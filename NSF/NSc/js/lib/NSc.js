@@ -4,24 +4,66 @@ var NSc = {
   services : {},
   isconnected : false,
   logs : [],
-  verbose: false;
+  verbose: false,
+  _debug : false,
+  debug : function(handler) {
+    if(this.debug) {
+      handler();
+    }
+  },
+
+  // The method definitions of NSF, emitter, response, and request handler.
+  methods : {
+    _sessionnotsupport : function(data) {
+      // session means which state we treat data as remote is requesting or responding.
+      this.addlog('The session does not support with this method in client.', 'ERR');
+      this.addLog(str(data), 'ERR');
+    }
+    _senddata: function(method, session, data) {
+      var wrapped = JSON.stringify({
+        method : method,
+        session : session,
+        data : data,
+      });
+      this.connection.send(wrapped);
+    }
+
+    signup : {
+
+    },
+
+    login : {
+      emitter : function(username, password, reshandler) {
+        this.handler.res = reshandler;
+      },
+
+      handler : function(data) {
+        let sessions = {
+          req : function(data) {
+            NSc.method._sessionnotsupport();
+          },
+          res : function(data) {
+
+          }
+        }
+        sessions[data.session](data);
+      }
+    },
+
+    command : {
+
+    }
+  },
 
 // do auto login by key(cookies) on connect
   connect : function(host, port) {
     if (this.connection == null) {
       this.addlog('Connecting to server...', 'OK');
-      this.conn = new WebSocket('ws://'+str(host)+':'+str(port));
+      this.connection = new WebSocket('ws://'+str(host)+':'+str(port));
     }
 
     this.connection.onopen = function() {
-      this.connection.send(
-          JSON.stringify({
-              action: 'login',
-              name: document.user.name,
-              pass: document.user.pass || null,
-              message: null
-          })
-      );
+      this.addlog('Connection established.', 'OK');
     }
 
     this.connection.onerror = function() {
@@ -30,9 +72,7 @@ var NSc = {
 
     this.connection.onmessage = function(e){
         var data = $.parseJSON(e.data);
-        if (data.type == 'auth') {
-            chat.name = data.name;
-            return;}
+        this.method[data.method].handler(data);
     };
 
     this.connection.onclose = function() {
@@ -45,16 +85,11 @@ var NSc = {
     this.connection.close();
   },
 
-  signup : function() {
-
-  },
-
-  login : function() {
-
-  },
-
-  command : function() {
-
+  login : function(username, password) {
+    let handler = function(data) {
+      NSc.addLog(data.data, 'LOGIN');
+    }
+    method.login.emitter(username, password, handler);
   },
 
   addlog() : function(log, tag) {
@@ -74,24 +109,26 @@ var NSc = {
   onbroadcast : null,
 
   createService : function(serviceID) {
+    let theservice = new(this.service)
 
+    return theservice;
   },
 
-  service : {
-    serviceID : 'undefined',
+  Service : function() {
+    this._serviceID = 'undefined',
 
-    events : {
+    var _events = {
       list: {},
       emit = function(eventname, data) {
         this.list[eventname](data);
       }
     },
 
-    on : function(eventname, handler) {
+    this.on = function(eventname, handler) {
       events.list.eventname = handler;
     },
 
-    send : function() {
+    this.send = function() {
 
     }
   }
