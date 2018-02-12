@@ -7,7 +7,7 @@ var NSc = {
   verbose: false,
   _debug : false,
   debug : function(handler) {
-    if(this.debug) {
+    if(this._debug) {
       handler();
     }
   },
@@ -19,6 +19,7 @@ var NSc = {
       this.addlog('The session does not support with this method in client.', 'ERR');
       this.addLog(str(data), 'ERR');
     }
+
     _senddata: function(method, session, data) {
       var wrapped = JSON.stringify({
         method : method,
@@ -34,6 +35,7 @@ var NSc = {
 
     login : {
       emitter : function(username, password, reshandler) {
+        NSc.methods._senddata('login', 'req', {username : username, password : password});
         this.handler.res = reshandler;
       },
 
@@ -72,7 +74,7 @@ var NSc = {
 
     this.connection.onmessage = function(e){
         var data = $.parseJSON(e.data);
-        this.method[data.method].handler(data);
+        this.methods[data.method].handler(data);
     };
 
     this.connection.onclose = function() {
@@ -105,8 +107,6 @@ var NSc = {
     }
   },
 
-  // callback input serviceID and info
-  onbroadcast : null,
 
   createService : function(serviceID) {
     let theservice = new(this.service)
