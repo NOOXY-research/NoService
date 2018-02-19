@@ -5,62 +5,61 @@
 
 
 let crypto = require('crypto');
-//  TEST
-//  test code
+let sqlite3 = require('sqlite3');
 
-user1 = new User().setusername('user1').setpassword('user1');
-user2 = new User().setusername('user2').setpassword('user2');
-user3 = new User().setusername('user3').setpassword('user3');
-users = {user1, user2, user3};
-
-getuser = function(username) {
-  for(let user in users) {
-    if(user.getusername() == username) {
-      return user;
-    }
-  }
-}
-
-
-//  TEST END
 
 function User() {
   let _username = null;
-  let _password = null; // hashed
   let _email = null;
-  let _usertoken = null;
-  let _usertoken_expire = null;
 
-  this.setUsername = function(username) {
-    _username = username;
+  this.getEmail = function() {
+    return _email;
   };
-
-  this.setPassword = function(password) {
-    hash = crypto.createHash('sha256').update(password).digest('base64');
-    _password = hash;
-  };
-
   this.getUsername = function() {
     return _username;
   };
-
-  this.Password = function(password, handler) {
-    if(_password) {};
-  }
 }
 
 let authoration = function () {
-  let database = null;
+  let _database = null;
+  let _Tokenexpire = function() {
+
+  };
 
   this.importDatabase = function(path) {
+    _database = new sqlite3.Database(path);
+  };
+
+  this.createDatabase = function(path) {
+    _database = new sqlite3.Database(path);
+    _database.run('CREATE TABLE users(username text,  password text, token text, tokenexpire datetime)');
+
+  };
+
+  this.TokenisValid = function(username, token, handler) {
+    let sql = 'SELECT username, token, tokenexpire FROM users WHERE username = '+username;
+    database.get(sql, function(err, row) {
+      
+    })
+  };
+
+  this.generateUserToken = function(username, password, handler) {
+
+  };
+
+  this.PasswordisValid = function(username, password, handler) {
+    if(_Tokenexpire(username)) {}
+  };
+
+  this.renewPassword = function(username, oldpassword, newpassword, handler) {
 
   }
 
-  this.TokenisValid = function(username, key, handler) {
+  this.UserisSuperuser = function(user, handler) {
 
-  },
+  }
 
-  this.UserisSuperuser = function(user) {
+  this.getUser(handler) {
 
   }
 

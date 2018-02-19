@@ -7,20 +7,39 @@
 var fs = require('fs');
 
 
-let conn = require('./connection');
-let auth = require('./authoration');
-let db = require('./database');
-let methods = require('./methods');
+let Conn = require('./connection');
+let Auth = require('./authoration');
+let Db = require('./database');
+let Methods = require('./methods');
+let ServiceManager = require('./service').manager;
 
 
-function launch() {
-  // initialize
+function launch(config) {
+  // initialize environmaent
   console.log('launching server...')
   if (isinitialized() == false) {
     initialize();
   };
 
-  
+  // initialize variables
+  let wsconn = new Conn.WSServer();
+  let methods = new Methods();
+  let auth = new Auth();
+  let servicemgr = new ServiceManager();
+
+  // setup variables
+  auth.importDatabase(config.databasepath);
+
+  // create gateway
+  let coregateway = {
+    auth: auth,
+    servicemgr : servicemgr,
+    conn: wsconn
+  };
+
+  // start connection
+  wsconn.setup(port, origin);
+  methods.setup(coregateway);
 
 }
 
