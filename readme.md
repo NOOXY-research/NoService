@@ -5,6 +5,7 @@ our goal:
 - simple
 - light core
 - module abilities
+- secure
 
 ## Requirement
 - Node.js
