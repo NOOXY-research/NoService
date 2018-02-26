@@ -1,5 +1,11 @@
 Not completed yet. Don't use it.
 
+our goal:
+- loose coupling
+- simple
+- light core
+- module abilities
+
 ## Requirement
 - Node.js
 - sqlite3 node packages
