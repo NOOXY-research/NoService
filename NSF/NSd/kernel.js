@@ -1,4 +1,4 @@
-// NSF/NSd/core.js
+\\// NSF/NSd/core.js
 // Description:
 // "core.js" control main behavior of deamon.
 // Copyright 2018 NOOXY. All Rights Reserved.

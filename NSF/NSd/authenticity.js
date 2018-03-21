@@ -32,7 +32,8 @@ let Authdb = function () {
       }
     })
 
-    this.updatesql = () => {
+    this.updatesql = (handler) => {
+      let err = null;
       if(typeof(this.username)=='undefined') {
         throw 'username undefined.';
       }
@@ -45,6 +46,9 @@ let Authdb = function () {
         }
         _database.run(sql, [this.username, this.pwdhash, this.token, this.tokenexpire, this.privilege, this.detail]);
         this.exisitence = true;
+      }
+      if(err) {
+        handler(err);
       }
     };
 
@@ -71,21 +75,35 @@ let Authdb = function () {
   };
 
   this.getUser = (username, handler) => {
+    let err = null;
     if(typeof(_cacheduser[username])=='undefined') {
       let user = new User(username);
       _cacheduser[username] = user;
     }
-    handler(_cacheduser[username]);
+    handler(err, _cacheduser[username]);
   }
 }
 
-function authoration() {
+function authenticity() {
 
-  let _authdb = new Authdb;
+  const _authdb = new Authdb;
   const SHA256KEY = 'FATFROG';
 
+  function User(username, isguest) {
+    let _username = username;
+    let _isGuest = isguest;
+    
+    this.isGuest() {
+      return _isGuest;
+    };
+
+    this.getUsermame() {
+      return _username;
+    };
+  }
+
   // Declare parameters
-  this.ExpirePeriod = 7 // Days
+  this.TokenExpirePeriod = 7 // Days
 
   this.importDatabase = (path) => {
     _authdb.importDatabase(path);
@@ -96,7 +114,15 @@ function authoration() {
 
   };
 
-  this.Userexist = (username, handler) => {
+  this.getGuest = (handler) => {
+
+  };
+
+  this.getUser = (username, handler) => {
+
+  }
+
+  this.Userexist = (user, handler) => {
     let user = _authdb.getUser(username);
     handler(user.exisitence)
   };
@@ -104,12 +130,17 @@ function authoration() {
   this.CreateUser = (username, password, handler) => {
     let err = null;
     let user = _authdb.getUser(username);
-    if(this.Userexist ==)
-    let pwdhash = crypto.createHmac('sha256', SHA256KEY).update(password).digest('hex');
+    if(this.exisitence ==) {
+      let pwdhash = crypto.createHmac('sha256', SHA256KEY).update(password).digest('hex');
+    }
+    else {
+      let err= new Error();
+    };
+
     handler(err);
   };
 
-  this.addUserDetail = (username, password, detail) => {
+  this.getUserObject = (username, password, detail) => {
 
   }
 
@@ -163,5 +194,6 @@ function authoration() {
   this.Userprivilege = (username, handler) => {
 
   };
+
 }
-module.exports = authoration;
+module.exports = authenticity;
