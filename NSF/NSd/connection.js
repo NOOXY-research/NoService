@@ -8,7 +8,7 @@ let Utils = require('./utilities');
 let WebSocketServer = require('ws').Server;
 
 function ConnectionProfile(conn) {
-  let _conn = conn;
+
   let _GUID = null;
 
   this.generateGUID = function() {
@@ -23,7 +23,7 @@ function ConnectionProfile(conn) {
   }
 
   this.getIPaddress() = function() {
-
+    
   }
 }
 
@@ -34,8 +34,8 @@ function WSServer() {
 
   this.onJSON = function(json, connprofile) {};
 
-  this.sendJSON = function(message, connprofile) {
-
+  this.sendJSON = function(json, connprofile) {
+    _clients[connprofile.getGUID()].send(JSON.stringify(json));
   };
 
   this.broadcast = function(json) {
@@ -54,6 +54,7 @@ function WSServer() {
 
         let originDomain = URL.parse(ws.upgradeReq.headers.origin).hostname;
         let connprofile = new ConnectionProfile(ws);
+        clients[connprofile.generateGUID()] = ws;
         connprofile.generateGUID();
 
         // if (configuration.origins.indexOf(originDomain) < 0) {
@@ -68,7 +69,7 @@ function WSServer() {
         // }
 
         ws.on('message', function(message) {
-          this.ondata(JSON.phrase(message), connprofile);
+          this.onJSON(JSON.phrase(message), connprofile);
         });
 
         ws.on('error', function(error) {
