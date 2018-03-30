@@ -92,7 +92,7 @@ function authenticity() {
   function User(username, isguest) {
     let _username = username;
     let _isGuest = isguest;
-    
+
     this.isGuest() {
       return _isGuest;
     };
@@ -115,38 +115,47 @@ function authenticity() {
   };
 
   this.getGuest = (handler) => {
+    let err = null;
+    let userdb = _authdb.getUser(username);
+    let user = null;
 
+    user = new User('GUEST', true);
+
+    handler(err, user);
   };
 
   this.getUser = (username, handler) => {
+    let err = null;
+    let userdb = _authdb.getUser(username);
+    let user = null;
+    if(userdb.exisitence == false) {
+      let err = new Error("[Authenticity] User not exist.");
+    }
+    else {
+      user = new User(userdb.username, false);
+    }
 
+    handler(err, user);
   }
-
-  this.Userexist = (user, handler) => {
-    let user = _authdb.getUser(username);
-    handler(user.exisitence)
-  };
 
   this.CreateUser = (username, password, handler) => {
     let err = null;
+    let pwdhash = null;
     let user = _authdb.getUser(username);
-    if(this.exisitence ==) {
-      let pwdhash = crypto.createHmac('sha256', SHA256KEY).update(password).digest('hex');
+
+    if(user.exisitence == false) {
+      pwdhash = crypto.createHmac('sha256', SHA256KEY).update(password).digest('hex');
     }
     else {
-      let err= new Error();
+      let err = new Error("[Authenticity] User already exist.");
     };
+
 
     handler(err);
   };
 
-  this.getUserObject = (username, password, detail) => {
-
-  }
-
-  this.DeleteUser = (username, password, handler) => {
-    let user = _authdb.getUser(username);
-    if(this.PasswordisValid(username, password)) {
+  this.DeleteUser = (user, password, handler) => {
+    if(this.PasswordisValid(user, password)) {
       user.delete();
       user.updatesql();
     }
@@ -156,11 +165,11 @@ function authenticity() {
     }
   };
 
-  this.renewPassword = (username, oldpassword, newpassword, handler) => {
+  this.renewPassword = (user, newpassword, handler) => {
 
   };
 
-  this.PasswordisValid = (username, password, handler) => {
+  this.PasswordisValid = (user, password, handler) => {
     let user = _authdb.getUser(username);
     let isValid = false;
     let pwdhash = user.pwdhash;
@@ -171,7 +180,7 @@ function authenticity() {
     handler(isValid);
   };
 
-  this.TokenisValid = (username, token, handler) => {
+  this.TokenisValid = (user, token, handler) => {
     let user = _authdb.getUser(username);
     let isValid = false;
     let now = new Date();
@@ -181,7 +190,7 @@ function authenticity() {
     }
   };
 
-  this.getUserToken = (username, password, handler) => {
+  this.getUserToken = (user, password, handler) => {
     let user = _authdb.getUser(username);
     let isValid = false;
     let now = new Date();
@@ -191,7 +200,7 @@ function authenticity() {
     }
   };
 
-  this.Userprivilege = (username, handler) => {
+  this.Userprivilege = (user, handler) => {
 
   };
 

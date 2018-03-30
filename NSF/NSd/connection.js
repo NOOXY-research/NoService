@@ -11,11 +11,8 @@ function ConnectionProfile(conn) {
 
   let _GUID = null;
 
-  this.generateGUID = function() {
-    if(!(_GUID === null)) {
-      _GUID = utils.generateGUID();
-    }
-    return _GUID;
+  if(!(_GUID === null)) {
+    _GUID = utils.generateGUID();
   }
 
   this.getGUID = function() {
@@ -23,7 +20,7 @@ function ConnectionProfile(conn) {
   }
 
   this.getIPaddress() = function() {
-    
+
   }
 }
 
@@ -31,6 +28,7 @@ function WSServer() {
 
   let _wss = null;
   let _clients = {};
+  let _connprofiles = {};
 
   this.onJSON = function(json, connprofile) {};
 
@@ -55,7 +53,6 @@ function WSServer() {
         let originDomain = URL.parse(ws.upgradeReq.headers.origin).hostname;
         let connprofile = new ConnectionProfile(ws);
         clients[connprofile.generateGUID()] = ws;
-        connprofile.generateGUID();
 
         // if (configuration.origins.indexOf(originDomain) < 0) {
         //     ws.send(JSON.stringify({
