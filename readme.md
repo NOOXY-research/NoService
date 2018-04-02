@@ -1,4 +1,4 @@
-![alt text](/imgs/NSFicon.png =250x250)
+![](/imgs/NSFicon.png =250x250)
 
 Not completed yet. Don't use it.
 
