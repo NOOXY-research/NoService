@@ -1,0 +1,13 @@
+setting = {
+  "demeon_name": "A NSF deameon",
+
+  "port": 5555,
+
+  "service": [
+    "shell",
+    "profile"
+  ],
+
+  "token_expire_period": 7
+
+}
