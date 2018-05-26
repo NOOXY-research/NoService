@@ -1,12 +1,32 @@
 setting = {
-  "demeon_name": "A NSF deameon",
+  "daemon_name": "A NSF deameon",
 
-  "port": 5555,
+  "connection_servers": [
+    {
+      "type": "Websocket",
+      "ip": "0.0.0.0",
+      "port": 9650
+    },
+    {
+      "type": "TCP/IP",
+      "ip": "0.0.0.0",
+      "port": 9651
+    }
+    ],
 
-  "service": [
+  "services_owner" : "root",
+
+  "services": [
     "shell",
     "profile"
   ],
+
+  "trusted_domains": [
+    "www.nooxy.tk",
+    "127.0.0.1"
+  ],
+
+  "only_trust_origin_domain": false,
 
   "token_expire_period": 7
 
