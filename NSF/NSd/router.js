@@ -1,4 +1,8 @@
-// router is part of core
+// NSF/NSd/router.js
+// Description:
+// "router.js" provide routing functions.
+// Copyright 2018 NOOXY. All Rights Reserved.
+
 function router() {
   let _coregateway = null;
 
@@ -34,18 +38,10 @@ function router() {
         let actions = {
           rq : function(data) {
             let responsedata = {};
-            _coregateway.auth.authby.Password(data.username, data.password, function(pass) {
-              responsedata['p'] = pass;
-              if(pass) {
-                _coregateway.auth.getToken(data.username, data.password, (token)=>{
-                  responsedata['t'] = token;
-                  _senddata(connprofile, 'loginbypwd', 'res', responsedata);
-                });
-              }
-              else {
-                responsedata['t'] = null;
-                _senddata(connprofile, 'loginbypwd', 'res', responsedata);
-              }
+              _coregateway.authorization.getToken(data.username, data.password, (token)=>{
+                responsedata['t'] = token;
+                _senddata(connprofile, 'GT', 'rs', responsedata);
+              });
             });
           },
 

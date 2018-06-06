@@ -72,7 +72,7 @@ function connection() {
       _wss.on('connection', function(ws, req) {
 
           let originDomain = URL.parse(ws.upgradeReq.headers.origin).hostname;
-          let connprofile = new ConnectionProfile(req.connection.remoteAddress, ws);
+          let connprofile = new ConnectionProfile(id, 'Client',req.connection.remoteAddress, ws);
           clients[connprofile.getGUID()] = ws;
 
           // if (configuration.origins.indexOf(originDomain) < 0) {

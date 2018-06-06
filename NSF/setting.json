@@ -14,7 +14,7 @@ setting = {
     }
     ],
 
-  "services_owner" : "root",
+  "local_services_owner" : "root",
 
   "services": [
     "shell",
