@@ -3,27 +3,34 @@
 // "router.js" provide routing functions.
 // Copyright 2018 NOOXY. All Rights Reserved.
 
-function router() {
+function Router() {
   let _coregateway = null;
 
+  // in case of wrong session of the position
   let _sessionnotsupport = function() {
     console.log('session not support');
   }
 
+  // a convinient function fo sending data
   let _senddata = function(connprofile, method, session, data) {
     var wrapped = {
       m : method,
       s : session,
       d : data,
     };
+
+    // finally sent the data through the connection.
     _coregateway.conn.sendJSON(connprofile, wrapped);
   }
 
+  // implements of NOOXY Service Protocol methods
   let methods = {
+    // nooxy service protocol implement of "signup"
     SU : {
 
     },
 
+    // nooxy service protocol implement of "get token"
     GT : {
       emitter : (connprofile, username, password) => {
         _senddata('GT', 'rq', {username : username, password : password});
@@ -62,13 +69,23 @@ function router() {
 
     AU : {
 
+    },
+
+    SC : {
+
+    },
+
+    AC : {
+
     }
   }
 
+  // import the accessbility of core resource
   this.setup = function(coregateway) {
     _coregateway = coregateway;
   };
 
+  // start this router
   this.start = function() {
     _coregateway.conn.onJSON = function(json, connprofile) {
       methods[json.method].handler(connprofile, json.session, json.data, coregateway);
@@ -76,4 +93,4 @@ function router() {
   };
 }
 
-module.exports = router
+module.exports = Router

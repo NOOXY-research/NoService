@@ -8,6 +8,7 @@ let crypto = require('crypto');
 let sqlite3 = require('sqlite3');
 let utils = require('./utilities');
 
+// database obj for accessing database of authenticity.
 let Authdb = function () {
   let _database = null;
   let _cacheduser = {};
@@ -15,6 +16,7 @@ let Authdb = function () {
   this.MaxCacheSize = 1000; //Users
 
   function User(username) {
+    // sql statement
     let sql = 'SELECT username, pwdhash, token, tokenexpire FROM users WHERE username = ?';
     _database.get(sql, [username], (err, row) => {
       if(err||typeof(row)=='undefined') {
@@ -32,6 +34,7 @@ let Authdb = function () {
       }
     })
 
+    // write newest information of user to database.
     this.updatesql = (handler) => {
       let err = null;
       if(typeof(this.username)=='undefined') {
@@ -52,6 +55,7 @@ let Authdb = function () {
       }
     };
 
+    // delete the user from database.
     this.delete = () => {
       _database.run('DELETE FROM users WHERE username=?;', [this.username])
       this.exisitence = false;
@@ -84,7 +88,8 @@ let Authdb = function () {
   }
 }
 
-function authenticity() {
+// the authenticity module
+function Authenticity() {
 
   const _authdb = new Authdb;
   const SHA256KEY = 'FATFROG';
@@ -105,18 +110,20 @@ function authenticity() {
   // Declare parameters
   this.TokenExpirePeriod = 7 // Days
 
+  // import database from specified path
   this.importDatabase = (path) => {
     _authdb.importDatabase(path);
   };
 
+  // create a new database for authenticity.
   this.createDatabase = (path) => {
     _authdb.createDatabase(path);
 
   };
 
+  // create a temp user which will not exist in database.
   this.getGuest = (handler) => {
     let err = null;
-    let userdb = _authdb.getUser(username);
     let user = null;
 
     user = new User('GUEST', true);
@@ -124,6 +131,7 @@ function authenticity() {
     handler(err, user);
   };
 
+  // get a user from imported database.
   this.getUser = (username, handler) => {
     let err = null;
     let userdb = _authdb.getUser(username);
