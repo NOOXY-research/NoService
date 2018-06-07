@@ -11,7 +11,12 @@ setting = {
       "type": "TCP/IP",
       "ip": "0.0.0.0",
       "port": 9651
-    }
+    },
+    {
+      "type": "Local",
+      "ip": "LOCALIP",
+      "port": "LOCALPORT"
+    },
     ],
 
   "local_services_owner" : "root",

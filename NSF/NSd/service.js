@@ -17,11 +17,11 @@ function Service(user, client) {
     };
 
     this.setupSocket = (SSocket) => {
-
+      _service_socket = SSocket;
     };
 
     this.setupPath = (path) => {
-
+      _service_path = path;
     };
 
     this.onSSMessage = (callback) => {

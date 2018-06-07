@@ -6,6 +6,7 @@
 let Utils = require('./utilities');
 
 function Connection() {
+  let _default_local_ip_and_port = '';
   let _servers = {};
   let _clients = {};
   let _have_local_server = false;
@@ -15,7 +16,7 @@ function Connection() {
 
   // define an profile of an connection
   function ConnectionProfile(pos, connMethod, hostip, hostport, clientip, conn) {
-    let _serverID = id;
+    // let _serverID = id;
     let _pos = pos;
     let _connMethod = connMethod;
     let _bundle = {};
@@ -40,6 +41,7 @@ function Connection() {
     this.getPosition() = (key, callback) => {callback(_pos);}
     this.setBundle() = (key, value) => {_bundle[key] = value;}
     this.getBundle() = (key, callback) => {callback(_bundle[key]);}
+    this.getConn() = (callback) => {callback(_conn)};
 
     // this.onConnectionDropout = () => {
     //   console.log('[ERR] onConnectionDropout not implemented');
@@ -100,8 +102,7 @@ function Connection() {
           });
 
           ws.on('close', function() {
-              var index = Utils.searchObject(clients, client);
-              delete clients[index];
+              delete _clients[connprofile.getGUID()];
               this.onClose(connprofile);
           });
 
@@ -112,6 +113,10 @@ function Connection() {
   function WSClient() {
 
   };
+
+  function TCPIPServer() {};
+
+  function TCPIPClient() {};
 
   function Virtualnet() {
     let _virt_servers = {};
@@ -151,7 +156,9 @@ function Connection() {
     };
 
     // parameters local ip, port to remote ones.
-    function Client(lvirtip, lvirtport, rvirtip, rvirtport) {
+    function Client(lvirtip, lvirtport) {
+      let _virtip = lvirtip;
+      let _virtport = lvirtport;
       // create sockets for both server and client
       let vss = new VirtualSocket();
       let vcs = new VirtualSocket();
@@ -167,10 +174,14 @@ function Connection() {
         };
 
         // trigger server and return server socket
-        _virt_servers[rvirtip+':'+rvirtport].ClientConnect(lvirtip, lvirtport, vss);
+        _virt_servers[rvirtip+':'+rvirtport].ClientConnect(_virtip, _virtport, vss);
 
         // return virtual client socket to callback
         callback(vcs);
+      };
+
+      this.getIP() = () => {
+        return _virtip;
       };
 
       this.close = () => {
@@ -187,7 +198,7 @@ function Connection() {
     };
 
     this.createClient = (virtip, virtport) => {
-      let vs = new Client(virtip, virtport);
+      let vs = new Client(utils.generateGUID() , utils.generateGUID(), virtip, virtport);
       return vs;
     };
   }
@@ -196,41 +207,75 @@ function Connection() {
 
   function LocalServer(id, virtnet) {
     let _serverID = id;
+    let _vnets = null;
     let _clients = {};
 
     this.onJSON = (connprofile, json) => {console.log('[ERR] onJSON not implemented');};
 
     this.onClose = (connprofile) => {console.log('[ERR] onClose not implemented');};
 
-    this.sendJSON = function(connprofile, json) {
+    this.sendJSON = (connprofile, json) => {
       _clients[connprofile.getGUID()].send(JSON.stringify(json));
     };
 
-    this.broadcast = function(json) {
+    this.broadcast = (json) => {
+      _clients.forEach((key, client) => {
+        client.send(JSON.stringify(json));
+      });
+    }
 
-    };
+    this.start = function(virtip, virtport) {
+      _vnets = virtnet.createServer(virtip, virtport);
+      _vnets.on('connection', function(vs) {
+          let connprofile = new ConnectionProfile('Client', 'Local', 'Virtualnet Remote Adress', vs);
+          _clients[connprofile.getGUID()] = vs;
 
-    this.start = function(virtip) {
+          vs.onmessage = (message) => {
+            this.onJSON(connprofile, JSON.phrase(message));
+          });
 
+          vs.onerror = (error) => {
+              console.log('[ERR] %s', error);
+              vs.close();
+          });
+
+          vs.onclose =  () => {
+              delete _clients[connprofile.getGUID()];
+              this.onClose(connprofile);
+          });
+
+      });
+    }
     }
 
   };
 
   function LocalClient(virtnet) {
+    let _virtnet = virtnet;
+    let _vnetc = null;
+
     this.onJSON = (connprofile, json) => {console.log('[ERR] onJSON not implemented');};
 
-    this.onClose = (connprofile) => {console.log('[ERR] onClose not implemented');};
+    this.onClose = () => {console.log('[ERR] onClose not implemented');};
 
-    this.sendJSON = function(connprofile, json) {
-      _servers[connprofile.getGUID()].send(JSON.stringify(json));
+    this.sendJSON = function(json) {
+      _vnetc.send(json);
     };
 
-    this.broadcast = function(json) {
+    this.connect = (virtip, virtport) => {
+      _vnetc = virtnet.createClient(utils.generateGUID(), utils.generateGUID());
+      _vnetc.connect(virtip, virtport, (vs) => {
+        vs.onmessage = (message) => {
+          let connprofile = new ConnectionProfile('Server', 'Local', virtip, virtport, _vnetc.getIP(), vs);
+          this.onJSON(connprofile, JSON.phrase(message));
+        });
 
-    };
+        vs.onerror = (error) => {
+            console.log('[ERR] %s', error);
+            vs.close();
+        });
 
-    this.connect = function(virtip) {
-
+      });
     }
   };
 
@@ -247,11 +292,14 @@ function Connection() {
     else if(conn_method == 'local'||'Local') {
       if(_have_local_server == false) {
         let serverID = "LOCAL";
-        let locs = new LocalServer(_serverID);
+        let locs = new LocalServer(serverID, _virtnet);
         _servers[_serverID] = locs;
-        locs.start();
+        locs.start('LOCALIP', 'LOCALPORT');
         locs.onJSON = this.onJSON;
         locs.onClose = this.onClose;
+      }
+      else {
+        console.log('[ERR] Can only exist one local server.');
       }
     }
 
@@ -266,7 +314,17 @@ function Connection() {
     }
 
     else if(conn_method == 'loc'||'Local') {
-
+      if(_have_local_server == false) {
+        console.log('[ERR] Local server not started.');
+      }
+      else {
+        let serverID = "LOCAL";
+        let locc = new LocalClient(_virtnet);
+        _servers[_serverID] = locs;
+        locc.connect('LOCALIP', 'LOCALPORT');
+        locc.onJSON = this.onJSON;
+        locc.onClose = this.onClose;
+      }
     }
 
     else {
@@ -275,13 +333,15 @@ function Connection() {
   }
 
   this.sendJSON(conn_profile, json) => {
-    _servers[conn_profile.serverID].sendJSON(conn_profile, json);
+    conn_profile.getConn((conn) => {
+      conn.sendJSON(conn_profile, json);
+    });
   }
 
   this.broadcast(json) => {
-    for(let i = 0; i < _servers.length; i++) {
-      _servers[i].broadcast(json);
-    }
+    _servers.forEach((key, server) => {
+      server.broadcast(json);
+    });
   }
 
   this.onJSON(conn_profile, json) => {

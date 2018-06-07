@@ -3,6 +3,21 @@
 // "utilities.js" provides general function to be widely used.
 // Copyright 2018 NOOXY. All Rights Reserved.
 
+generateUniqueID = () => {
+  return '_' + Math.random().toString(36).substr(2, 9);
+};
+};
+
+hashString = (s) => {
+  var s = 0, i, chr;
+  if (s.length === 0) return hash;
+  for (i = 0; i < s.length; i++) {
+    chr   = s.charCodeAt(i);
+    hash  = ((hash << 5) - hash) + chr;
+    hash |= 0; // Convert to 32bit integer
+  }
+  return hash;
+};
 
 removeHTML = function(str) {
   return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g,
@@ -54,6 +69,8 @@ function DatetoSQL(JsDate) {
 }
 
 module.exports = {
+  generateUniqueID: generateUniqueID;
+  hashString: hashString,
   removeHTML: removeHTML,
   generateGUID: generateGUID,
   searchObject: searchObject,

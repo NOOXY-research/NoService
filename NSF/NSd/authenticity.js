@@ -181,7 +181,7 @@ function Authenticity() {
     let user = _authdb.getUser(username);
     let isValid = false;
     let pwdhash = user.pwdhash;
-    let pwdhashalpha =crypto.createHmac('sha256', SHA256KEY).update(password).digest('hex');
+    let pwdhashalpha = crypto.createHmac('sha256', SHA256KEY).update(password).digest('hex');
     if(pwdhash==pwdhashalpha) {
       isValid = true;
     }
