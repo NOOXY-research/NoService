@@ -1,4 +1,4 @@
-setting = {
+{
   "daemon_name": "A NSF deameon",
 
   "connection_servers": [
@@ -21,6 +21,12 @@ setting = {
 
   "local_services_owner" : "root",
 
+  "services_path": "service/",
+
+  "services_files_path": "service_files/",
+
+  "authenticity_database": "database/authenticity.sqlite3",
+
   "services": [
     "shell",
     "profile"
@@ -32,6 +38,8 @@ setting = {
   ],
 
   "only_trust_origin_domain": false,
+
+  "authoration_timeout": 320,
 
   "token_expire_period": 7
 

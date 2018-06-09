@@ -3,9 +3,34 @@
 // "authorization.js" provide authorization actions.
 // Copyright 2018 NOOXY. All Rights Reserved.
 
+function AuthorationHandler() {
+  let _implts = {
+    'PW': null,
+    'AC': null
+  };
+
+  let _implts_callback = {
+    'PW': () => {
+
+    },
+    
+    'AC': () => {
+
+    }
+  };
+
+  this.RqRouter = (connprofile, data, data_sender) => {
+    _implts[conn_profile.getGUID()+data.m](connprofile, data);
+  };
+
+  this.setImplement = (implement_name, callback) => {
+    _implts[implement_name] = callback;
+  };
+};
+
 function Authorization() {
   let _realtime_token = null;
-  let _trusted_domain = [];
+  let _trusted_domains = [];
   let _authe_module = null;
   let _entity_module = null;
   let _auth_timeout = 320;
@@ -13,19 +38,23 @@ function Authorization() {
 
   this.emit = () => {console.log('[ERR] emit not implemented');};
 
-  this.onConnect = (connprofile, data) => {
+  this.RsRouter = (connprofile, data) => {
     _queue_operation[conn_profile.getGUID()+data.m](connprofile, data);
   };
 
   // function that import working authenticity module.
-  this.importAuthenticityModule = (authw_module) => {
-    _authe_module = _authe_module;
+  this.importAuthenticityModule = (authe_module) => {
+    _authe_module = authe_module;
   };
 
   //
   this.importEntityModule = (entity_module) => {
     _entity_module = entity_module;
   };
+
+  this.importTrustDomains(domain_list) = {
+    _trusted_domains = domain_list;
+  }
 
   // Authby group
   this.Authby = {
@@ -36,12 +65,24 @@ function Authorization() {
       }
       _entity_module.getEntityConnProfile(entityID, (conn_profile) => {
         this.emit(conn_profile, 'AU', data);
-        _queue_operation[conn_profile.getGUID()+'PW'] = ;
-      });
+        let op = (connprofile, data) = {
+          if(user === data.u) {
+            _authe_module.PasswordisValid(data.d.u, data.d.p, (isValid) => {
+              if(isValid) {
+                handler(true);
+              }
+              else {
+                handler(false);
+              }
+            });
+          }
+          else {
+            handler(false);
+          }
 
-      let op = (connprofile, data) = {
-        _authe_module.PasswordisValid();
-      }
+        }
+        _queue_operation[conn_profile.getGUID()+'PW'] = op;
+      });
 
       // set the timeout of this operation
       setTimeout(() => {delete _queue_operation[conn_profile.getGUID()+'PW']}, _auth_timeout*1000);
@@ -52,7 +93,33 @@ function Authorization() {
     },
 
     Token : (entityID, handler) =>{
+        let user = _entity_module.returnVal('owner');
+        let data = {
+          m: "TK"
+        }
+        _entity_module.getEntityConnProfile(entityID, (conn_profile) => {
+          this.emit(conn_profile, 'AU', data);
+          let op = (connprofile, data) = {
+            if(user === data.u) {
+              _authe_module.TokenisValid(data.d.u, data.d.t, (isValid) => {
+                if(isValid) {
+                  handler(true);
+                }
+                else {
+                  handler(false);
+                }
+              });
+            }
+            else {
+              handler(false);
+            }
 
+          }
+          _queue_operation[conn_profile.getGUID()+'TK'] = op;
+        });
+
+        // set the timeout of this operation
+        setTimeout(() => {delete _queue_operation[conn_profile.getGUID()+'TK']}, _auth_timeout*1000);
     },
 
     UserLevel : (entityID, handler) =>{

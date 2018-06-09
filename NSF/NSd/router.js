@@ -16,26 +16,26 @@ function Router() {
     var wrapped = {
       m : method,
       s : session,
-      d : data,
+      d : data
     };
 
     // finally sent the data through the connection.
     _coregateway.conn.sendJSON(connprofile, wrapped);
   }
 
-  // implements of NOOXY Service Protocol methods
+  // implementations of NOOXY Service Protocol methods
   let methods = {
-    // nooxy service protocol implement of "create Activity Entity"
+    // nooxy service protocol implementation of "create Activity Entity"
     CA: {
 
     },
 
-    // nooxy service protocol implement of "signup"
+    // nooxy service protocol implementation of "signup"
     SU: {
 
     },
 
-    // nooxy service protocol implement of "get token"
+    // nooxy service protocol implementation of "get token"
     GT: {
       emitter : (connprofile, username, password) => {
         _senddata('GT', 'rq', {username : username, password : password});
@@ -49,11 +49,11 @@ function Router() {
 
         let actions = {
           rq : function(connprofile, data) {
-            let responsedata = {};
-              _coregateway.authorization.getToken(data.username, data.password, (token)=>{
-                responsedata['t'] = token;
-                _senddata(connprofile, 'GT', 'rs', responsedata);
-              });
+                let responsedata = {};
+                _coregateway.authorization.getToken(data.username, data.password, (token)=>{
+                  responsedata['t'] = token;
+                  _senddata(connprofile, 'GT', 'rs', responsedata);
+                });
             });
           },
 
@@ -72,12 +72,12 @@ function Router() {
       }
     },
 
-    // nooxy service protocol implement of "kill token"
+    // nooxy service protocol implementation of "kill token"
     KT: {
 
     },
 
-    // nooxy service protocol implement of "Authorization"
+    // nooxy service protocol implementation of "Authorization"
     AU: {
       emitter : (connprofile, data) => {
         _senddata('GT', 'rq', data);
@@ -90,9 +90,8 @@ function Router() {
         }
 
         let actions = {
-          rq : "Client side implement";
-
-          rs : _coregateway.authenticity.onConnect(connprofile, data);
+          rq : _coregateway.AuthorationHandler.RqRouter(connprofile, data, _senddata),
+          rs : _coregateway.Authoration.RsRouter(connprofile, data)
         }
         connprofile.getPosition((pos)=> {
           if(rq_rs_pos[session] == pos) {
@@ -105,12 +104,12 @@ function Router() {
       }
     },
 
-    // nooxy service protocol implement of "Service Call"
+    // nooxy service protocol implementation of "Service Call"
     SC: {
 
     },
 
-    // nooxy service protocol implement of "Activity Call"
+    // nooxy service protocol implementation of "Activity Call"
     AC: {
 
     }
@@ -127,7 +126,7 @@ function Router() {
   // start this router
   this.start = function() {
     _coregateway.authenticity.emit = this.emit;
-    _coregateway.conn.onJSON = function(json, connprofile) {
+    _coregateway.conn.onJSON = function(connprofile, json) {
       methods[json.method].handler(connprofile, json.session, json.data, coregateway);
     };
   };

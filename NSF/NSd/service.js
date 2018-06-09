@@ -5,7 +5,31 @@
 
 
 function Service(user, client) {
-  _services = {};
+  let _services = {};
+
+  this.ServiceRqRouter = (connprofile, data, data_sender) => {
+
+    let methods = {
+      // nooxy service protocol implementation of "Service call"
+      SS: (connprofile, data, data_sender) => {
+        _services[data.d.n].SSCall(connprofile, data.d.d);
+      }
+    }
+
+    method[data.m](connprofile, data, data_sender);
+  };
+
+  this.ActivityRqRouter = (connprofile, data, data_sender) => {
+
+    let methods = {
+      // nooxy service protocol implementation of "Activity call"
+      AS: () => {
+
+      }
+    }
+
+    method[data.m]
+  };
 
   function ServiceObj() {
     let _entity_id = null;
@@ -24,8 +48,12 @@ function Service(user, client) {
       _service_path = path;
     };
 
+    this.SSCall = () => {
+
+    };
+
     this.onSSMessage = (callback) => {
-      
+
     };
   };
 

@@ -182,7 +182,7 @@ function Authenticity() {
     let isValid = false;
     let pwdhash = user.pwdhash;
     let pwdhashalpha = crypto.createHmac('sha256', SHA256KEY).update(password).digest('hex');
-    if(pwdhash==pwdhashalpha) {
+    if(pwdhash == pwdhashalpha) {
       isValid = true;
     }
     handler(isValid);
@@ -193,7 +193,7 @@ function Authenticity() {
     let isValid = false;
     let now = new Date();
     let exipredate = utils.SQLtoDate(user.tokenexpire)
-    if(now>exipredate||) {
+    if(now > exipredate||) {
 
     }
   };
@@ -203,14 +203,19 @@ function Authenticity() {
     let isValid = false;
     let now = new Date();
     let exipredate = utils.SQLtoDate(user.tokenexpire)
-    if(now>exipredate||) {
-
-    }
+    // if(now>exipredate||) {
+    //
+    // }
   };
 
-  this.Userprivilege = (user, handler) => {
+  this.getUserprivilege = (user, handler) => {
 
   };
+
+  // // Authenticity Router
+  // this.GTRouter = () => {
+  //
+  // }
 
 }
 module.exports = authenticity;
