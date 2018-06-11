@@ -3,6 +3,7 @@
 // "authorization.js" provide authorization actions.
 // Copyright 2018 NOOXY. All Rights Reserved.
 
+// Handling responses to authoration requests.
 function AuthorationHandler() {
   let _implts = {
     'PW': null,
@@ -13,7 +14,7 @@ function AuthorationHandler() {
     'PW': () => {
 
     },
-    
+
     'AC': () => {
 
     }
@@ -28,6 +29,7 @@ function AuthorationHandler() {
   };
 };
 
+// Serverside authoration emitter.
 function Authorization() {
   let _realtime_token = null;
   let _trusted_domains = [];
@@ -36,7 +38,7 @@ function Authorization() {
   let _auth_timeout = 320;
   let _queue_operation = {};
 
-  this.emit = () => {console.log('[ERR] emit not implemented');};
+  this.emitRouter = () => {console.log('[ERR] emit not implemented');};
 
   this.RsRouter = (connprofile, data) => {
     _queue_operation[conn_profile.getGUID()+data.m](connprofile, data);
@@ -64,7 +66,7 @@ function Authorization() {
         m: "PW"
       }
       _entity_module.getEntityConnProfile(entityID, (conn_profile) => {
-        this.emit(conn_profile, 'AU', data);
+        this.emitRouter(conn_profile, 'AU', data);
         let op = (connprofile, data) = {
           if(user === data.u) {
             _authe_module.PasswordisValid(data.d.u, data.d.p, (isValid) => {
@@ -98,7 +100,7 @@ function Authorization() {
           m: "TK"
         }
         _entity_module.getEntityConnProfile(entityID, (conn_profile) => {
-          this.emit(conn_profile, 'AU', data);
+          this.emitRouter(conn_profile, 'AU', data);
           let op = (connprofile, data) = {
             if(user === data.u) {
               _authe_module.TokenisValid(data.d.u, data.d.t, (isValid) => {

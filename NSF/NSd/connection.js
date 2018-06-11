@@ -252,6 +252,7 @@ function Connection() {
 
   function LocalClient(virtnet) {
     let _virtnet = virtnet;
+    // virtnet client
     let _vnetc = null;
 
     this.onJSON = (connprofile, json) => {console.log('[ERR] onJSON not implemented');};

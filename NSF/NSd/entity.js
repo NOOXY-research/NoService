@@ -1,6 +1,6 @@
 // NSF/NSd/entity.js
 // Description:
-// "entity.js" provide identity system for Service, Activity...
+// "entity.js" provide identity system for Service, Activity..., the perspective is this daemon. Entity is part of service module.
 // Copyright 2018 NOOXY. All Rights Reserved.
 
 let utils = require('./utilities');
@@ -20,7 +20,6 @@ function Entity() {
       spwandomain: Json.spwandomain,
       owner: Json.owner,
       ownerdomain: Json.ownerdomain,
-      ownertoken: Json.ownertoken,
       description: Json.description
     };
 
@@ -51,8 +50,12 @@ function Entity() {
     _entities[entityID].modify(key, value);
   };
 
+  this.getEntityMetaData = (entityID, callback) => {
+    callback(_entities[entityID].returnJSON());
+  };
+
   this.returnEntityValue = (entityID, key) => {
-    return _entities[entityID].gey(key);
+    return _entities[entityID].returnVal(key);
   };
 
   this.getEntityConnProfile = (entityID, callback) => {

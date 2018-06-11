@@ -3,43 +3,50 @@
 // "core.js" control main behavior of deamon.
 // Copyright 2018 NOOXY. All Rights Reserved.
 
-
 var fs = require('fs');
 
-
+var Path = require("path");
 let Conn = require('./connection');
 let Auth = require('./authoration');
 let Db = require('./database');
 let Methods = require('./methods');
-let ServiceManager = require('./service').manager;
+let Service = require('./service');
+let Entity = require('./entity');
+let Utils = require('./utilities');
+
+let _runtime_id = Utils.generateGUID();
+let _path = path.resolve("./");
+var _setting = JSON.parse(fs.readFileSync('setting.json', 'utf8'));
 
 
 function launch(config) {
-  // initialize environmaent
-  console.log('launching server...')
+  // initialize environment
+  console.log('Checking environment...')
   if (isinitialized() == false) {
     initialize();
   };
+  console.log('done.')
 
   // initialize variables
-  let wsconn = new Conn.WSServer();
-  let methods = new Methods();
-  let auth = new Auth();
-  let servicemgr = new ServiceManager();
+  console.log('Initializing variables...')
+  console.log('done.')
 
   // setup variables
-  auth.importDatabase(config.databasepath);
+  console.log('Settinup server...')
+  console.log('done.')
 
   // create gateway
+  console.log('Creating coregateway...')
   let coregateway = {
-    auth: auth,
-    servicemgr : servicemgr,
-    conn: wsconn
+    Authoration: _Authoration,
+    Service : _Service,
+    Connection: _Connection
   };
+  console.log('done.')
 
-  // start connection
-  wsconn.setup(port, origin);
-  methods.setup(coregateway);
+  // launch daemon
+  console.log('Launching daemon...')
+  console.log('done.')
 
 }
 
@@ -53,8 +60,8 @@ function isinitialized() {
 }
 
 function initialize() {
-  console.log('initializing NSd...')
-  console.log('creating eula...')
+  console.log('Initializing NSd...')
+  console.log('Creating eula...')
   fs.writeFile('./eula.txt', '', function(err) {
     if(err) {
         return console.log(err);

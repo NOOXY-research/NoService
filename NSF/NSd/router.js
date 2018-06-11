@@ -5,10 +5,12 @@
 
 function Router() {
   let _coregateway = null;
+  // for signup timeout
+  let _locked_ip = [];
 
   // in case of wrong session of the position
   let _sessionnotsupport = function() {
-    console.log('session not support');
+    console.log('[ERR] session not support');
   }
 
   // a convinient function fo sending data
@@ -25,11 +27,6 @@ function Router() {
 
   // implementations of NOOXY Service Protocol methods
   let methods = {
-    // nooxy service protocol implementation of "create Activity Entity"
-    CA: {
-
-    },
-
     // nooxy service protocol implementation of "signup"
     SU: {
 
@@ -80,7 +77,7 @@ function Router() {
     // nooxy service protocol implementation of "Authorization"
     AU: {
       emitter : (connprofile, data) => {
-        _senddata('GT', 'rq', data);
+        _senddata('AU', 'rq', data);
       },
 
       handler : (connprofile, session, data, coregateway) => {
@@ -104,19 +101,19 @@ function Router() {
       }
     },
 
-    // nooxy service protocol implementation of "Service Call"
-    SC: {
+    // nooxy service protocol implementation of "Call Service"
+    CS: {
 
     },
 
-    // nooxy service protocol implementation of "Activity Call"
-    AC: {
+    // nooxy service protocol implementation of "Call Activity"
+    CA: {
 
     }
   }
 
   // emit specified method.
-  this.emit = (connprofile, method, data) => {methods[method].emitter(connprofilem data)};
+  this.emit = (connprofile, method, data) => {methods[method].emitter(connprofile, data)};
 
   // import the accessbility of core resource
   this.setup = function(coregateway) {
@@ -125,7 +122,8 @@ function Router() {
 
   // start this router
   this.start = function() {
-    _coregateway.authenticity.emit = this.emit;
+    _coregateway.Authenticity.emitRouter = this.emit;
+    _coregateway.Service.emitRouter = this.emit;
     _coregateway.conn.onJSON = function(connprofile, json) {
       methods[json.method].handler(connprofile, json.session, json.data, coregateway);
     };

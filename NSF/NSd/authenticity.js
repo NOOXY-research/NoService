@@ -1,6 +1,6 @@
 // NSF/NSd/authenticity.js
 // Description:
-// "authenticity.js" provide users authenticity\ base on sqldatabase.
+// "authenticity.js" provide users authenticity base on sqldatabase.
 // Copyright 2018 NOOXY. All Rights Reserved.
 
 
@@ -35,7 +35,7 @@ let Authdb = function () {
     })
 
     // write newest information of user to database.
-    this.updatesql = (handler) => {
+    this.updatesql = (callback) => {
       let err = null;
       if(typeof(this.username)=='undefined') {
         throw 'username undefined.';
@@ -51,7 +51,7 @@ let Authdb = function () {
         this.exisitence = true;
       }
       if(err) {
-        handler(err);
+        callback(err);
       }
     };
 
@@ -78,13 +78,13 @@ let Authdb = function () {
     _database.run('CREATE TABLE users(username text,  pwdhash text, token text, tokenexpire datetime, privilege text, detail text)');
   };
 
-  this.getUser = (username, handler) => {
+  this.getUser = (username, callback) => {
     let err = null;
-    if(typeof(_cacheduser[username])=='undefined') {
+    if(typeof(_cacheduser[username]) == 'undefined') {
       let user = new User(username);
       _cacheduser[username] = user;
     }
-    handler(err, _cacheduser[username]);
+    callback(err, _cacheduser[username]);
   }
 }
 
@@ -122,17 +122,17 @@ function Authenticity() {
   };
 
   // create a temp user which will not exist in database.
-  this.getGuest = (handler) => {
+  this.getGuest = (callback) => {
     let err = null;
     let user = null;
 
     user = new User('GUEST', true);
 
-    handler(err, user);
+    callback(err, user);
   };
 
   // get a user from imported database.
-  this.getUser = (username, handler) => {
+  this.getUser = (username, callback) => {
     let err = null;
     let userdb = _authdb.getUser(username);
     let user = null;
@@ -143,10 +143,10 @@ function Authenticity() {
       user = new User(userdb.username, false);
     }
 
-    handler(err, user);
+    callback(err, user);
   }
 
-  this.CreateUser = (username, password, handler) => {
+  this.createUser = (username, password, callback) => {
     let err = null;
     let pwdhash = null;
     let user = _authdb.getUser(username);
@@ -159,25 +159,25 @@ function Authenticity() {
     };
 
 
-    handler(err);
+    callback(err);
   };
 
-  this.DeleteUser = (user, password, handler) => {
+  this.deleteUser = (user, password, callback) => {
     if(this.PasswordisValid(user, password)) {
       user.delete();
       user.updatesql();
     }
     else {
       const err = true;
-      handler(err);
+      callback(err);
     }
   };
 
-  this.renewPassword = (user, newpassword, handler) => {
+  this.renewPassword = (user, newpassword, callback) => {
 
   };
 
-  this.PasswordisValid = (user, password, handler) => {
+  this.PasswordisValid = (user, password, callback) => {
     let user = _authdb.getUser(username);
     let isValid = false;
     let pwdhash = user.pwdhash;
@@ -185,10 +185,10 @@ function Authenticity() {
     if(pwdhash == pwdhashalpha) {
       isValid = true;
     }
-    handler(isValid);
+    callback(isValid);
   };
 
-  this.TokenisValid = (user, token, handler) => {
+  this.TokenisValid = (user, token, callback) => {
     let user = _authdb.getUser(username);
     let isValid = false;
     let now = new Date();
@@ -198,7 +198,7 @@ function Authenticity() {
     }
   };
 
-  this.getUserToken = (user, password, handler) => {
+  this.getUserToken = (user, password, callback) => {
     let user = _authdb.getUser(username);
     let isValid = false;
     let now = new Date();
@@ -208,7 +208,11 @@ function Authenticity() {
     // }
   };
 
-  this.getUserprivilege = (user, handler) => {
+  this.getUserprivilege = (user, callback) => {
+
+  };
+
+  this.signupUser = () => {
 
   };
 
