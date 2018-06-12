@@ -17,7 +17,7 @@ let Authdb = function () {
 
   function User(username) {
     // sql statement
-    let sql = 'SELECT username, pwdhash, token, tokenexpire FROM users WHERE username = ?';
+    let sql = 'SELECT username, displayname, pwdhash, token, tokenexpire FROM users WHERE username = ?';
     _database.get(sql, [username], (err, row) => {
       if(err||typeof(row)=='undefined') {
         this.username = username;
@@ -26,6 +26,7 @@ let Authdb = function () {
       else {
         this.exisitence = true;
         this.username = row.username;
+        this.displayname = row.displayname;
         this.pwdhash = row.pwdhash;
         this.token = row.token;
         this.tokenexpire = row.tokenexpire;
@@ -42,12 +43,12 @@ let Authdb = function () {
       }
       else {
         if(this.exisitence) {
-          sql = 'UPDATE users SET username=?, pwdhash=?, token=?, tokenexpire=?, privilege=?, detail=? WHERE username = ?';
+          sql = 'UPDATE users SET username=?, displayname=?, pwdhash=?, token=?, tokenexpire=?, privilege=?, detail=? WHERE username = ?';
         }
         else {
-          sql = 'INSERT INTO users(username, pwdhash, token, tokenexpire, privilege, detail) VALUES (?, ?, ?, ?, ?, ?, ?);'
+          sql = 'INSERT INTO users(username, displayname, pwdhash, token, tokenexpire, privilege, detail) VALUES (?, ?, ?, ?, ?, ?, ?, ?);'
         }
-        _database.run(sql, [this.username, this.pwdhash, this.token, this.tokenexpire, this.privilege, this.detail]);
+        _database.run(sql, [this.username, this.displayname, this.pwdhash, this.token, this.tokenexpire, this.privilege, this.detail]);
         this.exisitence = true;
       }
       if(err) {
@@ -60,6 +61,7 @@ let Authdb = function () {
       _database.run('DELETE FROM users WHERE username=?;', [this.username])
       this.exisitence = false;
       this.username = null;
+      this.displayname = null;
       this.pwdhash = null;
       this.token = null;
       this.tokenexpire = null;
@@ -73,9 +75,10 @@ let Authdb = function () {
   };
 
   this.createDatabase = (path) => {
-    let _database = new sqlite3.Database(path);
+    console.log('flag');
+    _database = new sqlite3.Database(path);
     let expireDate = utils.DatetoSQL(utils.addDays(new Date(), 7));
-    _database.run('CREATE TABLE users(username text,  pwdhash text, token text, tokenexpire datetime, privilege text, detail text)');
+    _database.run('CREATE TABLE users(username text, displayname text,  pwdhash text, token text, tokenexpire datetime, privilege text, detail text)');
   };
 
   this.getUser = (username, callback) => {
@@ -91,21 +94,21 @@ let Authdb = function () {
 // the authenticity module
 function Authenticity() {
 
-  const _authdb = new Authdb;
+  const _authdb = new Authdb();
   const SHA256KEY = 'FATFROG';
 
-  function User(username, isguest) {
-    let _username = username;
-    let _isGuest = isguest;
-
-    this.isGuest() {
-      return _isGuest;
-    };
-
-    this.getUsermame() {
-      return _username;
-    };
-  }
+  // function User(username, isguest) {
+  //   let _username = username;
+  //   let _isGuest = isguest;
+  //
+  //   this.isGuest = () => {
+  //     return _isGuest;
+  //   };
+  //
+  //   this.getUsermame = () =>  {
+  //     return _username;
+  //   };
+  // }
 
   // Declare parameters
   this.TokenExpirePeriod = 7 // Days
@@ -118,7 +121,6 @@ function Authenticity() {
   // create a new database for authenticity.
   this.createDatabase = (path) => {
     _authdb.createDatabase(path);
-
   };
 
   // create a temp user which will not exist in database.
@@ -132,38 +134,43 @@ function Authenticity() {
   };
 
   // get a user from imported database.
-  this.getUser = (username, callback) => {
-    let err = null;
-    let userdb = _authdb.getUser(username);
-    let user = null;
-    if(userdb.exisitence == false) {
-      let err = new Error("[Authenticity] User not exist.");
-    }
-    else {
-      user = new User(userdb.username, false);
-    }
+  // this.getUser = (username, callback) => {
+  //   let err = null;
+  //   let userdb = _authdb.getUser(username);
+  //   let user = null;
+  //   if(userdb.exisitence == false) {
+  //     let err = new Error("[Authenticity] User not exist.");
+  //   }
+  //   else {
+  //     user = new User(userdb.username, false);
+  //   }
+  //
+  //   callback(err, user);
+  // }
 
-    callback(err, user);
-  }
-
-  this.createUser = (username, password, callback) => {
+  this.createUser = (username, displayname, password, privilege, callback) => {
     let err = null;
     let pwdhash = null;
-    let user = _authdb.getUser(username);
-
-    if(user.exisitence == false) {
-      pwdhash = crypto.createHmac('sha256', SHA256KEY).update(password).digest('hex');
-    }
-    else {
-      let err = new Error("[Authenticity] User already exist.");
-    };
-
+    _authdb.getUser(username, (err, user)=>{
+      if(user.exisitence == false) {
+        let now = new Date();
+        user.username = username;
+        user.displayname = displayname;
+        user.pwdhash = crypto.createHmac('sha256', SHA256KEY).update(password).digest('hex');
+        user.token = utils.generateGUID();
+        user.tokenexpire = now.setDate(now.getDate() + this.TokenExpirePeriod); ;
+        user.privilege = privilege;
+      }
+      else {
+        let err = new Error("[Authenticity] User already exist.");
+      };
+    });
 
     callback(err);
   };
 
-  this.deleteUser = (user, password, callback) => {
-    if(this.PasswordisValid(user, password)) {
+  this.deleteUser = (username, password, callback) => {
+    if(this.PasswordisValid(username, password)) {
       user.delete();
       user.updatesql();
     }
@@ -173,33 +180,40 @@ function Authenticity() {
     }
   };
 
-  this.renewPassword = (user, newpassword, callback) => {
+  this.renewPassword = (username, newpassword, callback) => {
 
   };
 
-  this.PasswordisValid = (user, password, callback) => {
-    let user = _authdb.getUser(username);
+  this.PasswordisValid = (username, password, callback) => {
+    let userdb = _authdb.getUser(username);
+    let err = false;
     let isValid = false;
-    let pwdhash = user.pwdhash;
+    let pwdhash = userdb.pwdhash;
     let pwdhashalpha = crypto.createHmac('sha256', SHA256KEY).update(password).digest('hex');
     if(pwdhash == pwdhashalpha) {
       isValid = true;
     }
-    callback(isValid);
+    callback(err, isValid);
   };
 
-  this.TokenisValid = (user, token, callback) => {
-    let user = _authdb.getUser(username);
+  this.TokenisValid = (username, token, callback) => {
+    let err = false;
     let isValid = false;
-    let now = new Date();
-    let exipredate = utils.SQLtoDate(user.tokenexpire)
-    if(now > exipredate||) {
+    _authdb.getUser(username, (user) => {
+      let now = new Date();
+      let exipredate = utils.SQLtoDate(user.tokenexpire);
+      if(now > exipredate|| token != user.token) {
+        callback(err, false);
+      }
+      else {
+        callback(err, true);
+      }
+    });
 
-    }
   };
 
-  this.getUserToken = (user, password, callback) => {
-    let user = _authdb.getUser(username);
+  this.getUserToken = (username, password, callback) => {
+    let userdb = _authdb.getUser(username);
     let isValid = false;
     let now = new Date();
     let exipredate = utils.SQLtoDate(user.tokenexpire)
@@ -208,7 +222,7 @@ function Authenticity() {
     // }
   };
 
-  this.getUserprivilege = (user, callback) => {
+  this.getUserprivilege = (username, callback) => {
 
   };
 
@@ -221,5 +235,5 @@ function Authenticity() {
   //
   // }
 
-}
-module.exports = authenticity;
+};
+module.exports = Authenticity;

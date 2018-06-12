@@ -4,12 +4,14 @@
 // Copyright 2018 NOOXY. All Rights Reserved.
 
 
-// configuration
-let config = {
-  port: 1234,
-  origin: false,
-  databasepath: 'none',
-};
+let Core = require('./NSd/core');
+var Path = require("path");
+var fs = require('fs');
 
-let core = require('./NSd/core');
-core.launch(config);
+let _path = Path.resolve("./");
+var _setting = JSON.parse(fs.readFileSync('setting.json', 'utf8'));
+_setting["path"] = _path+'/';
+
+let _core = new Core(_setting);
+
+_core.launch();

@@ -4,6 +4,7 @@
   "description": "no description",
   "private": true,
   "dependencies": {
+    "sqlite3": "^4.0.0",
     "ws": "^4.0.0"
   }
 }

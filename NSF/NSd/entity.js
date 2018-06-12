@@ -9,11 +9,11 @@ function Entity() {
   let _seed = utils.generateGUID();
   let _entities = {};
 
-  function EntityJson(id, Json, conn_profile) {
+  function EntityJson(entityID, Json, conn_profile) {
     let _conn_profile = conn_profile;
 
     let _meta = {
-      id: id,
+      id: entityID,
       serverid: Json.serverid,
       service: Json.service,
       type: Json.type,
@@ -61,6 +61,14 @@ function Entity() {
   this.getEntityConnProfile = (entityID, callback) => {
     _entities[entityID].getConnProfile(callback);
   };
+
+  this.returnEntitycount = () =>{
+
+  };
+
+  this.getfliteredEntity= (key, value) => {
+
+  }
 
   this.deleteEntity = (entityID) => {
     delete _entities[entityID];

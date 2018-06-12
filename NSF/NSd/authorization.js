@@ -4,7 +4,7 @@
 // Copyright 2018 NOOXY. All Rights Reserved.
 
 // Handling responses to authoration requests.
-function AuthorationHandler() {
+function Authorationcallback() {
   let _implts = {
     'PW': null,
     'AC': null
@@ -54,32 +54,32 @@ function Authorization() {
     _entity_module = entity_module;
   };
 
-  this.importTrustDomains(domain_list) = {
+  this.importTrustDomains = (domain_list) => {
     _trusted_domains = domain_list;
-  }
+  };
 
   // Authby group
   this.Authby = {
-    Password : (entityID, handler) =>{
+    Password : (entityID, callback) =>{
       let user = _entity_module.returnVal('owner');
       let data = {
         m: "PW"
       }
       _entity_module.getEntityConnProfile(entityID, (conn_profile) => {
         this.emitRouter(conn_profile, 'AU', data);
-        let op = (connprofile, data) = {
+        let op = (connprofile, data) => {
           if(user === data.u) {
             _authe_module.PasswordisValid(data.d.u, data.d.p, (isValid) => {
               if(isValid) {
-                handler(true);
+                callback(true);
               }
               else {
-                handler(false);
+                callback(false);
               }
             });
           }
           else {
-            handler(false);
+            callback(false);
           }
 
         }
@@ -90,50 +90,55 @@ function Authorization() {
       setTimeout(() => {delete _queue_operation[conn_profile.getGUID()+'PW']}, _auth_timeout*1000);
     },
 
-    Action : (entityID, handler) =>{
+    Action : (entityID, callback) =>{
 
     },
 
-    Token : (entityID, handler) =>{
+    Token : (entityID, callback) =>{
         let user = _entity_module.returnVal('owner');
         let data = {
           m: "TK"
         }
         _entity_module.getEntityConnProfile(entityID, (conn_profile) => {
           this.emitRouter(conn_profile, 'AU', data);
-          let op = (connprofile, data) = {
+          let op = (connprofile, data) => {
             if(user === data.u) {
               _authe_module.TokenisValid(data.d.u, data.d.t, (isValid) => {
                 if(isValid) {
-                  handler(true);
+                  callback(true);
                 }
                 else {
-                  handler(false);
+                  callback(false);
                 }
               });
             }
             else {
-              handler(false);
+              callback(false);
             }
 
           }
           _queue_operation[conn_profile.getGUID()+'TK'] = op;
         });
 
-        // set the timeout of this operation
+        // set the timeout of clearing expired authoration.
         setTimeout(() => {delete _queue_operation[conn_profile.getGUID()+'TK']}, _auth_timeout*1000);
     },
 
-    UserLevel : (entityID, handler) =>{
+    UserLevel : (entityID, callback) =>{
 
     },
 
-    RealtimeToken : (entityID, handler) =>{
+    RealtimeToken : (entityID, callback) =>{
 
     },
 
-    Domain : (entityID, handler) =>{
-
+    Domain : (entityID, callback) =>{
+      if(_trusted_domains.includes(entityID.returnHostIP())) {
+        callback(true);
+      }
+      else {
+        callback(false);
+      }
     }
   }
 

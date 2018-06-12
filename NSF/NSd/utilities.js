@@ -6,7 +6,6 @@
 generateUniqueID = () => {
   return '_' + Math.random().toString(36).substr(2, 9);
 };
-};
 
 hashString = (s) => {
   var s = 0, i, chr;
@@ -69,7 +68,7 @@ function DatetoSQL(JsDate) {
 }
 
 module.exports = {
-  generateUniqueID: generateUniqueID;
+  generateUniqueID: generateUniqueID,
   hashString: hashString,
   removeHTML: removeHTML,
   generateGUID: generateGUID,
