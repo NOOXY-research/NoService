@@ -15,28 +15,43 @@ function Service() {
   let _authoration_module = null;
   let _ActivityRsCEcallbacks = {};
   let _ASockets = {};
-  this.spwanClient = () => {console.log('[ERR] emitRouter not implemented');};
 
-  this.emitRouter = () => {console.log('[ERR] emitRouter not implemented');};
+  this.spwanClient = () => {Utils.tagLog('*ERR*', 'emitRouter not implemented');};
+
+  this.emitRouter = () => {Utils.tagLog('*ERR*', 'emitRouter not implemented');};
 
   this.ServiceRqRouter = (connprofile, data, response_emit) => {
 
     let methods = {
       // nooxy service protocol implementation of "Call Service: ServiceSocket"
       SS: (connprofile, data, response_emit) => {
-        _local_services[_entity_module.returnEntityValue(data.i, 'service')].sendSSData(data.i, data.d);
-        let _data = {
-          m: "SS",
-          d: {
-            // status
-            "i": data.i,
-            "s": "OK"
-          }
-        };
+        let _data = null;
+        let theservice = _local_services[_entity_module.returnEntityValue(data.i, 'service')];
+        if(typeof(theservice) != 'undefined') {
+          theservice.sendSSData(data.i, data.d);
+          _data = {
+            m: "SS",
+            d: {
+              // status
+              "i": data.i,
+              "s": "OK"
+            }
+          };
+        }
+        else {
+          _data = {
+            m: "SS",
+            d: {
+              // status
+              "i": data.i,
+              "s": "Fail"
+            }
+          };
+        }
         response_emit(connprofile, 'CS', 'rs', _data);
       },
-      // nooxy service protocol implementation of "Call Service: KillService"
-      KS: null
+      // nooxy service protocol implementation of "Call Service: String function"
+      SF: null
     }
 
     // call the callback.
@@ -66,9 +81,10 @@ function Service() {
           serverid: connprofile.returnServerID(),
           service: data.s,
           type: "Activity",
-          spwandomain: connprofile.returnHostIP(),
+          spwandomain: connprofile.returnClientIP(),
           owner: data.o,
-          ownerdomain: connprofile.returnClientIP(),
+          ownerdomain: data.od,
+          connectiontype:connprofile.returnConnMethod(),
           description: data.d
         };
 
@@ -131,7 +147,7 @@ function Service() {
     }
 
     this.onData = (entityID, data) => {
-      console.log('[ERR] onData not implemented');
+      Utils.tagLog('*ERR*', 'onData not implemented');
     };
   };
 
@@ -148,7 +164,7 @@ function Service() {
     };
 
     this.onData = (data) => {
-      console.log('[ERR] onData not implemented');
+      Utils.tagLog('*ERR*', 'onData not implemented');
     };
   };
 
@@ -174,6 +190,7 @@ function Service() {
     };
 
     this.launch = () => {
+
       // load module from local service directory
       _service_module = require(_service_path+'/entry');
 
@@ -185,6 +202,7 @@ function Service() {
         spwandomain: "Local",
         owner: _local_services_owner,
         ownerdomain: "Local",
+        connectiontype: null,
         description: "A Serverside Entity. Service Entity"
       };
 
@@ -196,9 +214,15 @@ function Service() {
       _service_socket = new ServiceSocket(_onSSData);
 
       // create the service for module.
-      _serviceapi_module.createServiceAPI(_service_socket, (api) => {
-        _service_module.start(api);
-      });
+      try {
+        _serviceapi_module.createServiceAPI(_service_socket, (api) => {
+          _service_module.start(api);
+        });
+      }
+      catch(err) {
+        Utils.tagLog('*ERR*', 'Service "'+_service_name+'" ended with failure.');
+        console.log(err);
+      }
     };
 
     this.setupPath = (path) => {
@@ -246,29 +270,39 @@ function Service() {
   };
 
   this.createActivitySocket = (method, targetip, targetport, service, callback) => {
+    let err = false;
     let _data = {
       "m": "CE",
       "d": {
         t: Utils.generateGUID(),
-        s: service
+        o: _local_services_owner,
+        s: service,
+        od: targetip,
       }
     };
 
     this.spwanClient(method, targetip, targetport, (connprofile) => {
       _ActivityRsCEcallbacks[_data.d.t] = (conn_profile, data) => {
-        let _as = new ActivitySocket(conn_profile, data.i, (i, d) => {
-          let _data2 = {
-            "m": "SS",
-            "d": {
-              "i": i,
-              "d": d
-            }
-          };
+        let _as = null;
+        if(data.i != "FAIL") {
+          _as = new ActivitySocket(conn_profile, data.i, (i, d) => {
+            let _data2 = {
+              "m": "SS",
+              "d": {
+                "i": i,
+                "d": d,
+              }
+            };
 
-          this.emitRouter(conn_profile, 'CS', _data2);
-        });
-        _ASockets[data.i] = _as;
-        callback(_as);
+            this.emitRouter(conn_profile, 'CS', _data2);
+          });
+          _ASockets[data.i] = _as;
+          callback(false, _as);
+        }
+        else{
+          callback(true, _as);
+        }
+
       }
       this.emitRouter(connprofile, 'CA', _data);
     });
@@ -278,6 +312,10 @@ function Service() {
   this.importAuthorization = (authorization_module) => {
     _authoration_module = authorization_module
   };
+
+  this.importOwner = (owner) => {
+    _local_services_owner = owner;
+  }
 
   this.importServicesList = (service_list) => {
     for(let i=0; i<service_list.length; i++) {

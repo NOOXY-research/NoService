@@ -10,7 +10,7 @@ function Router() {
 
   // in case of wrong session of the position
   let _sessionnotsupport = function() {
-    console.log('[ERR] session not support');
+    console.log('[*ERR*] session not support');
   }
 
   // a convinient function fo sending data

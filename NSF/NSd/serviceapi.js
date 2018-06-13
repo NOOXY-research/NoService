@@ -20,6 +20,8 @@ function ServiceAPI() {
 
   this.createServiceAPI = (service_socket, callback) => {
     let _api = new _prototype();
+    _api.Utils = require('./utilities'),
+
     _api.Service = {
       ServiceSocket: service_socket,
       ActivitySocket: {
@@ -31,6 +33,12 @@ function ServiceAPI() {
       Entity: {
         getEntityMetaData: (entityID, callback) => {
           _coregateway.Entity.getEntityMetaData(entityID, callback);
+        },
+        returnCount: () => {
+          return _coregateway.Entity.returnEntitycount();
+        },
+        getEntities: (callback) => {
+          _coregateway.Entity.getEntitiesMeta(callback);
         }
       }
     };
@@ -49,6 +57,19 @@ function ServiceAPI() {
     _api.Daemon = {
       Settings: _coregateway.Settings
     };
+
+    _api.Connection = {
+      getServers: (callback) => {
+        _coregateway.Connection.getServers(callback);
+      },
+      getClients: (callback) => {
+        _coregateway.Connection.getClients(callback);
+      },
+      Sniff : {
+        onJSON: null
+      }
+    }
+
     callback(_api);
   };
 

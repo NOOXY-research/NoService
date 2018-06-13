@@ -38,7 +38,7 @@ function Authorization() {
   let _auth_timeout = 320;
   let _queue_operation = {};
 
-  this.emitRouter = () => {console.log('[ERR] emit not implemented');};
+  this.emitRouter = () => {console.log('[*ERR*] emit not implemented');};
 
   this.RsRouter = (connprofile, data) => {
     _queue_operation[conn_profile.getGUID()+data.m](connprofile, data);

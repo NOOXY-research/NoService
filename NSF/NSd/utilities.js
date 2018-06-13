@@ -3,6 +3,39 @@
 // "utilities.js" provides general function to be widely used.
 // Copyright 2018 NOOXY. All Rights Reserved.
 
+String.prototype.replaceAll = function(search, replacement) {
+    var target = this;
+    return target.split(search).join(replacement);
+};
+
+printLOGO = (version, copyright) => {
+  console.log('88b 88  dP\'Yb   dP\'Yb  Yb  dP Yb  dP  TM')
+  console.log('88Yb88 dP   Yb dP   Yb  YbdP   YbdP  ')
+  console.log('88 Y88 Yb   dP Yb   dP  dPYb    88   ')
+  console.log('88  Y8  YbodP   YbodP  dP  Yb   88   Service Framework. ')
+  console.log('')
+  console.log('')
+  console.log(copyright)
+  console.log('')
+  console.log('ver. '+version)
+  console.log('For more information or update -> www.nooxy.tk')
+  console.log('')
+};
+
+tagLog = (tag, logstring) => {
+  let _space = 10;
+  tag = tag.substring(0, _space);
+  for(var i=0; i < _space-tag.length; i++) {
+    if(i%2 != 1) {
+      tag = tag + ' ';
+    }
+    else {
+      tag = ' ' + tag;
+    }
+  }
+  console.log('['+tag+'] '+logstring.replaceAll('\n', '\n['+tag+'] '));
+};
+
 generateUniqueID = () => {
   return '_' + Math.random().toString(36).substr(2, 9);
 };
@@ -68,6 +101,8 @@ function DatetoSQL(JsDate) {
 }
 
 module.exports = {
+  printLOGO: printLOGO,
+  tagLog: tagLog,
   generateUniqueID: generateUniqueID,
   hashString: hashString,
   removeHTML: removeHTML,

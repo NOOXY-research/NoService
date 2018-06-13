@@ -31,15 +31,16 @@ function Core(settings) {
   let _serviceAPI = null;
 
   this.launch = () => {
+    Utils.printLOGO('aphla', 'copyright(c)2018 NOOXY inc.');
     // initialize environment
-    console.log('Checking environment...')
+    Utils.tagLog('Daemon', 'Checking environment...')
     if (this.isinitialized() == false) {
       this.initialize();
     };
-    console.log('Checking environment done.')
+    Utils.tagLog('Daemon', 'Checking environment done.')
 
     // initialize variables
-    console.log('Initializing variables.')
+    Utils.tagLog('Daemon', 'Initializing variables.')
     let _connection = new Connection();
     let _authorization = null;
     let _authenticity = null;
@@ -47,10 +48,10 @@ function Core(settings) {
     let _service = null;
     let _entity = null;
     let _serviceAPI = null;
-    console.log('Initializing variables done.')
+    Utils.tagLog('Daemon', 'Initializing variables done.')
 
     // setup variables
-    console.log('Setting up variables.')
+    Utils.tagLog('Daemon', 'Setting up variables.')
     _connection = new Connection();
     _authorization = new Authorization();
     _authenticity = new Authenticity();
@@ -60,7 +61,7 @@ function Core(settings) {
     _serviceAPI = new ServiceAPI();
 
       // create gateway
-      console.log('Creating coregateway...')
+      Utils.tagLog('Daemon', 'Creating coregateway...')
       let coregateway = {
           Settings: settings,
           Authoration: _authorization,
@@ -71,11 +72,11 @@ function Core(settings) {
           Entity: _entity,
           Authenticity: _authenticity
         };
-      console.log('Creating coregateway done.')
+      Utils.tagLog('Daemon', 'Creating coregateway done.')
 
     // setup router
     _router.importCore(coregateway);
-    
+
     // setup connection
     for(var server in settings.connection_servers) {
       _connection.addServer(settings.connection_servers[server].type,
@@ -102,19 +103,25 @@ function Core(settings) {
     _service.importServicesList(settings.services);
     _service.importEntity(_entity);
     _service.importAPI(_serviceAPI);
+    _service.importOwner(settings.local_services_owner);
+
+    // setup User
+
+    //
 
     // setup api
     _serviceAPI.importCore(coregateway);
 
-    console.log('Setting up variables done.');
+    Utils.tagLog('Daemon', 'Setting up variables done.');
 
     // launch services
-    console.log('Launching services...');
+    Utils.tagLog('Daemon', 'Launching services...');
     console.log();
     _service.launch();
-    console.log('Launching services done.');
-
-    console.log('NOOXY Service Framework successfully started.');
+    Utils.tagLog('Daemon', 'Launching services done.');
+    //
+    Utils.tagLog('Daemon', 'NOOXY Service Framework successfully started.');
+    Utils.tagLog('Shell', 'Local Shell not implemented.');
   }
 
   this.isinitialized = () => {
@@ -128,22 +135,22 @@ function Core(settings) {
   }
 
   this.initialize = () => {
-    console.log('Initializing NSd...')
-    console.log('Creating eula...')
+    Utils.tagLog('Daemon', 'Initializing NSd...')
+    Utils.tagLog('Daemon', 'Creating eula...')
 
     if (fs.existsSync(_path+settings.database_path)) {
-      console.log('Database already exist.')
+      Utils.tagLog('Daemon', 'Database already exist.')
     }
     else {
-      console.log('Creating database...')
+      Utils.tagLog('Daemon', 'Creating database...')
       let _auth = new Authenticity();
       _auth.createDatabase(_path+settings.database_path);
       _auth.createUser('root', 'rootd', 'root', 0,(err)=> {
         if(err) {
-          console.log('[ERR] Occur failure on creating database.');
+          Utils.tagLog('Daemon', '[ERR] Occur failure on creating database.');
         }
         else {
-          console.log('NSF Superuser "root" with password "root" created. Please change password later for security.');
+          Utils.tagLog('Daemon', 'NSF Superuser "root" with password "root" created. Please change password later for security.');
         }
       });
     }
@@ -153,7 +160,7 @@ function Core(settings) {
           return console.log(err);
       }
     });
-    console.log('NSd initilalized.');
+    Utils.tagLog('Daemon', 'NSd initilalized.');
   }
 }
 

@@ -55,81 +55,10 @@ function Connection() {
     this.returnConn = () => {return _conn;};
 
     // this.onConnectionDropout = () => {
-    //   console.log('[ERR] onConnectionDropout not implemented');
+    //   Utils.tagLog('*ERR*', 'onConnectionDropout not implemented');
     // }
 
   }
-
-  // a wrapped WebSocket server for nooxy service framework
-  function WSServer(id) {
-    let _hostip = null;
-    let _serverID = id;
-    let _wss = null;
-    let _clients = {};
-
-    this.onJSON = (connprofile, json) => {console.log('[ERR] onJSON not implemented');};
-
-    this.onClose = (connprofile) => {console.log('[ERR] onClose not implemented');};
-
-    this.sendJSON = function(connprofile, json) {
-      _clients[connprofile.returnGUID()].send(JSON.stringify(json));
-    };
-
-    this.broadcast = function(json) {
-      this._wss.clients.forEach(function each(client) {
-        if (client.readyState === WebSocket.OPEN) {
-          client.send(JSON.stringify(json));
-        }
-      });
-    };
-
-    this.start = function(ip, port, origin = false) {
-      // launch server
-      _wss = new WebSocket.Server({port: port, host: ip});
-      _hostip = ip;
-
-      _wss.on('connection', function(ws, req) {
-
-          let originDomain = URL.parse(ws.upgradeReq.headers.origin).hostname;
-          new ConnectionProfile(id, 'Client', req.connection.remoteAddress, ws); new ConnectionProfile(id, 'Client',req.connection.remoteAddress, ws);
-          clients[connprofile.returnGUID()] = ws;
-
-          // if (configuration.origins.indexOf(originDomain) < 0) {
-          //     ws.send(JSON.stringify({
-          //         method : 'notify',
-          //         session : 'req',
-          //         data : 'Connection from unknown source refused.'
-          //     }));
-          //
-          //     ws.close();
-          //     return;
-          // }
-
-          ws.on('message', function(message) {
-            this.onJSON(connprofile, JSON.phrase(message));
-          });
-
-          ws.on('error', function(error) {
-              console.log('[ERR] %s', error);
-              ws.close();
-          });
-
-          ws.on('close', function() {
-              delete _clients[connprofile.returnGUID()];
-              this.onClose(connprofile);
-          });
-
-      });
-    }
-  }
-
-  function WSClient() {
-
-  };
-
-  function TCPIPServer() {};
-
-  function TCPIPClient() {};
 
   function Virtualnet() {
     let _virt_servers = {};
@@ -138,12 +67,12 @@ function Connection() {
       // define an virtual socket
       function VirtualSocket(type) {
         this.type = type;
-        this.send = (d)=>{console.log('[ERR] VirtualSocket send not implemented. Of '+this.type+'. d=>'+d)};
+        this.send = (d)=>{Utils.tagLog('*ERR*', 'VirtualSocket send not implemented. Of '+this.type+'. d=>'+d)};
         let _types = {
-          open : ()=>{console.log('[ERR] VirtualSocket opopen not implemented. Of '+this.type)},
-          message : ()=>{console.log('[ERR] VirtualSocket onmessage not implemented. Of '+this.type)},
-          error : ()=>{console.log('[ERR] VirtualSocket onerror not implemented. Of '+this.type)},
-          close : ()=>{console.log('[ERR] VirtualSocket onclose not implemented. Of '+this.type)}
+          open : ()=>{Utils.tagLog('*ERR*', 'VirtualSocket opopen not implemented. Of '+this.type)},
+          message : ()=>{Utils.tagLog('*ERR*', 'VirtualSocket onmessage not implemented. Of '+this.type)},
+          error : ()=>{Utils.tagLog('*ERR*', 'VirtualSocket onerror not implemented. Of '+this.type)},
+          close : ()=>{Utils.tagLog('*ERR*', 'VirtualSocket onclose not implemented. Of '+this.type)}
         };
 
         let _returntype = (type) => {
@@ -244,14 +173,102 @@ function Connection() {
 
   _virtnet = new Virtualnet();
 
+  // a wrapped WebSocket server for nooxy service framework
+  function WSServer(id) {
+    let _hostip = null;
+    let _serverID = id;
+    let _wss = null;
+    let _clients = {};
+
+    this.onJSON = (connprofile, json) => {Utils.tagLog('*ERR*', 'onJSON not implemented');};
+
+    this.onClose = (connprofile) => {Utils.tagLog('*ERR*', 'onClose not implemented');};
+
+    this.sendJSON = function(connprofile, json) {
+      _clients[connprofile.returnGUID()].send(JSON.stringify(json));
+    };
+
+    this.broadcast = function(json) {
+      this._wss.clients.forEach(function each(client) {
+        if (client.readyState === WebSocket.OPEN) {
+          client.send(JSON.stringify(json));
+        }
+      });
+    };
+
+    this.start = (ip, port, origin = false) => {
+      // launch server
+      _wss = new WebSocket.Server({port: port, host: ip});
+      _hostip = ip;
+
+      _wss.on('connection', (ws, req) => {
+
+        let connprofile = new ConnectionProfile(_serverID, 'Client', 'WebSocket', ip, port, req.connection.remoteAddress, this);
+        _clients[connprofile.returnGUID()] = ws;
+
+        ws.on('message', (message) => {
+          this.onJSON(connprofile, JSON.parse(message));
+        });
+
+        ws.on('error', (message) => {
+          Utils.tagLog('*ERR*', '%s', error);
+          ws.close();
+        });
+
+        ws.on('close', (message) => {
+          delete _clients[connprofile.returnGUID()];
+          this.onClose(connprofile);
+        });
+
+      });
+    }
+  }
+
+  function WSClient() {
+    let _ws = null
+
+    this.onJSON = (connprofile, json) => {Utils.tagLog('*ERR*', 'onJSON not implemented');};
+
+    this.onClose = () => {Utils.tagLog('*ERR*', 'onClose not implemented');};
+
+    this.sendJSON = function(connprofile, json) {
+      _ws.send(JSON.stringify(json));
+    };
+
+    this.connect = (ip, port, callback) => {
+      let connprofile = null;
+      Utils.tagLog('FLAG', 'ws://'+ip+':'+port);
+      _ws = new WebSocket('ws://'+ip+':'+port);
+      connprofile = new ConnectionProfile(null, 'Server', 'Local', ip, port, 'localhost', this);
+      _ws.on('open', function open() {
+        callback(connprofile);
+        // ws.send('something');
+      });
+      _ws.on('message', (message) => {
+        this.onJSON(connprofile, JSON.parse(message));
+      });
+
+      _ws.on('error', (error) => {
+          Utils.tagLog('*ERR*', '%s', error);
+          vs.close();
+      });
+
+
+    }
+  };
+
+  function TCPIPServer() {};
+
+  function TCPIPClient() {};
+
   function LocalServer(id, virtnet) {
     let _serverID = id;
     let _vnets = null;
     let _clients = {};
 
-    this.onJSON = (connprofile, json) => {console.log('[ERR] LocalServer onJSON not implemented.');};
+    this.onJSON = (connprofile, json) => {Utils.tagLog('*ERR*', 'LocalServer onJSON not implemented.');};
 
-    this.onClose = (connprofile) => {console.log('[ERR] LocalServer onClose not implemented');};
+    this.onClose = (connprofile) => {Utils.tagLog('*ERR*', 'LocalServer onClose not implemented');};
 
     this.sendJSON = (connprofile, json) => {
       _clients[connprofile.returnGUID()].send(JSON.stringify(json));
@@ -274,7 +291,7 @@ function Connection() {
           });
 
           vs.on('error', (message) => {
-            console.log('[ERR] %s', error);
+            Utils.tagLog('*ERR*', '%s', error);
             vs.close();
           });
 
@@ -293,9 +310,9 @@ function Connection() {
     let _vnetc = null;
     let _vs = null
 
-    this.onJSON = (connprofile, json) => {console.log('[ERR] onJSON not implemented');};
+    this.onJSON = (connprofile, json) => {Utils.tagLog('*ERR*', 'onJSON not implemented');};
 
-    this.onClose = () => {console.log('[ERR] onClose not implemented');};
+    this.onClose = () => {Utils.tagLog('*ERR*', 'onClose not implemented');};
 
     this.sendJSON = function(connprofile, json) {
       _vs.send(JSON.stringify(json));
@@ -313,7 +330,7 @@ function Connection() {
         });
 
         vs.on('error', (error) => {
-            console.log('[ERR] %s', error);
+            Utils.tagLog('*ERR*', '%s', error);
             vs.close();
         });
 
@@ -324,7 +341,7 @@ function Connection() {
   };
 
   this.addServer = (conn_method, ip, port) => {
-    if(conn_method == 'ws'||conn_method =='WebSocket') {
+    if(conn_method == 'ws' || conn_method =='WebSocket') {
       let _serverID = Utils.generateGUID();
       let wws = new WSServer(_serverID);
       _servers[_serverID] = wws;
@@ -344,23 +361,27 @@ function Connection() {
         _have_local_server = true;
       }
       else {
-        console.log('[ERR] Can only exist one local server.');
+        Utils.tagLog('*ERR*', 'Can only exist one local server.');
       }
     }
 
     else {
-      console.log('[ERR]'+conn_method+' not implemented.');
+      Utils.tagLog('*ERR*', ''+conn_method+' not implemented.');
     }
   }
 
   this.createClient = (conn_method, remoteip, port, callback) => {
     if(conn_method == 'ws'||conn_method =='WebSocket') {
-
+      let serverID = "WebSocket";
+      let wsc = new WSClient(_virtnet);
+      wsc.onJSON = this.onJSON;
+      wsc.onClose = this.onClose;
+      wsc.connect(remoteip, port, callback);
     }
 
     else if(conn_method == 'loc'||conn_method =='Local') {
       if(_have_local_server == false) {
-        console.log('[ERR] Local server not started.');
+        Utils.tagLog('*ERR*', 'Local server not started.');
       }
       else {
         let serverID = "LOCAL";
@@ -373,7 +394,7 @@ function Connection() {
     }
 
     else {
-      console.log('[ERR]');
+      Utils.tagLog('*ERR*', '');
     }
   }
 
@@ -390,11 +411,19 @@ function Connection() {
   }
 
   this.onJSON = (conn_profile, json) => {
-    console.log('[ERR] Connection module onJSON not implement');
+    Utils.tagLog('*ERR*', 'Connection module onJSON not implement');
   }
 
   this.onClose = (conn_profile) => {
-    console.log('[ERR] Connection module onClose not implement');
+    Utils.tagLog('*ERR*', 'Connection module onClose not implement');
+  }
+
+  this.getServers = (callback) => {
+    callback(false, _servers);
+  }
+
+  this.getClients = (callback) => {
+    callback(false, _clients);
   }
 
 }

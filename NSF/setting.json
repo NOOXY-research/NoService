@@ -9,7 +9,7 @@
     {
       "type": "WebSocket",
       "ip": "0.0.0.0",
-      "port": 1111
+      "port": 1268
     },
     {
       "type": "TCP/IP",
@@ -43,6 +43,8 @@
     "0.0.0.0",
     "localhost"
   ],
+
+  "shell_service": "shell",
 
   "only_trust_origin_domain": false,
 

@@ -20,6 +20,7 @@ function Entity() {
       spwandomain: Json.spwandomain,
       owner: Json.owner,
       ownerdomain: Json.ownerdomain,
+      connectiontype: Json.connectiontype,
       description: Json.description
     };
 
@@ -64,12 +65,20 @@ function Entity() {
   };
 
   this.returnEntitycount = () =>{
-    return _entities.length();
+    return Object.keys(_entities).length;
+  };
+
+  this.getEntitiesMeta = (callback) => {
+    let _e = {};
+    for(let key in _entities) {
+      _e[key] = _entities[key].returnJSON()
+    }
+    callback(false, _e);
   };
 
   this.getfliteredEntity= (key, value) => {
 
-  }
+  };
 
   this.deleteEntity = (entityID) => {
     delete _entities[entityID];
