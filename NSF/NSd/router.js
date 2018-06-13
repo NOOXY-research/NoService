@@ -20,9 +20,8 @@ function Router() {
       s : session,
       d : data
     };
-
     // finally sent the data through the connection.
-    _coregateway.Connection.sendJSON(connprofile, JSON.stringify(wrapped));
+    _coregateway.Connection.sendJSON(connprofile, wrapped);
   }
 
   // implementations of NOOXY Service Protocol methods
@@ -47,13 +46,18 @@ function Router() {
           }
         }
         connprofile.getRemotePosition((pos)=> {
-          if(rq_rs_pos[session] == pos) {
-            actions[session](connprofile, data);
+          if(rq_rs_pos[session] == pos || rq_rs_pos[session] == 'Both') {
+            if(session == 'rq') {
+              actions[session](connprofile, data, _senddata);
+            }
+            else {
+              actions[session](connprofile, data);
+            }
           }
           else {
             _sessionnotsupport();
           }
-        })
+        });
       }
     },
 
@@ -83,8 +87,13 @@ function Router() {
           }
         }
         connprofile.getRemotePosition((pos)=> {
-          if(rq_rs_pos[session] == pos) {
-            actions[session](connprofile, data);
+          if(rq_rs_pos[session] == pos || rq_rs_pos[session] == 'Both') {
+            if(session == 'rq') {
+              actions[session](connprofile, data, _senddata);
+            }
+            else {
+              actions[session](connprofile, data);
+            }
           }
           else {
             _sessionnotsupport();
@@ -111,17 +120,22 @@ function Router() {
         }
 
         let actions = {
-          rq : _coregateway.AuthorationHandler.RqRouter(connprofile, data, _senddata),
-          rs : _coregateway.Authoration.RsRouter(connprofile, data)
+          rq : _coregateway.AuthorationHandler.RqRouter,
+          rs : _coregateway.Authoration.RsRouter
         }
         connprofile.getRemotePosition((pos)=> {
-          if(rq_rs_pos[session] == pos) {
-            actions[session](connprofile, data);
+          if(rq_rs_pos[session] == pos || rq_rs_pos[session] == 'Both') {
+            if(session == 'rq') {
+              actions[session](connprofile, data, _senddata);
+            }
+            else {
+              actions[session](connprofile, data);
+            }
           }
           else {
             _sessionnotsupport();
           }
-        })
+        });
       }
     },
 
@@ -138,12 +152,17 @@ function Router() {
         }
 
         let actions = {
-          rq : _coregateway.Service.ServiceRqRouter(connprofile, data, _senddata),
-          rs : _coregateway.Service.ServiceRsRouter(connprofile, data)
+          rq : _coregateway.Service.ServiceRqRouter,
+          rs : _coregateway.Service.ServiceRsRouter
         }
         connprofile.getRemotePosition((pos)=> {
-          if(rq_rs_pos[session] == pos) {
-            actions[session](connprofile, data);
+          if(rq_rs_pos[session] == pos || rq_rs_pos[session] == 'Both') {
+            if(session == 'rq') {
+              actions[session](connprofile, data, _senddata);
+            }
+            else {
+              actions[session](connprofile, data);
+            }
           }
           else {
             _sessionnotsupport();
@@ -160,22 +179,28 @@ function Router() {
 
       handler : (connprofile, session, data) => {
         let rq_rs_pos = {
-          rq: "Server",
-          rs: "Client"
+          rq: "Both",
+          rs: "Both"
         }
 
         let actions = {
-          rq : _coregateway.Service.ActivityRqRouter(connprofile, data, _senddata),
-          rs : _coregateway.Service.ActivityRsRouter(connprofile, data)
+          rq : _coregateway.Service.ActivityRqRouter,
+          rs : _coregateway.Service.ActivityRsRouter
         }
+
         connprofile.getRemotePosition((pos)=> {
-          if(rq_rs_pos[session] == pos) {
-            actions[session](connprofile, data);
+          if(rq_rs_pos[session] == pos || rq_rs_pos[session] == 'Both') {
+            if(session == 'rq') {
+              actions[session](connprofile, data, _senddata);
+            }
+            else {
+              actions[session](connprofile, data);
+            }
           }
           else {
             _sessionnotsupport();
           }
-        })
+        });
       }
     }
   }
@@ -189,7 +214,6 @@ function Router() {
   this.importCore = (coregateway) => {
     _coregateway = coregateway;
     _coregateway.Connection.onJSON = (connprofile, json) => {
-      console.log();
       methods[json.m].handler(connprofile, json.s, json.d);
     };
     _coregateway.Authenticity.emitRouter = this.emit;
@@ -197,7 +221,6 @@ function Router() {
     _coregateway.Service.spwanClient = _coregateway.Connection.createClient;
 
   };
-
 
 }
 

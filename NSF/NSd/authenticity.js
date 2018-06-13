@@ -75,7 +75,6 @@ let Authdb = function () {
   };
 
   this.createDatabase = (path) => {
-    console.log('flag');
     _database = new sqlite3.Database(path);
     let expireDate = utils.DatetoSQL(utils.addDays(new Date(), 7));
     _database.run('CREATE TABLE users(username text, displayname text,  pwdhash text, token text, tokenexpire datetime, privilege text, detail text)');

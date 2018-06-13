@@ -29,17 +29,18 @@ function Service() {
           m: "SS",
           d: {
             // status
+            "i": data.i,
             "s": "OK"
           }
         };
-        response_emit('CS', 'rs', _data);
+        response_emit(connprofile, 'CS', 'rs', _data);
       },
       // nooxy service protocol implementation of "Call Service: KillService"
       KS: null
     }
 
     // call the callback.
-    method[data.m](connprofile, data, response_emit);
+    methods[data.m](connprofile, data.d, response_emit);
   };
 
   this.ActivityRqRouter = (connprofile, data, response_emit) => {
@@ -49,8 +50,8 @@ function Service() {
       AS: () => {
         _ASockets[data.d.i].onData(data.d.d);
         let _data = {
-          m: "AS",
-          d: {
+          "m": "AS",
+          "d": {
             // status
             "s": "OK"
           }
@@ -63,20 +64,21 @@ function Service() {
         // create a description of this service entity.
         let _entity_json = {
           serverid: connprofile.returnServerID(),
-          service: data.d.s,
+          service: data.s,
           type: "Activity",
           spwandomain: connprofile.returnHostIP(),
-          owner: data.d.o,
+          owner: data.o,
           ownerdomain: connprofile.returnClientIP(),
-          description: data.d.d
+          description: data.d
         };
-        _entity_module.registerEntity(_entity_json, connprofile, (id) => {
+
+        _entity_module.registerEntity(_entity_json, connprofile, (err, id) => {
             let _data = {
-              m: "CE",
-              d: {
+              "m": "CE",
+              "d": {
                 // temp id
-                t: data.d.t,
-                i: id
+                "t": data.t,
+                "i": id
               }
             };
             response_emit(connprofile, 'CA', 'rs', _data);
@@ -84,7 +86,7 @@ function Service() {
       }
     }
     // call the callback.
-    methods[data.m](connprofile, data, response_emit);
+    methods[data.m](connprofile, data.d, response_emit);
   }
 
   this.ServiceRsRouter =  (connprofile, data) => {
@@ -113,11 +115,11 @@ function Service() {
       // nooxy service protocol implementation of "Call Activity: createEntity"
       CE: (connprofile, data) => {
         // create a description of this service entity.
-        _ARsCEcallback[data.d.t](connprofile, data);
+        _ActivityRsCEcallbacks[data.t](connprofile, data);
       }
     }
 
-    methods[data.m](connprofile, data);
+    methods[data.m](connprofile, data.d);
   };
 
   function ServiceSocket(Datacallback) {
@@ -129,7 +131,7 @@ function Service() {
     }
 
     this.onData = (entityID, data) => {
-
+      console.log('[ERR] onData not implemented');
     };
   };
 
@@ -142,7 +144,7 @@ function Service() {
     };
 
     this.sendData = (data) => {
-      Datacallback(data);
+      Datacallback(_entity_id, data);
     };
 
     this.onData = (data) => {
@@ -167,7 +169,7 @@ function Service() {
             "d": data
           }
         }
-        this.emitRouter(connprofile, 'AC', _data);
+        this.emitRouter(connprofile, 'CA', _data);
       });
     };
 
@@ -251,19 +253,24 @@ function Service() {
         s: service
       }
     };
+
     this.spwanClient(method, targetip, targetport, (connprofile) => {
-      this.emitRouter(connprofile, 'CA', _data);
       _ActivityRsCEcallbacks[_data.d.t] = (conn_profile, data) => {
-        let _as = new ActivitySocket(conn_profile, data.d.i, (d) => {
+        let _as = new ActivitySocket(conn_profile, data.i, (i, d) => {
           let _data2 = {
             "m": "SS",
-            "d": d
+            "d": {
+              "i": i,
+              "d": d
+            }
           };
-          this.emitRouter(conn_profile, 'SC', _data2);
+
+          this.emitRouter(conn_profile, 'CS', _data2);
         });
-        _ASockets[data.d.i] = _as;
+        _ASockets[data.i] = _as;
         callback(_as);
       }
+      this.emitRouter(connprofile, 'CA', _data);
     });
 
   };

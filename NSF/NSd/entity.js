@@ -30,7 +30,7 @@ function Entity() {
     };
 
     this.returnVal = (key) => {
-      return _json[key];
+      return _meta[key];
     };
 
     // return a JSONfy data structure.
@@ -55,6 +55,7 @@ function Entity() {
   };
 
   this.returnEntityValue = (entityID, key) => {
+
     return _entities[entityID].returnVal(key);
   };
 
@@ -63,7 +64,7 @@ function Entity() {
   };
 
   this.returnEntitycount = () =>{
-
+    return _entities.length();
   };
 
   this.getfliteredEntity= (key, value) => {

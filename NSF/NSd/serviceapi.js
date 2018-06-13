@@ -23,8 +23,14 @@ function ServiceAPI() {
     _api.Service = {
       ServiceSocket: service_socket,
       ActivitySocket: {
-        createSocket: (method, targetip, targetport, callback) => {
-          _coregateway.Service.createActivitySocket(method, targetip, targetport, callback);
+        createSocket: (method, targetip, targetport, service, callback) => {
+          _coregateway.Service.createActivitySocket(method, targetip, targetport, service, callback);
+        }
+      },
+
+      Entity: {
+        getEntityMetaData: (entityID, callback) => {
+          _coregateway.Entity.getEntityMetaData(entityID, callback);
         }
       }
     };
@@ -44,6 +50,10 @@ function ServiceAPI() {
       Settings: _coregateway.Settings
     };
     callback(_api);
+  };
+
+  this.createActivityAPI = (callback) => {
+
   };
 }
 

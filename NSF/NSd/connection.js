@@ -50,7 +50,7 @@ function Connection() {
     this.returnHostPort = () => {return _hostport;}
     this.returnClientIP = () => {return _clientip;}
     this.returnConnMethod = () => {return _connMethod;}
-    this.returnPosition = () => {return _pos;}
+    this.returnRemotePosition = () => {return _pos;}
     this.returnBundle = (key) => {return _bundle[key];}
     this.returnConn = () => {return _conn;};
 
@@ -133,20 +133,48 @@ function Connection() {
 
   function Virtualnet() {
     let _virt_servers = {};
+    // define a socket pair
+    function SocketPair() {
+      // define an virtual socket
+      function VirtualSocket(type) {
+        this.type = type;
+        this.send = (d)=>{console.log('[ERR] VirtualSocket send not implemented. Of '+this.type+'. d=>'+d)};
+        let _types = {
+          open : ()=>{console.log('[ERR] VirtualSocket opopen not implemented. Of '+this.type)},
+          message : ()=>{console.log('[ERR] VirtualSocket onmessage not implemented. Of '+this.type)},
+          error : ()=>{console.log('[ERR] VirtualSocket onerror not implemented. Of '+this.type)},
+          close : ()=>{console.log('[ERR] VirtualSocket onclose not implemented. Of '+this.type)}
+        };
 
-    // define an virtual socket
-    function VirtualSocket(type) {
-      this.type = type;
-      this.send = ()=>{console.log('[ERR] VirtualSocket send not implemented. Of '+this.type)};
-      let _types = {
-        open : ()=>{console.log('[ERR] VirtualSocket opopen not implemented. Of '+this.type)},
-        message : ()=>{console.log('[ERR] VirtualSocket onmessage not implemented. Of '+this.type)},
-        error : ()=>{console.log('[ERR] VirtualSocket onerror not implemented. Of '+this.type)},
-        close : ()=>{console.log('[ERR] VirtualSocket onclose not implemented. Of '+this.type)}
+        let _returntype = (type) => {
+          return _types[type];
+        }
+
+        this.on = (type, callback)=>{_types[type] = callback;};
+        this.emit = (type, d) =>{
+          let _exe = _returntype(type);
+          _exe(d.msg);
+        };
+
       };
-      this.on = (type, callback)=>{_types[type] = callback;};
-      this.emit = (type, callback) =>{callback(_types[type]);};
-    };
+      let _vcs = new VirtualSocket('Client');
+      let _vss = new VirtualSocket('Server');
+
+      _vcs.send = (msg) => {
+        let _d = {msg: msg}
+        _vss.emit('message', _d);
+      };
+      _vss.send = (msg) => {
+        let _d = {msg: msg}
+        _vcs.emit('message', _d);
+      };
+
+      this.ClientSocket = _vcs;
+      this.ServerSocket = _vss;
+
+    }
+
+
 
     function Server(virtip, virtport) {
       // add this server to list of virtual servers
@@ -162,9 +190,8 @@ function Connection() {
       }
 
       this.ClientConnect = (clientvirtip, _virtport, vs, callback)=>{
-        _clients[clientvirtip] = vs;
         type_callback['connection'] (vs);
-        callback();
+        _clients[clientvirtip] = vs;
       };
 
 
@@ -180,24 +207,16 @@ function Connection() {
       let _virtip = lvirtip;
       let _virtport = lvirtport;
       // create sockets for both server and client
-      let vss = new VirtualSocket('Server');
-      let vcs = new VirtualSocket('Client');
+      let sp = new SocketPair();
+      let vss = sp.ServerSocket;
+      let vcs = sp.ClientSocket;
 
       this.connect = (rvirtip, rvirtport, callback) => {
+        // return virtual client socket to callback
+        callback(vcs);
+
         // trigger server and return server socket
-        _virt_servers[rvirtip+':'+rvirtport].ClientConnect(_virtip, _virtport, vss, () => {
-          // bind connection funcitons
-          vss.send = (msg) => {
-            vcs.emit('message', (callback)=>{callback(msg)});
-          };
-
-          vcs.send = (msg) => {
-            vss.emit('message', (callback)=>{callback(msg)});
-          };
-
-          // return virtual client socket to callback
-          callback(vcs);
-        });
+        _virt_servers[rvirtip+':'+rvirtport].ClientConnect(_virtip, _virtport, vss);
       };
 
       this.getIP = () => {
@@ -254,15 +273,15 @@ function Connection() {
             this.onJSON(connprofile, JSON.parse(message));
           });
 
-          vs.onerror = (error) => {
-              console.log('[ERR] %s', error);
-              vs.close();
-          };
+          vs.on('error', (message) => {
+            console.log('[ERR] %s', error);
+            vs.close();
+          });
 
-          vs.onclose =  () => {
-              delete _clients[connprofile.returnGUID()];
-              this.onClose(connprofile);
-          };
+          vs.on('close', (message) => {
+            delete _clients[connprofile.returnGUID()];
+            this.onClose(connprofile);
+          });
 
       });
     }
@@ -279,25 +298,28 @@ function Connection() {
     this.onClose = () => {console.log('[ERR] onClose not implemented');};
 
     this.sendJSON = function(connprofile, json) {
-      _vs.send(json);
+      _vs.send(JSON.stringify(json));
     };
 
     this.connect = (virtip, virtport, callback) => {
+      let connprofile = null;
       _vnetc = virtnet.createClient(Utils.generateGUID(), Utils.generateGUID());
       _vnetc.connect(virtip, virtport, (vs) => {
         _vs = vs;
-        let connprofile = new ConnectionProfile(null, 'Server', 'Local', virtip, virtport, _vnetc.getIP(), this);
-        callback(connprofile);
-        vs.onmessage = (message) => {
-          this.onJSON(connprofile, JSON.phrase(message));
-        };
+        connprofile = new ConnectionProfile(null, 'Server', 'Local', virtip, virtport, _vnetc.getIP(), this);
 
-        vs.onerror = (error) => {
+        vs.on('message', (message) => {
+          this.onJSON(connprofile, JSON.parse(message));
+        });
+
+        vs.on('error', (error) => {
             console.log('[ERR] %s', error);
             vs.close();
-        };
+        });
 
       });
+
+      callback(connprofile);
     }
   };
 
@@ -343,9 +365,10 @@ function Connection() {
       else {
         let serverID = "LOCAL";
         let locc = new LocalClient(_virtnet);
-        locc.connect('LOCALIP', 'LOCALPORT', callback);
         locc.onJSON = this.onJSON;
         locc.onClose = this.onClose;
+        locc.connect('LOCALIP', 'LOCALPORT', callback);
+
       }
     }
 
@@ -355,7 +378,6 @@ function Connection() {
   }
 
   this.sendJSON = (connprofile, json) => {
-    // console.log(connprofile.returnHostIP());
     connprofile.getConn((conn) => {
       conn.sendJSON(connprofile, json);
     });
