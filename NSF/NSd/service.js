@@ -6,6 +6,11 @@
 let Utils = require('./utilities');
 
 function Service() {
+  // ServiceStringFunction
+  function SStringfunction() {
+
+  };
+
   let _local_services = {};
   let _activities = {};
   let _local_services_path = null;
@@ -175,6 +180,7 @@ function Service() {
     let _service_path = null;
     let _service_name = service_name;
     let _service_module = null;
+    let _service_manifest = null;
 
     let _onSSData = (entityID, data) => {
       entity_module.getConnProfile(entityID, (connprofile) => {
@@ -193,6 +199,13 @@ function Service() {
 
       // load module from local service directory
       _service_module = require(_service_path+'/entry');
+      try{
+        _service_manifest = Utils.returnJSONfromFile(_service_path+'/manifest.json');
+      }
+      catch(err) {
+        Utils.tagLog('*ERR*', 'Service "'+_service_name+'" load manifest.json with failure.');
+        console.log(err);
+      };
 
       // create a description of this service entity.
       let _entity_json = {
@@ -215,9 +228,17 @@ function Service() {
 
       // create the service for module.
       try {
-        _serviceapi_module.createServiceAPI(_service_socket, (api) => {
-          _service_module.start(api);
-        });
+        if(_service_manifest.implementation_api == false) {
+          _serviceapi_module.createServiceAPI(_service_socket, (api) => {
+            _service_module.start(api);
+          });
+        }
+        else {
+          _serviceapi_module.createServiceAPIwithImplementaion(_service_socket, (api) => {
+            _service_module.start(api);
+          });
+        }
+
       }
       catch(err) {
         Utils.tagLog('*ERR*', 'Service "'+_service_name+'" ended with failure.');
@@ -233,6 +254,9 @@ function Service() {
       _service_socket.onData(entityID, data);
     };
 
+    this.returnManifest = () => {
+      return _service_manifest;
+    }
 
   };
 
@@ -308,6 +332,10 @@ function Service() {
     });
 
   };
+
+  this.returnServiceManifest = (service_name)=> {
+    return _local_services[service_name].returnManifest();
+  }
 
   this.importAuthorization = (authorization_module) => {
     _authoration_module = authorization_module

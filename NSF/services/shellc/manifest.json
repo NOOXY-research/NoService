@@ -1,0 +1,6 @@
+{
+  "displayname": "shellc",
+  "description": "A Shell Client implementation.",
+  "Authors": ["NOOXY", "noowyee"],
+  "implementation_api": true
+}

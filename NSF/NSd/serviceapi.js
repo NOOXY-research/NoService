@@ -18,12 +18,11 @@ function ServiceAPI() {
     // console.log(_coregateway);
   };
 
-  this.createServiceAPI = (service_socket, callback) => {
+  let _get_normal_api = (callback)=> {
     let _api = new _prototype();
     _api.Utils = require('./utilities'),
 
     _api.Service = {
-      ServiceSocket: service_socket,
       ActivitySocket: {
         createSocket: (method, targetip, targetport, service, callback) => {
           _coregateway.Service.createActivitySocket(method, targetip, targetport, service, callback);
@@ -68,10 +67,27 @@ function ServiceAPI() {
       Sniff : {
         onJSON: null
       }
-    }
+    };
+
+    _api.Implementation = _coregateway.Implementation;
 
     callback(_api);
   };
+
+  this.createServiceAPI = (service_socket, callback) => {
+    _get_normal_api((api) => {
+      api.Service.ServiceSocket = service_socket;
+      callback(api);
+    });
+  };
+
+  this.createServiceAPIwithImplementaion = (service_socket, callback) => {
+    _get_normal_api((api) => {
+      api.Service.ServiceSocket = service_socket;
+      api.Implementation = _coregateway.Implementation;
+      callback(api);
+    });
+  }
 
   this.createActivityAPI = (callback) => {
 

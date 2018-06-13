@@ -13,6 +13,7 @@ let Router = require('./router');
 let Service = require('./service');
 let Entity = require('./entity');
 let ServiceAPI = require('./serviceapi');
+let Implementation = require('./implementation');
 let Log = null;
 let Utils = require('./utilities');
 
@@ -29,18 +30,25 @@ function Core(settings) {
   let _service = null;
   let _entity = null;
   let _serviceAPI = null;
+  let _implementation = null;
+
+  let verbose = (tag, log) => {
+    if(settings.verbose) {
+      Utils.tagLog(tag, log);
+    };
+  };
 
   this.launch = () => {
     Utils.printLOGO('aphla', 'copyright(c)2018 NOOXY inc.');
     // initialize environment
-    Utils.tagLog('Daemon', 'Checking environment...')
+    verbose('Daemon', 'Checking environment...')
     if (this.isinitialized() == false) {
       this.initialize();
     };
-    Utils.tagLog('Daemon', 'Checking environment done.')
+    verbose('Daemon', 'Checking environment done.')
 
     // initialize variables
-    Utils.tagLog('Daemon', 'Initializing variables.')
+    verbose('Daemon', 'Initializing variables.')
     let _connection = new Connection();
     let _authorization = null;
     let _authenticity = null;
@@ -48,10 +56,10 @@ function Core(settings) {
     let _service = null;
     let _entity = null;
     let _serviceAPI = null;
-    Utils.tagLog('Daemon', 'Initializing variables done.')
+    verbose('Daemon', 'Initializing variables done.')
 
     // setup variables
-    Utils.tagLog('Daemon', 'Setting up variables.')
+    verbose('Daemon', 'Setting up variables.')
     _connection = new Connection();
     _authorization = new Authorization();
     _authenticity = new Authenticity();
@@ -59,9 +67,10 @@ function Core(settings) {
     _service = new Service();
     _entity = new Entity();
     _serviceAPI = new ServiceAPI();
+    _implementation = new Implementation();
 
       // create gateway
-      Utils.tagLog('Daemon', 'Creating coregateway...')
+      verbose('Daemon', 'Creating coregateway...')
       let coregateway = {
           Settings: settings,
           Authoration: _authorization,
@@ -70,9 +79,10 @@ function Core(settings) {
           Router: _router,
           ServiceAPI: _serviceAPI,
           Entity: _entity,
-          Authenticity: _authenticity
+          Authenticity: _authenticity,
+          Implementation: _implementation
         };
-      Utils.tagLog('Daemon', 'Creating coregateway done.')
+      verbose('Daemon', 'Creating coregateway done.')
 
     // setup router
     _router.importCore(coregateway);
@@ -100,6 +110,14 @@ function Core(settings) {
     // setup service
     _service.setupServicesPath(_path+settings.services_path);
     _service.importAuthorization(_authorization);
+    // add shell related service to List.
+    if(settings.shell_service != null) {
+      settings.services.push(settings.shell_service && settings.services.includes(settings.shell_service) == false);
+    }
+    if(settings.shell_client_service != null && settings.services.includes(settings.shell_client_service) == false) {
+      settings.services.push(settings.shell_client_service);
+    }
+    //
     _service.importServicesList(settings.services);
     _service.importEntity(_entity);
     _service.importAPI(_serviceAPI);
@@ -112,16 +130,23 @@ function Core(settings) {
     // setup api
     _serviceAPI.importCore(coregateway);
 
-    Utils.tagLog('Daemon', 'Setting up variables done.');
+    verbose('Daemon', 'Setting up variables done.');
 
     // launch services
-    Utils.tagLog('Daemon', 'Launching services...');
+    verbose('Daemon', 'Launching services...');
     console.log();
     _service.launch();
-    Utils.tagLog('Daemon', 'Launching services done.');
+    verbose('Daemon', 'Launching services done.');
     //
-    Utils.tagLog('Daemon', 'NOOXY Service Framework successfully started.');
-    Utils.tagLog('Shell', 'Local Shell not implemented.');
+    verbose('Daemon', 'NOOXY Service Framework successfully started.');
+    if(settings.shell_service == null) {
+      verbose('Shell', 'Shell Service not implemented.');
+    }
+
+    if(settings.shell_client_service == null) {
+      verbose('Shellc', 'Local Shell not implemented.');
+    }
+
   }
 
   this.isinitialized = () => {
@@ -135,22 +160,22 @@ function Core(settings) {
   }
 
   this.initialize = () => {
-    Utils.tagLog('Daemon', 'Initializing NSd...')
-    Utils.tagLog('Daemon', 'Creating eula...')
+    verbose('Daemon', 'Initializing NSd...')
+    verbose('Daemon', 'Creating eula...')
 
     if (fs.existsSync(_path+settings.database_path)) {
-      Utils.tagLog('Daemon', 'Database already exist.')
+      verbose('Daemon', 'Database already exist.')
     }
     else {
-      Utils.tagLog('Daemon', 'Creating database...')
+      verbose('Daemon', 'Creating database...')
       let _auth = new Authenticity();
       _auth.createDatabase(_path+settings.database_path);
       _auth.createUser('root', 'rootd', 'root', 0,(err)=> {
         if(err) {
-          Utils.tagLog('Daemon', '[ERR] Occur failure on creating database.');
+          verbose('Daemon', '[ERR] Occur failure on creating database.');
         }
         else {
-          Utils.tagLog('Daemon', 'NSF Superuser "root" with password "root" created. Please change password later for security.');
+          verbose('Daemon', 'NSF Superuser "root" with password "root" created. Please change password later for security.');
         }
       });
     }
@@ -160,7 +185,7 @@ function Core(settings) {
           return console.log(err);
       }
     });
-    Utils.tagLog('Daemon', 'NSd initilalized.');
+    verbose('Daemon', 'NSd initilalized.');
   }
 }
 

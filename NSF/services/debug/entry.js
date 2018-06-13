@@ -19,7 +19,6 @@ function start(api) {
   // console.log(api);
   api.Utils.tagLog('TEST', 'Creating ActivitySocket.');
   api.Service.ActivitySocket.createSocket('Local', 'LOCALIP', 'LOCALPORT', 'debug', (err, as) => {
-    console.log(err);
     if(err) {
       api.Utils.tagLog('*ERR*', 'ActivitySocket failed.');
     }

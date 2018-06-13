@@ -2,12 +2,19 @@
 // Description:
 // "utilities.js" provides general function to be widely used.
 // Copyright 2018 NOOXY. All Rights Reserved.
+var fs = require('fs');
+
+// read a file and return a parsed JSON obj
+returnJSONfromFile = (filename) => {
+  return JSON.parse(fs.readFileSync(filename, 'utf8'));;
+};
 
 String.prototype.replaceAll = function(search, replacement) {
     var target = this;
     return target.split(search).join(replacement);
 };
 
+// print the NSF LOGO
 printLOGO = (version, copyright) => {
   console.log('88b 88  dP\'Yb   dP\'Yb  Yb  dP Yb  dP  TM')
   console.log('88Yb88 dP   Yb dP   Yb  YbdP   YbdP  ')
@@ -15,13 +22,12 @@ printLOGO = (version, copyright) => {
   console.log('88  Y8  YbodP   YbodP  dP  Yb   88   Service Framework. ')
   console.log('')
   console.log('')
-  console.log(copyright)
-  console.log('')
-  console.log('ver. '+version)
+  console.log('ver. '+version+'. '+copyright)
   console.log('For more information or update -> www.nooxy.tk')
   console.log('')
 };
 
+// print log with tag
 tagLog = (tag, logstring) => {
   let _space = 10;
   tag = tag.substring(0, _space);
@@ -36,6 +42,7 @@ tagLog = (tag, logstring) => {
   console.log('['+tag+'] '+logstring.replaceAll('\n', '\n['+tag+'] '));
 };
 
+// generateGUID
 generateUniqueID = () => {
   return '_' + Math.random().toString(36).substr(2, 9);
 };
@@ -101,6 +108,7 @@ function DatetoSQL(JsDate) {
 }
 
 module.exports = {
+  returnJSONfromFile: returnJSONfromFile,
   printLOGO: printLOGO,
   tagLog: tagLog,
   generateUniqueID: generateUniqueID,

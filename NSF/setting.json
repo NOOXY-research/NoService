@@ -27,6 +27,8 @@
 
   "services_path": "services/",
 
+  "verbose": false,
+
   "services_files_path": "service_files/",
 
   "database_path": "db.sqlite3",
@@ -34,7 +36,7 @@
   "SHA256KEY": "FATFROG",
 
   "services": [
-    "debug"
+
   ],
 
   "trusted_domains": [
@@ -44,7 +46,9 @@
     "localhost"
   ],
 
-  "shell_service": "shell",
+  "shell_service": null,
+
+  "shell_client_service": "shellc",
 
   "only_trust_origin_domain": false,
 

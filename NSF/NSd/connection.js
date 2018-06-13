@@ -366,7 +366,7 @@ function Connection() {
     }
 
     else {
-      Utils.tagLog('*ERR*', ''+conn_method+' not implemented.');
+      Utils.tagLog('*ERR*', ''+conn_method+' not implemented. Skipped.');
     }
   }
 
