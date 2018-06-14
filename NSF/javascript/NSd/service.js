@@ -21,14 +21,17 @@ function Service() {
 
   this.emitRouter = () => {Utils.tagLog('*ERR*', 'emitRouter not implemented');};
 
+  // Serverside
   this.ServiceRqRouter = (connprofile, data, response_emit) => {
-
+    let theservice = null;
+    if(data.d.i != null) {
+      theservice = _local_services[_entity_module.returnEntityValue(data.d.i, 'service')];
+    }
     let methods = {
       // nooxy service protocol implementation of "Call Service: ServiceSocket"
       SS: (connprofile, data, response_emit) => {
         let _data = null;
-        let theservice = _local_services[_entity_module.returnEntityValue(data.i, 'service')];
-        if(typeof(theservice) != 'undefined') {
+        if(typeof(theservice) != 'undefined'||theservice!=null) {
           theservice.sendSSData(data.i, data.d);
           _data = {
             m: "SS",
@@ -52,30 +55,51 @@ function Service() {
         response_emit(connprofile, 'CS', 'rs', _data);
       },
       // nooxy service protocol implementation of "Call Service: String function"
-      SF: null
-    }
-
-    // call the callback.
-    methods[data.m](connprofile, data.d, response_emit);
-  };
-
-  this.ActivityRqRouter = (connprofile, data, response_emit) => {
-
-    let methods = {
-      // nooxy service protocol implementation of "Call Activity: ActivitySocket"
-      AS: () => {
-        _ASockets[data.d.i].onData(data.d.d);
-        let _data = {
-          "m": "AS",
-          "d": {
-            // status
-            "s": "OK"
-          }
-        };
-        response_emit(connprofile, 'CA', 'rs', _data);
+      JF: (connprofile, data, response_emit) => {
+        let _data = null;
+        if(typeof(theservice) != 'undefined') {
+          theservice.sendSSJFCall(data.i, data.n, data.j, (err, returnvalue)=>{
+            if(err) {
+              _data = {
+                m: "JF",
+                d: {
+                  // status
+                  "t": data.t,
+                  "i": data.i,
+                  "s": "Fail"
+                }
+              };
+            }
+            else {
+              _data = {
+                m: "JF",
+                d: {
+                  // status
+                  "t": data.t,
+                  "i": data.i,
+                  "s": "OK",
+                  "r": JSON.stringify(returnvalue)
+                }
+              };
+            }
+            response_emit(connprofile, 'CS', 'rs', _data);
+          });
+        }
+        else {
+          _data = {
+            m: "JF",
+            d: {
+              // status
+              "t": data.t,
+              "i": data.i,
+              "s": "Fail"
+            }
+          };
+          response_emit(connprofile, 'CS', 'rs', _data);
+        }
       },
 
-      // nooxy service protocol implementation of "Call Activity: createEntity"
+      // nooxy service protocol implementation of "Call Service: createEntity"
       CE: (connprofile, data, response_emit) => {
         // create a description of this service entity.
         let _entity_json = {
@@ -98,14 +122,16 @@ function Service() {
                 "i": id
               }
             };
-            response_emit(connprofile, 'CA', 'rs', _data);
+            response_emit(connprofile, 'CS', 'rs', _data);
         });
       }
     }
+
     // call the callback.
     methods[data.m](connprofile, data.d, response_emit);
-  }
+  };
 
+  // ClientSide
   this.ServiceRsRouter =  (connprofile, data) => {
 
     let methods = {
@@ -113,26 +139,54 @@ function Service() {
       SS: (connprofile, data) => {
 
       },
-      // nooxy service protocol implementation of "Call Service: KillService"
-      KS: null
+      // nooxy service protocol implementation of "Call Service: JSONfunction"
+      JF: (connprofile, data) => {
+        if(data.d.s == 'OK') {
+          _ASockets[data.d.i].sendJFReturn(false, data.d.t, data.d.r);
+        }
+        else {
+
+        }
+      },
+      // nooxy service protocol implementation of "Call Activity: createEntity"
+      CE: (connprofile, data) => {
+        // create a description of this service entity.
+        _ActivityRsCEcallbacks[data.d.t](connprofile, data);
+      }
     }
 
     // call the callback.
     methods[data.m](connprofile, data);
   };
 
+  // ClientSide implement
+  this.ActivityRqRouter = (connprofile, data, response_emit) => {
+
+    let methods = {
+      // nooxy service protocol implementation of "Call Activity: ActivitySocket"
+      AS: () => {
+        _ASockets[data.d.i].onData(data.d.d);
+        let _data = {
+          "m": "AS",
+          "d": {
+            // status
+            "s": "OK"
+          }
+        };
+        response_emit(connprofile, 'CA', 'rs', _data);
+      },
+    }
+    // call the callback.
+    methods[data.m](connprofile, data.d, response_emit);
+  }
+
+  // ClientSide
   this.ActivityRsRouter = (connprofile, data) => {
 
     let methods = {
       // nooxy service protocol implementation of "Call Activity: ActivitySocket"
       AS: (connprofile, data) => {
         // no need to implement anything
-      },
-
-      // nooxy service protocol implementation of "Call Activity: createEntity"
-      CE: (connprofile, data) => {
-        // create a description of this service entity.
-        _ActivityRsCEcallbacks[data.t](connprofile, data);
       }
     }
 
@@ -140,13 +194,15 @@ function Service() {
   };
 
   function ServiceSocket(Datacallback) {
+    let _jsonfunctions = {};
     // JSON Function
-    function JSONfunction() {
-
-    };
 
     let _send_handler = null;
     let _mode = null;
+
+    this.def = (name, callback) => {
+      _jsonfunctions[name] = callback;
+    };
 
     this.sendData = (entityID, data) => {
       Datacallback(entityID, data);
@@ -155,15 +211,31 @@ function Service() {
     this.onData = (entityID, data) => {
       Utils.tagLog('*ERR*', 'onData not implemented');
     };
+
+    this.onJFCall = (JFname, jsons, callback) => {
+      callback(false, _jsonfunctions[JFname](JSON.parse(jsons)));
+    };
+
   };
 
-  function ActivitySocket(conn_profile, entity_id, Datacallback) {
-    // JSON Function
-    function JSONfunction() {
+  function ActivitySocket(conn_profile, entity_id, Datacallback, JFCallback) {
 
-    };
     let _entity_id = entity_id;
     let _conn_profile = conn_profile;
+    let _jfqueue = {};
+
+    this.sendJFReturn = (err, tempid, returnvalue) => {
+      _jfqueue[tempid](err, JSON.parse(returnvalue));
+    };
+
+    // JSONfunction call
+    this.call = (name, Json, callback) => {
+      let tempid = Utils.generateUniqueID();
+      _jfqueue[tempid] = (err, returnvalue) => {
+        callback(err, returnvalue);
+      };
+      JFCallback(_entity_id, name, tempid, Json);
+    }
 
     this.returnEntityID = () => {
       return _entity_id;
@@ -187,6 +259,7 @@ function Service() {
     let _service_module = null;
     let _service_manifest = null;
 
+    // on Service Socket Data
     let _onSSData = (entityID, data) => {
       entity_module.getConnProfile(entityID, (connprofile) => {
         let _data = {
@@ -196,11 +269,12 @@ function Service() {
             "d": data
           }
         }
-        this.emitRouter(connprofile, 'CA', _data);
+        this.emitRouter(connprofile, 'AC', _data);
       });
     };
 
-    this.launch = async () => {
+
+    this.launch = () => {
 
       // load module from local service directory
       _service_module = require(_service_path+'/entry');
@@ -229,7 +303,7 @@ function Service() {
         _entity_id = entity_id;
       });
 
-      _service_socket = new ServiceSocket(_onSSData);
+      _service_socket = new ServiceSocket(_onSSData); // _onJFCAll = on JSONfunction call
 
       // create the service for module.
       try {
@@ -257,6 +331,10 @@ function Service() {
 
     this.sendSSData = (entityID, data) => {
       _service_socket.onData(entityID, data);
+    };
+
+    this.sendSSJFCall = (entityID, JFname, jsons, callback) => {
+      _service_socket.onJFCall(JFname, jsons, callback);
     };
 
     this.returnManifest = () => {
@@ -313,8 +391,8 @@ function Service() {
     this.spwanClient(method, targetip, targetport, (err, connprofile) => {
       _ActivityRsCEcallbacks[_data.d.t] = (conn_profile, data) => {
         let _as = null;
-        if(data.i != "FAIL") {
-          _as = new ActivitySocket(conn_profile, data.i, (i, d) => {
+        if(data.d.i != "FAIL") {
+          _as = new ActivitySocket(conn_profile, data.d.i, (i, d) => {
             let _data2 = {
               "m": "SS",
               "d": {
@@ -324,8 +402,21 @@ function Service() {
             };
 
             this.emitRouter(conn_profile, 'CS', _data2);
+          },
+          // JScallback
+          (entity_id, name, tempid, Json) =>{
+            let _data2 = {
+              "m": "JF",
+              "d": {
+                "i": entity_id,
+                "n": name,
+                "j": JSON.stringify(Json),
+                "t": tempid
+              }
+            };
+            this.emitRouter(connprofile, 'CS', _data2);
           });
-          _ASockets[data.i] = _as;
+          _ASockets[data.d.i] = _as;
           callback(false, _as);
         }
         else{
@@ -333,7 +424,7 @@ function Service() {
         }
 
       }
-      this.emitRouter(connprofile, 'CA', _data);
+      this.emitRouter(connprofile, 'CS', _data);
     });
 
   };

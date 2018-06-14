@@ -38,7 +38,7 @@
   "SHA256KEY": "FATFROG",
 
   "services": [
-    "debug"
+    "tester"
   ],
 
   "trusted_domains": [
@@ -52,7 +52,11 @@
 
   "shell_client_service": "NShell",
 
-  "shell_client_service_delay": 0,
+  "debug_service": "debug",
+
+  "debug": true,
+
+  "shell_client_service_delay": 1000,
 
   "only_trust_origin_domain": false,
 

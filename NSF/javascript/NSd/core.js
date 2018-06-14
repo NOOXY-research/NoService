@@ -36,7 +36,7 @@ function Core(settings) {
   let _implementation = null;
 
   let verbose = (tag, log) => {
-    if(settings.verbose) {
+    if(settings.verbose||settings.debug) {
       Utils.tagLog(tag, log);
     };
   };
@@ -127,13 +127,18 @@ function Core(settings) {
     _service.setupServicesPath(_path+settings.services_path);
     _service.importAuthorization(_authorization);
     // add shell related service to List.
-    if(settings.shell_service != null) {
-      settings.services.push(settings.shell_service && settings.services.includes(settings.shell_service) == false);
+    if(settings.shell_service != null && settings.services.includes(settings.shell_service) == false) {
+      settings.services.push(settings.shell_service);
     }
     if(settings.shell_client_service != null && settings.services.includes(settings.shell_client_service) == false) {
       settings.services.push(settings.shell_client_service);
     }
-    //
+    // add debug
+    if(settings.debug != null && settings.services.includes(settings.debug_service) == false) {
+      settings.services.unshift(settings.debug_service);
+    }
+    verbose('Daemon', 'Debug service enabled.');
+
     _service.importServicesList(settings.services);
     _service.importEntity(_entity);
     _service.importAPI(_serviceAPI);

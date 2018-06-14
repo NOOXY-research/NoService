@@ -1,9 +1,20 @@
-const readlineSync = require('readline-sync');
-const cluster = require('cluster');
+const readline = require('readline');
+var Writable = require('stream').Writable;
+
+var rl = readline.createInterface({
+  input: process.stdin,
+  output: process.stdout
+});
+
+rl._writeToOutput = function _writeToOutput(stringToWrite) {
+  if (rl.stdoutMuted)
+    rl.output.write("\x1B[2K\x1B[200D"+rl.query+"["+((rl.line.length%2==1)?"*.":".*")+"]");
+  else
+    rl.output.write(stringToWrite);
+};
+
 
 function start(api) {
-
-  console.log(`Worker ${process.pid} started`);
   let _username = null;
   let _password = null;
   let _token = null;
@@ -17,15 +28,27 @@ function start(api) {
   api.Implementation.setImplement('signin', (conn_method, remoteip, port, callback)=>{
     api.Implementation.setImplement('onToken', callback);
     console.log('Please signin your account.');
-    _username = readlineSync.question('username: ');
-    _password = readlineSync.question('password: ', {hideEchoBack: true });
-    api.Implementation.getClientConnProfile(conn_method, remoteip, port, (err, connprofile) => {
-      let _data = {
-        u: _username,
-        p: _password
-      }
-      api.Implementation.emitRouter(connprofile, 'GT', _data);
+    rl.stdoutMuted = false;
+    rl.query = 'username: ';
+    rl.question(rl.query, (username) => {
+
+      _username = username;
+      rl.stdoutMuted = true;
+      rl.query = 'password: ';
+      rl.question(rl.query, (password) => {
+        rl.stdoutMuted = false;
+        console.log('');
+        _password = password;
+        api.Implementation.getClientConnProfile(conn_method, remoteip, port, (err, connprofile) => {
+          let _data = {
+            u: _username,
+            p: _password
+          }
+          api.Implementation.emitRouter(connprofile, 'GT', _data);
+        });
+      });
     });
+
   });
 
   api.Implementation.setImplement('AuthbyToken', (callback) => {
@@ -36,8 +59,8 @@ function start(api) {
     }
     callback(false, _username, _token);
   });
-  //
-  // setTimeout(()=> {
+
+  setTimeout(()=> {
     let _manifest = api.Me.Manifest;
     let _daemon_display_name = api.Daemon.Settings.daemon_display_name;
     console.log('');
@@ -52,14 +75,21 @@ function start(api) {
       _token = token;
       let cmd = null;
       api.Service.ActivitySocket.createSocket(DAEMONTYPE, DAEMONIP, DAEMONPORT, 'NShell', (err, as) => {
-          while(1) {
-            cmd = readlineSync.question('>>> ');
-          }
+        var recursiveAsyncReadLine = function () {
+          rl.question('>>> ', function (cmd) {
+            if (cmd == 'exit') //we need some base case, for recursion
+              return rl.close(); //closing RL and returning from function.
+            console.log('Got it! "', cmd, '"');
+            recursiveAsyncReadLine(); //Calling this function again to ask new question
+          });
+        };
+
+        recursiveAsyncReadLine();
       });
     });
 
-  //
-  // }, api.Daemon.Settings.shell_client_service_delay);
+
+  }, api.Daemon.Settings.shell_client_service_delay);
 
 }
 
