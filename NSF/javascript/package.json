@@ -1,0 +1,11 @@
+{
+  "name": "NSF",
+  "version": "0.0.0",
+  "description": "no description",
+  "private": true,
+  "dependencies": {
+    "readline-sync": "^1.4.9",
+    "sqlite3": "^4.0.0",
+    "ws": "^4.0.0"
+  }
+}

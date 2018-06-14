@@ -1,0 +1,63 @@
+{
+  "daemon_name": "A NSF daemeon",
+
+  "daemon_display_name": "NOOXY service",
+
+  "discription": "description",
+
+  "connection_servers": [
+    {
+      "type": "WebSocket",
+      "ip": "0.0.0.0",
+      "port": 1268
+    },
+    {
+      "type": "TCP/IP",
+      "ip": "0.0.0.0",
+      "port": 2222
+    },
+    {
+      "type": "Local",
+      "ip": "LOCALIP",
+      "port": "LOCALPORT"
+    }
+  ],
+
+  "default_server": 0,
+
+  "local_services_owner" : "admin",
+
+  "services_path": "services/",
+
+  "verbose": false,
+
+  "services_files_path": "service_files/",
+
+  "database_path": "db.sqlite3",
+
+  "SHA256KEY": "FATFROG",
+
+  "services": [
+    "debug"
+  ],
+
+  "trusted_domains": [
+    "www.nooxy.tk",
+    "127.0.0.1",
+    "0.0.0.0",
+    "localhost"
+  ],
+
+  "shell_service": null,
+
+  "shell_client_service": "NShell",
+
+  "shell_client_service_delay": 0,
+
+  "only_trust_origin_domain": false,
+
+  "authoration_timeout": 320,
+
+  "token_expire_period": 7
+
+}
