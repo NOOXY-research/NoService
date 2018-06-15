@@ -206,14 +206,10 @@ function Authenticity() {
   };
 
   this.PasswordisValid = (username, password, callback) => {
-    // console.log(username);
-    // console.log(password);
     let isValid = false;
     _authdb.getUser(username, (err, user) => {
       let pwdhash = user.pwdhash;
       let pwdhashalpha = crypto.createHmac('sha256', SHA256KEY).update(password).digest('hex');
-      // console.log(pwdhash);
-      // console.log(pwdhashalpha);
       if(pwdhash == pwdhashalpha) {
         isValid = true;
       }

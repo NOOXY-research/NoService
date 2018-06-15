@@ -56,8 +56,11 @@ function Entity() {
   };
 
   this.returnEntityValue = (entityID, key) => {
-
-    return _entities[entityID].returnVal(key);
+    let entity = _entities[entityID];
+    if(entity != null) {
+       return entity.returnVal(key);
+    }
+     return null;
   };
 
   this.getEntityConnProfile = (entityID, callback) => {
@@ -79,6 +82,10 @@ function Entity() {
   this.returnEntityMetaData = (entityID) => {
     return _entities[entityID].returnMeta();
   };
+
+  this.returnEntitiesID = () => {
+    return Object.keys(_entities);
+  }
 
   this.getfliteredEntity= (key, value) => {
 

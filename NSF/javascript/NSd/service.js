@@ -238,8 +238,9 @@ function Service() {
     };
 
     this.onJFCall = (entityID, JFname, jsons, callback) => {
-      console.log(entityID);
-      callback(false, _jsonfunctions[JFname](JSON.parse(jsons), entityID));
+      _jsonfunctions[JFname](JSON.parse(jsons), entityID, (err, returnVal)=>{
+        callback(err, returnVal);
+      });
     };
 
   };
@@ -258,6 +259,7 @@ function Service() {
     this.call = (name, Json, callback) => {
       let tempid = Utils.generateUniqueID();
       _jfqueue[tempid] = (err, returnvalue) => {
+
         callback(err, returnvalue);
       };
       JFCallback(_entity_id, name, tempid, Json);

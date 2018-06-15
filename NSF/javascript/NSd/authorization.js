@@ -8,17 +8,25 @@ function AuthorizationHandler() {
   let _implementation_module = null;
 
   let _implts_callback = {
-    'PW': () => {
-
+    'PW': (connprofile, data, data_sender) => {
+      let AuthbyPassword = _implementation_module.returnImplement('AuthbyPassword');
+      AuthbyPassword((err, password)=>{
+        let _data = {
+          m:'PW',
+          d:{
+            p: password
+          }
+        }
+        data_sender(connprofile, 'AU', 'rs', _data);
+      })
     },
 
     'TK': (connprofile, data, data_sender) => {
       let AuthbyToken = _implementation_module.returnImplement('AuthbyToken');
-      AuthbyToken((err, username, token)=>{
+      AuthbyToken((err, token)=>{
         let _data = {
           m:'TK',
           d:{
-            u: username,
             t: token
           }
         }
@@ -53,7 +61,6 @@ function Authorization() {
 
   this.RsRouter = (connprofile, data) => {
     let op = _queue_operation[connprofile.returnGUID()+data.m];
-    console.log(_queue_operation);
     op(connprofile, data);
   };
 
@@ -73,15 +80,14 @@ function Authorization() {
   // Authby group
   this.Authby = {
     Password : (entityID, callback) =>{
-      let user = _entity_module.returnVal('owner');
+      let user = _entity_module.returnEntityValue(entityID, 'owner');
       let data = {
         m: "PW"
       }
       _entity_module.getEntityConnProfile(entityID, (err, connprofile) => {
         this.emitRouter(connprofile, 'AU', data);
         let op = (connprofile, data) => {
-          if(user == data.d.u) {
-            _authe_module.PasswordisValid(data.d.u, data.d.p, (isValid) => {
+            _authe_module.PasswordisValid(user, data.d.p, (err, isValid) => {
               if(isValid) {
                 callback(false, true);
               }
@@ -89,11 +95,6 @@ function Authorization() {
                 callback(false, false);
               }
             });
-          }
-          else {
-            callback(false, false);
-          }
-
         }
         _queue_operation[connprofile.returnGUID()+'PW'] = op;
       });
@@ -113,20 +114,14 @@ function Authorization() {
         }
         _entity_module.getEntityConnProfile(entityID, (err, connprofile) => {
           let op = (connprofile, data) => {
-            if(user === data.d.u) {
-              _authe_module.TokenisValid(data.d.u, data.d.t, (isValid) => {
-                if(isValid) {
-                  callback(true);
-                }
-                else {
-                  callback(false);
-                }
-              });
-            }
-            else {
-              callback(false);
-            }
-
+            _authe_module.TokenisValid(user, data.d.t, (err, isValid) => {
+              if(isValid) {
+                callback(false, true);
+              }
+              else {
+                callback(false, false);
+              }
+            });
           }
           _queue_operation[connprofile.returnGUID()+'TK'] = op;
           // set the timeout of clearing expired authorization.

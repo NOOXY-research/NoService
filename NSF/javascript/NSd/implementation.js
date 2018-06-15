@@ -9,19 +9,25 @@ function Implementation() {
   let _connection_module = null;
 
   let _implts = {
-    // for Server
+    // return for Server
     AuthbyToken: (callback) => {
       Utils.tagLog('*ERR*', 'AuthbyToken not implement');
-      callback(true, 'username', 'token');
+      callback(true, 'token');
     },
 
-    // for Client
+    // return for Server
+    AuthbyPassword: (callback) => {
+      Utils.tagLog('*ERR*', 'AuthbyPassword not implement');
+      callback(true, 'password');
+    },
+
+    // return for Client
     signin: (conn_method, remoteip, port, username, password, callback) => {
       Utils.tagLog('*ERR*', 'signin not implement');
       callback(true, 'token');
     },
 
-    // for Client
+    // return for Client
     signup: (conn_method, remoteip, port, username, password, callback) => {
       Utils.tagLog('*ERR*', 'signup not implement');
       callback(true, 'token');

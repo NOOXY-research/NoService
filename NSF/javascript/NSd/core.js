@@ -155,7 +155,6 @@ function Core(settings) {
 
     // launch services
     verbose('Daemon', 'Launching services...');
-    console.log();
     _service.launch();
     verbose('Daemon', 'Launching services done.');
     //

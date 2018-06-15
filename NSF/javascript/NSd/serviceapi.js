@@ -15,7 +15,6 @@ function ServiceAPI() {
 
   this.importCore = (coregateway) => {
     _coregateway = coregateway;
-    // console.log(_coregateway);
   };
 
   let _get_normal_api = (callback)=> {
@@ -38,6 +37,9 @@ function ServiceAPI() {
         },
         getEntities: (callback) => {
           _coregateway.Entity.getEntitiesMeta(callback);
+        },
+        returnEntitiesID: () => {
+          return _coregateway.Entity.returnEntitiesID();
         }
       }
     };

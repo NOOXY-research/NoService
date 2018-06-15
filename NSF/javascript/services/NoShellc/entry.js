@@ -25,29 +25,45 @@ function start(api) {
   let DAEMONIP = api.Daemon.Settings.connection_servers[DEFAULT_SERVER].ip;
   let DAEMONPORT =api.Daemon.Settings.connection_servers[DEFAULT_SERVER].port;
 
-  api.Implementation.setImplement('signin', (conn_method, remoteip, port, callback)=>{
-    api.Implementation.setImplement('onToken', callback);
-    console.log('Please signin your account.');
+  let _get_username_and_password = (callback) => {
+    let u = null;
+    let p = null;
     rl.stdoutMuted = false;
     rl.query = 'username: ';
     rl.question(rl.query, (username) => {
 
-      _username = username;
-      rl.stdoutMuted = true;
-      rl.query = 'password: ';
-      rl.question(rl.query, (password) => {
-        rl.stdoutMuted = false;
-        console.log('');
-        _password = password;
-        api.Implementation.getClientConnProfile(conn_method, remoteip, port, (err, connprofile) => {
-          let _data = {
-            u: _username,
-            p: _password
-          }
-          api.Implementation.emitRouter(connprofile, 'GT', _data);
-        });
+      u = username;
+      _get_password((err, p)=>{
+        callback(false, u, p);
       });
     });
+
+  };
+
+  let _get_password = (callback)=> {
+    rl.stdoutMuted = true;
+    rl.query = 'password: ';
+    rl.question(rl.query, (password) => {
+      rl.stdoutMuted = false;
+      console.log('');
+      p = password;
+      callback(false, p);
+    });
+  }
+
+  api.Implementation.setImplement('signin', (conn_method, remoteip, port, callback)=>{
+    api.Implementation.setImplement('onToken', callback);
+    console.log('Please signin your account.');
+    _get_username_and_password((err, u, p)=>{
+      api.Implementation.getClientConnProfile(conn_method, remoteip, port, (err, connprofile) => {
+        let _data = {
+          u: u,
+          p: p
+        }
+        api.Implementation.emitRouter(connprofile, 'GT', _data);
+      });
+    });
+
 
   });
 
@@ -58,6 +74,12 @@ function start(api) {
       });
     }
     callback(false, _username, _token);
+  });
+
+  api.Implementation.setImplement('AuthbyPassword', (callback) => {
+    _get_password((err, p) => {
+      callback(err, p);
+    });
   });
 
   setTimeout(()=> {
@@ -77,8 +99,7 @@ function start(api) {
       api.Service.ActivitySocket.createSocket(DAEMONTYPE, DAEMONIP, DAEMONPORT, 'NoShell', (err, as) => {
         as.call('welcome', null, (err, msg) => {
           console.log(msg);
-          var recursiveAsyncReadLine = function () {
-
+          var recursiveAsyncReadLine = () => {
             rl.question('>>> ', function (cmd) {
               if (cmd == 'exit') //we need some base case, for recursion
                 return rl.close(); //closing RL and returning from function.
