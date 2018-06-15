@@ -35,7 +35,7 @@ function Entity() {
     };
 
     // return a JSONfy data structure.
-    this.returnJSON = () => {
+    this.returnMeta = () => {
       return _meta;
     };
   }
@@ -52,7 +52,7 @@ function Entity() {
   };
 
   this.getEntityMetaData = (entityID, callback) => {
-    callback(false, _entities[entityID].returnJSON());
+    callback(false, _entities[entityID].returnMeta());
   };
 
   this.returnEntityValue = (entityID, key) => {
@@ -71,9 +71,13 @@ function Entity() {
   this.getEntitiesMeta = (callback) => {
     let _e = {};
     for(let key in _entities) {
-      _e[key] = _entities[key].returnJSON()
+      _e[key] = _entities[key].returnMeta()
     }
     callback(false, _e);
+  };
+
+  this.returnEntityMetaData = (entityID) => {
+    return _entities[entityID].returnMeta();
   };
 
   this.getfliteredEntity= (key, value) => {

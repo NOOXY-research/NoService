@@ -74,17 +74,22 @@ function start(api) {
       }
       _token = token;
       let cmd = null;
-      api.Service.ActivitySocket.createSocket(DAEMONTYPE, DAEMONIP, DAEMONPORT, 'NShell', (err, as) => {
-        var recursiveAsyncReadLine = function () {
-          rl.question('>>> ', function (cmd) {
-            if (cmd == 'exit') //we need some base case, for recursion
-              return rl.close(); //closing RL and returning from function.
-            console.log('Got it! "', cmd, '"');
-            recursiveAsyncReadLine(); //Calling this function again to ask new question
-          });
-        };
+      api.Service.ActivitySocket.createSocket(DAEMONTYPE, DAEMONIP, DAEMONPORT, 'NoShell', (err, as) => {
+        as.call('welcome', null, (err, msg) => {
+          console.log(msg);
+          var recursiveAsyncReadLine = function () {
 
-        recursiveAsyncReadLine();
+            rl.question('>>> ', function (cmd) {
+              if (cmd == 'exit') //we need some base case, for recursion
+                return rl.close(); //closing RL and returning from function.
+              as.call('sendC', {c: cmd}, (err, json)=>{
+                console.log(json.r);
+                recursiveAsyncReadLine(); //Calling this function again to ask new question
+              });
+            });
+          };
+          recursiveAsyncReadLine();
+        });
       });
     });
 

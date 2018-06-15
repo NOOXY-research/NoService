@@ -30,8 +30,8 @@ function ServiceAPI() {
       },
 
       Entity: {
-        getEntityMetaData: (entityID, callback) => {
-          _coregateway.Entity.getEntityMetaData(entityID, callback);
+        returnEntityMetaData: (entityID) => {
+          return _coregateway.Entity.returnEntityMetaData(entityID);
         },
         returnCount: () => {
           return _coregateway.Entity.returnEntitycount();
@@ -96,7 +96,7 @@ function ServiceAPI() {
   }
 
   this.createActivityAPI = (callback) => {
-    
+
   };
 }
 

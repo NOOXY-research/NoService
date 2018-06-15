@@ -134,7 +134,7 @@ function Core(settings) {
       settings.services.push(settings.shell_client_service);
     }
     // add debug
-    if(settings.debug != null && settings.services.includes(settings.debug_service) == false) {
+    if(settings.debug == true && settings.debug_service != null && settings.services.includes(settings.debug_service) == false) {
       settings.services.unshift(settings.debug_service);
     }
     verbose('Daemon', 'Debug service enabled.');

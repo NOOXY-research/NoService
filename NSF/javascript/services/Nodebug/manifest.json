@@ -1,6 +1,6 @@
 {
-  "displayname": "debug",
-  "description": "no description",
+  "displayname": "Nodebug",
+  "description": "NOOXY debuger",
   "Authors": ["NOOXY", "noowyee"],
   "implementation_api": false
 }

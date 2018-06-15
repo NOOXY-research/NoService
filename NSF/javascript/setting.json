@@ -3,7 +3,7 @@
 
   "daemon_display_name": "NOOXY service",
 
-  "discription": "description",
+  "description": "description",
 
   "connection_servers": [
     {
@@ -23,7 +23,7 @@
     }
   ],
 
-  "default_server": 0,
+  "default_server": 2,
 
   "local_services_owner" : "admin",
 
@@ -38,7 +38,6 @@
   "SHA256KEY": "FATFROG",
 
   "services": [
-    "tester"
   ],
 
   "trusted_domains": [
@@ -48,15 +47,15 @@
     "localhost"
   ],
 
-  "shell_service": null,
+  "shell_service": "NoShell",
 
-  "shell_client_service": "NShell",
+  "shell_client_service": "NoShellc",
 
-  "debug_service": "debug",
+  "debug_service": "Nodebug",
 
-  "debug": true,
+  "debug": false,
 
-  "shell_client_service_delay": 1000,
+  "shell_client_service_delay": 500,
 
   "only_trust_origin_domain": false,
 

@@ -6,7 +6,7 @@
 let Utils = require('./utilities');
 
 function Service() {
-
+  // need add service event system
   let _local_services = {};
   let _activities = {};
   let _local_services_path = null;
@@ -16,6 +16,31 @@ function Service() {
   let _authorization_module = null;
   let _ActivityRsCEcallbacks = {};
   let _ASockets = {};
+
+
+  this.importAuthorization = (authorization_module) => {
+    _authorization_module = authorization_module
+  };
+
+  this.importOwner = (owner) => {
+    _local_services_owner = owner;
+  }
+
+  this.importServicesList = (service_list) => {
+    for(let i=0; i<service_list.length; i++) {
+      let _s = new ServiceObj(service_list[i]);
+      _s.setupPath(_local_services_path+service_list[i]);
+      _local_services[service_list[i]] = _s;
+    }
+  };
+
+  this.importEntity = (entity_module) => {
+    _entity_module = entity_module;
+  };
+
+  this.importAPI = (serviceapi_module) => {
+    _serviceapi_module = serviceapi_module;
+  };
 
   this.spwanClient = () => {Utils.tagLog('*ERR*', 'emitRouter not implemented');};
 
@@ -212,8 +237,9 @@ function Service() {
       Utils.tagLog('*ERR*', 'onData not implemented');
     };
 
-    this.onJFCall = (JFname, jsons, callback) => {
-      callback(false, _jsonfunctions[JFname](JSON.parse(jsons)));
+    this.onJFCall = (entityID, JFname, jsons, callback) => {
+      console.log(entityID);
+      callback(false, _jsonfunctions[JFname](JSON.parse(jsons), entityID));
     };
 
   };
@@ -334,7 +360,7 @@ function Service() {
     };
 
     this.sendSSJFCall = (entityID, JFname, jsons, callback) => {
-      _service_socket.onJFCall(JFname, jsons, callback);
+      _service_socket.onJFCall(entityID, JFname, jsons, callback);
     };
 
     this.returnManifest = () => {
@@ -343,39 +369,24 @@ function Service() {
 
   };
 
-  // // object for managing Activity.
-  // function ActivityObj(_conn_profile) {
-  //   let _entity_id = null;
-  //   let _activity_socket = null;
-  //   let _conn_profile = null;
-  //
-  //   this.setupSocket = (ASocket) => {
-  //
-  //   };
-  //
-  //   this.sendSSData = (entityID, data) => {
-  //     _activity_socket.onData(entityID);
-  //   };
-  //
-  //   this.onSSData = (entityID, data) => {
-  //
-  //   };
-  // };
-
+  // Service module launch
   this.launch = () => {
     for (var key in _local_services) {
       _local_services[key].launch();
     }
   };
 
+  // Service module Path
   this.setupServicesPath = (path) => {
     _local_services_path = path;
   };
 
+  // Service module Owner
   this.setupOwner = (username) => {
     _local_services_owner = username;
   };
 
+  // Service module create activity socket
   this.createActivitySocket = (method, targetip, targetport, service, callback) => {
     let err = false;
     let _data = {
@@ -432,30 +443,6 @@ function Service() {
   this.returnServiceManifest = (service_name)=> {
     return _local_services[service_name].returnManifest();
   }
-
-  this.importAuthorization = (authorization_module) => {
-    _authorization_module = authorization_module
-  };
-
-  this.importOwner = (owner) => {
-    _local_services_owner = owner;
-  }
-
-  this.importServicesList = (service_list) => {
-    for(let i=0; i<service_list.length; i++) {
-      let _s = new ServiceObj(service_list[i]);
-      _s.setupPath(_local_services_path+service_list[i]);
-      _local_services[service_list[i]] = _s;
-    }
-  };
-
-  this.importEntity = (entity_module) => {
-    _entity_module = entity_module;
-  };
-
-  this.importAPI = (serviceapi_module) => {
-    _serviceapi_module = serviceapi_module;
-  };
 }
 
 module.exports = Service;

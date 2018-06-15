@@ -1,0 +1,6 @@
+{
+  "displayname": "NoNoti",
+  "description": "NOOXY Service Notification system",
+  "Authors": ["NOOXY", "noowyee"],
+  "implementation_api": false
+}

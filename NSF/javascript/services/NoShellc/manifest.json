@@ -1,5 +1,5 @@
 {
-  "displayname": "NShell",
+  "displayname": "NShellc",
   "description": "NOOXY Shell. Default NSF Shell Client implementation.",
   "Authors": ["NOOXY", "noowyee"],
   "implementation_api": true
