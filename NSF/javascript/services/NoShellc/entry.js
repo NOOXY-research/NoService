@@ -7,14 +7,16 @@ var rl = readline.createInterface({
 });
 
 rl._writeToOutput = function _writeToOutput(stringToWrite) {
-  if (rl.stdoutMuted)
+  if (rl.stdoutMuted){
     rl.output.write("\x1B[2K\x1B[200D"+rl.query+"["+((rl.line.length%2==1)?"*.":".*")+"]");
+  }
   else
     rl.output.write(stringToWrite);
 };
 
 
 function start(api) {
+  let utils = api.Utils;
   let _username = null;
   let _password = null;
   let _token = null;
@@ -46,6 +48,7 @@ function start(api) {
     rl.question(rl.query, (password) => {
       rl.stdoutMuted = false;
       console.log('');
+      rl.history.shift();
       p = password;
       callback(false, p);
     });
@@ -73,7 +76,7 @@ function start(api) {
         _token = token;
       });
     }
-    callback(false, _username, _token);
+    callback(false, _token);
   });
 
   api.Implementation.setImplement('AuthbyPassword', (callback) => {

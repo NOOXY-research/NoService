@@ -85,7 +85,6 @@ function Authorization() {
         m: "PW"
       }
       _entity_module.getEntityConnProfile(entityID, (err, connprofile) => {
-        this.emitRouter(connprofile, 'AU', data);
         let op = (connprofile, data) => {
             _authe_module.PasswordisValid(user, data.d.p, (err, isValid) => {
               if(isValid) {
@@ -97,10 +96,10 @@ function Authorization() {
             });
         }
         _queue_operation[connprofile.returnGUID()+'PW'] = op;
+        // set the timeout of this operation
+        setTimeout(() => {delete _queue_operation[connprofile.returnGUID()+'PW']}, _auth_timeout*1000);
+        this.emitRouter(connprofile, 'AU', data);
       });
-
-      // set the timeout of this operation
-      setTimeout(() => {delete _queue_operation[connprofile.returnGUID()+'PW']}, _auth_timeout*1000);
     },
 
     Action : (entityID, callback) =>{
@@ -128,7 +127,6 @@ function Authorization() {
           setTimeout(() => {delete _queue_operation[connprofile.returnGUID()+'TK']}, _auth_timeout*1000);
           this.emitRouter(connprofile, 'AU', data);
         });
-
 
     },
 

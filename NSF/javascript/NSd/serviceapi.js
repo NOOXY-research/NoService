@@ -3,9 +3,22 @@
 // "api.js" provide interface of core interacting.
 // Copyright 2018 NOOXY. All Rights Reserved.
 
+let Utils = require('./utilities');
+
 function ServiceAPI() {
   let _coregateway = null;
 
+  let _safe_callback = (callback) => {
+    return (a, b, c, d, e, f, g, h, i, j, k, l, m, n ,o) => {
+      try {
+        callback(a, b, c, d, e, f, g, h, i, j, k, l, m, n ,o);
+      }
+      catch (err) {
+        Utils.tagLog('*ERR*', 'Service API occured error.');
+        console.log(err);
+      }
+    }
+  };
   function _prototype() {
     this.Service = null;
     this.Authorization = null;
@@ -19,12 +32,12 @@ function ServiceAPI() {
 
   let _get_normal_api = (callback)=> {
     let _api = new _prototype();
-    _api.Utils = require('./utilities'),
-
+    _api.Utils = require('./utilities');
+    _api.SafeCallback = _safe_callback;
     _api.Service = {
       ActivitySocket: {
         createSocket: (method, targetip, targetport, service, callback) => {
-          _coregateway.Service.createActivitySocket(method, targetip, targetport, service, callback);
+          _coregateway.Service.createActivitySocket(method, targetip, targetport, service, _safe_callback(callback));
         }
       },
 
@@ -36,7 +49,7 @@ function ServiceAPI() {
           return _coregateway.Entity.returnEntitycount();
         },
         getEntities: (callback) => {
-          _coregateway.Entity.getEntitiesMeta(callback);
+          _coregateway.Entity.getEntitiesMeta(_safe_callback(callback));
         },
         returnEntitiesID: () => {
           return _coregateway.Entity.returnEntitiesID();
@@ -47,10 +60,10 @@ function ServiceAPI() {
     _api.Authorization = {
       Authby: {
         Token: (entityID, callback) => {
-          _coregateway.Authorization.Authby.Token(entityID, callback);
+          _coregateway.Authorization.Authby.Token(entityID, _safe_callback(callback));
         },
         Password : (entityID, callback) => {
-          _coregateway.Authorization.Authby.Password(entityID, callback);
+          _coregateway.Authorization.Authby.Password(entityID, _safe_callback(callback));
         }
       }
     };
@@ -61,10 +74,10 @@ function ServiceAPI() {
 
     _api.Connection = {
       getServers: (callback) => {
-        _coregateway.Connection.getServers(callback);
+        _coregateway.Connection.getServers(_safe_callback(callback));
       },
       getClients: (callback) => {
-        _coregateway.Connection.getClients(callback);
+        _coregateway.Connection.getClients(_safe_callback(callback));
       }
     };
 
