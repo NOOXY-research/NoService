@@ -66,17 +66,22 @@ function start(api) {
         api.Implementation.emitRouter(connprofile, 'GT', _data);
       });
     });
-
-
   });
 
   api.Implementation.setImplement('AuthbyToken', (callback) => {
+    let pass = true;
     if(_token == null) {
       api.Implementation.returnImplement('signin')(DAEMONTYPE, DAEMONIP, DAEMONPORT, (err, token)=>{
         _token = token;
+        if(_token != null) {
+          callback(false, _token);
+        }
       });
     }
-    callback(false, _token);
+    else {
+      callback(false, _token);
+    }
+
   });
 
   api.Implementation.setImplement('AuthbyPassword', (callback) => {
@@ -92,12 +97,12 @@ function start(api) {
     console.log(_manifest.displayname);
     console.log(_manifest.description);
     console.log('');
-    console.log('To access '+_daemon_display_name+'. You need to auth yourself.');
-    api.Implementation.returnImplement('signin')(DAEMONTYPE, DAEMONIP, DAEMONPORT, (err, token)=>{
-      if(err) {
-        console.log('Auth failed.');
-      }
-      _token = token;
+    // console.log('To access '+_daemon_display_name+'. You need to auth yourself.');
+    // api.Implementation.returnImplement('signin')(DAEMONTYPE, DAEMONIP, DAEMONPORT, (err, token)=>{
+    //   if(err) {
+    //     console.log('Auth failed.');
+    //   }
+    //   _token = token;
       let cmd = null;
       api.Service.ActivitySocket.createSocket(DAEMONTYPE, DAEMONIP, DAEMONPORT, 'NoShell', (err, as) => {
         as.call('welcome', null, (err, msg) => {
@@ -115,7 +120,7 @@ function start(api) {
           recursiveAsyncReadLine();
         });
       });
-    });
+    // });
 
 
   }, api.Daemon.Settings.shell_client_service_delay);

@@ -51,7 +51,7 @@ function start(api) {
       service: (t0, c0) => {
         return _(t0, {
           entity: (t1, c1) => {
-            api.Authorization.Authby.Password(entityID, (err, pass)=>{
+            api.Authorization.Authby.Token(entityID, (err, pass)=>{
               if(pass) {
                 r = _(t1, {
                   show: (t2, c2) => {
@@ -65,9 +65,12 @@ function start(api) {
                 }, c1);
               }
               else {
-                c2(false , {r:"Auth failed"});
+                c1(false , {r:"Auth failed"});
               }
             });
+          },
+          list: (t1, c1) => {
+            c1(false, {r:api.Service.returnList()});
           },
 
           socket: (t1, c1) => {

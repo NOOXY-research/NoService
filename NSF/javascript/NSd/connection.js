@@ -58,9 +58,9 @@ function Connection() {
   function Virtualnet() {
     let _virt_servers = {};
     // define a socket pair
-    function SocketPair() {
+    function SocketPair(hip, cip) {
       // define an virtual socket
-      function VirtualSocket(type) {
+      function VirtualSocket(type, lIP, rIP) {
         this.type = type;
         this.send = (d)=>{Utils.tagLog('*ERR*', 'VirtualSocket send not implemented. Of '+this.type+'. d=>'+d)};
         let _types = {
@@ -69,6 +69,14 @@ function Connection() {
           error : ()=>{Utils.tagLog('*ERR*', 'VirtualSocket onerror not implemented. Of '+this.type)},
           close : ()=>{Utils.tagLog('*ERR*', 'VirtualSocket onclose not implemented. Of '+this.type)}
         };
+
+        this.returnLocalIP = () => {
+          return lIP;
+        }
+
+        this.returnRemoteIP = () => {
+          return rIP;
+        }
 
         let _returntype = (type) => {
           return _types[type];
@@ -81,8 +89,10 @@ function Connection() {
         };
 
       };
-      let _vcs = new VirtualSocket('Client');
-      let _vss = new VirtualSocket('Server');
+
+      // cip clientip hostip
+      let _vcs = new VirtualSocket('Client', cip, hip);
+      let _vss = new VirtualSocket('Server', hip, cip);
 
       _vcs.send = (msg) => {
         let _d = {msg: msg}
@@ -131,11 +141,11 @@ function Connection() {
       let _virtip = lvirtip;
       let _virtport = lvirtport;
       // create sockets for both server and client
-      let sp = new SocketPair();
-      let vss = sp.ServerSocket;
-      let vcs = sp.ClientSocket;
 
       this.connect = (rvirtip, rvirtport, callback) => {
+        let sp = new SocketPair(rvirtip, lvirtip);
+        let vss = sp.ServerSocket;
+        let vcs = sp.ClientSocket;
         // return virtual client socket to callback
         callback(false, vcs);
 
@@ -160,8 +170,8 @@ function Connection() {
       return vs;
     };
 
-    this.createClient = (virtip, virtport) => {
-      let vs = new Client(Utils.generateGUID() , Utils.generateGUID(), virtip, virtport);
+    this.createClient = (cip, cp, hip, hp) => {
+      let vs = new Client(cip, cp, hip, hp);
       return vs;
     };
   }
@@ -277,7 +287,7 @@ function Connection() {
     this.start = function(virtip, virtport) {
       _vnets = virtnet.createServer(virtip, virtport);
       _vnets.on('connection', (vs) => {
-          let connprofile = new ConnectionProfile(_serverID, 'Client', 'Local', virtip, virtport, 'Virtualnet Remote Adress', this);
+          let connprofile = new ConnectionProfile(_serverID, 'Client', 'Local', virtip, virtport, vs.returnRemoteIP(), this);
           _clients[connprofile.returnGUID()] = vs;
 
           vs.on('message', (message) => {
@@ -314,7 +324,7 @@ function Connection() {
 
     this.connect = (virtip, virtport, callback) => {
       let connprofile = null;
-      _vnetc = virtnet.createClient(Utils.generateGUID(), Utils.generateGUID());
+      _vnetc = virtnet.createClient('LOCALIP', Utils.generateGUID(), virtip, virtport);
       _vnetc.connect(virtip, virtport, (err, vs) => {
         _vs = vs;
         connprofile = new ConnectionProfile(null, 'Server', 'Local', virtip, virtport, _vnetc.getIP(), this);

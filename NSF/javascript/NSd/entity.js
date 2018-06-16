@@ -14,6 +14,8 @@ function Entity() {
 
     let _meta = {
       id: entityID,
+      mode: Json.mode, // normal or service
+      daemonauthkey: Json.daemonauthkey, // for daemon activity call
       serverid: Json.serverid,
       service: Json.service,
       type: Json.type,

@@ -95,6 +95,16 @@ function Core(settings) {
           Implementation: _implementation
         };
       verbose('Daemon', 'Creating coregateway done.')
+    // trust myself
+    settings.connection_servers.push({
+          "type": "Local",
+          "ip": "LOCALIP",
+          "port": "LOCALPORT"
+    });
+    
+    for(let i in settings.connection_servers) {
+      settings.trusted_domains.push(settings.connection_servers[i].ip);
+    }
 
     // setup router
     _router.importCore(coregateway);
@@ -118,7 +128,8 @@ function Core(settings) {
     // setup Authorization
     _authorization.importAuthenticityModule(_authenticity);
     _authorization.importEntityModule(_entity);
-    _authorization.importTrustDomains(_path+settings.trusted_domains);
+    _authorization.importTrustedDomains(settings.trusted_domains);
+    _authorization.importDaemonAuthKey(settings.daemon_authorization_key);
 
     // setup AuthorizationHandler
     _authorizationhandler.importImplementationModule(_implementation);
@@ -143,7 +154,7 @@ function Core(settings) {
     _service.importEntity(_entity);
     _service.importAPI(_serviceAPI);
     _service.importOwner(settings.local_services_owner);
-
+    _service.importDaemonAuthKey(settings.daemon_authorization_key);
     // setup User
 
     //

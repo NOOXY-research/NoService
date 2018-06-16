@@ -15,8 +15,12 @@ function Service() {
   let _serviceapi_module = null;
   let _authorization_module = null;
   let _ActivityRsCEcallbacks = {};
+  let _daemon_auth_key = null;
   let _ASockets = {};
 
+  this.importDaemonAuthKey = (key) => {
+    _daemon_auth_key = key;
+  };
 
   this.importAuthorization = (authorization_module) => {
     _authorization_module = authorization_module
@@ -130,6 +134,8 @@ function Service() {
         let _entity_json = {
           serverid: connprofile.returnServerID(),
           service: data.s,
+          mode: data.m,
+          daemonauthkey: data.k,
           type: "Activity",
           spwandomain: connprofile.returnClientIP(),
           owner: data.o,
@@ -137,6 +143,14 @@ function Service() {
           connectiontype:connprofile.returnConnMethod(),
           description: data.d
         };
+
+        if(_entity_json.mode == null) {
+          _entity_json.mode = 'normal';
+        }
+
+        if(_entity_json.ownerdomain == null) {
+          _entity_json.ownerdomain == connprofile.returnHostIP();
+        }
 
         _entity_module.registerEntity(_entity_json, connprofile, (err, id) => {
             let _data = {
@@ -262,7 +276,7 @@ function Service() {
 
         callback(err, returnvalue);
       };
-      JFCallback(_entity_id, name, tempid, Json);
+      JFCallback(conn_profile, _entity_id, name, tempid, Json);
     }
 
     this.returnEntityID = () => {
@@ -270,7 +284,7 @@ function Service() {
     };
 
     this.sendData = (data) => {
-      Datacallback(_entity_id, data);
+      Datacallback(conn_profile, _entity_id, data);
     };
 
     this.onData = (data) => {
@@ -388,6 +402,33 @@ function Service() {
     _local_services_owner = username;
   };
 
+  // ss callback
+  let _sscallback = (conn_profile, i, d) => {
+    let _data2 = {
+      "m": "SS",
+      "d": {
+        "i": i,
+        "d": d,
+      }
+    };
+
+    this.emitRouter(conn_profile, 'CS', _data2);
+  }
+  // jf callback
+
+  let _jscallback = (connprofile, entity_id, name, tempid, Json)=> {
+    let _data2 = {
+      "m": "JF",
+      "d": {
+        "i": entity_id,
+        "n": name,
+        "j": JSON.stringify(Json),
+        "t": tempid
+      }
+    };
+    this.emitRouter(connprofile, 'CS', _data2);
+  }
+
   // Service module create activity socket
   this.createActivitySocket = (method, targetip, targetport, service, callback) => {
     let err = false;
@@ -396,6 +437,7 @@ function Service() {
       "d": {
         t: Utils.generateGUID(),
         o: _local_services_owner,
+        m: 'normal',
         s: service,
         od: targetip,
       }
@@ -405,30 +447,39 @@ function Service() {
       _ActivityRsCEcallbacks[_data.d.t] = (conn_profile, data) => {
         let _as = null;
         if(data.d.i != "FAIL") {
-          _as = new ActivitySocket(conn_profile, data.d.i, (i, d) => {
-            let _data2 = {
-              "m": "SS",
-              "d": {
-                "i": i,
-                "d": d,
-              }
-            };
+          _as = new ActivitySocket(conn_profile, data.d.i, _sscallback ,  _jscallback);
+          _ASockets[data.d.i] = _as;
+          callback(false, _as);
+        }
+        else{
+          callback(true, _as);
+        }
 
-            this.emitRouter(conn_profile, 'CS', _data2);
-          },
-          // JScallback
-          (entity_id, name, tempid, Json) =>{
-            let _data2 = {
-              "m": "JF",
-              "d": {
-                "i": entity_id,
-                "n": name,
-                "j": JSON.stringify(Json),
-                "t": tempid
-              }
-            };
-            this.emitRouter(connprofile, 'CS', _data2);
-          });
+      }
+      this.emitRouter(connprofile, 'CS', _data);
+    });
+
+  };
+
+  this.createDaemonActivitySocket = (method, targetip, targetport, service, owner, callback) => {
+    let err = false;
+    let _data = {
+      "m": "CE",
+      "d": {
+        t: Utils.generateGUID(),
+        m: 'daemon',
+        k: _daemon_auth_key,
+        o: owner,
+        s: service,
+        od: targetip,
+      }
+    };
+
+    this.spwanClient(method, targetip, targetport, (err, connprofile) => {
+      _ActivityRsCEcallbacks[_data.d.t] = (conn_profile, data) => {
+        let _as = null;
+        if(data.d.i != "FAIL") {
+          _as = new ActivitySocket(conn_profile, data.d.i, _sscallback ,  _jscallback);
           _ASockets[data.d.i] = _as;
           callback(false, _as);
         }
@@ -444,7 +495,11 @@ function Service() {
 
   this.returnServiceManifest = (service_name)=> {
     return _local_services[service_name].returnManifest();
-  }
+  };
+
+  this.returnList = () => {
+    return Object.keys(_local_services);
+  };
 }
 
 module.exports = Service;

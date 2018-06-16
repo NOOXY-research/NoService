@@ -15,11 +15,6 @@
       "type": "TCP/IP",
       "ip": "0.0.0.0",
       "port": 2222
-    },
-    {
-      "type": "Local",
-      "ip": "LOCALIP",
-      "port": "LOCALPORT"
     }
   ],
 
@@ -35,7 +30,7 @@
 
   "database_path": "db.sqlite3",
 
-  "SHA256KEY": "FATFROG",
+  "SHA256_key": "FATFROG",
 
   "services": [
   ],
@@ -53,7 +48,7 @@
 
   "debug_service": "Nodebug",
 
-  "debug": true,
+  "debug": false,
 
   "shell_client_service_delay": 0,
 
@@ -61,6 +56,8 @@
 
   "authoration_timeout": 320,
 
-  "token_expire_period": 7
+  "token_expire_period": 7,
+
+  "daemon_authorization_key": "WHATAKEY"
 
 }

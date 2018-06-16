@@ -38,6 +38,9 @@ function ServiceAPI() {
       ActivitySocket: {
         createSocket: (method, targetip, targetport, service, callback) => {
           _coregateway.Service.createActivitySocket(method, targetip, targetport, service, _safe_callback(callback));
+        },
+        createDeamonSocket: (method, targetip, targetport, service, owner, callback) => {
+          _coregateway.Service.createDaemonActivitySocket(method, targetip, targetport, service, owner, _safe_callback(callback));
         }
       },
 
@@ -54,6 +57,10 @@ function ServiceAPI() {
         returnEntitiesID: () => {
           return _coregateway.Entity.returnEntitiesID();
         }
+      },
+
+      returnList: () => {
+        return _coregateway.Service.returnList();
       }
     };
 

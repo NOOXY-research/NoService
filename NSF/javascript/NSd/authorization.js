@@ -6,6 +6,8 @@
 // Handling responses to authorization requests.
 function AuthorizationHandler() {
   let _implementation_module = null;
+  let _daemon_auth_key = null;
+  let _trusted_domains = null;
 
   let _implts_callback = {
     'PW': (connprofile, data, data_sender) => {
@@ -77,29 +79,44 @@ function Authorization() {
     _trusted_domains = domain_list;
   };
 
+  //
+
   // Authby group
   this.Authby = {
-    Password : (entityID, callback) =>{
-      let user = _entity_module.returnEntityValue(entityID, 'owner');
-      let data = {
-        m: "PW"
-      }
-      _entity_module.getEntityConnProfile(entityID, (err, connprofile) => {
-        let op = (connprofile, data) => {
-            _authe_module.PasswordisValid(user, data.d.p, (err, isValid) => {
-              if(isValid) {
-                callback(false, true);
-              }
-              else {
-                callback(false, false);
-              }
-            });
+    Password : (entityID, callback) => {
+      let mode = _entity_module.returnEntityValue(entityID, 'mode');
+      if(mode == 'normal') {
+        let user = _entity_module.returnEntityValue(entityID, 'owner');
+        let data = {
+          m: "PW"
         }
-        _queue_operation[connprofile.returnGUID()+'PW'] = op;
-        // set the timeout of this operation
-        setTimeout(() => {delete _queue_operation[connprofile.returnGUID()+'PW']}, _auth_timeout*1000);
-        this.emitRouter(connprofile, 'AU', data);
-      });
+        _entity_module.getEntityConnProfile(entityID, (err, connprofile) => {
+          let op = (connprofile, data) => {
+              _authe_module.PasswordisValid(user, data.d.p, (err, isValid) => {
+                if(isValid) {
+                  callback(false, true);
+                }
+                else {
+                  callback(false, false);
+                }
+              });
+          }
+          _queue_operation[connprofile.returnGUID()+'PW'] = op;
+          // set the timeout of this operation
+          setTimeout(() => {delete _queue_operation[connprofile.returnGUID()+'PW']}, _auth_timeout*1000);
+          this.emitRouter(connprofile, 'AU', data);
+        });
+      }
+      else {
+        this.Authby.DaemonAuthKey(entityID, (err, pass) => {
+          if(pass) {
+            callback(false, true);
+          }
+          else {
+            callback(false, false);
+          }
+        });
+      }
     },
 
     Action : (entityID, callback) =>{
@@ -107,6 +124,8 @@ function Authorization() {
     },
 
     Token : (entityID, callback) =>{
+      let mode = _entity_module.returnEntityValue(entityID, 'mode');
+      if(mode == 'normal') {
         let user = _entity_module.returnEntityValue(entityID, 'owner');
         let data = {
           m: "TK"
@@ -127,7 +146,17 @@ function Authorization() {
           setTimeout(() => {delete _queue_operation[connprofile.returnGUID()+'TK']}, _auth_timeout*1000);
           this.emitRouter(connprofile, 'AU', data);
         });
-
+      }
+      else {
+        this.Authby.DaemonAuthKey(entityID, (err, pass) => {
+          if(pass) {
+            callback(false, true);
+          }
+          else {
+            callback(false, false);
+          }
+        });
+      }
     },
 
     UserLevel : (entityID, callback) =>{
@@ -139,14 +168,38 @@ function Authorization() {
     },
 
     Domain : (entityID, callback) => {
-      if(_trusted_domains.includes(entityID.returnHostIP())) {
-        callback(true);
+      if(_trusted_domains.includes(_entity_module.returnEntityValue(entityID, 'spwandomain'))) {
+        callback(false, true);
       }
       else {
-        callback(false);
+        callback(false, false);
       }
+    },
+
+    DaemonAuthKey: (entityID, callback)=> {
+      this.Authby.Domain(entityID, (err, pass) => {
+        if(pass) {
+          if(_daemon_auth_key == _entity_module.returnEntityValue(entityID, 'daemonauthkey')) {
+            callback(false, true);
+          }
+          else {
+            callback(false, false);
+          }
+        }
+        else {
+          callback(false, false);
+        }
+      });
     }
   }
+
+  this.importTrustedDomains = (domains) => {
+    _trusted_domains = domains;
+  }
+
+  this.importDaemonAuthKey = (key) =>{
+    _daemon_auth_key = key;
+  };
 
   this.getRealtimeToken = (callback) => {callback(_realtime_token);}
 
