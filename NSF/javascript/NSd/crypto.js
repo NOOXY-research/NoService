@@ -20,6 +20,7 @@ function NSPS() {
 function Crypto() {
   // to base64
   let _algo = {
+    // key is in length 32 char
     AESCBC256: {
       encryptString: function e(key, toEncrypt, callback) {
         let iv = Crypto.randomBytes(16);
@@ -39,6 +40,7 @@ function Crypto() {
       }
     },
 
+    // Keys is in pem format
     RSA2048: {
       encryptString: (publicKey, toEncrypt, callback) => {
         var buffer = new Buffer(toEncrypt);
@@ -54,9 +56,9 @@ function Crypto() {
 
   }
 
-  // hashing two string (host and client pub key)by SHA512 to get AES-CBC 256 key
+  // hashing two string (host and client pub key)by SHA256 to get AES-CBC 256 key
   this.generateAESCBC256KeyByHash = (string1, string2, callback) => {
-    crypto.createHash('sha256').update(string1+string2, 'utf-8').digest('base64');
+    callback(crypto.createHash('sha256').update(string1+string2, 'utf-8').digest('base64').substring(0, 32));
   };
 
   this.encryptString = (algo, key, toEncrypt, callback) => {

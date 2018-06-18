@@ -64,6 +64,6 @@
 
   "rsa_2048_pub_key": "rsa_2048_pub.pem",
 
-  "rsa_2048_pub_key": "rsa_2048_pub.pem",
+  "rsa_2048_priv_key": "rsa_2048_priv.pem"
 
 }
