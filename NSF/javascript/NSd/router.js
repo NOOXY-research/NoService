@@ -1,10 +1,11 @@
 // NSF/NSd/router.js
 // Description:
-// "router.js" provide routing functions.
+// "router.js" provide routing functions. Highly associated with nooxy service protocol.
 // Copyright 2018 NOOXY. All Rights Reserved.
 
 function Router() {
   let _coregateway = null;
+  // nooxy service protocol sercure
   let _sniffers = [];
   // for signup timeout
   let _locked_ip = [];
@@ -30,11 +31,43 @@ function Router() {
       d : data
     };
     // finally sent the data through the connection.
-    _coregateway.Connection.sendJSON(connprofile, wrapped);
+    _coregateway.Connection.send(connprofile, JSON.stringify(wrapped));
   }
 
   // implementations of NOOXY Service Protocol methods
   let methods = {
+    // nooxy service protocol implementation of "sercure protocol"
+    SP: {
+      emitter : (connprofile, data) => {
+        _senddata(connprofile, 'SP', 'rq', data);
+      },
+
+      handler : (connprofile, session, data) => {
+        let rq_rs_pos = {
+          rq: "Server",
+          rs: "Client"
+        }
+
+        let actions = {
+          rq : _coregateway.NSPS.RqRouter, // in client need to be implement module
+          rs : _coregateway.NSPS.RsRouter
+        }
+        connprofile.getRemotePosition((err, pos)=> {
+          if(rq_rs_pos[session] == pos || rq_rs_pos[session] == 'Both') {
+            if(session == 'rq') {
+              actions[session](connprofile, data, _senddata);
+            }
+            else {
+              actions[session](connprofile, data);
+            }
+          }
+          else {
+            _sessionnotsupport();
+          }
+        });
+      }
+    },
+
     // nooxy service protocol implementation of "signup"
     SU: {
       emitter : (connprofile, username, password) => {
@@ -232,7 +265,8 @@ function Router() {
   // import the accessbility of core resource
   this.importCore = (coregateway) => {
     _coregateway = coregateway;
-    _coregateway.Connection.onJSON = (connprofile, json) => {
+    _coregateway.Connection.onData = (connprofile, data) => {
+      let json = JSON.parse(data);
       _tellSniffers(json);
       methods[json.m].handler(connprofile, json.s, json.d);
     };

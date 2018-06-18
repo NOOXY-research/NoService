@@ -27,7 +27,6 @@ function Connection() {
     let _clientip = clientip;
     let _conn = conn;
 
-
     this.getServerID = (callback) => {callback(false, _serverID);}
     this.getHostIP = (callback) => {callback(false, _hostip);}
     this.getHostPort = (callback) => {callback(false, _hostport);}
@@ -185,18 +184,18 @@ function Connection() {
     let _wss = null;
     let _clients = {};
 
-    this.onJSON = (connprofile, json) => {Utils.tagLog('*ERR*', 'onJSON not implemented');};
+    this.onData = (connprofile, data) => {Utils.tagLog('*ERR*', 'onData not implemented');};
 
     this.onClose = (connprofile) => {Utils.tagLog('*ERR*', 'onClose not implemented');};
 
-    this.sendJSON = function(connprofile, json) {
-      _clients[connprofile.returnGUID()].send(JSON.stringify(json));
+    this.send = function(connprofile, data) {
+      _clients[connprofile.returnGUID()].send(data);
     };
 
-    this.broadcast = function(json) {
+    this.broadcast = (data) => {
       this._wss.clients.forEach(function each(client) {
         if (client.readyState === WebSocket.OPEN) {
-          client.send(JSON.stringify(json));
+          client.send(data);
         }
       });
     };
@@ -212,7 +211,7 @@ function Connection() {
         _clients[connprofile.returnGUID()] = ws;
 
         ws.on('message', (message) => {
-          this.onJSON(connprofile, JSON.parse(message));
+          this.onData(connprofile, message);
         });
 
         ws.on('error', (message) => {
@@ -232,12 +231,12 @@ function Connection() {
   function WSClient() {
     let _ws = null
 
-    this.onJSON = (connprofile, json) => {Utils.tagLog('*ERR*', 'onJSON not implemented');};
+    this.onData = (connprofile, data) => {Utils.tagLog('*ERR*', 'onData not implemented');};
 
     this.onClose = () => {Utils.tagLog('*ERR*', 'onClose not implemented');};
 
-    this.sendJSON = function(connprofile, json) {
-      _ws.send(JSON.stringify(json));
+    this.send = function(connprofile, data) {
+      _ws.send(data);
     };
 
     this.connect = (ip, port, callback) => {
@@ -249,7 +248,7 @@ function Connection() {
         // ws.send('something');
       });
       _ws.on('message', (message) => {
-        this.onJSON(connprofile, JSON.parse(message));
+        this.onData(connprofile, message);
       });
 
       _ws.on('error', (error) => {
@@ -270,17 +269,17 @@ function Connection() {
     let _vnets = null;
     let _clients = {};
 
-    this.onJSON = (connprofile, json) => {Utils.tagLog('*ERR*', 'LocalServer onJSON not implemented.');};
+    this.onData = (connprofile, data) => {Utils.tagLog('*ERR*', 'LocalServer onData not implemented.');};
 
     this.onClose = (connprofile) => {Utils.tagLog('*ERR*', 'LocalServer onClose not implemented');};
 
-    this.sendJSON = (connprofile, json) => {
-      _clients[connprofile.returnGUID()].send(JSON.stringify(json));
+    this.send = (connprofile, data) => {
+      _clients[connprofile.returnGUID()].send(data);
     };
 
-    this.broadcast = (json) => {
+    this.broadcast = (data) => {
       _clients.forEach((key, client) => {
-        client.send(JSON.stringify(json));
+        client.send(data);
       });
     }
 
@@ -291,7 +290,7 @@ function Connection() {
           _clients[connprofile.returnGUID()] = vs;
 
           vs.on('message', (message) => {
-            this.onJSON(connprofile, JSON.parse(message));
+            this.onData(connprofile, message);
           });
 
           vs.on('error', (message) => {
@@ -314,12 +313,12 @@ function Connection() {
     let _vnetc = null;
     let _vs = null
 
-    this.onJSON = (connprofile, json) => {Utils.tagLog('*ERR*', 'onJSON not implemented');};
+    this.onData = (connprofile, data) => {Utils.tagLog('*ERR*', 'onData not implemented');};
 
     this.onClose = () => {Utils.tagLog('*ERR*', 'onClose not implemented');};
 
-    this.sendJSON = function(connprofile, json) {
-      _vs.send(JSON.stringify(json));
+    this.send = function(connprofile, data) {
+      _vs.send(data);
     };
 
     this.connect = (virtip, virtport, callback) => {
@@ -330,7 +329,7 @@ function Connection() {
         connprofile = new ConnectionProfile(null, 'Server', 'Local', virtip, virtport, _vnetc.getIP(), this);
 
         vs.on('message', (message) => {
-          this.onJSON(connprofile, JSON.parse(message));
+          this.onData(connprofile, message);
         });
 
         vs.on('error', (error) => {
@@ -350,7 +349,7 @@ function Connection() {
       let wws = new WSServer(_serverID);
       _servers[_serverID] = wws;
       wws.start(ip, port);
-      wws.onJSON = this.onJSON;
+      wws.onData = this.onData;
       wws.onClose = this.onClose;
     }
 
@@ -360,7 +359,7 @@ function Connection() {
         let locs = new LocalServer(_serverID, _virtnet);
         _servers[_serverID] = locs;
         locs.start('LOCALIP', 'LOCALPORT');
-        locs.onJSON = this.onJSON;
+        locs.onData = this.onData;
         locs.onClose = this.onClose;
         _have_local_server = true;
       }
@@ -378,7 +377,7 @@ function Connection() {
     if(conn_method == 'ws'||conn_method =='WebSocket') {
       let serverID = "WebSocket";
       let wsc = new WSClient(_virtnet);
-      wsc.onJSON = this.onJSON;
+      wsc.onData = this.onData;
       wsc.onClose = this.onClose;
       wsc.connect(remoteip, port, callback);
     }
@@ -390,7 +389,7 @@ function Connection() {
       else {
         let serverID = "LOCAL";
         let locc = new LocalClient(_virtnet);
-        locc.onJSON = this.onJSON;
+        locc.onData = this.onData;
         locc.onClose = this.onClose;
         locc.connect('LOCALIP', 'LOCALPORT', callback);
       }
@@ -399,39 +398,43 @@ function Connection() {
     else {
       Utils.tagLog('*ERR*', ''+conn_method+' not implemented. Skipped.');
     }
-  }
+  };
 
-  this.sendJSON = (connprofile, json) => {
+  this.send = (connprofile, data) => {
     connprofile.getConn((err, conn) => {
-      conn.sendJSON(connprofile, json);
+      conn.send(connprofile, data);
     });
-  }
+  };
 
-  this.broadcast = (json) => {
+  this.broadcast = (data) => {
     _servers.forEach((key, server) => {
-      server.broadcast(json);
+      server.broadcast(data);
     });
-  }
+  };
 
-  this.onJSON = (conn_profile, json) => {
-    Utils.tagLog('*ERR*', 'Connection module onJSON not implement');
-  }
+  this.onData = (conn_profile, data) => {
+    Utils.tagLog('*ERR*', 'Connection module onData not implement');
+  };
 
   this.onClose = (conn_profile) => {
     Utils.tagLog('*ERR*', 'Connection module onClose not implement');
-  }
+  };
+
+  this.closeConnetion = (conn_profile) => {
+
+  };
 
   this.getServers = (callback) => {
     callback(false, _servers);
-  }
+  };
 
   this.getClients = (callback) => {
     callback(false, _clients);
-  }
+  };
 
   this.killClient = (conn_profile) => {
 
-  }
+  };
 
 }
 

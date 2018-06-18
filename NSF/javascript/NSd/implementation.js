@@ -6,9 +6,24 @@
 let Utils = require('./utilities');
 
 function Implementation() {
+  let _support_secure = false;
   let _connection_module = null;
 
+  // NOOXY service protocol secure list
+  let _nsps_list = ['setAES256Key'];
+
   let _implts = {
+
+    // NOOXY service protocol sercure
+    // set AES256 keys
+    setAES256Key: () => {
+      Utils.tagLog('*ERR*', 'setAES256Key not implement');
+      callback(true);
+    },
+
+    // NOOXY service protocol sercure
+
+
     // return for Server
     AuthbyToken: (callback) => {
       Utils.tagLog('*ERR*', 'AuthbyToken not implement');
@@ -67,7 +82,13 @@ function Implementation() {
     _connection_module = connection_module;
   };
 
+  this.setSecure = (boolean)=>{
 
+  };
+
+  this.isSecure = (boolean)=>{
+
+  };
 
   this.setImplement = (name, callback) => {
     _implts[name] = callback;
@@ -79,7 +100,11 @@ function Implementation() {
 
   this.returnImplementBundle = () => {
     return _implts;
-  }
+  };
+
+  this.returnNSPSModule = () =>{
+
+  };
 }
 
 module.exports = Implementation;
