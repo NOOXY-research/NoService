@@ -18,7 +18,7 @@
     }
   ],
 
-  "default_server": 2,
+  "default_server": 0,
 
   "local_services_owner" : "admin",
 
@@ -48,7 +48,7 @@
 
   "debug_service": "Nodebug",
 
-  "debug": false,
+  "debug": true,
 
   "shell_client_service_delay": 0,
 

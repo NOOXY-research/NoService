@@ -253,7 +253,7 @@ function Authenticity() {
       if(valid) {
         _authdb.getUser(username, (err, user)=>{
           let now = new Date();
-          let expiredate = Utils.SQLtoDate(user.tokenexpire)
+          let expiredate = Utils.SQLtoDate(user.tokenexpire);
           if(now > expiredate) {
             callback(false, this.renewToken(username));
           }
@@ -270,7 +270,9 @@ function Authenticity() {
   };
 
   this.getUserprivilege = (username, callback) => {
-
+    _authdb.getUser(username, (err, user) => {
+      callback(false, user.privilege);
+    };
   };
 
   this.signupUser = () => {

@@ -3,6 +3,10 @@ function start(api) {
     api.Utils.tagLog('DEGUG', 'Received a Json.');
     api.Utils.tagLog('DEGUG', Json);
   })
+  // api.Sniffer.onRouterRawData((err, data)=>{
+  //   api.Utils.tagLog('DEGUG', 'Received a raw data.');
+  //   api.Utils.tagLog('DEGUG', data);
+  // })
 }
 
 module.exports = {

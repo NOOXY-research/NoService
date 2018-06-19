@@ -90,7 +90,8 @@ function ServiceAPI() {
 
     // for sniffing data
     _api.Sniffer = {
-      onRouterJSON: _coregateway.Router.addSniffer,
+      onRouterJSON: _coregateway.Router.addJSONSniffer,
+      onRouterRawData: _coregateway.Router.addRAWSniffer,
     }
 
     callback(false, _api);

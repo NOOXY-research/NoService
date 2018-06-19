@@ -6,13 +6,20 @@
 function Router() {
   let _coregateway = null;
   // nooxy service protocol sercure
-  let _sniffers = [];
+  let _json_sniffers = [];
+  let _raw_sniffers = [];
   // for signup timeout
   let _locked_ip = [];
 
-  let _tellSniffers = (Json) => {
-    for(let i in _sniffers) {
-      _sniffers[i](false, Json);
+  let _tellJSONSniffers = (Json) => {
+    for(let i in _json_sniffers) {
+      _json_sniffers[i](false, Json);
+    }
+  };
+
+  let _tellRAWSniffers = (data) => {
+    for(let i in _raw_sniffers) {
+      _raw_sniffers[i](false, data);
     }
   };
 
@@ -266,8 +273,12 @@ function Router() {
     }
   }
 
-  this.addSniffer = (callback) => {
-    _sniffers.push(callback);
+  this.addJSONSniffer = (callback) => {
+    _json_sniffers.push(callback);
+  };
+
+  this.addRAWSniffer = (callback) => {
+    _raw_sniffers.push(callback);
   };
 
   // emit specified method.
@@ -281,18 +292,19 @@ function Router() {
 
     // while recieve a data from connection
     _coregateway.Connection.onData = (connprofile, data) => {
-      if(_coregateway.Settings.secure == true) {
+      _tellRAWSniffers(data);
+      if(_coregateway.Settings.secure == true && connprofile.returnConnMethod() != 'Local' && connprofile.returnConnMethod() != 'local') {
         // upgrade protocol
         if(connprofile.returnBundle('NSPS') == 'pending') {
           let json = JSON.parse(data);
-          _tellSniffers(json);
+          _tellJSONSniffers(json);
           methods[json.m].handler(connprofile, json.s, json.d);
         }
         else if(connprofile.returnBundle('NSPS') != true && connprofile.returnRemotePosition() == 'Client') {
           _coregateway.NSPS.upgradeConnection(connprofile, (err, succeess)=>{
             if(succeess) {
               let json = JSON.parse(data);
-              _tellSniffers(json);
+              _tellJSONSniffers(json);
               methods[json.m].handler(connprofile, json.s, json.d);
             }
             else {
@@ -302,7 +314,7 @@ function Router() {
         }
         else if(connprofile.returnBundle('NSPS') != true) {
           let json = JSON.parse(data);
-          _tellSniffers(json);
+          _tellJSONSniffers(json);
           methods[json.m].handler(connprofile, json.s, json.d);
         }
         else if(connprofile.returnBundle('NSPS') == true) {
@@ -311,14 +323,15 @@ function Router() {
           _coregateway.NoCrypto.decryptString('AESCBC256', connprofile.returnBundle('aes_256_cbc_key'), data, (err, decrypted)=> {
 
             let json = JSON.parse(decrypted);
-            _tellSniffers(json);
+            _tellJSONSniffers(json);
             methods[json.m].handler(connprofile, json.s, json.d);
           });
         }
       }
       else {
+        console.log( connprofile.returnConnMethod());
         let json = JSON.parse(data);
-        _tellSniffers(json);
+        _tellJSONSniffers(json);
         methods[json.m].handler(connprofile, json.s, json.d);
       }
 

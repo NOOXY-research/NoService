@@ -159,8 +159,14 @@ function Authorization() {
       }
     },
 
-    UserLevel : (entityID, callback) =>{
-
+    UserPrivilege : (entityID, callback) =>{
+      _authe_module.
+      if(_trusted_domains.includes(_entity_module.returnEntityValue(entityID, 'spwandomain'))) {
+        callback(false, true);
+      }
+      else {
+        callback(false, false);
+      }
     },
 
     RealtimeToken : (entityID, callback) =>{

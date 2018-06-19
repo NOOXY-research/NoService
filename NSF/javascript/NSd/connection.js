@@ -27,7 +27,10 @@ function Connection() {
     let _clientip = clientip;
     let _conn = conn;
 
-    this.closeConnetion = () => {Utils.tagLog('*ERR*', 'closeConnetion not implemented. Of '+this.type)};
+    this.closeConnetion = () => {
+      // Utils.tagLog('*ERR*', 'closeConnetion not implemented. Of '+this.type);
+      _conn.close();
+    };
 
     this.getServerID = (callback) => {callback(false, _serverID);}
     this.getHostIP = (callback) => {callback(false, _hostip);}
@@ -246,7 +249,7 @@ function Connection() {
     this.connect = (ip, port, callback) => {
       let connprofile = null;
       _ws = new WebSocket('ws://'+ip+':'+port);
-      connprofile = new ConnectionProfile(null, 'Server', 'Local', ip, port, 'localhost', this);
+      connprofile = new ConnectionProfile(null, 'Server', 'WebSocket', ip, port, 'localhost', this);
       _ws.on('open', function open() {
         callback(false, connprofile);
         // ws.send('something');
@@ -431,10 +434,6 @@ function Connection() {
 
   this.onClose = (conn_profile) => {
     Utils.tagLog('*ERR*', 'Connection module onClose not implement');
-  };
-
-  this.closeConnetion = (conn_profile) => {
-
   };
 
   this.getServers = (callback) => {
