@@ -7,7 +7,7 @@
 function AuthorizationHandler() {
   let _implementation_module = null;
   let _daemon_auth_key = null;
-  let _trusted_domains = null;
+  let _trusted_domains = [];
 
   let _implts_callback = {
     'PW': (connprofile, data, data_sender) => {
@@ -119,7 +119,7 @@ function Authorization() {
       }
     },
 
-    Action : (entityID, callback) =>{
+    Action : (entityID, action_meta_data, callback) =>{
 
     },
 
@@ -159,18 +159,19 @@ function Authorization() {
       }
     },
 
-    UserPrivilege : (entityID, callback) =>{
-      _authe_module.
-      if(_trusted_domains.includes(_entity_module.returnEntityValue(entityID, 'spwandomain'))) {
-        callback(false, true);
-      }
-      else {
-        callback(false, false);
-      }
-    },
-
-    RealtimeToken : (entityID, callback) =>{
-
+    // smaller have more privilege
+    isSuperUser : (entityID, callback) =>{
+      let _owner = _entity_module.returnEntityValue(entityID, 'spwandomain');
+      _authe_module.getUserprivilege(_owner, (err, level) => {
+        if(level == 0) {
+          // isSuperUser
+          callback(false, true);
+        }
+        else {
+          //is not
+          callback(false, false);
+        }
+      });
     },
 
     Domain : (entityID, callback) => {
@@ -200,7 +201,7 @@ function Authorization() {
   }
 
   this.importTrustedDomains = (domains) => {
-    _trusted_domains = domains;
+    _trusted_domains = _trusted_domains.concat(domains);
   }
 
   this.importDaemonAuthKey = (key) =>{

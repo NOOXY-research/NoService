@@ -62,6 +62,10 @@ function start(api) {
                     c2(false, {r:api.Service.Entity.returnEntitiesID()});
                   },
 
+                  count: (t2, c2)=> {
+                    c1(false, {r:api.Service.Entity.returnCount()});
+                  }
+
                 }, c1);
               }
               else {
@@ -69,6 +73,7 @@ function start(api) {
               }
             });
           },
+
           list: (t1, c1) => {
             c1(false, {r:api.Service.returnList()});
           },
@@ -142,5 +147,6 @@ function start(api) {
 }
 
 module.exports = {
-  start: start
+  start: start,
+  close: null
 }

@@ -73,7 +73,7 @@ function Entity() {
     return Object.keys(_entities).length;
   };
 
-  this.getEntitiesMeta = (callback) => {
+  this.getEntitiesMetaData = (callback) => {
     let _e = {};
     for(let key in _entities) {
       _e[key] = _entities[key].returnMeta()
@@ -89,8 +89,15 @@ function Entity() {
     return Object.keys(_entities);
   }
 
-  this.getfliteredEntity= (key, value) => {
-
+  this.getfliteredEntityMetaData= (key, value, callback) => {
+    let _e = {};
+    for(let k in _entities) {
+      let _meta = _entities[k].returnMeta();
+      if(_meta[key] == value) {
+        _e[k] = _meta;
+      }
+    }
+    callback(false, _e);
   };
 
   this.deleteEntity = (entityID) => {

@@ -20,6 +20,7 @@ let Log = null;
 let Utils = require('./utilities');
 let NoCrypto = require('./crypto').NoCrypto;
 let NSPS = require('./crypto').NSPS;
+let Vars = require('./variables');
 
 function Core(settings) {
   let _runtime_id = Utils.generateGUID();
@@ -88,7 +89,24 @@ function Core(settings) {
     _nocrypto = new NoCrypto();
     _nsps = new NSPS();
 
-
+      //
+      let _daemon = {
+        Settings: settings,
+        close: () => {
+          _connection.close();
+          _authorization.close();
+          _authorizationhandler.close();
+          _authenticity.close();
+          _router.close();
+          _service.close();
+          _entity.close();
+          _serviceAPI.close();
+          _implementation.close();
+          _nocrypto.close();
+          _nsps.close();
+        },
+        Variables: Vars
+      }
       // create gateway
       verbose('Daemon', 'Creating coregateway...')
       let coregateway = {
@@ -103,7 +121,8 @@ function Core(settings) {
           Authenticity: _authenticity,
           Implementation: _implementation,
           NoCrypto: _nocrypto,
-          NSPS: _nsps
+          NSPS: _nsps,
+          Daemon: _daemon
         };
       verbose('Daemon', 'Creating coregateway done.')
     // trust myself
@@ -118,7 +137,7 @@ function Core(settings) {
     }
 
     // setup NOOXY Service protocol secure
-    _nsps.importRSA2048KeyPair(fs.readFileSync(settings.rsa_2048_priv_key, 'utf8'), fs.readFileSync(settings.rsa_2048_pub_key, 'utf8'));
+    _nsps.importRSA2048KeyPair(fs.readFileSync(_path+settings.rsa_2048_priv_key, 'utf8'), fs.readFileSync(_path+settings.rsa_2048_pub_key, 'utf8'));
     _nsps.importCryptoModule(_nocrypto);
     // setup router
     _router.importCore(coregateway);
@@ -195,8 +214,22 @@ function Core(settings) {
   }
 
   this.isinitialized = () => {
-    if (fs.existsSync('./eula.txt')) {
-      return true;
+    if (fs.existsSync(_path+'eula.txt')&&fs.existsSync(_path+settings.database_path)) {
+
+      if(settings.sercure == false) {
+        return true;
+      }
+      else if(fs.existsSync(_path+settings.rsa_2048_priv_key) && fs.existsSync(_path+settings.rsa_2048_pub_key)) {
+        return true;
+      }
+      else {
+        Utils.tagLog('*ERR*', 'Secure is on. But RSA2048 Key Pair is not set. Please geneate it by openssl.');
+        Utils.tagLog('*ERR*', 'Your settings:');
+        Utils.tagLog('*ERR*', 'PrivateKey: '+_path+settings.rsa_2048_priv_key);
+        Utils.tagLog('*ERR*', 'PublicKey: '+_path+settings.rsa_2048_pub_key);
+        process.exit()
+        return false;
+      }
     }
     else {
       return false;

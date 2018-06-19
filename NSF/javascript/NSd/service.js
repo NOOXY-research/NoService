@@ -184,7 +184,7 @@ function Service() {
           _ASockets[data.d.i].sendJFReturn(false, data.d.t, data.d.r);
         }
         else {
-
+          
         }
       },
       // nooxy service protocol implementation of "Call Activity: createEntity"

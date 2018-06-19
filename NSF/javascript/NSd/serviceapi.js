@@ -9,9 +9,9 @@ function ServiceAPI() {
   let _coregateway = null;
 
   let _safe_callback = (callback) => {
-    return (a, b, c, d, e, f, g, h, i, j, k, l, m, n ,o) => {
+    return (a, b, c, d, e, f, g, h, i, j, k, l, m, n ,o, p, q, r, s) => {
       try {
-        callback(a, b, c, d, e, f, g, h, i, j, k, l, m, n ,o);
+        callback(a, b, c, d, e, f, g, h, i, j, k, l, m, n ,o, p, q, r, s);
       }
       catch (err) {
         Utils.tagLog('*ERR*', 'Service API occured error.');
@@ -45,6 +45,15 @@ function ServiceAPI() {
       },
 
       Entity: {
+        getfliteredEntityMetaData: (key, value, callback) => {
+          _coregateway.Entity.getfliteredEntityMetaData(key, value, _safe_callback(callback));
+        },
+        returnEntityValue: (entityID, key) => {
+          return _coregateway.Entity.returnEntityValue(entityID, key);
+        },
+        getEntitiesMetaData: (callback) => {
+          _coregateway.Entity.getEntitiesMeta(_safe_callback(callback));
+        },
         returnEntityMetaData: (entityID) => {
           return _coregateway.Entity.returnEntityMetaData(entityID);
         },
@@ -56,12 +65,20 @@ function ServiceAPI() {
         },
         returnEntitiesID: () => {
           return _coregateway.Entity.returnEntitiesID();
+        },
+        getEntityConnProfile: (entityID, callback)=> {
+            _coregateway.Entity.getEntityConnProfile(entityID, callback);
         }
       },
 
       returnList: () => {
         return _coregateway.Service.returnList();
+      },
+
+      returnServiceManifest: (service_name)=> {
+        return _coregateway.Service.returnManifest(service_name);
       }
+
     };
 
     _api.Authorization = {
@@ -69,14 +86,50 @@ function ServiceAPI() {
         Token: (entityID, callback) => {
           _coregateway.Authorization.Authby.Token(entityID, _safe_callback(callback));
         },
-        Password : (entityID, callback) => {
+        Password: (entityID, callback) => {
           _coregateway.Authorization.Authby.Password(entityID, _safe_callback(callback));
+        },
+        Action: (entityID, action_meta_data, callback)=> {
+
+        },
+        isSuperUser: (entityID, callback) => {
+          _coregateway.Authorization.Authby.isSuperUser(entityID, _safe_callback(callback));
+        },
+        Domain: (entityID, callback) => {
+          _coregateway.Authorization.Authby.Domain(entityID, callback);
+        },
+        DaemonAuthKey: (entityID, callback) => {
+          _coregateway.Authorization.Authby.DaemonAuthKey(entityID, callback);
         }
+      },
+      importTrustDomains: (domains) => {
+        _coregateway.importDaemonAuthKey(domains);
       }
     };
 
     _api.Daemon = {
-      Settings: _coregateway.Settings
+      Settings: _coregateway.Daemon.Settings,
+      close: _coregateway.Daemon.close,
+      Variables: _coregateway.Daemon.Variables
+    };
+
+    _api.Authenticity = {
+      createUser: (username, displayname, password, privilege, callback) => {
+        _coregateway.Authenticity.createUser(username, displayname, password, privilege, _safe_callback(callback));
+      },
+
+      deleteUser: (username, callback) => {
+        _coregateway.Authenticity.deleteUser(username, _safe_callback(callback));
+      },
+
+      updatePassword: (username, newpassword, callback) => {
+        _coregateway.Authenticity.updatePassword(username, newpassword, _safe_callback(callback));
+      },
+
+      updateToken: (username) => {
+        return _coregateway.Authenticity.updateToken(username);
+      }
+
     };
 
     _api.Connection = {
@@ -85,8 +138,23 @@ function ServiceAPI() {
       },
       getClients: (callback) => {
         _coregateway.Connection.getClients(_safe_callback(callback));
+      },
+      addServer: (conn_method, ip, port) => {
+        _coregateway.Connection.addServer(conn_method, ip, port);
       }
     };
+
+    _api.Crypto = {
+      generateAESCBC256KeyByHash: (string1, string2, callback)=>{
+        _coregateway.NoCrypto.generateAESCBC256KeyByHash(string1, string2, _safe_callback(callback));
+      },
+      encryptString: (algo, key, toEncrypt, callback)=>{
+        _coregateway.NoCrypto.encryptString(algo, key, toEncrypt, _safe_callback(callback));
+      },
+      decryptString: (algo, key, toDecrypt, callback) =>{
+        _coregateway.NoCrypto.decryptString(algo, key, toDecrypt, _safe_callback(callback));
+      }
+    }
 
     // for sniffing data
     _api.Sniffer = {
@@ -97,13 +165,19 @@ function ServiceAPI() {
     callback(false, _api);
   };
 
+  let _block_super_user_api = (api, callback) => {
+    callback(false, api);
+  };
+
   this.createServiceAPI = (service_socket, manifest, callback) => {
     _get_normal_api((err, api) => {
       api.Service.ServiceSocket = service_socket;
       api.Me = {
         Manifest: manifest
       }
-      callback(false, api);
+      _block_super_user_api(api, (err, blocked_api)=>{
+        callback(false, blocked_api);
+      });
     });
   };
 
@@ -116,6 +190,10 @@ function ServiceAPI() {
       }
       callback(false, api);
     });
+  }
+
+  this.createSuperUserServiceAPI = (ervice_socket, manifest, callback) => {
+
   }
 
   this.createActivityAPI = (callback) => {
