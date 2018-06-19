@@ -27,6 +27,8 @@ function Connection() {
     let _clientip = clientip;
     let _conn = conn;
 
+    this.closeConnetion = () => {Utils.tagLog('*ERR*', 'closeConnetion not implemented. Of '+this.type)};
+
     this.getServerID = (callback) => {callback(false, _serverID);}
     this.getHostIP = (callback) => {callback(false, _hostip);}
     this.getHostPort = (callback) => {callback(false, _hostport);}
@@ -184,6 +186,8 @@ function Connection() {
     let _wss = null;
     let _clients = {};
 
+    this.closeConnetion = ()=> {};
+
     this.onData = (connprofile, data) => {Utils.tagLog('*ERR*', 'onData not implemented');};
 
     this.onClose = (connprofile) => {Utils.tagLog('*ERR*', 'onClose not implemented');};
@@ -254,6 +258,11 @@ function Connection() {
       _ws.on('error', (error) => {
           Utils.tagLog('*ERR*', '%s', error);
           vs.close();
+      });
+
+      _ws.on('close', (error) => {
+          Utils.tagLog('*ERR*', '%s', error);
+          this.onClose(connprofile);
       });
 
 
@@ -335,6 +344,10 @@ function Connection() {
         vs.on('error', (error) => {
             Utils.tagLog('*ERR*', '%s', error);
             vs.close();
+        });
+
+        vs.on('close', (error) => {
+            Utils.tagLog('*ERR*', '%s', error);
         });
 
       });

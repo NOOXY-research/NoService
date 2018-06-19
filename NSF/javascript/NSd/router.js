@@ -30,8 +30,21 @@ function Router() {
       s : session,
       d : data
     };
+    let json = JSON.stringify(wrapped);
     // finally sent the data through the connection.
-    _coregateway.Connection.send(connprofile, JSON.stringify(wrapped));
+    if(connprofile.returnBundle('NSPS') == true) {
+      _coregateway.NoCrypto.encryptString('AESCBC256', connprofile.returnBundle('aes_256_cbc_key'), json, (err, encrypted)=> {
+        _coregateway.Connection.send(connprofile, encrypted);
+      });
+    }
+    else if (connprofile.returnBundle('NSPS') == 'finalize') {
+      connprofile.setBundle('NSPS', true);
+      _coregateway.Connection.send(connprofile, json);
+
+    }
+    else {
+      _coregateway.Connection.send(connprofile, json);
+    }
   }
 
   // implementations of NOOXY Service Protocol methods
@@ -49,7 +62,7 @@ function Router() {
         }
 
         let actions = {
-          rq : _coregateway.NSPS.RqRouter, // in client need to be implement module
+          rq : _coregateway.NSPS.RqRouter,
           rs : _coregateway.NSPS.RsRouter
         }
         connprofile.getRemotePosition((err, pos)=> {
@@ -265,15 +278,56 @@ function Router() {
   // import the accessbility of core resource
   this.importCore = (coregateway) => {
     _coregateway = coregateway;
+
+    // while recieve a data from connection
     _coregateway.Connection.onData = (connprofile, data) => {
-      let json = JSON.parse(data);
-      _tellSniffers(json);
-      methods[json.m].handler(connprofile, json.s, json.d);
+      if(_coregateway.Settings.secure == true) {
+        // upgrade protocol
+        if(connprofile.returnBundle('NSPS') == 'pending') {
+          let json = JSON.parse(data);
+          _tellSniffers(json);
+          methods[json.m].handler(connprofile, json.s, json.d);
+        }
+        else if(connprofile.returnBundle('NSPS') != true && connprofile.returnRemotePosition() == 'Client') {
+          _coregateway.NSPS.upgradeConnection(connprofile, (err, succeess)=>{
+            if(succeess) {
+              let json = JSON.parse(data);
+              _tellSniffers(json);
+              methods[json.m].handler(connprofile, json.s, json.d);
+            }
+            else {
+              connprofile.closeConnetion();
+            }
+          });
+        }
+        else if(connprofile.returnBundle('NSPS') != true) {
+          let json = JSON.parse(data);
+          _tellSniffers(json);
+          methods[json.m].handler(connprofile, json.s, json.d);
+        }
+        else if(connprofile.returnBundle('NSPS') == true) {
+          // true
+
+          _coregateway.NoCrypto.decryptString('AESCBC256', connprofile.returnBundle('aes_256_cbc_key'), data, (err, decrypted)=> {
+
+            let json = JSON.parse(decrypted);
+            _tellSniffers(json);
+            methods[json.m].handler(connprofile, json.s, json.d);
+          });
+        }
+      }
+      else {
+        let json = JSON.parse(data);
+        _tellSniffers(json);
+        methods[json.m].handler(connprofile, json.s, json.d);
+      }
+
     };
     _coregateway.Authenticity.emitRouter = this.emit;
     _coregateway.Service.emitRouter = this.emit;
     _coregateway.Implementation.emitRouter = this.emit;
     _coregateway.Authorization.emitRouter = this.emit;
+    _coregateway.NSPS.emitRouter = this.emit;
     _coregateway.Service.spwanClient = _coregateway.Connection.createClient;
 
   };

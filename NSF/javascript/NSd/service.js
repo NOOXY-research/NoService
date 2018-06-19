@@ -257,6 +257,10 @@ function Service() {
       });
     };
 
+    this.onClose = (entityID) => {
+      Utils.tagLog('*ERR*', 'onClose not implemented');
+    };
+
   };
 
   function ActivitySocket(conn_profile, entity_id, Datacallback, JFCallback) {
@@ -289,6 +293,10 @@ function Service() {
 
     this.onData = (data) => {
       Utils.tagLog('*ERR*', 'onData not implemented');
+    };
+
+    this.onClose = () => {
+      Utils.tagLog('*ERR*', 'onClose not implemented');
     };
   };
 

@@ -18,7 +18,8 @@ let ServiceAPI = require('./serviceapi');
 let Implementation = require('./implementation');
 let Log = null;
 let Utils = require('./utilities');
-
+let NoCrypto = require('./crypto').NoCrypto;
+let NSPS = require('./crypto').NSPS;
 
 function Core(settings) {
   let _runtime_id = Utils.generateGUID();
@@ -34,6 +35,8 @@ function Core(settings) {
   let _entity = null;
   let _serviceAPI = null;
   let _implementation = null;
+  let _nocrypto = null;
+  let _nsps = null;
 
   let verbose = (tag, log) => {
     if(settings.verbose||settings.debug) {
@@ -57,16 +60,19 @@ function Core(settings) {
     Utils.printLOGO('aphla', 'copyright(c)2018 NOOXY inc.');
 
     // initialize variables
-    verbose('Daemon', 'Initializing variables.')
-    let _connection = new Connection();
-    let _authorization = null;
-    let _authorizationhandler = null;
-    let _authenticity = null;
-    let _router = null;
-    let _service = null;
-    let _entity = null;
-    let _serviceAPI = null;
-    verbose('Daemon', 'Initializing variables done.')
+    // verbose('Daemon', 'Initializing variables.')
+    // // let _connection = null;
+    // // let _authorization = null;
+    // // let _authorizationhandler = null;
+    // // let _authenticity = null;
+    // // let _router = null;
+    // // let _service = null;
+    // // let _entity = null;
+    // // let _serviceAPI = null;
+    // // let _implementation = null;
+    // // let _nocrypto = null;
+    // // let _nsps = null;
+    // verbose('Daemon', 'Initializing variables done.')
 
     // setup variables
     verbose('Daemon', 'Setting up variables.')
@@ -79,6 +85,9 @@ function Core(settings) {
     _entity = new Entity();
     _serviceAPI = new ServiceAPI();
     _implementation = new Implementation();
+    _nocrypto = new NoCrypto();
+    _nsps = new NSPS();
+
 
       // create gateway
       verbose('Daemon', 'Creating coregateway...')
@@ -92,7 +101,9 @@ function Core(settings) {
           ServiceAPI: _serviceAPI,
           Entity: _entity,
           Authenticity: _authenticity,
-          Implementation: _implementation
+          Implementation: _implementation,
+          NoCrypto: _nocrypto,
+          NSPS: _nsps
         };
       verbose('Daemon', 'Creating coregateway done.')
     // trust myself
@@ -101,11 +112,14 @@ function Core(settings) {
           "ip": "LOCALIP",
           "port": "LOCALPORT"
     });
-    
+
     for(let i in settings.connection_servers) {
       settings.trusted_domains.push(settings.connection_servers[i].ip);
     }
 
+    // setup NOOXY Service protocol secure
+    _nsps.importRSA2048KeyPair(fs.readFileSync(settings.rsa_2048_priv_key, 'utf8'), fs.readFileSync(settings.rsa_2048_pub_key, 'utf8'));
+    _nsps.importCryptoModule(_nocrypto);
     // setup router
     _router.importCore(coregateway);
 

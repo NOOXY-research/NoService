@@ -10,46 +10,70 @@ function Implementation() {
   let _connection_module = null;
 
   // NOOXY service protocol secure list
-  let _nsps_list = ['setAES256Key'];
+  let _nsps_list = ['generateAESCBC256KeyByHash', 'encryptString', 'decryptString'];
 
   let _implts = {
 
     // NOOXY service protocol sercure
-    // set AES256 keys
-    setAES256Key: () => {
-      Utils.tagLog('*ERR*', 'setAES256Key not implement');
-      callback(true);
-    },
 
-    // NOOXY service protocol sercure
+      // hashing two string (host and client pub key)by SHA256 to get AES-CBC 256 key 32 char
+      generateAESCBC256KeyByHash: (string1, string2, callback) => {
+        Utils.tagLog('*ERR*', 'generateAESCBC256KeyByHash not implemented');
+        callback(true, 'hash 32 char');
+      },
 
+      generateRSA2048KeyPair: (callback) => {
+        Utils.tagLog('*ERR*', 'generateAESCBC256KeyByHash not implemented');
+        callback(true, 'priv', 'pub');
+      },
+
+      encryptString: (key, toEncrypt, callback) => {
+        Utils.tagLog('*ERR*', 'generateAESCBC256KeyByHash not implemented');
+        callback(true, 'encrypted');
+      },
+
+      decryptString: (key, toEncrypt, callback) => {
+        Utils.tagLog('*ERR*', 'generateAESCBC256KeyByHash not implemented');
+        callback(true, 'decrypted');
+      },
+
+      saveRSA2048KeyPair: (priv, pub) => {
+        Utils.tagLog('*ERR*', 'saveRSA2048KeyPair not implemented');
+      },
+
+      loadRSA2048KeyPair: (callback) => {
+        Utils.tagLog('*ERR*', 'loadRSA2048KeyPair not implemented');
+        callback(true, 'priv', 'pub');
+      },
+
+    // NOOXY service protocol sercure end
 
     // return for Server
     AuthbyToken: (callback) => {
-      Utils.tagLog('*ERR*', 'AuthbyToken not implement');
+      Utils.tagLog('*ERR*', 'AuthbyToken not implemented');
       callback(true, 'token');
     },
 
     // return for Server
     AuthbyPassword: (callback) => {
-      Utils.tagLog('*ERR*', 'AuthbyPassword not implement');
+      Utils.tagLog('*ERR*', 'AuthbyPassword not implemented');
       callback(true, 'password');
     },
 
     // return for Client
     signin: (conn_method, remoteip, port, username, password, callback) => {
-      Utils.tagLog('*ERR*', 'signin not implement');
+      Utils.tagLog('*ERR*', 'signin not implemented');
       callback(true, 'token');
     },
 
     // return for Client
     signup: (conn_method, remoteip, port, username, password, callback) => {
-      Utils.tagLog('*ERR*', 'signup not implement');
+      Utils.tagLog('*ERR*', 'signup not implemented');
       callback(true, 'token');
     },
 
     onToken: (err, token) => {
-      Utils.tagLog('*ERR*', 'onToken not implement');
+      Utils.tagLog('*ERR*', 'onToken not implemented');
     },
 
     // for Server
@@ -60,6 +84,11 @@ function Implementation() {
     AuthbyPassword: null,
 
     AuthbyAction: null
+  };
+
+  // Nooxy service protocol sercure request
+  this.NSPSRqRouter = (connprofile, data, data_sender) => {
+
   };
 
   this.onToken = (connprofile, status, token)=> {
