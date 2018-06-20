@@ -1,6 +1,7 @@
 {
-  "displayname": "NoNoti",
-  "description": "NOOXY Service Notification system",
+  "name": "NoMailer",
+  "displayname": "NOOXY Mail Sender Service",
+  "description": "Mail sender for account recovery or other stuff.",
   "Authors": ["NOOXY", "noowyee"],
-  "implementation_api": false
+  "implementation_api": false,
 }

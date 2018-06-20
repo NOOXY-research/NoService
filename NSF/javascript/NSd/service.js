@@ -377,17 +377,36 @@ function Service() {
     let _service_manifest = null;
 
 
-    this.launch = () => {
+    this.launch = (depended_service_dict) => {
+      // check node packages dependencies
 
-      // load module from local service directory
-      _service_module = require(_service_path+'/entry');
       try{
         _service_manifest = Utils.returnJSONfromFile(_service_path+'/manifest.json');
       }
       catch(err) {
         Utils.tagLog('*ERR*', 'Service "'+_service_name+'" load manifest.json with failure.');
         console.log(err);
+        process.exit();
       };
+      // check node packages dependencies
+      try {
+        for(let package_name in _service_manifest.dependencies.node_packages) {
+          try {
+            require.resolve(package_name);
+          }
+          catch (err) {
+            Utils.tagLog('*ERR*', 'Service "'+_service_name+'" require node package "'+package_name+'".');
+            process.exit();
+          }
+        }
+      }
+      catch (err) {
+        Utils.tagLog('*ERR*', 'Service "'+_service_name+'" have wrong dependencies settings.');
+        process.exit();
+      }
+      depended_service_dict[_service_name] = _service_manifest.dependencies.services;
+      _service_module = require(_service_path+'/entry');
+      // load module from local service directory
 
       // create a description of this service entity.
       let _entity_json = {
@@ -455,8 +474,20 @@ function Service() {
 
   // Service module launch
   this.launch = () => {
+    let launched_service = [];
+    let depended_service_dict = {};
     for (var key in _local_services) {
-      _local_services[key].launch();
+      _local_services[key].launch(depended_service_dict);
+      launched_service.push(key);
+    }
+    // check dependencies
+    for (let service_name in depended_service_dict) {
+      for(let depended in depended_service_dict[service_name]) {
+        if(!launched_service.includes(depended)) {
+          Utils.tagLog('*ERR*', 'Service "'+service_name+'" depend on another service "'+depended+'". But it doesn\'t launched.');
+          process.exit();
+        }
+      }
     }
   };
 

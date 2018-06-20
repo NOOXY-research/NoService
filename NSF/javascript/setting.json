@@ -24,8 +24,6 @@
 
   "services_path": "services/",
 
-  "verbose": false,
-
   "services_files_path": "service_files/",
 
   "database_path": "db.sqlite3",
@@ -47,6 +45,8 @@
   "shell_client_service": "NoShellc",
 
   "debug_service": "NoDebug",
+
+  "verbose": false,
 
   "debug": false,
 
