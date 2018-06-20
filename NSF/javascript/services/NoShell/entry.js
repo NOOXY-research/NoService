@@ -93,18 +93,26 @@ function start(api) {
     // commands dict
     let c_dict = {
       help: (t0, c0) =>{
-        c0(false, {r:'command list:\n'+
+        c0(false, {r:
+          '[daemon]\n'+
+          '  daemon [settings]\n'+
           '[service]\n'+
           '  service [list|manifest {service name}]\n'+
-          '  service socket\n'+
+          '  service listjfunc {target service}\n'+
+          '  service jfunc {target service} {target username} {target jfunc} {JSON} ---Call a JSONfunction as target user.\n'+
           '  service entity [show {entityID}|list|count]\n'+
           '[auth]\n'+
-          '  auth emit [password|token] {entityID}\n'+
+          '  auth emit [password|token] {entityID}  ---Emit authorization proccess to targeted entity.\n'+
           '[me]\n'+
           '  me\n'+
           '  me [meta|chpasswd]\n'+
           '[sniffer]\n'+
-          '  sniffer router json [on|off]'
+          '  sniffer router json [on|off]'+
+          '[others]\n'+
+          '  echo {keyword|text} ---Echo plain text.\n'+
+          '  help ---This menu.\n'+
+          'Keywords: \n'+
+          '  Me -> your entityID.'
         });;
       },
 
@@ -142,10 +150,22 @@ function start(api) {
             c1(false, {r:api.Service.returnServiceManifest(t1[0])});
           },
 
-          socket: (t1, c1) => {
-            return  _(socket_remain, {
+          listjfunc: (t1, c1) => {
+            c1(false, {r:api.Service.returnJSONfuncList(t1[0])});
+          },
 
-            }, c1);
+          jfunc: (t1, c1) => {
+            // setup up remote shell service by daemon default connciton
+            let DEFAULT_SERVER = api.Daemon.Settings.default_server;
+            let DAEMONTYPE = api.Daemon.Settings.connection_servers[DEFAULT_SERVER].type;
+            let DAEMONIP = api.Daemon.Settings.connection_servers[DEFAULT_SERVER].ip;
+            let DAEMONPORT =api.Daemon.Settings.connection_servers[DEFAULT_SERVER].port;
+            api.Service.ActivitySocket.createDeamonSocket(DAEMONTYPE, DAEMONIP, DAEMONPORT, t1[0], t1[1], (err, as)=> {
+              as.call(t1[2], t1[3],(err, msg)=>{
+                c1(false, {r:msg});
+                as.close();
+              });
+            });
           }
 
         }, c0);
@@ -196,6 +216,10 @@ function start(api) {
         }
       },
 
+      echo: (t0, c0) => {
+        c0(false, {r: t0[0]});
+      },
+
       sniffer: (t0, c0) => {
         return _(t0, {
           router: (t1, c1) => {
@@ -243,8 +267,8 @@ function start(api) {
   ss.def('welcome', (json, entityID, returnJSON)=>{
     let emeta = api.Service.Entity.returnEntityMetaData(entityID);
     let settings = api.Daemon.Settings;
-    let msg = '\n'+emeta.owner+'(as entity '+entityID+'). Welcome accessing NoShell of Server "'+settings.daemon_name+'"\n';
-    msg = msg + settings.description+'\n';
+    let msg = '\nHello. '+emeta.owner+'(as entity '+entityID+').\n  Welcome accessing NoShell service of Daemon "'+settings.daemon_name+'".\n';
+    msg = msg + '  Daemon description: \n  ' + settings.description+'\n';
 
     returnJSON(false, msg);
   });

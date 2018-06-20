@@ -1,6 +1,7 @@
 {
-  "displayname": "NoShellc",
-  "description": "NOOXY Shell. Default NSF Local Shell Client implementation.",
+  "name": "NoShellc",
+  "displayname": "NOOXY Shell Client",
+  "description": "Default NSF Local Shell Client implementation.",
   "Authors": ["NOOXY", "noowyee"],
   "implementation_api": true
 }

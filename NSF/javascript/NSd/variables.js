@@ -8,4 +8,4 @@ let Variables = {
   }
 }
 
-exports.module = Variables;
+module.exports = Variables;

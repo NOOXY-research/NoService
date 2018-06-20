@@ -58,7 +58,8 @@ function Core(settings) {
   };
 
   this.launch = () => {
-    Utils.printLOGO('aphla', 'copyright(c)2018 NOOXY inc.');
+    Utils.printLOGO(Vars.version, Vars.copyright);
+
 
     // initialize variables
     // verbose('Daemon', 'Initializing variables.')

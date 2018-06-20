@@ -106,10 +106,9 @@ function start(api) {
   setTimeout(()=> {
     let _manifest = api.Me.Manifest;
     let _daemon_display_name = api.Daemon.Settings.daemon_display_name;
-    console.log('');
-    console.log(_manifest.displayname);
+    console.log(_manifest.displayname+' started.');
     console.log(_manifest.description);
-    console.log('');
+    console.log('connecting to daemon(nsp('+DAEMONTYPE+')://'+DAEMONIP+':'+DAEMONPORT+')...');
     // console.log('To access '+_daemon_display_name+'. You need to auth yourself.');
     // api.Implementation.returnImplement('signin')(DAEMONTYPE, DAEMONIP, DAEMONPORT, (err, token)=>{
     //   if(err) {
@@ -118,6 +117,7 @@ function start(api) {
     //   _token = token;
       let cmd = null;
       api.Service.ActivitySocket.createSocket(DAEMONTYPE, DAEMONIP, DAEMONPORT, 'NoShell', (err, as) => {
+        console.log('connected.');
         as.onData = (data) => {
           if(data.t == 'stream') {
             console.log(data.d);

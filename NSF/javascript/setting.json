@@ -46,7 +46,7 @@
 
   "shell_client_service": "NoShellc",
 
-  "debug_service": "Nodebug",
+  "debug_service": "NoDebug",
 
   "debug": false,
 

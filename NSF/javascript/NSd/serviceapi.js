@@ -84,6 +84,10 @@ function ServiceAPI() {
 
       returnServiceManifest: (service_name)=> {
         return _coregateway.Service.returnServiceManifest(service_name);
+      },
+
+      returnJSONfuncList: (service_name)=> {
+        return _coregateway.Service.returnJSONfuncList(service_name);
       }
 
     };

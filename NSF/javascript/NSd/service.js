@@ -95,7 +95,7 @@ function Service() {
         }
         response_emit(connprofile, 'CS', 'rs', _data);
       },
-      // nooxy service protocol implementation of "Call Service: String function"
+      // nooxy service protocol implementation of "Call Service: json function"
       JF: (connprofile, data, response_emit) => {
         let _data = null;
         if(typeof(theservice) != 'undefined') {
@@ -196,7 +196,7 @@ function Service() {
           _ASockets[data.d.i].sendJFReturn(false, data.d.t, data.d.r);
         }
         else {
-
+          _ASockets[data.d.i].sendJFReturn(true, data.d.t, data.d.r);
         }
       },
       // nooxy service protocol implementation of "Call Activity: createEntity"
@@ -252,6 +252,10 @@ function Service() {
     let _send_handler = null;
     let _mode = null;
 
+    this.returnJSONfuncList = () => {
+      return Object.keys(_jsonfunctions);
+    };
+
     this.def = (name, callback) => {
       _jsonfunctions[name] = callback;
     };
@@ -279,9 +283,15 @@ function Service() {
     };
 
     this.onJFCall = (entityID, JFname, jsons, callback) => {
-      _jsonfunctions[JFname](JSON.parse(jsons), entityID, (err, returnVal)=>{
-        callback(err, returnVal);
-      });
+      try {
+        _jsonfunctions[JFname](JSON.parse(jsons==null?'{}':jsons), entityID, (err, returnVal)=>{
+          callback(err, returnVal);
+        });
+      }
+      catch (err) {
+        callback(err);
+      }
+
     };
 
     this.onClose = (entityID) => {
@@ -295,13 +305,25 @@ function Service() {
   };
 
   function ActivitySocket(conn_profile, entity_id, Datacallback, JFCallback) {
+    let entities_prev = conn_profile.returnBundle('bundle_entities');
+    if(entities_prev != null) {
+      conn_profile.setBundle('bundle_entities', [entity_id].concat(entities_prev));
+    }
+    else {
+      conn_profile.setBundle('bundle_entities', [entity_id]);
+    }
 
     let _entity_id = entity_id;
     let _conn_profile = conn_profile;
     let _jfqueue = {};
 
     this.sendJFReturn = (err, tempid, returnvalue) => {
-      _jfqueue[tempid](err, JSON.parse(returnvalue));
+      if(err) {
+        _jfqueue[tempid](err);
+      }
+      else {
+        _jfqueue[tempid](err, JSON.parse(returnvalue));
+      }
     };
 
     // JSONfunction call
@@ -329,6 +351,20 @@ function Service() {
     this.onClose = () => {
       Utils.tagLog('*ERR*', 'onClose not implemented');
     };
+
+    this.close = () => {
+      let bundle = conn_profile.returnBundle('bundle_entities');
+      for (var i=bundle.length-1; i>=0; i--) {
+        if (bundle[i] === _entity_id) {
+            bundle.splice(i, 1);
+        }
+      }
+      conn_profile.setBundle('bundle_entities', bundle);
+      _entity_module.deleteEntity(_entity_id);
+      if(!bundle.length) {
+        conn_profile.closeConnetion();
+      }
+    }
   };
 
   // object for managing service.
@@ -366,7 +402,7 @@ function Service() {
       };
 
       // register this service to entity system
-      _entity_module.registerEntity(_entity_json, null, (entity_id)=>{
+      _entity_module.registerEntity(_entity_json, null, (entity_id) => {
         _entity_id = entity_id;
       });
 
@@ -374,6 +410,9 @@ function Service() {
 
       // create the service for module.
       try {
+        if(_service_manifest.name != _service_name) {
+          throw new Error('Service name in manifest must fit with name "'+_service_name+'". Please check manifest file.');
+        }
         if(_service_manifest.implementation_api == false) {
           _serviceapi_module.createServiceAPI(_service_socket, _service_manifest, (err, api) => {
             _service_module.start(api);
@@ -390,6 +429,10 @@ function Service() {
         Utils.tagLog('*ERR*', 'Service "'+_service_name+'" ended with failure.');
         console.log(err);
       }
+    };
+
+    this.returnJSONfuncList = () => {
+      return _service_socket.returnJSONfuncList();
     };
 
     this.setupPath = (path) => {
@@ -521,6 +564,10 @@ function Service() {
   this.returnServiceManifest = (service_name)=> {
     return _local_services[service_name].returnManifest();
   };
+
+  this.returnJSONfuncList = (service_name) => {
+    return _local_services[service_name].returnJSONfuncList();
+  }
 
   this.returnList = () => {
     return Object.keys(_local_services);

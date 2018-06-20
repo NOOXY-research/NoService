@@ -27,12 +27,12 @@ function Connection() {
     let _hostip = hostip;
     let _hostport = hostport;
     let _clientip = clientip;
-    let _conn = conn;
+    let _conn = conn; // conn is wrapped!
 
 
     this.closeConnetion = () => {
       // Utils.tagLog('*ERR*', 'closeConnetion not implemented. Of '+this.type);
-      _conn.close();
+      _conn.close(_GUID);
     };
 
     this.getServerID = (callback) => {callback(false, _serverID);}
@@ -280,6 +280,8 @@ function Connection() {
     let _netserver = null;
     let _clients = {};
 
+    this.close = (GUID) => {_clients[GUID].destroy()};
+
     this.closeConnetion = ()=> {};
 
     this.onData = (connprofile, data) => {Utils.tagLog('*ERR*', 'onData not implemented');};
@@ -329,6 +331,8 @@ function Connection() {
   function TCPIPClient() {
     let _netc = null
 
+    this.close = (GUID) => {_netc.destroy()};
+
     this.onData = (connprofile, data) => {Utils.tagLog('*ERR*', 'onData not implemented');};
 
     this.onClose = () => {Utils.tagLog('*ERR*', 'onClose not implemented');};
@@ -354,7 +358,6 @@ function Connection() {
       });
 
       _netc.on('close', () => {
-          Utils.tagLog('*ERR*', '%s', error);
           this.onClose(connprofile);
       });
 
@@ -535,9 +538,10 @@ function Connection() {
     Utils.tagLog('*ERR*', 'Connection module onData not implement');
   };
 
-  this.onClose = (conn_profile) => {
-    Utils.tagLog('*ERR*', 'Connection module onClose not implement');
-  };
+  this.onClose = (connprofile) => {
+    delete connprofile.returnConn();
+    delete connprofile;
+  }
 
   this.getServers = (callback) => {
     callback(false, _servers);
