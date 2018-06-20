@@ -1,6 +1,14 @@
+// NSF/services/NoShell/entry.js
+// Description:
+// "NoShell/entry.js" is a NSF Shell service.
+// Copyright 2018 NOOXY. All Rights Reserved.
+//
+// beware that this client's crypto uses daemon's implementation so it can only be used as local client instead of remote one.
+
 const readline = require('readline');
 var Writable = require('stream').Writable;
 
+// async stdio
 var rl = readline.createInterface({
   input: process.stdin,
   output: process.stdout
@@ -22,11 +30,13 @@ function start(api) {
   let _token = null;
   let _mutex = true;
 
+  // setup up remote shell service by daemon default connciton
   let DEFAULT_SERVER = api.Daemon.Settings.default_server;
   let DAEMONTYPE = api.Daemon.Settings.connection_servers[DEFAULT_SERVER].type;
   let DAEMONIP = api.Daemon.Settings.connection_servers[DEFAULT_SERVER].ip;
   let DAEMONPORT =api.Daemon.Settings.connection_servers[DEFAULT_SERVER].port;
 
+  // get username and password from terminal input
   let _get_username_and_password = (callback) => {
     let u = null;
     let p = null;
@@ -54,6 +64,7 @@ function start(api) {
     });
   }
 
+  // setup NSF Auth implementation
   api.Implementation.setImplement('signin', (conn_method, remoteip, port, callback)=>{
     api.Implementation.setImplement('onToken', callback);
     console.log('Please signin your account.');
@@ -68,6 +79,7 @@ function start(api) {
     });
   });
 
+  // setup NSF Auth implementation
   api.Implementation.setImplement('AuthbyToken', (callback) => {
     let pass = true;
     if(_token == null) {
@@ -84,6 +96,7 @@ function start(api) {
 
   });
 
+  // setup NSF Auth implementation
   api.Implementation.setImplement('AuthbyPassword', (callback) => {
     _get_password((err, p) => {
       callback(err, p);
@@ -105,6 +118,11 @@ function start(api) {
     //   _token = token;
       let cmd = null;
       api.Service.ActivitySocket.createSocket(DAEMONTYPE, DAEMONIP, DAEMONPORT, 'NoShell', (err, as) => {
+        as.onData = (data) => {
+          if(data.t == 'stream') {
+            console.log(data.d);
+          }
+        }
         as.call('welcome', null, (err, msg) => {
           console.log(msg);
           var recursiveAsyncReadLine = () => {

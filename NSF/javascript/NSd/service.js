@@ -31,8 +31,20 @@ function Service() {
   }
 
   this.importServicesList = (service_list) => {
+    // as callback
+    let _ascallback = (conn_profile, i, d) => {
+      let _data = {
+        "m": "AS",
+        "d": {
+          "i": i,
+          "d": d,
+        }
+      };
+
+      this.emitRouter(conn_profile, 'CA', _data);
+    }
     for(let i=0; i<service_list.length; i++) {
-      let _s = new ServiceObj(service_list[i]);
+      let _s = new ServiceObj(service_list[i], _ascallback);
       _s.setupPath(_local_services_path+service_list[i]);
       _local_services[service_list[i]] = _s;
     }
@@ -209,6 +221,7 @@ function Service() {
           "m": "AS",
           "d": {
             // status
+            "i": data.d.i,
             "s": "OK"
           }
         };
@@ -232,7 +245,7 @@ function Service() {
     methods[data.m](connprofile, data.d);
   };
 
-  function ServiceSocket(Datacallback) {
+  function ServiceSocket(service_name, Datacallback) {
     let _jsonfunctions = {};
     // JSON Function
 
@@ -244,8 +257,22 @@ function Service() {
     };
 
     this.sendData = (entityID, data) => {
-      Datacallback(entityID, data);
-    }
+      _entity_module.getEntityConnProfile(entityID, (err, connprofile)=>{
+        Datacallback(connprofile, entityID, data);
+      });
+    };
+
+    this.broadcastData = (data) => {
+      // console.log('f');
+      let query = 'service='+service_name+',type=Activity';
+      _entity_module.getfliteredEntitiesList(query, (err, entitiesID)=>{
+        for(let i in entitiesID) {
+          _entity_module.getEntityConnProfile(entitiesID[i], (err, connprofile) => {
+            Datacallback(connprofile, entitiesID[i], data);
+          });
+        }
+      });
+    };
 
     this.onData = (entityID, data) => {
       Utils.tagLog('*ERR*', 'onData not implemented');
@@ -260,6 +287,10 @@ function Service() {
     this.onClose = (entityID) => {
       Utils.tagLog('*ERR*', 'onClose not implemented');
     };
+
+    this.returnServiceName = () => {
+      return service_name;
+    }
 
   };
 
@@ -301,27 +332,13 @@ function Service() {
   };
 
   // object for managing service.
-  function ServiceObj(service_name) {
+  function ServiceObj(service_name, Datacallback) {
     let _entity_id = null;
     let _service_socket = null;
     let _service_path = null;
     let _service_name = service_name;
     let _service_module = null;
     let _service_manifest = null;
-
-    // on Service Socket Data
-    let _onSSData = (entityID, data) => {
-      entity_module.getConnProfile(entityID, (connprofile) => {
-        let _data = {
-          "m": "AS",
-          "d": {
-            "i": _entity_id,
-            "d": data
-          }
-        }
-        this.emitRouter(connprofile, 'AC', _data);
-      });
-    };
 
 
     this.launch = () => {
@@ -353,7 +370,7 @@ function Service() {
         _entity_id = entity_id;
       });
 
-      _service_socket = new ServiceSocket(_onSSData); // _onJFCAll = on JSONfunction call
+      _service_socket = new ServiceSocket(_service_name, Datacallback); // _onJFCAll = on JSONfunction call
 
       // create the service for module.
       try {

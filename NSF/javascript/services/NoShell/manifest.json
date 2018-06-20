@@ -1,4 +1,5 @@
 {
+  "name": "NoShell",
   "displayname": "NoShell",
   "description": "NOOXY Shell. Default NSF Shell Client implementation.",
   "Authors": ["NOOXY", "noowyee"],

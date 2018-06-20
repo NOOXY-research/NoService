@@ -1,5 +1,49 @@
+// NSF/services/NoShell/entry.js
+// Description:
+// "NoShell/entry.js" is a NSF Shell service.
+// Copyright 2018 NOOXY. All Rights Reserved.
+
 function start(api) {
   let ss = api.Service.ServiceSocket;
+  let sniffonJSON = false;
+  let sniffonRAW = false;
+
+  api.Sniffer.onRouterJSON((err, json)=>{
+    j = JSON.stringify(json, null, 2);
+    if(sniffonJSON) {
+      try {
+        api.Service.Entity.getfliteredEntitiesList("service=NoShell", (err, list)=>{
+          if(!list.includes(json.d.d.i)) {
+            ss.broadcastData({t:'stream', d:'Sniffer catch JSON on '+api.Daemon.Settings.daemon_name+'" :\n'+j});
+          }
+        });
+      }
+      catch (err) {
+        ss.broadcastData({t:'stream', d:'Sniffer catch JSON on '+api.Daemon.Settings.daemon_name+'" :\n'+j});
+        if(api.Daemon.Settings.debug) {
+          console.log(err);
+        }
+      }
+    }
+  });
+
+  api.Sniffer.onRouterRawData((err, data)=>{
+    if(sniffonRAW) {
+      try {
+        api.Service.Entity.getfliteredEntitiesList("service=NoShell", (err, list)=>{
+          if(!list.includes(json.d.d.i)) {
+            ss.broadcastData({t:'stream', d:'Sniffer catch RAW on '+api.Daemon.Settings.daemon_name+'" :\n'+data});
+          }
+        });
+      }
+      catch (err) {
+        ss.broadcastData({t:'stream', d:'Sniffer catch RAW on '+api.Daemon.Settings.daemon_name+'" :\n'+data});
+        if(api.Daemon.Settings.debug) {
+          console.log(err);
+        }
+      }
+    }
+  })
 
   let spliter = ' ';
 
@@ -35,6 +79,9 @@ function start(api) {
       dict[t](tokens, callback);
     }
     catch (err) {
+      if(api.Daemon.Settings.debug) {
+        console.log(err);
+      }
       callback(false , {r:'Unknown command. Start at token "'+t0+'".'});
     }
   };
@@ -46,8 +93,21 @@ function start(api) {
     // commands dict
     let c_dict = {
       help: (t0, c0) =>{
-        c0(false, {r:'HELP!? '});;
+        c0(false, {r:'command list:\n'+
+          '[service]\n'+
+          '  service [list|manifest {service name}]\n'+
+          '  service socket\n'+
+          '  service entity [show {entityID}|list|count]\n'+
+          '[auth]\n'+
+          '  auth emit [password|token] {entityID}\n'+
+          '[me]\n'+
+          '  me\n'+
+          '  me [meta|chpasswd]\n'+
+          '[sniffer]\n'+
+          '  sniffer router json [on|off]'
+        });;
       },
+
       service: (t0, c0) => {
         return _(t0, {
           entity: (t1, c1) => {
@@ -78,6 +138,10 @@ function start(api) {
             c1(false, {r:api.Service.returnList()});
           },
 
+          manifest: (t1, c1) => {
+            c1(false, {r:api.Service.returnServiceManifest(t1[0])});
+          },
+
           socket: (t1, c1) => {
             return  _(socket_remain, {
 
@@ -86,6 +150,7 @@ function start(api) {
 
         }, c0);
       },
+
       auth: (t0, c0) => {
         _(t0, {
           emit: (t1, c1) => {
@@ -104,6 +169,7 @@ function start(api) {
           }
         }, c0);
       },
+
       me: (t0, c0) => {
         if(t0.length == 0) {
           c0(false, {r: 'You are '+emeta.owner+'. Connected with ActivitySocket('+entityID+'). :D'});
@@ -128,8 +194,46 @@ function start(api) {
             }
           }, c0);
         }
+      },
+
+      sniffer: (t0, c0) => {
+        return _(t0, {
+          router: (t1, c1) => {
+            api.Authorization.Authby.Token(entityID, (err, pass)=>{
+              if(pass) {
+                r = _(t1, {
+                  json: (t2, c2) => {
+                    if(t2[0] == 'on') {
+                      sniffonJSON = true;
+                      c2(false, {r:'Sniffer on Router JSON on.'});
+                    }
+                    else {
+                      sniffonJSON = false;
+                      c2(false, {r:'Sniffer on Router JSON off.'});
+                    }
+                  },
+
+                  raw: (t2, c2) => {
+                    if(t2[0] == 'on') {
+                      sniffonRAW = true;
+                      c2(false, {r:'Sniffer on Router RAW on.'});
+                    }
+                    else {
+                      sniffonRAW = false;
+                      c2(false, {r:'Sniffer on Router RAW off.'});
+                    }
+                  }
+                }, c1);
+              }
+              else {
+                c1(false , {r:"Auth failed"});
+              }
+            });
+          }
+        }, c0);
       }
     };
+
     replace(cmd, 'Me', entityID);
     _(cmd, c_dict, returnJSON);
   });

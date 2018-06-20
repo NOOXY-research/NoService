@@ -14,6 +14,7 @@ function Connection() {
   let _have_local_server = false;
   let _virtnet = null;
   let _blocked_ip = [];
+  let _tcp_ip_chunk_token = '}{"""}<>';
 
 
   // define an profile of an connection
@@ -27,6 +28,7 @@ function Connection() {
     let _hostport = hostport;
     let _clientip = clientip;
     let _conn = conn;
+
 
     this.closeConnetion = () => {
       // Utils.tagLog('*ERR*', 'closeConnetion not implemented. Of '+this.type);
@@ -285,7 +287,7 @@ function Connection() {
     this.onClose = (connprofile) => {Utils.tagLog('*ERR*', 'onClose not implemented');};
 
     this.send = function(connprofile, data) {
-      _clients[connprofile.returnGUID()].write(data);
+      _clients[connprofile.returnGUID()].write(_tcp_ip_chunk_token+data);
     };
 
     this.broadcast = (data) => {
@@ -301,8 +303,12 @@ function Connection() {
         let connprofile = new ConnectionProfile(_serverID, 'Client', 'TCP/IP', ip, port, socket.remoteAddress, this);
         _clients[connprofile.returnGUID()] = socket;
 
-        socket.on('data', (message) => {
-          this.onData(connprofile, message.toString('utf8'));
+        socket.on('data', (data) => {
+          data = data.toString('utf8');
+          let chunks = data.split(_tcp_ip_chunk_token);
+          for(let i =1; i<chunks.length; i++) {
+            this.onData(connprofile, chunks[i]);
+          }
         });
 
         socket.on('error', (message) => {
@@ -328,7 +334,7 @@ function Connection() {
     this.onClose = () => {Utils.tagLog('*ERR*', 'onClose not implemented');};
 
     this.send = (connprofile, data) => {
-      _netc.write(data);
+      _netc.write(_tcp_ip_chunk_token+data);
     };
 
     this.connect = (ip, port, callback) => {
@@ -339,8 +345,12 @@ function Connection() {
         callback(false, connprofile);
       })
 
-      _netc.on('data', (message) => {
-        this.onData(connprofile, message.toString('utf8'));
+      _netc.on('data', (data) => {
+        data = data.toString('utf8');
+        let chunks = data.split(_tcp_ip_chunk_token);
+        for(let i =1; i<chunks.length; i++) {
+          this.onData(connprofile, chunks[i]);
+        }
       });
 
       _netc.on('close', () => {

@@ -49,8 +49,11 @@ function ServiceAPI() {
       },
 
       Entity: {
-        getfliteredEntityMetaData: (key, value, callback) => {
-          _coregateway.Entity.getfliteredEntityMetaData(key, value, _safe_callback(callback));
+        getfliteredEntitiesMetaData: (key, value, callback) => {
+          _coregateway.Entity.getfliteredEntitiesMetaData(key, value, _safe_callback(callback));
+        },
+        getfliteredEntitiesList: (query, callback) => {
+          _coregateway.Entity.getfliteredEntitiesList(query, callback);
         },
         returnEntityValue: (entityID, key) => {
           return _coregateway.Entity.returnEntityValue(entityID, key);
@@ -80,7 +83,7 @@ function ServiceAPI() {
       },
 
       returnServiceManifest: (service_name)=> {
-        return _coregateway.Service.returnManifest(service_name);
+        return _coregateway.Service.returnServiceManifest(service_name);
       }
 
     };

@@ -94,7 +94,6 @@ function NoCrypto() {
         let crypted = cipher.update(toEncrypt,'utf8','base64');
         crypted += cipher.final('base64');
         crypted = iv.toString('base64')+crypted;
-
         callback(false, crypted);
       },
       decryptString: (key, toDecrypt, callback) => {

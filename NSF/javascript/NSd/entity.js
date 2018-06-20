@@ -89,12 +89,33 @@ function Entity() {
     return Object.keys(_entities);
   }
 
-  this.getfliteredEntityMetaData= (key, value, callback) => {
+  this.getfliteredEntitiesMetaData = (key, value, callback) => {
     let _e = {};
     for(let k in _entities) {
       let _meta = _entities[k].returnMeta();
       if(_meta[key] == value) {
         _e[k] = _meta;
+      }
+    }
+    callback(false, _e);
+  };
+
+  this.getfliteredEntitiesList = (query, callback) => {
+    let _e = [];
+    let qs = query.split(',');
+    for(let k in _entities) {
+      let _meta = _entities[k].returnMeta();
+      let pass = true;
+      for(let i in qs) {
+        let key = qs[i].split('=')[0];
+        let value = qs[i].split('=')[1];
+        if(_meta[key] != value) {
+          pass = false;
+        }
+      };
+
+      if(pass) {
+        _e.push(_meta['id']);
       }
     }
     callback(false, _e);
