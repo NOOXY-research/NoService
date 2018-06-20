@@ -46,7 +46,7 @@ function Service() {
     _serviceapi_module = serviceapi_module;
   };
 
-  this.spwanClient = () => {Utils.tagLog('*ERR*', 'emitRouter not implemented');};
+  this.spwanClient = () => {Utils.tagLog('*ERR*', 'spwanClient not implemented');};
 
   this.emitRouter = () => {Utils.tagLog('*ERR*', 'emitRouter not implemented');};
 
@@ -184,7 +184,7 @@ function Service() {
           _ASockets[data.d.i].sendJFReturn(false, data.d.t, data.d.r);
         }
         else {
-          
+
         }
       },
       // nooxy service protocol implementation of "Call Activity: createEntity"

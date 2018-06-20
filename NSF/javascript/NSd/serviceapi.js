@@ -8,6 +8,7 @@ let Utils = require('./utilities');
 function ServiceAPI() {
   let _coregateway = null;
 
+  // prevent callback crash whole nooxy service framework system
   let _safe_callback = (callback) => {
     return (a, b, c, d, e, f, g, h, i, j, k, l, m, n ,o, p, q, r, s) => {
       try {
@@ -19,6 +20,8 @@ function ServiceAPI() {
       }
     }
   };
+
+  // in case forget
   function _prototype() {
     this.Service = null;
     this.Authorization = null;
@@ -26,6 +29,7 @@ function ServiceAPI() {
     this.Notification = null;
   };
 
+  // import core in order to bind realtime modules to api
   this.importCore = (coregateway) => {
     _coregateway = coregateway;
   };

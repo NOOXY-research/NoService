@@ -4,7 +4,8 @@
 // Copyright 2018 NOOXY. All Rights Reserved.
 
 let Utils = require('./utilities');
-let WebSocket = require('ws');
+const WebSocket = require('ws');
+const Net = require('net');
 
 function Connection() {
   let _default_local_ip_and_port = '';
@@ -268,13 +269,88 @@ function Connection() {
           this.onClose(connprofile);
       });
 
+    }
+  };
+
+  function TCPIPServer(id) {
+    let _hostip = null;
+    let _serverID = id;
+    let _netserver = null;
+    let _clients = {};
+
+    this.closeConnetion = ()=> {};
+
+    this.onData = (connprofile, data) => {Utils.tagLog('*ERR*', 'onData not implemented');};
+
+    this.onClose = (connprofile) => {Utils.tagLog('*ERR*', 'onClose not implemented');};
+
+    this.send = function(connprofile, data) {
+      _clients[connprofile.returnGUID()].write(data);
+    };
+
+    this.broadcast = (data) => {
+      for(let i in _clients) {
+        client.write(data);
+      };
+    };
+
+    this.start = (ip, port, origin = false) => {
+      // launch server
+      _hostip = ip;
+      Net.createServer((socket)=>{
+        let connprofile = new ConnectionProfile(_serverID, 'Client', 'TCP/IP', ip, port, socket.remoteAddress, this);
+        _clients[connprofile.returnGUID()] = socket;
+
+        socket.on('data', (message) => {
+          this.onData(connprofile, message.toString('utf8'));
+        });
+
+        socket.on('error', (message) => {
+          Utils.tagLog('*ERR*', message);
+          socket.close();
+        });
+
+        socket.on('close', (message) => {
+          delete _clients[connprofile.returnGUID()];
+          this.onClose(connprofile);
+        });
+
+      }).listen(port, ip);
 
     }
   };
 
-  function TCPIPServer() {};
+  function TCPIPClient() {
+    let _netc = null
 
-  function TCPIPClient() {};
+    this.onData = (connprofile, data) => {Utils.tagLog('*ERR*', 'onData not implemented');};
+
+    this.onClose = () => {Utils.tagLog('*ERR*', 'onClose not implemented');};
+
+    this.send = (connprofile, data) => {
+      _netc.write(data);
+    };
+
+    this.connect = (ip, port, callback) => {
+      _netc =  new Net.Socket();
+      let connprofile = null;
+      _netc.connect(port, ip, ()=>{
+        connprofile = new ConnectionProfile(null, 'Server', 'TCP/IP', ip, port, 'localhost', this);
+        callback(false, connprofile);
+      })
+
+      _netc.on('data', (message) => {
+        this.onData(connprofile, message.toString('utf8'));
+      });
+
+      _netc.on('close', () => {
+          Utils.tagLog('*ERR*', '%s', error);
+          this.onClose(connprofile);
+      });
+
+
+    }
+  };
 
   function LocalServer(id, virtnet) {
     let _serverID = id;
@@ -384,6 +460,15 @@ function Connection() {
       }
     }
 
+    else if(conn_method == 'TCP/IP' || conn_method =='TCP') {
+      let _serverID = Utils.generateGUID();
+      let nets = new TCPIPServer(_serverID);
+      _servers[_serverID] = nets;
+      nets.start(ip, port);
+      nets.onData = this.onData;
+      nets.onClose = this.onClose;
+    }
+
     else {
       Utils.tagLog('*ERR*', ''+conn_method+' not implemented. Skipped.');
     }
@@ -409,6 +494,14 @@ function Connection() {
         locc.onClose = this.onClose;
         locc.connect('LOCALIP', 'LOCALPORT', callback);
       }
+    }
+
+    else if(conn_method == 'TCP/IP'||conn_method =='TCP') {
+      let serverID = "TCP/IP";
+      let netc = new TCPIPClient(_virtnet);
+      netc.onData = this.onData;
+      netc.onClose = this.onClose;
+      netc.connect(remoteip, port, callback);
     }
 
     else {
