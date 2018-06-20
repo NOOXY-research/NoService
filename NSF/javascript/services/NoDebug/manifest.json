@@ -3,5 +3,15 @@
   "displayname": "NOOXY debuger",
   "description": "A really simple debuger.",
   "Authors": ["NOOXY", "noowyee"],
-  "implementation_api": false
+  "implementation_api": false,
+  "dependencies": {
+
+    "node_packages" : {
+
+    },
+
+    "services" : {
+
+    }
+  }
 }

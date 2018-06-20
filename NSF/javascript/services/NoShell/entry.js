@@ -97,7 +97,7 @@ function start(api) {
           '[daemon]\n'+
           '  daemon [settings]\n'+
           '[service]\n'+
-          '  service [list|manifest {service name}]\n'+
+          '  service [list|[manifest|create] {service name}]\n'+
           '  service listjfunc {target service}\n'+
           '  service jfunc {target service} {target username} {target jfunc} {JSON} ---Call a JSONfunction as target user.\n'+
           '  service entity [show {entityID}|list|count]\n'+
@@ -142,6 +142,20 @@ function start(api) {
             });
           },
 
+          create: (t1, c1) => {
+            api.Service.ActivitySocket.createDefaultAdminDeamonSocket('NoServiceManager', (err, as)=> {
+              if(err) {
+                c1(false, {r:'Failed'});
+              }
+              else {
+                as.call('createService', {name: t1[0]}, (err, msg)=>{
+                  c1(false, {r:msg.s});
+                  as.close();
+                });
+              }
+            });
+          },
+
           list: (t1, c1) => {
             c1(false, {r:api.Service.returnList()});
           },
@@ -155,11 +169,6 @@ function start(api) {
           },
 
           jfunc: (t1, c1) => {
-            // setup up remote shell service by daemon default connciton
-            let DEFAULT_SERVER = api.Daemon.Settings.default_server;
-            let DAEMONTYPE = api.Daemon.Settings.connection_servers[DEFAULT_SERVER].type;
-            let DAEMONIP = api.Daemon.Settings.connection_servers[DEFAULT_SERVER].ip;
-            let DAEMONPORT =api.Daemon.Settings.connection_servers[DEFAULT_SERVER].port;
             api.Service.ActivitySocket.createDeamonSocket(DAEMONTYPE, DAEMONIP, DAEMONPORT, t1[0], t1[1], (err, as)=> {
               as.call(t1[2], t1[3],(err, msg)=>{
                 c1(false, {r:msg});

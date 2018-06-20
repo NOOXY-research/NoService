@@ -10,7 +10,7 @@
 
     },
     "services" : {
-
+      "NoServiceManager": "0.0.0"
     }
   }
 }

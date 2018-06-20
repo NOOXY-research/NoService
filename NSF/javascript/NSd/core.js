@@ -25,7 +25,11 @@ let Vars = require('./variables');
 function Core(settings) {
   let _runtime_id = Utils.generateGUID();
   let _path = settings['path'];
-
+  settings.services_path = _path+settings.services_path;
+  settings.services_files_path = _path+settings.services_files_path;
+  settings.rsa_2048_priv_key = _path+settings.rsa_2048_priv_key;
+  settings.rsa_2048_pub_key = _path+settings.rsa_2048_pub_key;
+  settings.database_path = _path+settings.database_path;
   // initialize variables
   let _connection = null;
   let _authorization = null;
@@ -138,7 +142,7 @@ function Core(settings) {
     }
 
     // setup NOOXY Service protocol secure
-    _nsps.importRSA2048KeyPair(fs.readFileSync(_path+settings.rsa_2048_priv_key, 'utf8'), fs.readFileSync(_path+settings.rsa_2048_pub_key, 'utf8'));
+    _nsps.importRSA2048KeyPair(fs.readFileSync(settings.rsa_2048_priv_key, 'utf8'), fs.readFileSync(settings.rsa_2048_pub_key, 'utf8'));
     _nsps.importCryptoModule(_nocrypto);
     // setup router
     _router.importCore(coregateway);
@@ -154,7 +158,7 @@ function Core(settings) {
 
     // setup authenticity
     _authenticity.TokenExpirePeriod = settings.token_expire_period;
-    _authenticity.importDatabase(_path+settings.database_path);
+    _authenticity.importDatabase(settings.database_path);
 
     // setup entity
     // pass
@@ -169,7 +173,7 @@ function Core(settings) {
     _authorizationhandler.importImplementationModule(_implementation);
 
     // setup service
-    _service.setupServicesPath(_path+settings.services_path);
+    _service.setupServicesPath(settings.services_path);
     _service.importAuthorization(_authorization);
     // add shell related service to List.
     if(settings.shell_service != null && settings.services.includes(settings.shell_service) == false) {
@@ -215,19 +219,19 @@ function Core(settings) {
   }
 
   this.isinitialized = () => {
-    if (fs.existsSync(_path+'eula.txt')&&fs.existsSync(_path+settings.database_path)) {
+    if (fs.existsSync(_path+'eula.txt')&&fs.existsSync(settings.database_path)) {
 
       if(settings.sercure == false) {
         return true;
       }
-      else if(fs.existsSync(_path+settings.rsa_2048_priv_key) && fs.existsSync(_path+settings.rsa_2048_pub_key)) {
+      else if(fs.existsSync(settings.rsa_2048_priv_key) && fs.existsSync(settings.rsa_2048_pub_key)) {
         return true;
       }
       else {
         Utils.tagLog('*ERR*', 'Secure is on. But RSA2048 Key Pair is not set. Please geneate it by openssl.');
         Utils.tagLog('*ERR*', 'Your settings:');
-        Utils.tagLog('*ERR*', 'PrivateKey: '+_path+settings.rsa_2048_priv_key);
-        Utils.tagLog('*ERR*', 'PublicKey: '+_path+settings.rsa_2048_pub_key);
+        Utils.tagLog('*ERR*', 'PrivateKey: '+settings.rsa_2048_priv_key);
+        Utils.tagLog('*ERR*', 'PublicKey: '+settings.rsa_2048_pub_key);
         process.exit()
         return false;
       }
@@ -241,12 +245,12 @@ function Core(settings) {
     verbose('Daemon', 'Initializing NSd...')
     verbose('Daemon', 'Creating eula...')
 
-    if (fs.existsSync(_path+settings.database_path)) {
+    if (fs.existsSync(settings.database_path)) {
       verbose('Daemon', 'Database already exist.')
     }
     verbose('Daemon', 'Creating database...')
     let _auth = new Authenticity();
-    _auth.createDatabase(_path+settings.database_path);
+    _auth.createDatabase(settings.database_path);
     _auth.createUser('root', 'displayname', 'root', 0, (err)=> {
       if(err) {
         verbose('Daemon', '[ERR] Occur failure on creating database.');

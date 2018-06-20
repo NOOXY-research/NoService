@@ -1,0 +1,23 @@
+{
+  "name": "NoServiceManager",
+
+  "version": "0.0.0",
+
+  "displayname": "NOOXY Service Framework service manager",
+
+  "description": "Providing ablilty to create, manipulate or modify NSF Services.",
+
+  "Authors": ["noowyee", "NOOXY"],
+
+  "implementation_api": false,
+
+  "dependencies": {
+
+    "node_packages" : {
+    },
+
+    "services" : {
+    }
+
+  }
+}

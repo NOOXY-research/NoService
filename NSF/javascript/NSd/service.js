@@ -560,6 +560,10 @@ function Service() {
 
   };
 
+  this.createAdminDaemonActivitySocket = (method, targetip, targetport, service, callback) => {
+    this.createDaemonActivitySocket(method, targetip, targetport, service, _local_services_owner, callback);
+  };
+
   this.createDaemonActivitySocket = (method, targetip, targetport, service, owner, callback) => {
     let err = false;
     let _data = {
@@ -573,6 +577,7 @@ function Service() {
         od: targetip,
       }
     };
+
 
     this.spwanClient(method, targetip, targetport, (err, connprofile) => {
       _ActivityRsCEcallbacks[_data.d.t] = (conn_profile, data) => {

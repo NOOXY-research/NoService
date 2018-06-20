@@ -35,6 +35,12 @@ function ServiceAPI() {
   };
 
   let _get_normal_api = (callback)=> {
+    // setup up remote shell service by daemon default connciton
+    let DEFAULT_SERVER = _coregateway.Daemon.Settings.default_server;
+    let DAEMONTYPE = _coregateway.Daemon.Settings.connection_servers[DEFAULT_SERVER].type;
+    let DAEMONIP = _coregateway.Daemon.Settings.connection_servers[DEFAULT_SERVER].ip;
+    let DAEMONPORT = _coregateway.Daemon.Settings.connection_servers[DEFAULT_SERVER].port;
+
     let _api = new _prototype();
     _api.Utils = require('./utilities');
     _api.SafeCallback = _safe_callback;
@@ -43,9 +49,19 @@ function ServiceAPI() {
         createSocket: (method, targetip, targetport, service, callback) => {
           _coregateway.Service.createActivitySocket(method, targetip, targetport, service, _safe_callback(callback));
         },
+        createDefaultDeamonSocket: (service, owner, callback) => {
+          _coregateway.Service.createDaemonActivitySocket(DAEMONTYPE, DAEMONIP, DAEMONPORT, service, owner, _safe_callback(callback));
+        },
         createDeamonSocket: (method, targetip, targetport, service, owner, callback) => {
           _coregateway.Service.createDaemonActivitySocket(method, targetip, targetport, service, owner, _safe_callback(callback));
-        }
+        },
+        createAdminDeamonSocket: (method, targetip, targetport, service, callback) => {
+          _coregateway.Service.createAdminDaemonActivitySocket(method, targetip, targetport, service, _safe_callback(callback));
+        },
+
+        createDefaultAdminDeamonSocket: (service, callback) => {
+          _coregateway.Service.createAdminDaemonActivitySocket(DAEMONTYPE, DAEMONIP, DAEMONPORT, service, _safe_callback(callback));
+        },
       },
 
       Entity: {
