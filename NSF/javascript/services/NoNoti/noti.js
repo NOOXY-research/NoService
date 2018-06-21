@@ -84,11 +84,12 @@ let NotificationDataBase = function () {
   this.createDatabase = (path) => {
     _database = new sqlite3.Database(path);
     let expiredate = Utils.DatetoSQL(Utils.addDays(new Date(), 7));
-    // types: "instant", "queue"
-    _database.run('CREATE TABLE channels(channelid text, displayname text,  type text, subscriber text, history datetime, privilege text, detail text)');
+
+    _database.run('CREATE TABLE channels(id text, displayname text, description text, subscribers text');
+    _database.run('CREATE TABLE users(userid text, userchannel, queuenoti text, channels text');
   };
 
-  this.getUser = (username, callback) => {
+  this.getChannel = (username, callback) => {
     let err = null;
     if(typeof(_cacheduser[username]) == 'undefined') {
       let user = new User(username);
@@ -105,7 +106,7 @@ let NotificationDataBase = function () {
 
 function Notification() {
   let _online_users = {};
-  
+
   function User() {
 
   }
@@ -135,7 +136,11 @@ function Notification() {
 
   }
 
-  this.addQueueNotitoChannel = (username) => {
+  this.sendQueueNotitoChannel = (username) => {
+
+  }
+
+  this.sendInstantNotitoChannel = (username) => {
 
   }
 
