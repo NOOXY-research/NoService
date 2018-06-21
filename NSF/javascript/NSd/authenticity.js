@@ -157,6 +157,12 @@ function Authenticity() {
     });
   }
 
+  this.getUserID = (username, callback) => {
+    _authdb.getUser(username, (err, user) => {
+      callback(false, user.userid);
+    });
+  }
+
   this.createUser = (username, displayname, password, privilege, callback) => {
     let pwdhash = null;
     _authdb.getUser(username, (err, user)=>{

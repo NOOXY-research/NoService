@@ -173,6 +173,7 @@ function Core(settings) {
     _authorizationhandler.importImplementationModule(_implementation);
 
     // setup service
+    _service.setDebug(settings.debug);
     _service.setupServicesPath(settings.services_path);
     _service.importAuthorization(_authorization);
     // add shell related service to List.

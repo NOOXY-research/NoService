@@ -169,7 +169,7 @@ function start(api) {
           },
 
           jfunc: (t1, c1) => {
-            api.Service.ActivitySocket.createDeamonSocket(DAEMONTYPE, DAEMONIP, DAEMONPORT, t1[0], t1[1], (err, as)=> {
+            api.Service.ActivitySocket.createDefaultDeamonSocket(t1[0], t1[1], (err, as)=> {
               as.call(t1[2], t1[3],(err, msg)=>{
                 c1(false, {r:msg});
                 as.close();

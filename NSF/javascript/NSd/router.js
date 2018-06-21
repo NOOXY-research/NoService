@@ -296,6 +296,14 @@ function Router() {
       }
 
     };
+
+    _coregateway.Connection.onClose = (connprofile) => {
+      _coregateway.Service.onConnectionClose(connprofile, (err)=>{
+        delete connprofile.returnConn();
+        delete connprofile;
+      });
+    };
+
     _coregateway.Authenticity.emitRouter = this.emit;
     _coregateway.Service.emitRouter = this.emit;
     _coregateway.Implementation.emitRouter = this.emit;

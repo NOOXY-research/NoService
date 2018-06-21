@@ -36,10 +36,32 @@ function start(api) {
   // You will need entityID to Authorize remote user. And identify remote.
   ss.onData = (entityID, data) => {
     // Get Username and process your work.
-    let username = api.Service.Entity.returnEntityValue('owner');
+    let username = api.Service.Entity.returnEntityOwner(entityID);
+    // To store your data and associated with userid INSEAD OF USERNAME!!!
+    // Since userid can be promised as a unique identifer!!!
+    let userid = null;
+    // Get userid from API
+    api.Authenticity.getUserID(username, (err, id) => {
+      userid = id;
+    });
     // process you operation here
     console.log('recieve a data');
     console.log(data);
+  }
+
+  // ServiceSocket.onClose, in case connection close.
+  ss.onClose = (entityID) => {
+    // Get Username and process your work.
+    let username = api.Service.Entity.returnEntityOwner(entityID);
+    // To store your data and associated with userid INSEAD OF USERNAME!!!
+    // Since userid can be promised as a unique identifer!!!
+    let userid = null;
+    // Get userid from API
+    api.Authenticity.getUserID(username, (err, id) => {
+      userid = id;
+    });
+    // process you operation here
+    console.log('ServiceSocket closed');
   }
 }
 

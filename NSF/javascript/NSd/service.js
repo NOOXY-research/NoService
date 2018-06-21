@@ -17,6 +17,11 @@ function Service() {
   let _ActivityRsCEcallbacks = {};
   let _daemon_auth_key = null;
   let _ASockets = {};
+  let _debug = false;
+
+  this.setDebug = (boolean) => {
+    _debug = boolean;
+  };
 
   this.importDaemonAuthKey = (key) => {
     _daemon_auth_key = key;
@@ -62,6 +67,14 @@ function Service() {
 
   this.emitRouter = () => {Utils.tagLog('*ERR*', 'emitRouter not implemented');};
 
+  this.onConnectionClose = (connprofile, callback) => {
+    let _entitiesID = connprofile.returnBundle('bundle_entities');
+    for(let i in _entitiesID) {
+      let theservice = _local_services[_entity_module.returnEntityValue(_entitiesID, 'service')];
+      theservice.sendSSClose(_entitiesID);
+    };
+    callback(false);
+  };
   // Serverside
   this.ServiceRqRouter = (connprofile, data, response_emit) => {
     let theservice = null;
@@ -173,6 +186,13 @@ function Service() {
                 "i": id
               }
             };
+            let entities_prev = connprofile.returnBundle('bundle_entities');
+            if(entities_prev != null) {
+              connprofile.setBundle('bundle_entities', [id].concat(entities_prev));
+            }
+            else {
+              connprofile.setBundle('bundle_entities', [id]);
+            }
             response_emit(connprofile, 'CS', 'rs', _data);
         });
       }
@@ -279,7 +299,8 @@ function Service() {
     };
 
     this.onData = (entityID, data) => {
-      Utils.tagLog('*ERR*', 'onData not implemented');
+      if(_debug)
+        Utils.tagLog('*WARN*', 'onData of service "'+service_name+'" not implemented');
     };
 
     this.onJFCall = (entityID, JFname, jsons, callback) => {
@@ -295,7 +316,8 @@ function Service() {
     };
 
     this.onClose = (entityID) => {
-      Utils.tagLog('*ERR*', 'onClose not implemented');
+      if(_debug)
+        Utils.tagLog('*WARN*', 'onClose of service "'+service_name+'" not implemented');
     };
 
     this.returnServiceName = () => {
@@ -360,7 +382,6 @@ function Service() {
         }
       }
       conn_profile.setBundle('bundle_entities', bundle);
-      _entity_module.deleteEntity(_entity_id);
       if(!bundle.length) {
         conn_profile.closeConnetion();
       }
@@ -456,6 +477,10 @@ function Service() {
 
     this.setupPath = (path) => {
       _service_path = path;
+    };
+
+    this.sendSSClose = (entityID) => {
+      _service_socket.onClose(entityID);
     };
 
     this.sendSSData = (entityID, data) => {

@@ -539,8 +539,7 @@ function Connection() {
   };
 
   this.onClose = (connprofile) => {
-    delete connprofile.returnConn();
-    delete connprofile;
+    Utils.tagLog('*ERR*', 'Connection module onData not implement');
   }
 
   this.getServers = (callback) => {
