@@ -280,6 +280,15 @@ function Service() {
       _jsonfunctions[name] = callback;
     };
 
+    // sercurely define a JSONfunction
+    this.sdef = (name, callback) => {
+      _jsonfunctions[name] = (json, entityID, returnJSON)=>{
+        _authorization_module.Authby.isSuperUserwithToken(entityID, ()=>{
+          callback(json, entityID, returnJSON);
+        });
+      }
+    };
+
     this.sendData = (entityID, data) => {
       _entity_module.getEntityConnProfile(entityID, (err, connprofile)=>{
         Datacallback(connprofile, entityID, data);

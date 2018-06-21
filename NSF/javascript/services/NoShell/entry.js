@@ -86,7 +86,7 @@ function start(api) {
     }
   };
   // send command
-  ss.def('sendC', (json, entityID, returnJSON)=>{
+  ss.sdef('sendC', (json, entityID, returnJSON)=>{
     let settings = api.Daemon.Settings;
     let cmd = json.c.split(spliter);
     let emeta = api.Service.Entity.returnEntityMetaData(entityID);
@@ -108,6 +108,8 @@ function start(api) {
           '  me [entitymeta|chpasswd|usermeta]\n'+
           '[sniffer]\n'+
           '  sniffer router json [on|off]'+
+          '[noti]\n'+
+          '  noti ---NOOXY notification\n'+
           '[others]\n'+
           '  echo {keyword|text} ---Echo plain text.\n'+
           '  help ---This menu.\n'+

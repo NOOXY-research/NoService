@@ -161,7 +161,7 @@ function Authorization() {
 
     // smaller have more privilege
     isSuperUser : (entityID, callback) =>{
-      let _owner = _entity_module.returnEntityValue(entityID, 'spwandomain');
+      let _owner = _entity_module.returnEntityOwner(entityID);
       _authe_module.getUserprivilege(_owner, (err, level) => {
         if(level == 0) {
           // isSuperUser
@@ -170,6 +170,19 @@ function Authorization() {
         else {
           //is not
           callback(false, false);
+        }
+      });
+    },
+
+    isSuperUserwithToken: (entityID, callback) =>{
+      this.Authby.isSuperUser(entityID, (err, pass) => {
+        if(pass) {
+          this.Authby.Token(entityID, (err, pass) => {
+            callback(err, pass);
+          })
+        }
+        else {
+          callback(err, pass);
         }
       });
     },
