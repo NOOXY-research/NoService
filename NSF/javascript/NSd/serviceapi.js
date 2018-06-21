@@ -74,6 +74,9 @@ function ServiceAPI() {
         returnEntityValue: (entityID, key) => {
           return _coregateway.Entity.returnEntityValue(entityID, key);
         },
+        returnEntityOwner: (entityID, key) => {
+          return _coregateway.Entity.returnEntityOwner(entityID, key);
+        },
         getEntitiesMetaData: (callback) => {
           _coregateway.Entity.getEntitiesMeta(_safe_callback(callback));
         },
@@ -155,6 +158,10 @@ function ServiceAPI() {
 
       updateToken: (username) => {
         return _coregateway.Authenticity.updateToken(username);
+      },
+
+      getUserMeta: (username, callback) => {
+        _coregateway.Authenticity.getUserMeta(username, callback);
       }
 
     };
@@ -200,7 +207,8 @@ function ServiceAPI() {
     _get_normal_api((err, api) => {
       api.Service.ServiceSocket = service_socket;
       api.Me = {
-        Manifest: manifest
+        Manifest: manifest,
+        FilesPath: api.Daemon.Settings.services_files_path+manifest.name
       }
       _block_super_user_api(api, (err, blocked_api)=>{
         callback(false, blocked_api);
@@ -213,7 +221,8 @@ function ServiceAPI() {
       api.Service.ServiceSocket = service_socket;
       api.Implementation = _coregateway.Implementation;
       api.Me = {
-        Manifest: manifest
+        Manifest: manifest,
+        FilesPath: api.Daemon.Settings.services_files_path+manifest.name
       }
       callback(false, api);
     });

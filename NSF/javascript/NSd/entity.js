@@ -65,6 +65,10 @@ function Entity() {
      return null;
   };
 
+  this.returnEntityOwner = (entityID) => {
+    return this.returnEntityValue(entityID, 'owner');
+  };
+
   this.getEntityConnProfile = (entityID, callback) => {
     _entities[entityID].getConnProfile(callback);
   };

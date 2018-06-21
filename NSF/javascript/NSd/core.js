@@ -53,7 +53,7 @@ function Core(settings) {
     // initialize environment
     verbose('Daemon', 'Checking environment...')
     if (this.isinitialized() == false) {
-      this.initialize(()=>{this.launch()});
+      this.initialize(this.launch);
     }
     else {
       this.launch();
@@ -251,12 +251,12 @@ function Core(settings) {
     verbose('Daemon', 'Creating database...')
     let _auth = new Authenticity();
     _auth.createDatabase(settings.database_path);
-    _auth.createUser('root', 'displayname', 'root', 0, (err)=> {
+    _auth.createUser(Vars.default_user.username, Vars.default_user.displayname, Vars.default_user.password, 0, (err)=> {
       if(err) {
         verbose('Daemon', '[ERR] Occur failure on creating database.');
       }
       else {
-        verbose('Daemon', 'NSF Superuser "root" with password "root" created. Please change password later for security.');
+        verbose('Daemon', 'NSF Superuser "'+Vars.default_user.username+'" with password "'+Vars.default_user.password+'" created. Please change password later for security.');
       }
       fs.writeFile('./eula.txt', '', function(err) {
         if(err) {
@@ -266,8 +266,6 @@ function Core(settings) {
       verbose('Daemon', 'NSd initilalized.');
       callback(err);
     });
-
-
   }
 }
 

@@ -105,7 +105,7 @@ function start(api) {
           '  auth emit [password|token] {entityID}  ---Emit authorization proccess to targeted entity.\n'+
           '[me]\n'+
           '  me\n'+
-          '  me [meta|chpasswd]\n'+
+          '  me [entitymeta|chpasswd|usermeta]\n'+
           '[sniffer]\n'+
           '  sniffer router json [on|off]'+
           '[others]\n'+
@@ -205,8 +205,19 @@ function start(api) {
         }
         else {
           _(t0, {
-            meta: (t1, c1) => {
+            chpasswd: (t1, c1) => {
+              api.Authenticity.updatePassword(api.Service.Entity.returnEntityOwner(entityID), t1[0],(err)=>{
+                c1(false, {r:'Error->'+err});
+              })
+
+            },
+            entitymeta: (t1, c1) => {
               c1(false, {r:api.Service.Entity.returnEntityMetaData(entityID)});
+            },
+            usermeta: (t1, c1) => {
+              api.Authenticity.getUserMeta(api.Service.Entity.returnEntityOwner(entityID), (err, meta)=>{
+                c1(false, {r:meta});
+              });
             }
           }, c0);
         }

@@ -1,16 +1,7 @@
 {
-  "name": "NoShellc",
-  "version": "0.0.0",
-  "displayname": "NOOXY Shell Client",
-  "description": "Default NSF Local Shell Client implementation.",
+  "name": "NoMailer",
+  "displayname": "NOOXY Mail Sender Service",
+  "description": "Mail sender for account recovery, subscribe or other stuff.",
   "Authors": ["NOOXY", "noowyee"],
   "implementation_api": false,
-  "dependencies": {
-    "node_packages" : {
-
-    },
-    "services" : {
-
-    }
-  }
 }

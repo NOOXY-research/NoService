@@ -12,6 +12,8 @@ function start(api) {
   // You need to wrap the callback funciton by api.SafeCallback.
   // E.g. setTimeout(api.SafeCallback(callback), timeout)
   let safec = api.SafeCallback;
+  // Please save and manipulate your files in this directory
+  let files_path = api.Me.FilesPath;
 
   // Access another service on this daemon
   let admin_daemon_asock = api.Servcie.ActivitySocket.createDefaultAdminDeamonSocket('Another Service', (err, activitysocket)=> {
@@ -44,6 +46,8 @@ function start(api) {
 // If the daemon stop, your service recieve close signal here.
 function close(api) {
   // Saving state of you service.
+  // Please save and manipulate your files in this directory
+  let services_files_path = api.Me.FilesPath;
 }
 
 // Export your work for system here.

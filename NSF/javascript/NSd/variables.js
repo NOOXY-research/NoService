@@ -4,6 +4,7 @@ let Variables = {
   'copyright': 'copyright(c)2018 NOOXY inc.',
   'default_user': {
     'username': 'admin',
+    'displayname': 'NSF Superuser',
     'password': 'admin'
   }
 }

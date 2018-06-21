@@ -88,41 +88,6 @@ function Router() {
       }
     },
 
-    // nooxy service protocol implementation of "signup"
-    SU: {
-      emitter : (connprofile, username, password) => {
-        _senddata(connprofile, 'SU', 'rq', {username : username, password : password});
-      },
-
-      handler : (connprofile, session, data) => {
-        let rq_rs_pos = {
-          rq: "Client",
-          rs: "Server"
-        }
-
-        let actions = {
-          rq : null,
-
-          rs : (connprofile, data) => {
-
-          }
-        }
-        connprofile.getRemotePosition((err, pos)=> {
-          if(rq_rs_pos[session] == pos || rq_rs_pos[session] == 'Both') {
-            if(session == 'rq') {
-              actions[session](connprofile, data, _senddata);
-            }
-            else {
-              actions[session](connprofile, data);
-            }
-          }
-          else {
-            _sessionnotsupport();
-          }
-        });
-      }
-    },
-
     // nooxy service protocol implementation of "get token"
     GT: {
       emitter : (connprofile, data) => {
@@ -168,11 +133,6 @@ function Router() {
           }
         });
       }
-    },
-
-    // nooxy service protocol implementation of "kill token"
-    KT: {
-
     },
 
     // nooxy service protocol implementation of "Authorization"

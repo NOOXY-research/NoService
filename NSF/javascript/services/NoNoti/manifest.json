@@ -1,7 +1,17 @@
 {
-  "name": "NoMailer",
-  "displayname": "NOOXY Mail Sender Service",
-  "description": "Mail sender for account recovery or other stuff.",
-  "Authors": ["NOOXY", "noowyee"],
+  "name": "NoNoti",
+  "version": "0.0.0",
+  "displayname": "NOOXY Notification manager.",
+  "description": "Create Channel to push your notification.",
+  "Authors": [
+    "NOOXY",
+    "noowyee"
+  ],
   "implementation_api": false,
+  "dependencies": {
+    "node_packages": {
+      "sqlite3": "^0.0.0"
+    },
+    "services": {}
+  }
 }

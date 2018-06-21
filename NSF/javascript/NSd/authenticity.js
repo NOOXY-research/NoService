@@ -21,7 +21,7 @@ let Authdb = function () {
     this.loadsql = (next) => {
 
       // sql statement
-      let sql = 'SELECT username, displayname, pwdhash, token, tokenexpire, detail, privilege FROM users WHERE username = ?';
+      let sql = 'SELECT username, userid, displayname, pwdhash, token, tokenexpire, detail, privilege FROM users WHERE username = ?';
 
       _database.get(sql, [username], (err, row) => {
         if(err || typeof(row) == 'undefined') {
@@ -31,6 +31,7 @@ let Authdb = function () {
         else {
           this.exisitence = true;
           this.username = row.username;
+          this.userid = row.userid;
           this.displayname = row.displayname;
           this.pwdhash = row.pwdhash;
           this.token = row.token;
@@ -49,16 +50,17 @@ let Authdb = function () {
       let sql = null;
       let err = null;
       if(typeof(this.username)=='undefined') {
-        throw 'username undefined.';
+        callback(new Error('username undefined.'));
       }
       else {
         if(this.exisitence) {
-          sql = 'UPDATE users SET username=?, displayname=?, pwdhash=?, token=?, tokenexpire=?, privilege=?, detail=? WHERE username = ?';
+          sql = 'UPDATE users SET username=?, userid=?, displayname=?, pwdhash=?, token=?, tokenexpire=?, privilege=?, detail=? WHERE username = ?';
         }
         else {
-          sql = 'INSERT INTO users(username, displayname, pwdhash, token, tokenexpire, privilege, detail) VALUES (?, ?, ?, ?, ?, ?, ?);'
+          sql = 'INSERT INTO users(username, userid, displayname, pwdhash, token, tokenexpire, privilege, detail) VALUES (?, ?, ?, ?, ?, ?, ?, ?);'
+          this.userid = Utils.generateGUID();
         }
-        _database.run(sql, [this.username, this.displayname, this.pwdhash, this.token, this.tokenexpire, this.privilege, this.detail], (err) => {
+        _database.run(sql, [this.username, this.userid, this.displayname, this.pwdhash, this.token, this.tokenexpire, this.privilege, this.detail], (err) => {
           if(err) {
             callback(err);
           }
@@ -76,6 +78,7 @@ let Authdb = function () {
       _database.run('DELETE FROM users WHERE username=?;', [this.username])
       this.exisitence = false;
       this.username = null;
+      this.userid = null;
       this.displayname = null;
       this.pwdhash = null;
       this.token = null;
@@ -92,7 +95,7 @@ let Authdb = function () {
   this.createDatabase = (path) => {
     _database = new sqlite3.Database(path);
     let expiredate = Utils.DatetoSQL(Utils.addDays(new Date(), 7));
-    _database.run('CREATE TABLE users(username text, displayname text,  pwdhash text, token text, tokenexpire datetime, privilege text, detail text)');
+    _database.run('CREATE TABLE users(username text, userid text, displayname text,  pwdhash text, token text, tokenexpire datetime, privilege text, detail text)');
   };
 
   this.getUser = (username, callback) => {
@@ -139,6 +142,21 @@ function Authenticity() {
     callback(err, user);
   };
 
+  this.getUserMeta = (username, callback) => {
+    _authdb.getUser(username, (err, user) => {
+      let user_meta = {
+        exisitence : user.exisitence,
+        username : user.username,
+        userid : user.userid,
+        displayname : user.displayname,
+        tokenexpire : user.tokenexpire,
+        privilege : user.privilege,
+        detail : user.detail
+      }
+      callback(false, user_meta);
+    });
+  }
+
   this.createUser = (username, displayname, password, privilege, callback) => {
     let pwdhash = null;
     _authdb.getUser(username, (err, user)=>{
@@ -152,7 +170,6 @@ function Authenticity() {
         user.tokenexpire = Utils.DatetoSQL(expiredate);
         user.privilege = privilege;
         user.updatesql(callback);
-        callback(false);
       }
       else {
         let err = new Error("[Authenticity] User create error.");
@@ -179,8 +196,7 @@ function Authenticity() {
     if(newpassword != null && newpassword.length ) {
       _authdb.getUser(username, (err, user)=>{
         user.pwdhash = crypto.createHmac('sha256', SHA256KEY).update(newpassword).digest('hex');
-        user.updatesql();
-        callback(false);
+        user.updatesql(callback);
       });
     }
     else {
@@ -218,17 +234,22 @@ function Authenticity() {
 
   };
 
-  this.updateToken = (username) => {
+  this.updateToken = (username, callback) => {
     let _token=null;
     _authdb.getUser(username, (err, user)=>{
       let expiredate = new Date();
       expiredate = Utils.addDays(expiredate, this.TokenExpirePeriod);
       user.token = Utils.generateGUID();
       user.tokenexpire = Utils.DatatoSQL(expiredate);
-      user.updatesql();
-      _token = user.token;
+      user.updatesql((err)=>{
+        if(!err) {
+          callback(err, user.token);
+        }
+        else {
+          callback(err);
+        }
+      });
     });
-    return _token;
   }
 
   this.getUserToken = (username, password, callback) => {
@@ -238,7 +259,9 @@ function Authenticity() {
           let now = new Date();
           let expiredate = Utils.SQLtoDate(user.tokenexpire);
           if(now > expiredate) {
-            callback(false, this.updateToken(username));
+            this.updateToken(username, (err, token) => {
+              callback(error, token);
+            });
           }
           else {
             callback(false, user.token);
