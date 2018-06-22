@@ -193,6 +193,7 @@ function Service() {
             else {
               connprofile.setBundle('bundle_entities', [id]);
             }
+            _local_services[data.s].sendSSConnection(id);
             response_emit(connprofile, 'CS', 'rs', _data);
         });
       }
@@ -327,6 +328,11 @@ function Service() {
     this.onClose = (entityID) => {
       if(_debug)
         Utils.tagLog('*WARN*', 'onClose of service "'+service_name+'" not implemented');
+    };
+
+    this.onConnect = (entityID) => {
+      if(_debug)
+        Utils.tagLog('*WARN*', 'onConnect of service "'+service_name+'" not implemented');
     };
 
     this.returnServiceName = () => {
@@ -486,6 +492,10 @@ function Service() {
 
     this.setupPath = (path) => {
       _service_path = path;
+    };
+
+    this.sendSSConnection = (entityID) => {
+      _service_socket.onConnect(entityID);
     };
 
     this.sendSSClose = (entityID) => {

@@ -1,4 +1,10 @@
+// NSF/services/NoNoti/noti.js
+// Description:
+// "NoNoti/noti.js" description.
+// Copyright 2018 NOOXY. All Rights Reserved.
+
 let sqlite3 = require('sqlite3');
+let fs = require('fs');
 
 generateGUID = function() {
   return s4() + s4() + '-' + s4() + '-' + s4() + '-' +s4() + '-' + s4() + s4() +
@@ -212,7 +218,6 @@ let NotificationDataBase = function () {
 
   this.createDatabase = (path) => {
     _database = new sqlite3.Database(path);
-
     _database.run('CREATE TABLE channels(id text, displayname text, description text, subscribers text');
     _database.run('CREATE TABLE users(userid text, userchannel text, queuenotis text, channels text');
     _database.run('CREATE TABLE notis(id text, channel text, title text, content text');
@@ -264,7 +269,9 @@ let NotificationDataBase = function () {
 function Notification() {
   let _notificationdb = new NotificationDataBase();
   let _online_users = {};
-  let _activated_channels = {};
+  let _cached_channels = {};
+
+  let _clear_cache_interval = 120; // mins
 
   let _sendNotisCallback = (userid , Notis) => {
     this.onNotis(userid , Notis);
@@ -277,13 +284,28 @@ function Notification() {
 
     this.sendNotis = (notis) => {
       let notislist = [];
-      for(let i in notis) {
-
+      let i = 0;
+      let loop = () => {
+        _notidb.getNoti(notis[i], (notidb)=> {
+          let Noti_json = {
+            t:notidb.title,
+            c:notidb.content,
+            i:notidb.id
+          };
+          notislist.push(Noti);
+          if(i<notis.length) {
+            i++
+            loop();
+          }
+        });
+      }
+      if(notis.length!=0) {
+        loop();
       }
       _sendNotisCallback(userid, notislist);
     };
 
-    this.removeQueueNoti = (queuenotis) => {
+    this.removeQueueNoti = (queuenotis, callback) => {
       for(let qnotiid in queuenotis) {
         let index = _queuenotis.indexOf(qnotiid);
         if (index > -1) {
@@ -292,13 +314,15 @@ function Notification() {
       }
       _notificationdb.getUser(userid, (err, userdb)=> {
         userdb.queuenotis = JSON.stringify(_queuenotis);
+        userdb.updatesql(callback);
       });
     };
 
-    this.addQueueNoti = (queuenotis) => {
+    this.addQueueNoti = (queuenotis, callback) => {
       _queuenotis = _queuenotis.concat(queuenotis);
       _notificationdb.getUser(userid, (err, userdb)=> {
         userdb.queuenotis = JSON.stringify(_queuenotis);
+        userdb.updatesql(callback);
       });
     };
 
@@ -306,16 +330,17 @@ function Notification() {
       return _queuenotis;
     };
 
-    this.addChannel = (channelid) => {
+    this.addChannel = (channelid, callback) => {
       if(!_channels.includes(channelid)) {
         _channels.push(_channels.push);
         _notificationdb.getUser(userid, (err, userdb)=> {
           userdb.userchannel = JSON.stringify(_channels);
+          userdb.updatesql(callback);
         });
       }
     };
 
-    this.removeChannel = (channelid) => {
+    this.removeChannel = (channelid, callback) => {
       if(channel != _userchannelid) {
         if(_channels.includes(channelid)) {
           let index = _channels.indexOf(channelid);
@@ -324,6 +349,7 @@ function Notification() {
           }
           _notificationdb.getUser(userid, (err, userdb)=> {
             userdb.userchannel = JSON.stringify(_channels);
+            userdb.updatesql(callback);
           });
         }
       }
@@ -385,10 +411,18 @@ function Notification() {
       });
     };
 
+    this.updateDisplayname = (displayname, callback) => {
+      _displayname = displayname;
+      _notificationdb.getChannel(channelid, (err, channeldb)=> {
+        channeldb.displayname = displayname;
+        channeldb.updatesql(callback);
+      });
+    }
+
     this.updateDescription = (description, callback) => {
       _description = description;
       _notificationdb.getChannel(channelid, (err, channeldb)=> {
-        channeldb.description = JSON.stringify(_subscriber);
+        channeldb.description = description;
         channeldb.updatesql(callback);
       });
     }
@@ -467,66 +501,121 @@ function Notification() {
       let queuenotis = JSON.parse(userdb.queuenotis);
       let notis = [];
       let i = 0;
-      let loop = () => {
-        _notidb.getNoti(queuenotis[i], (notidb)=> {
-          let Noti_json = {
-            t:notidb.title,
-            c:notidb.content,
-            i:notidb.id
-          };
-          queuenotis.push(Noti);
-          if(i<queuenotis.length) {
-            loop();
-          }
-        });
-      }
-      loop();
-      _user.sendNotis(notis);
+      _user.sendNotis(_user.returnQueueNoti());
     });
-
   };
 
   this.createChannel = (name, description, callback) => {
-    callback(false, channelid);
+    let id = generateGUID();
+    let c = new Channel(id);
+    c.updateDisplayname(name, (err)=>{
+      c.updateDescription(description, (err2)=>{
+        callback(false, id);
+      });
+    })
+
   };
 
   this.deleteOnlineUser = (userid) => {
     delete _online_users[userid];
   };
 
-  this.addUsertoChannel = (userid, channelid) => {
-
+  this.addUsertoChannel = (userid, channelid, callback) => {
+    if(_cached_channels[channelid] != null) {
+      _cached_channels[channelid].addSubscriber(userid, callback);
+    }
+    else {
+      this.cacheChannel(channelid, (err)=>{
+        _cached_channels[channelid].addSubscriber(userid, callback);
+      });
+    }
   };
 
-  this.deleteNotisofUser = (userid, notisid) => {
-
+  this.deleteUserfromChannel = (userid, channelid, callback) => {
+    if(_cached_channels[channelid] != null) {
+      _cached_channels[channelid].removeSubscriber(userid, callback);
+    }
+    else {
+      this.cacheChannel(channelid, (err)=>{
+        _cached_channels[channelid].removeSubscriber(userid, callback);
+      });
+    }
   };
 
-  this.addUsertoChannel = (userid) => {
-
+  this.deleteNotisofUser = (userid, notisid, callback) => {
+    if(_online_users[userid] != null) {
+      _online_users[userid].removeQueueNoti(notisid, callback);
+    }
+    else {
+      let u = new User(userid);
+      u.loadsql((err)=>{
+        u.removeQueueNoti(notisid, callback);
+      });
+    }
   };
 
-  this.deleteUserfromChannel = (userid) => {
-
+  this.addQueueNotistoChannel = (channelid, notis, callback) => {
+    if(_cached_channels[channelid] != null) {
+      _cached_channels[channelid].addQueueNotis(notis, callback);
+    }
+    else {
+      this.cacheChannel(channelid, (err)=>{
+        _cached_channels[channelid].addQueueNotis(notis, callback);
+      });
+    }
   };
 
-  this.addQueueNotistoChannel = (userid) => {
-
+  this.sendInstantNotitoChannel = (channelid, notis, callback) => {
+    if(_cached_channels[channelid] != null) {
+      _cached_channels[channelid].sendInstantNotis(notis, callback);
+    }
+    else {
+      this.cacheChannel(channelid, (err)=>{
+        _cached_channels[channelid].sendInstantNotis(notis, callback);
+      });
+    }
   };
 
-  this.sendInstantNotitoChannel = (userid) => {
 
+  this.addQueueNotistoUser = (userid, notis, callback) => {
+    if(_online_users[userid] != null) {
+      _online_users[userid].addQueueNoti(notis, callback);
+    }
+    else {
+      let u = new User(userid);
+      u.loadsql((err)=>{
+        u.addQueueNoti(notis, callback);
+      });
+    }
+  };
+
+  this.sendInstantNotitoUser = (userid, notis) => {
+    if(_online_users[userid] != null) {
+      _online_users[userid].sendNotis(notis, callback);
+    }
+    else {
+      let u = new User(userid);
+      u.loadsql((err)=>{
+        u.sendNotis(notis);
+      });
+    }
   };
 
   this.onNotis = (userid , Notis) => {
-    api.Utils.tagLog('*ERR*', 'onNotis not implemented.');
+    console.log('*ERR* onNotis not implemented.');
   }
 
-  this.activateChannel = () => {
-
+  this.cacheChannel = (channelid, callback) => {
+    _cached_channels[channelid] =  new Channel(channelid);
+    _cached_channels[channelid].loaddb(callback);
   };
 
-  this.importDatabase = () => {
+  this.importDatabase = (path) => {
+    if(!fs.existsSync(path)) {
+      _notificationdb.createDatabase(path);
+    }
+    else {
+      _notificationdb.importDatabase(path);
 
   };
 }

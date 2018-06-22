@@ -32,6 +32,17 @@ function start(api) {
     returnJSON(false, json_be_returned);
   });
 
+  // Safe define a JSONfunction.
+  ss.sdef('SafeJSONfunction', (json, entityID, returnJSON)=>{
+    // Code here for JSONfunciton
+    // Return Value for JSONfunction call. Otherwise remote will not recieve funciton return value.
+    let json_be_returned = {
+      d: 'Hello! NOOXY Service Framework!'
+    }
+    // First parameter for error, next is JSON to be returned.
+    returnJSON(false, json_be_returned);
+  });
+
   // ServiceSocket.onData, in case client send data to this Service.
   // You will need entityID to Authorize remote user. And identify remote.
   ss.onData = (entityID, data) => {
@@ -48,7 +59,12 @@ function start(api) {
     console.log('recieve a data');
     console.log(data);
   }
-
+  // Send data to client.
+  ss.sendData(entityID, 'My data to be transfer.');
+  // ServiceSocket.onConnect, in case on new connection.
+  ss.onConnect = (entityID) => {
+    // Do something.
+  }
   // ServiceSocket.onClose, in case connection close.
   ss.onClose = (entityID) => {
     // Get Username and process your work.
