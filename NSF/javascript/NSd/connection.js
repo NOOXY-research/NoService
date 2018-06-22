@@ -66,8 +66,11 @@ function Connection() {
     let _virt_servers = {};
     // define a socket pair
     function SocketPair(hip, cip) {
+      let selfdestruct = ()=> {
+        delete this;
+      }
       // define an virtual socket
-      function VirtualSocket(type, lIP, rIP) {
+      function VirtualSocket(type, lIP, rIP, selfdestruct) {
         this.type = type;
         this.send = (d)=>{Utils.tagLog('*ERR*', 'VirtualSocket send not implemented. Of '+this.type+'. d=>'+d)};
         let _types = {
@@ -88,7 +91,7 @@ function Connection() {
         let _returntype = (type) => {
           return _types[type];
         }
-
+        this.close = () => {Utils.tagLog('*ERR*', 'VirtualSocket onClose not implemented. Of '+this.type)};
         this.on = (type, callback)=>{_types[type] = callback;};
         this.emit = (type, d) =>{
           let _exe = _returntype(type);
@@ -105,9 +108,22 @@ function Connection() {
         let _d = {msg: msg}
         _vss.emit('message', _d);
       };
+
       _vss.send = (msg) => {
         let _d = {msg: msg}
         _vcs.emit('message', _d);
+      };
+
+      _vcs.close = (msg) => {
+        let _d = {msg: msg}
+        _vss.emit('close', _d);
+        selfdestruct();
+      };
+
+      _vss.close = (msg) => {
+        let _d = {msg: msg}
+        _vcs.emit('close', _d);
+        selfdestruct();
       };
 
       this.ClientSocket = _vcs;
@@ -192,7 +208,7 @@ function Connection() {
     let _wss = null;
     let _clients = {};
 
-    this.closeConnetion = ()=> {};
+    this.close = (GUID) => {_clients[GUID].close()};
 
     this.onData = (connprofile, data) => {Utils.tagLog('*ERR*', 'onData not implemented');};
 
@@ -241,6 +257,10 @@ function Connection() {
   function WSClient() {
     let _ws = null
 
+    this.close = () => {
+      _ws.close();
+    };
+
     this.onData = (connprofile, data) => {Utils.tagLog('*ERR*', 'onData not implemented');};
 
     this.onClose = () => {Utils.tagLog('*ERR*', 'onClose not implemented');};
@@ -262,12 +282,11 @@ function Connection() {
       });
 
       _ws.on('error', (error) => {
-          Utils.tagLog('*ERR*', '%s', error);
+          Utils.tagLog('*ERR*', error);
           vs.close();
       });
 
       _ws.on('close', (error) => {
-          Utils.tagLog('*ERR*', '%s', error);
           this.onClose(connprofile);
       });
 
@@ -370,6 +389,8 @@ function Connection() {
     let _vnets = null;
     let _clients = {};
 
+    this.close = (GUID) => {_clients[GUID].close()};
+
     this.onData = (connprofile, data) => {Utils.tagLog('*ERR*', 'LocalServer onData not implemented.');};
 
     this.onClose = (connprofile) => {Utils.tagLog('*ERR*', 'LocalServer onClose not implemented');};
@@ -394,8 +415,10 @@ function Connection() {
             this.onData(connprofile, message);
           });
 
-          vs.on('error', (message) => {
-            Utils.tagLog('*ERR*', '%s', error);
+          vs.on('error', (err) => {
+            Utils.tagLog('*ERR*', err);
+            delete _clients[connprofile.returnGUID()];
+            this.onClose(connprofile);
             vs.close();
           });
 
@@ -413,6 +436,8 @@ function Connection() {
     // virtnet client
     let _vnetc = null;
     let _vs = null
+
+    this.close = (GUID) => {_vs.close()};
 
     this.onData = (connprofile, data) => {Utils.tagLog('*ERR*', 'onData not implemented');};
 
@@ -434,12 +459,12 @@ function Connection() {
         });
 
         vs.on('error', (error) => {
-            Utils.tagLog('*ERR*', '%s', error);
+            Utils.tagLog('*ERR*', error);
             vs.close();
         });
 
         vs.on('close', (error) => {
-            Utils.tagLog('*ERR*', '%s', error);
+            Utils.tagLog('*ERR*', error);
         });
 
       });

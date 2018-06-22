@@ -1,0 +1,14 @@
+{
+  "name": "NoChat",
+  "version": "0.0.0",
+  "displayname": "Service fullname",
+  "description": "Service description",
+  "Authors": [
+    "Author"
+  ],
+  "implementation_api": false,
+  "dependencies": {
+    "node_packages": {},
+    "services": {}
+  }
+}

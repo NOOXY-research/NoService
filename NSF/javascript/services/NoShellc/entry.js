@@ -108,7 +108,7 @@ function start(api) {
     let _daemon_display_name = api.Daemon.Settings.daemon_display_name;
     console.log(_manifest.displayname+' started.');
     console.log(_manifest.description);
-    console.log('connecting to daemon(nsp('+DAEMONTYPE+')://'+DAEMONIP+':'+DAEMONPORT+')...');
+    console.log('connecting to default server of daemon(nsp('+DAEMONTYPE+')://'+DAEMONIP+':'+DAEMONPORT+')...');
     // console.log('To access '+_daemon_display_name+'. You need to auth yourself.');
     // api.Implementation.returnImplement('signin')(DAEMONTYPE, DAEMONIP, DAEMONPORT, (err, token)=>{
     //   if(err) {

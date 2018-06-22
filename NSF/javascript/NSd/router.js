@@ -289,7 +289,6 @@ function Router() {
         }
       }
       else {
-        console.log( connprofile.returnConnMethod());
         let json = JSON.parse(data);
         _tellJSONSniffers(json);
         methods[json.m].handler(connprofile, json.s, json.d);
