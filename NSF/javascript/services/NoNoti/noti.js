@@ -254,7 +254,11 @@ function Notification() {
   let _notidb = new NotificationDataBase();
   let _online_users = {};
 
-  function User(_sendNotisCallback) {
+  let _sendNotisCallback = (userid , Notis) => {
+    this.onNotis(userid , Notis);
+  }
+
+  function User(userid) {
     this.sendNotis = (Notis_json) => {
 
     }; //
@@ -266,40 +270,49 @@ function Notification() {
 
 
   this.addOnlineUser = (userid) => {
+    let _user = new User(userid);
+    _online_users[userid] = _user;
+    _notidb.getUser(userid, (userdb)=> {
 
-  }
+    });
+    user.sendNotis();
+  };
+
+  this.createChannel = (name, description, callback) => {
+    callback(false, channelid);
+  };
 
   this.deleteOnlineUser = (userid) => {
 
-  }
+  };
+
+  this.addUsertoChannel = (userid, channelid) => {
+
+  };
+
+  this.deleteNotisofUser = (userid, notisid) => {
+
+  };
 
   this.addUsertoChannel = (userid) => {
 
-  }
-
-  this.deleteNotiofUser = (userid) => {
-
-  }
-
-  this.addUsertoChannel = (userid) => {
-
-  }
+  };
 
   this.deleteUserfromChannel = (userid) => {
 
-  }
+  };
 
   this.addQueueNotitoChannel = (userid) => {
 
-  }
+  };
 
   this.addInstantNotitoChannel = (userid) => {
 
-  }
+  };
 
   this.deleteQueueNotifromChannel = (userid) => {
 
-  }
+  };
 
   this.onNotis = (userid , Notis) => {
     api.Utils.tagLog('*ERR*', 'onNotis not implemented.');

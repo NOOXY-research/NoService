@@ -45,6 +45,32 @@ let Authdb = function () {
 
     };
 
+    this.loadbyUserIdsql = (userid, next) => {
+
+      // sql statement
+      let sql = 'SELECT username, userid, displayname, pwdhash, token, tokenexpire, detail, privilege FROM users WHERE userid = ?';
+
+      _database.get(sql, [userid], (err, row) => {
+        if(err || typeof(row) == 'undefined') {
+          this.exisitence = false;
+        }
+        else {
+          this.exisitence = true;
+          this.username = row.username;
+          this.userid = row.userid;
+          this.displayname = row.displayname;
+          this.pwdhash = row.pwdhash;
+          this.token = row.token;
+          this.tokenexpire = row.tokenexpire;
+          this.privilege = row.privilege;
+          this.detail = row.detail;
+        }
+        _database.close();
+        next(false);
+      })
+
+    };
+
     // write newest information of user to database.
     this.updatesql = (callback) => {
       let sql = null;
@@ -110,6 +136,16 @@ let Authdb = function () {
     else {
       callback(err, _cacheduser[username]);
     }
+  };
+
+  this.getUserbyId = (userid, callback) => {
+    let user = new User();
+    user.loadbyUserIdsql(userid, (err)=>{
+      if(typeof(_cacheduser[user.username]) == 'undefined') {
+          _cacheduser[username] = user;
+      }
+      callback(err, _cacheduser[username]);
+    });
   }
 }
 
@@ -155,13 +191,19 @@ function Authenticity() {
       }
       callback(false, user_meta);
     });
-  }
+  };
 
   this.getUserID = (username, callback) => {
     _authdb.getUser(username, (err, user) => {
       callback(false, user.userid);
     });
-  }
+  };
+
+  this.converUserIDtoUsername = (userid, callback) => {
+    _authdb.getUserbyId(userid, (err, user) => {
+      callback(false, user.username);
+    });
+  };
 
   this.createUser = (username, displayname, password, privilege, callback) => {
     let pwdhash = null;
