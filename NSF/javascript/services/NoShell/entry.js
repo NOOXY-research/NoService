@@ -172,8 +172,12 @@ function start(api) {
 
           jfunc: (t1, c1) => {
             api.Service.ActivitySocket.createDefaultDeamonSocket(t1[0], t1[1], (err, as)=> {
-              as.call(t1[2], t1[3],(err, msg)=>{
-                c1(false, {r:msg});
+              let jfuncd = {};
+              as.onData = (data) => {
+                jfuncd['onData no.'+Object.keys(jfuncd).length] = data;
+              }
+              as.call(t1[2], JSON.parse(t1[3]),(err, msg)=>{
+                c1(false, {r:'jfunc onData: \n'+ JSON.stringify(jfuncd, null, 2)+'\njfunc returnValue: '+JSON.stringify(msg)});
                 as.close();
               });
             });

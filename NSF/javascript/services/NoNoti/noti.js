@@ -16,7 +16,7 @@ function s4() {
 }
 
 // database obj for accessing database of authenticity.
-let NotificationDataBase = function () {
+function NotificationDataBase() {
   let _database = null;
   let _cachedchannels = {};
   let _cachedusers = {};
@@ -27,7 +27,6 @@ let NotificationDataBase = function () {
   function Channel(ChannelID) {
 
     this.loadsql = (next) => {
-
       // sql statement
       let sql = 'SELECT id, displayname, description, subscribers FROM channels WHERE id = ?';
 
@@ -225,21 +224,21 @@ let NotificationDataBase = function () {
 
   this.getChannel = (channelid, callback) => {
     let err = null;
-    if(typeof(_cachedchannel[channelid]) == 'undefined') {
+    if(_cachedchannels[channelid] == null) {
       let channel = new Channel(channelid);
       channel.loadsql((err)=>{
-        _cachedchannel[channelid] = channel;
-        callback(err, _cachedchannel[channelid]);
+        _cachedchannels[channelid] = channel;
+        callback(err, _cachedchannels[channelid]);
       });
     }
     else {
-      callback(err, _cachedchannel[channelid]);
+      callback(err, _cachedchannels[channelid]);
     }
   }
 
   this.getUser = (userid, callback) => {
     let err = null;
-    if(typeof(_cachedusers[userid]) == 'undefined') {
+    if(cachedusers[userid] == null) {
       let user = new User(userid);
       user.loadsql((err)=>{
         _cachedusers[userid] = user;
@@ -253,7 +252,7 @@ let NotificationDataBase = function () {
 
   this.getNoti = (notiid, callback) => {
     let err = null;
-    if(typeof(_cachednotis[notiid]) == 'undefined') {
+    if(cachednotis[notiid] == null) {
       let noti = new Noti(notiid);
       noti.loadsql((err)=>{
         _cachednotis[notiid] = noti;
@@ -412,7 +411,7 @@ function Notification() {
     };
 
     this.updateDisplayname = (displayname, callback) => {
-      _displayname = displayname;
+
       _notificationdb.getChannel(channelid, (err, channeldb)=> {
         channeldb.displayname = displayname;
         channeldb.updatesql(callback);
@@ -420,8 +419,8 @@ function Notification() {
     }
 
     this.updateDescription = (description, callback) => {
-      _description = description;
       _notificationdb.getChannel(channelid, (err, channeldb)=> {
+        console.log(channeldb);
         channeldb.description = description;
         channeldb.updatesql(callback);
       });
@@ -505,6 +504,7 @@ function Notification() {
   this.createChannel = (name, description, callback) => {
     let id = generateGUID();
     let c = new Channel(id);
+    console.log(name);
     c.updateDisplayname(name, (err)=>{
       c.updateDescription(description, (err2)=>{
         callback(false, id);

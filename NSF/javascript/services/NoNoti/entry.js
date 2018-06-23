@@ -36,6 +36,8 @@ function start(api) {
 
   // for server
   ss.def('createChannel', (json, entityID, returnJSON)=>{
+    console.log(json);
+    console.log(typeof(json));
     Notisys.createChannel(json.name, json.description, (err, channelid)=>{
       let json_be_returned = {
         i: channelid
