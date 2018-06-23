@@ -218,9 +218,9 @@ let NotificationDataBase = function () {
 
   this.createDatabase = (path) => {
     _database = new sqlite3.Database(path);
-    _database.run('CREATE TABLE channels(id text, displayname text, description text, subscribers text');
-    _database.run('CREATE TABLE users(userid text, userchannel text, queuenotis text, channels text');
-    _database.run('CREATE TABLE notis(id text, channel text, title text, content text');
+    _database.run('CREATE TABLE channels(id text, displayname text, description text, subscribers text)');
+    _database.run('CREATE TABLE users(userid text, userchannel text, queuenotis text, channels text)');
+    _database.run('CREATE TABLE notis(id text, channel text, title text, content text)');
   };
 
   this.getChannel = (channelid, callback) => {
@@ -286,7 +286,7 @@ function Notification() {
       let notislist = [];
       let i = 0;
       let loop = () => {
-        _notidb.getNoti(notis[i], (notidb)=> {
+        _notificationdb.getNoti(notis[i], (notidb)=> {
           let Noti_json = {
             t:notidb.title,
             c:notidb.content,
@@ -495,14 +495,11 @@ function Notification() {
 
 
   this.addOnlineUser = (userid) => {
-    let _user = new User(userid);
-    _online_users[userid] = _user;
-    _notidb.getUser(userid, (userdb)=> {
-      let queuenotis = JSON.parse(userdb.queuenotis);
-      let notis = [];
-      let i = 0;
+    if(_online_users[userid] == null) {
+      let _user = new User(userid);
+      _online_users[userid] = _user;
       _user.sendNotis(_user.returnQueueNoti());
-    });
+    }
   };
 
   this.createChannel = (name, description, callback) => {
@@ -513,7 +510,6 @@ function Notification() {
         callback(false, id);
       });
     })
-
   };
 
   this.deleteOnlineUser = (userid) => {
@@ -601,6 +597,18 @@ function Notification() {
     }
   };
 
+  this.removeQueueNoti = (userid, notis) => {
+    if(_online_users[userid] != null) {
+      _online_users[userid].removeQueueNoti(notis, callback);
+    }
+    else {
+      let u = new User(userid);
+      u.loadsql((err)=>{
+        u.removeQueueNoti(notis);
+      });
+    }
+  };
+
   this.onNotis = (userid , Notis) => {
     console.log('*ERR* onNotis not implemented.');
   }
@@ -616,7 +624,7 @@ function Notification() {
     }
     else {
       _notificationdb.importDatabase(path);
-
+    }
   };
 }
 

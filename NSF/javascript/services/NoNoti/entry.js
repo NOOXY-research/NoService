@@ -4,22 +4,25 @@
 // Copyright 2018 NOOXY. All Rights Reserved.
 
 let Notification = require('./noti');
+let Notisys = new Notification();
+
 // service entry point
 function start(api) {
   let ss = api.Service.ServiceSocket;
   let safec = api.SafeCallback;
   let files_path = api.Me.FilesPath;
+  Notisys.importDatabase(files_path+'test.sqlite3');
   let _online_users = {};
 
   // Access another service on this daemon
-  let admin_daemon_asock = api.Servcie.ActivitySocket.createDefaultAdminDeamonSocket('Another Service', (err, activitysocket)=> {
+  let admin_daemon_asock = api.Service.ActivitySocket.createDefaultAdminDeamonSocket('Another Service', (err, activitysocket)=> {
     // accessing other service
   });
 
-  Notification.onNotis = (userid , Notis) => {
+  Notisys.onNotis = (userid , Notis) => {
     let entitiesID = _online_users[userid];
     for(let i in entitiesID) {
-      ss.sendData(entitiesID, {
+      ss.sendData(entitiesID[i], {
         n: Notis
       });
     }
@@ -33,25 +36,24 @@ function start(api) {
 
   // for server
   ss.def('createChannel', (json, entityID, returnJSON)=>{
-    Notification.createChannel(json.name, json.description, (err, channelid)=>{
+    Notisys.createChannel(json.name, json.description, (err, channelid)=>{
       let json_be_returned = {
         i: channelid
       }
-      returnJSON(false, json_be_returned);
+      returnJSON(err, json_be_returned);
     });
   });
 
   // for server
   ss.def('sendUser', (json, entityID, returnJSON)=>{
-    Notification.sendInstantNotitoUser(json.userid, json.notis);
+    Notisys.sendInstantNotitoUser(json.userid, json.notis);
     let json_be_returned = {}
     returnJSON(false, json_be_returned);
   });
 
   // for server
   ss.def('removeUserQnotis', (json, entityID, returnJSON)=>{
-    let type = json.type;
-
+    Notisys.sendInstantNotitoUser(json.userid, json.notis);
     let json_be_returned = {}
     returnJSON(false, json_be_returned);
   });
@@ -66,7 +68,7 @@ function start(api) {
 
   ss.onConnect = (entityID) => {
     // Get Username and process your work.
-    let username = api.Service.Entity.returnEntityValue('owner');
+    let username = api.Service.Entity.returnEntityOwner(entityID);
 
     api.Authenticity.getUserID(username, (err, id) => {
       let list = _online_users[id];
@@ -77,13 +79,13 @@ function start(api) {
         list = [entityID];
       }
       _online_users[id] = list;
-      Notification.addOnlineUser(id);
+      Notisys.addOnlineUser(id);
     });
   };
 
   ss.onClose = (entityID) => {
     // Get Username and process your work.
-    let username = api.Service.Entity.returnEntityValue('owner');
+    let username = api.Service.Entity.returnEntityOwner(entityID);
 
     api.Authenticity.getUserID(username, (err, id) => {
       let list = _online_users[id];
@@ -95,7 +97,7 @@ function start(api) {
       }
       else {
         list = null;
-        Notification.deleteOnlineUser(id);
+        Notisys.deleteOnlineUser(id);
       }
       _online_users[id] = list;
     });
@@ -105,7 +107,7 @@ function start(api) {
   // You will need entityID to Authorize remote user. And identify remote.
   ss.onData = (entityID, data) => {
     // Get Username and process your work.
-    let username = api.Service.Entity.returnEntityValue('owner');
+    let username = api.Service.Entity.returnEntityOwner(entityID);
     // process you operation here
     console.log('recieve a data');
     console.log(data);

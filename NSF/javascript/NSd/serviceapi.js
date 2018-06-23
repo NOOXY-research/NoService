@@ -162,8 +162,11 @@ function ServiceAPI() {
 
       getUserMeta: (username, callback) => {
         _coregateway.Authenticity.getUserMeta(username, callback);
-      }
+      },
 
+      getUserID: (username, callback) => {
+        _coregateway.Authenticity.getUserID(username, callback);
+      }
     };
 
     _api.Connection = {
@@ -208,7 +211,7 @@ function ServiceAPI() {
       api.Service.ServiceSocket = service_socket;
       api.Me = {
         Manifest: manifest,
-        FilesPath: api.Daemon.Settings.services_files_path+manifest.name
+        FilesPath: api.Daemon.Settings.services_files_path+manifest.name+'/'
       }
       _block_super_user_api(api, (err, blocked_api)=>{
         callback(false, blocked_api);
@@ -222,7 +225,7 @@ function ServiceAPI() {
       api.Implementation = _coregateway.Implementation;
       api.Me = {
         Manifest: manifest,
-        FilesPath: api.Daemon.Settings.services_files_path+manifest.name
+        FilesPath: api.Daemon.Settings.services_files_path+manifest.name+'/'
       }
       callback(false, api);
     });

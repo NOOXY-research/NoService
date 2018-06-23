@@ -120,7 +120,7 @@ function Service() {
                   // status
                   "t": data.t,
                   "i": data.i,
-                  "s": "Fail"
+                  "s": err
                 }
               };
             }
@@ -155,47 +155,60 @@ function Service() {
 
       // nooxy service protocol implementation of "Call Service: createEntity"
       CE: (connprofile, data, response_emit) => {
-        // create a description of this service entity.
-        let _entity_json = {
-          serverid: connprofile.returnServerID(),
-          service: data.s,
-          mode: data.m,
-          daemonauthkey: data.k,
-          type: "Activity",
-          spwandomain: connprofile.returnClientIP(),
-          owner: data.o,
-          ownerdomain: data.od,
-          connectiontype:connprofile.returnConnMethod(),
-          description: data.d
-        };
+        if(_local_services[data.s] != null) {
+          // create a description of this service entity.
+          let _entity_json = {
+            serverid: connprofile.returnServerID(),
+            service: data.s,
+            mode: data.m,
+            daemonauthkey: data.k,
+            type: "Activity",
+            spwandomain: connprofile.returnClientIP(),
+            owner: data.o,
+            ownerdomain: data.od,
+            connectiontype:connprofile.returnConnMethod(),
+            description: data.d
+          };
 
-        if(_entity_json.mode == null) {
-          _entity_json.mode = 'normal';
-        }
+          if(_entity_json.mode == null) {
+            _entity_json.mode = 'normal';
+          }
 
-        if(_entity_json.ownerdomain == null) {
-          _entity_json.ownerdomain == connprofile.returnHostIP();
-        }
+          if(_entity_json.ownerdomain == null) {
+            _entity_json.ownerdomain == connprofile.returnHostIP();
+          }
 
-        _entity_module.registerEntity(_entity_json, connprofile, (err, id) => {
-            let _data = {
-              "m": "CE",
-              "d": {
-                // temp id
-                "t": data.t,
-                "i": id
+          _entity_module.registerEntity(_entity_json, connprofile, (err, id) => {
+              let _data = {
+                "m": "CE",
+                "d": {
+                  // temp id
+                  "t": data.t,
+                  "i": id
+                }
+              };
+              let entities_prev = connprofile.returnBundle('bundle_entities');
+              if(entities_prev != null) {
+                connprofile.setBundle('bundle_entities', [id].concat(entities_prev));
               }
-            };
-            let entities_prev = connprofile.returnBundle('bundle_entities');
-            if(entities_prev != null) {
-              connprofile.setBundle('bundle_entities', [id].concat(entities_prev));
+              else {
+                connprofile.setBundle('bundle_entities', [id]);
+              }
+              response_emit(connprofile, 'CS', 'rs', _data);
+              _local_services[data.s].sendSSConnection(id);
+          });
+        }
+        else {
+          let _data = {
+            "m": "CE",
+            "d": {
+              // temp id
+              "t": data.t,
+              "i": null
             }
-            else {
-              connprofile.setBundle('bundle_entities', [id]);
-            }
-            _local_services[data.s].sendSSConnection(id);
-            response_emit(connprofile, 'CS', 'rs', _data);
-        });
+          };
+          response_emit(connprofile, 'CS', 'rs', _data);
+        }
       }
     }
 
@@ -237,6 +250,7 @@ function Service() {
     let methods = {
       // nooxy service protocol implementation of "Call Activity: ActivitySocket"
       AS: () => {
+        console.log(_ASockets);
         _ASockets[data.d.i].onData(data.d.d);
         let _data = {
           "m": "AS",

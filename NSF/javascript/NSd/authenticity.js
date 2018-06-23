@@ -22,7 +22,6 @@ let Authdb = function () {
 
       // sql statement
       let sql = 'SELECT username, userid, displayname, pwdhash, token, tokenexpire, detail, privilege FROM users WHERE username = ?';
-
       _database.get(sql, [username], (err, row) => {
         if(err || typeof(row) == 'undefined') {
           this.username = username;
@@ -195,13 +194,15 @@ function Authenticity() {
 
   this.getUserID = (username, callback) => {
     _authdb.getUser(username, (err, user) => {
-      callback(false, user.userid);
+      let id = user.userid;
+      callback(false, id);
     });
   };
 
-  this.converUserIDtoUsername = (userid, callback) => {
+  this.getUsernamebyId = (userid, callback) => {
     _authdb.getUserbyId(userid, (err, user) => {
-      callback(false, user.username);
+      let username = user.username;
+      callback(false, username);
     });
   };
 
