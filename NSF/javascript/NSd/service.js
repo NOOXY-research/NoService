@@ -45,7 +45,7 @@ function Service() {
           "d": d,
         }
       };
-
+      console.log(_data);
       this.emitRouter(conn_profile, 'CA', _data);
     }
     for(let i=0; i<service_list.length; i++) {
@@ -69,11 +69,22 @@ function Service() {
 
   this.onConnectionClose = (connprofile, callback) => {
     let _entitiesID = connprofile.returnBundle('bundle_entities');
-    for(let i in _entitiesID) {
-      let theservice = _local_services[_entity_module.returnEntityValue(_entitiesID, 'service')];
-      theservice.sendSSClose(_entitiesID);
-    };
-    callback(false);
+    let i = 0;
+    if(_entitiesID.length) {
+      let loop = () => {
+        let theservice = _local_services[_entity_module.returnEntityValue(_entitiesID, 'service')];
+        theservice.sendSSClose(_entitiesID[i], (err)=>{
+          if(i < _entitiesID.length-1) {
+            i++
+            loop();
+          }
+        });
+      };
+      callback(false);
+    }
+    else {
+      callback(false);
+    }
   };
   // Serverside
   this.ServiceRqRouter = (connprofile, data, response_emit) => {
@@ -339,9 +350,10 @@ function Service() {
 
     };
 
-    this.onClose = (entityID) => {
+    this.onClose = (entityID, callback) => {
       if(_debug)
         Utils.tagLog('*WARN*', 'onClose of service "'+service_name+'" not implemented');
+      callback(false);
     };
 
     this.onConnect = (entityID) => {
@@ -512,8 +524,8 @@ function Service() {
       _service_socket.onConnect(entityID);
     };
 
-    this.sendSSClose = (entityID) => {
-      _service_socket.onClose(entityID);
+    this.sendSSClose = (entityID, callback) => {
+      _service_socket.onClose(entityID, callback);
     };
 
     this.sendSSData = (entityID, data) => {

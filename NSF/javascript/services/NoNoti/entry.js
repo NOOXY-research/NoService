@@ -83,13 +83,14 @@ function start(api) {
     });
   };
 
-  ss.onClose = (entityID) => {
+  ss.onClose = (entityID, callback) => {
     // Get Username and process your work.
     let username = api.Service.Entity.returnEntityOwner(entityID);
-
+    console.log(entityID);
     api.Authenticity.getUserID(username, (err, id) => {
+
       let list = _online_users[id];
-      if(list.length != 1) {
+      if(list.length > 1) {
         let index = list.indexOf(entityID);
         if (index > -1) {
           list.splice(entityID, 1);
@@ -101,6 +102,7 @@ function start(api) {
       }
       _online_users[id] = list;
     });
+    callback(false);
   }
 
   // ServiceSocket.onData, in case client send data to this Service.
