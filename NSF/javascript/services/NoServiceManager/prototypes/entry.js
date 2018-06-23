@@ -62,11 +62,13 @@ function start(api) {
   // Send data to client.
   ss.sendData(entityID, 'My data to be transfer.');
   // ServiceSocket.onConnect, in case on new connection.
-  ss.onConnect = (entityID) => {
+  ss.onConnect = (entityID, callback) => {
     // Do something.
+    // report error;
+    callback(false);
   }
   // ServiceSocket.onClose, in case connection close.
-  ss.onClose = (entityID) => {
+  ss.onClose = (entityID, callback) => {
     // Get Username and process your work.
     let username = api.Service.Entity.returnEntityOwner(entityID);
     // To store your data and associated with userid INSEAD OF USERNAME!!!
@@ -78,6 +80,8 @@ function start(api) {
     });
     // process you operation here
     console.log('ServiceSocket closed');
+    // report error;
+    callback(false);
   }
 }
 

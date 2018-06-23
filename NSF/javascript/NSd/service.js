@@ -82,6 +82,32 @@ function Service() {
       theservice = _local_services[_entity_module.returnEntityValue(data.d.i, 'service')];
     }
     let methods = {
+      // nooxy service protocol implementation of "Call Service: Vertify Entity"
+      VE: (connprofile, data, response_emit) => {
+        theservice.sendSSConnection(data.i, (err)=> {
+          let _data = null;
+          if(err) {
+            _data = {
+              m: "VE",
+              d: {
+                i: data.i,
+                "s": "Fail"
+              }
+            }
+          }
+          else {
+            _data = {
+              m: "VE",
+              d: {
+                i: data.i,
+                "s": "OK"
+              }
+            }
+          }
+          response_emit(connprofile, 'CS', 'rs', _data);
+        });
+
+      },
       // nooxy service protocol implementation of "Call Service: ServiceSocket"
       SS: (connprofile, data, response_emit) => {
         let _data = null;
@@ -195,7 +221,6 @@ function Service() {
                 connprofile.setBundle('bundle_entities', [id]);
               }
               response_emit(connprofile, 'CS', 'rs', _data);
-              _local_services[data.s].sendSSConnection(id);
           });
         }
         else {
@@ -220,6 +245,12 @@ function Service() {
   this.ServiceRsRouter =  (connprofile, data) => {
 
     let methods = {
+      // nooxy service protocol implementation of "Call Service: Vertify Connection"
+      VE: (connprofile, data) => {
+        if(data.d.s == 'OK') {
+          _ASockets[data.d.i].launch();
+        }
+      },
       // nooxy service protocol implementation of "Call Service: ServiceSocket"
       SS: (connprofile, data) => {
 
@@ -235,8 +266,23 @@ function Service() {
       },
       // nooxy service protocol implementation of "Call Activity: createEntity"
       CE: (connprofile, data) => {
-        // create a description of this service entity.
-        _ActivityRsCEcallbacks[data.d.t](connprofile, data);
+
+        // tell server finish create
+        if(data.d.i != null) {
+          // create a description of this service entity.
+          _ActivityRsCEcallbacks[data.d.t](connprofile, data);
+          let _data = {
+            "m": "VE",
+            "d": {
+              "i": data.d.i,
+            }
+          };
+
+          this.emitRouter(connprofile, 'CS', _data);
+        }
+        else {
+          delete   _ActivityRsCEcallbacks[data.d.t];
+        }
       }
     }
 
@@ -250,7 +296,6 @@ function Service() {
     let methods = {
       // nooxy service protocol implementation of "Call Activity: ActivitySocket"
       AS: () => {
-        console.log(_ASockets);
         _ASockets[data.d.i].onData(data.d.d);
         let _data = {
           "m": "AS",
@@ -339,14 +384,16 @@ function Service() {
 
     };
 
-    this.onClose = (entityID) => {
+    this.onClose = (entityID, callback) => {
       if(_debug)
         Utils.tagLog('*WARN*', 'onClose of service "'+service_name+'" not implemented');
+      callback(false);
     };
 
-    this.onConnect = (entityID) => {
+    this.onConnect = (entityID, callback) => {
       if(_debug)
         Utils.tagLog('*WARN*', 'onConnect of service "'+service_name+'" not implemented');
+      callback(false);
     };
 
     this.returnServiceName = () => {
@@ -355,18 +402,43 @@ function Service() {
 
   };
 
-  function ActivitySocket(conn_profile, entity_id, Datacallback, JFCallback) {
+  function ActivitySocket(conn_profile, Datacallback, JFCallback) {
+    let _entity_id = null;
+    let _launched = false;
+
+    let wait_ops = [];
+    let wait_launch_ops = [];
+
     let entities_prev = conn_profile.returnBundle('bundle_entities');
     if(entities_prev != null) {
-      conn_profile.setBundle('bundle_entities', [entity_id].concat(entities_prev));
+      conn_profile.setBundle('bundle_entities', [_entity_id].concat(entities_prev));
     }
     else {
-      conn_profile.setBundle('bundle_entities', [entity_id]);
+      conn_profile.setBundle('bundle_entities', [_entity_id]);
     }
 
-    let _entity_id = entity_id;
     let _conn_profile = conn_profile;
     let _jfqueue = {};
+
+    let exec = (callback) => {
+      if(_launched != false) {
+        callback();
+      }
+      else {
+        wait_ops.push(callback);
+      }
+    };
+
+    this.launch = () => {
+      _launched = true;
+      for(let i in wait_ops) {
+        wait_ops[i]();
+      }
+    };
+
+    this.setEntityID = (id) => {
+      _entity_id = id;
+    };
 
     this.sendJFReturn = (err, tempid, returnvalue) => {
       if(err) {
@@ -379,12 +451,14 @@ function Service() {
 
     // JSONfunction call
     this.call = (name, Json, callback) => {
-      let tempid = Utils.generateUniqueID();
-      _jfqueue[tempid] = (err, returnvalue) => {
-
-        callback(err, returnvalue);
+      let op = ()=> {
+        let tempid = Utils.generateUniqueID();
+        _jfqueue[tempid] = (err, returnvalue) => {
+          callback(err, returnvalue);
+        };
+        JFCallback(conn_profile, _entity_id, name, tempid, Json);
       };
-      JFCallback(conn_profile, _entity_id, name, tempid, Json);
+      exec(op);
     }
 
     this.returnEntityID = () => {
@@ -392,7 +466,10 @@ function Service() {
     };
 
     this.sendData = (data) => {
-      Datacallback(conn_profile, _entity_id, data);
+      let op = ()=> {
+        Datacallback(conn_profile, _entity_id, data);
+      };
+      exec(op);
     };
 
     this.onData = (data) => {
@@ -404,17 +481,20 @@ function Service() {
     };
 
     this.close = () => {
-      let bundle = conn_profile.returnBundle('bundle_entities');
-      for (var i=bundle.length-1; i>=0; i--) {
-        if (bundle[i] === _entity_id) {
-            bundle.splice(i, 1);
+      let op = ()=> {
+        let bundle = conn_profile.returnBundle('bundle_entities');
+        for (var i=bundle.length-1; i>=0; i--) {
+          if (bundle[i] === _entity_id) {
+              bundle.splice(i, 1);
+          }
+        }
+        conn_profile.setBundle('bundle_entities', bundle);
+        if(!bundle.length) {
+          conn_profile.closeConnetion();
         }
       }
-      conn_profile.setBundle('bundle_entities', bundle);
-      if(!bundle.length) {
-        conn_profile.closeConnetion();
-      }
-    }
+      exec(op);
+    };
   };
 
   // object for managing service.
@@ -508,8 +588,8 @@ function Service() {
       _service_path = path;
     };
 
-    this.sendSSConnection = (entityID) => {
-      _service_socket.onConnect(entityID);
+    this.sendSSConnection = (entityID, callback) => {
+      _service_socket.onConnect(entityID, callback);
     };
 
     this.sendSSClose = (entityID) => {
@@ -601,10 +681,10 @@ function Service() {
     };
 
     this.spwanClient(method, targetip, targetport, (err, connprofile) => {
-      _ActivityRsCEcallbacks[_data.d.t] = (conn_profile, data) => {
-        let _as = null;
+      let _as = new ActivitySocket(connprofile, _sscallback ,  _jscallback);
+      _ActivityRsCEcallbacks[_data.d.t] = (connprofile, data) => {
         if(data.d.i != "FAIL") {
-          _as = new ActivitySocket(conn_profile, data.d.i, _sscallback ,  _jscallback);
+          _as.setEntityID(data.d.i);
           _ASockets[data.d.i] = _as;
           callback(false, _as);
         }
@@ -638,10 +718,11 @@ function Service() {
 
 
     this.spwanClient(method, targetip, targetport, (err, connprofile) => {
-      _ActivityRsCEcallbacks[_data.d.t] = (conn_profile, data) => {
-        let _as = null;
+      let _as = new ActivitySocket(connprofile, _sscallback ,  _jscallback);
+      _ActivityRsCEcallbacks[_data.d.t] = (connprofile, data) => {
+
         if(data.d.i != "FAIL") {
-          _as = new ActivitySocket(conn_profile, data.d.i, _sscallback ,  _jscallback);
+          _as.setEntityID(data.d.i);
           _ASockets[data.d.i] = _as;
           callback(false, _as);
         }

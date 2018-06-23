@@ -66,10 +66,9 @@ function start(api) {
     returnJSON(false, json_be_returned);
   });
 
-  ss.onConnect = (entityID) => {
+  ss.onConnect = (entityID, callback) => {
     // Get Username and process your work.
     let username = api.Service.Entity.returnEntityOwner(entityID);
-
     api.Authenticity.getUserID(username, (err, id) => {
       let list = _online_users[id];
       if(list != null) {
@@ -81,9 +80,10 @@ function start(api) {
       _online_users[id] = list;
       Notisys.addOnlineUser(id);
     });
+    callback(false);
   };
 
-  ss.onClose = (entityID) => {
+  ss.onClose = (entityID, callback) => {
     // Get Username and process your work.
     let username = api.Service.Entity.returnEntityOwner(entityID);
 
@@ -101,6 +101,7 @@ function start(api) {
       }
       _online_users[id] = list;
     });
+    callback(false);
   }
 
   // ServiceSocket.onData, in case client send data to this Service.

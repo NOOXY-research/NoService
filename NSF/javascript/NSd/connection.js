@@ -115,14 +115,12 @@ function Connection() {
       };
 
       _vcs.close = (msg) => {
-        let _d = {msg: msg}
-        _vss.emit('close', _d);
+        _vss.emit('close');
         selfdestruct();
       };
 
       _vss.close = (msg) => {
-        let _d = {msg: msg}
-        _vcs.emit('close', _d);
+        _vcs.emit('close');
         selfdestruct();
       };
 
@@ -423,6 +421,7 @@ function Connection() {
           });
 
           vs.on('close', (message) => {
+            console('OwO');
             delete _clients[connprofile.returnGUID()];
             this.onClose(connprofile);
           });
