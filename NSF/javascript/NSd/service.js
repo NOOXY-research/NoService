@@ -70,7 +70,10 @@ function Service() {
   this.onConnectionClose = (connprofile, callback) => {
     let _entitiesID = connprofile.returnBundle('bundle_entities');
     let i = 0;
-    if(_entitiesID.length) {
+    if(_entitiesID==null) {
+      callback(true);
+    }
+    else if(_entitiesID.length) {
       let loop = () => {
         let theservice = _local_services[_entity_module.returnEntityValue(_entitiesID, 'service')];
         theservice.sendSSClose(_entitiesID[i], (err)=>{

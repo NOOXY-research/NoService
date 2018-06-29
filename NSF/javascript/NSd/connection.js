@@ -332,7 +332,7 @@ function Connection() {
 
         socket.on('error', (message) => {
           Utils.tagLog('*ERR*', message);
-          socket.close();
+          socket.destroy();
         });
 
         socket.on('close', (message) => {

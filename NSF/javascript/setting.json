@@ -9,12 +9,12 @@
     {
       "type": "WebSocket",
       "ip": "0.0.0.0",
-      "port": 1268
+      "port": 1267
     },
     {
       "type": "TCP/IP",
       "ip": "0.0.0.0",
-      "port": 2222
+      "port": 2212
     }
   ],
 
@@ -47,6 +47,11 @@
   "shell_client_service": "NoShellc",
 
   "debug_service": "NoDebug",
+
+  "debug_config": {
+  	"show_json": true,
+	"show_conn_data": false
+  },
 
   "verbose": false,
 
