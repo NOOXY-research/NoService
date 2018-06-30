@@ -252,7 +252,7 @@ function Core(settings) {
     verbose('Daemon', 'Creating database...')
     let _auth = new Authenticity();
     _auth.createDatabase(settings.database_path);
-    _auth.createUser(Vars.default_user.username, Vars.default_user.displayname, Vars.default_user.password, 0, (err)=> {
+    _auth.createUser(Vars.default_user.username, Vars.default_user.displayname, Vars.default_user.password, 0, null, (err)=> {
       if(err) {
         verbose('Daemon', '[ERR] Occur failure on creating database.');
       }

@@ -22,56 +22,15 @@ function start(api) {
 
   // JSONfunction is a function that can be defined, which others entities can call.
   // It is a NOOXY Service Framework Standard
-  ss.def('createUser', (json, entityID, returnJSON)=>{
+  ss.def('JSONfunction', (json, entityID, returnJSON)=>{
+    // Code here for JSONfunciton
+    // Return Value for JSONfunction call. Otherwise remote will not recieve funciton return value.
     let json_be_returned = {
-      "e": false,
-      "s": 'Unstated.'
+      d: 'Hello! NOOXY Service Framework!'
     }
-    // In case of Superuser privilege.
-    if(json.pm <= 0) {
-      api.Authorization.Authby.isSuperUser(entityID, (err, pass)=>{
-        if(pass) {
-          api.Authorization.Authby.Password(entityID, (err, pass2)=>{
-            if(pass2) {
-              api.Authenticity.createUser(json.un, json.dn, json.pw, json.pm, json.dc, (err)=>{
-                json_be_returned.s = 'User created.';
-                returnJSON(false, json_be_returned);
-              });
-            }
-            else {
-              json_be_returned.e = true;
-              json_be_returned.s = 'Password invalid!';
-              returnJSON(false, json_be_returned);
-            }
-          });
-        }
-        else {
-          json_be_returned.e = true;
-          json_be_returned.s = 'You are not a superuser!';
-          returnJSON(false, json_be_returned);
-        }
-      });
-    }
-    else {
-      api.Authenticity.createUser(json.un, json.dn, json.pw, json.pm, json.dc, (err)=>{
-        json_be_returned.s = 'User created.';
-        returnJSON(false, json_be_returned);
-      });
-    }
+    // First parameter for error, next is JSON to be returned.
+    returnJSON(false, json_be_returned);
   });
-
-  // CreateUser of function.
-  // ss.sdef('getUserProfile', (json, entityID, returnJSON)=>{
-  //   let json_be_returned = {
-  //     s: 'Unsuccessful.'
-  //   }
-  //
-  //   api.Authenticity.createUser(json.u, json.u, json.p, json.p, (err)=> {
-  //
-  //     // First parameter for error, next is JSON to be returned.
-  //     returnJSON(false, json_be_returned);
-  //   });
-  // });
 
   // Safe define a JSONfunction.
   ss.sdef('SafeJSONfunction', (json, entityID, returnJSON)=>{
@@ -101,7 +60,7 @@ function start(api) {
     console.log(data);
   }
   // Send data to client.
-  // ss.sendData('A entity ID', 'My data to be transfer.');
+  ss.sendData('A entity ID', 'My data to be transfer.');
   // ServiceSocket.onConnect, in case on new connection.
   ss.onConnect = (entityID, callback) => {
     // Do something.

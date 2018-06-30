@@ -211,7 +211,7 @@ function Authenticity() {
     });
   };
 
-  this.createUser = (username, displayname, password, privilege, callback) => {
+  this.createUser = (username, displayname, password, privilege, detail, callback) => {
     let pwdhash = null;
     _authdb.getUser(username, (err, user)=>{
       if(user.exisitence == false || username == null|| password == null || privilege == null) {
@@ -223,6 +223,7 @@ function Authenticity() {
         user.token = Utils.generateGUID();
         user.tokenexpire = Utils.DatetoSQL(expiredate);
         user.privilege = privilege;
+        user.detail = detail;
         user.updatesql(callback);
       }
       else {

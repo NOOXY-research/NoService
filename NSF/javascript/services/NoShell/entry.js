@@ -103,11 +103,13 @@ function start(api) {
           '  service entity [show {entityID}|list|count]\n'+
           '[auth]\n'+
           '  auth emit [password|token] {entityID}  ---Emit authorization proccess to targeted entity.\n'+
+          '[user]\n'+
+          '  user create {username} {displayname} {password} {privilege} {description} {profilephoto} {language} {email} {phone} {gender} {physical address}  ---Create a NOOXY user.\n'+
           '[me]\n'+
           '  me\n'+
           '  me [entitymeta|chpasswd|usermeta|updatetoken]\n'+
           '[sniffer]\n'+
-          '  sniffer router json [on|off]'+
+          '  sniffer router json [on|off]\n'+
           '[noti]\n'+
           '  noti ---NOOXY notification\n'+
           '[others]\n'+
@@ -185,13 +187,35 @@ function start(api) {
               as.onData = (data) => {
                 jfuncd['onData no.'+Object.keys(jfuncd).length] = data;
               }
-              as.call(t1[2], JSON.parse(t1[3]),(err, msg)=>{
+              let json_string = "";
+              for(let i=3; i<t1.length; i++) {
+                json_string += t1[i];
+              }
+              as.call(t1[2], JSON.parse(json_string), (err, msg)=>{
                 c1(false, {r:'jfunc onData: \n'+ JSON.stringify(jfuncd==null?'{}':jfuncd, null, 2)+'\njfunc returnValue: '+JSON.stringify(msg)});
                 as.close();
               });
             });
           }
 
+        }, c0);
+      },
+
+      user: (t0, c0) => {
+        _(t0, {
+          create: (t1, c1) => {
+            api.Service.ActivitySocket.createDefaultAdminDeamonSocket('NoUser', (err, as)=> {
+              if(err) {
+                c1(false, {r:'Failed'});
+              }
+              else {
+                as.call('createUser', {un: t1[0], dn: t1[1], pw: t1[2], pm: t1[3], dc: t1[4], pp: t1[5],lg: t1[6], em: t1[7],ph: t1[8],gd: t1[9], ad: t1[10]}, (err, msg)=>{
+                  c1(false, {r:msg});
+                  as.close();
+                });
+              }
+            });
+          }
         }, c0);
       },
 

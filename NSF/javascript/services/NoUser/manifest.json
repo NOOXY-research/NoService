@@ -11,5 +11,59 @@
   "dependencies": {
     "node_packages": {},
     "services": {}
+  },
+  "JSONfunciton_prototypes": {
+    "reProf": {
+      "displayname": "Return the NOOXY user's profile.",
+      "description": "Returning a full profile of a NOOXY user.",
+      "secure": true,
+      "protocol": {
+        "JSON_call": {
+          "c": "Plaintext of the command."
+        },
+
+        "JSON_return": {
+          "un": "username",
+          "dn": "displayname",
+          "pm": "privilege",
+          "dc": "description",
+          "pp": "profilephoto",
+          
+          "lg": "language",
+          "em": "email",
+          "ph": "phone",
+          "gd": "gender",
+          "ad": "physical address"
+        }
+      }
+    },
+
+    "createUser": {
+      "displayname": "Create a NOOXY USER",
+      "description": "Creating NOOXY user with specified settings.",
+      "secure": false,
+      "protocol": {
+        "JSON_call": {
+          "un": "username",
+          "dn": "displayname",
+          "pw": "password",
+          "pm": "privilege",
+          "dc": "description",
+          "pp": "profilephoto",
+
+          "lg": "language",
+          "em": "email",
+          "ph": "phone",
+          "gd": "gender",
+          "ad": "physical address"
+
+        },
+
+        "JSON_return": {
+          "e": "error",
+          "s": "state"
+        }
+      }
+    }
   }
 }

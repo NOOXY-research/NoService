@@ -15,7 +15,7 @@ function ServiceAPI() {
         callback(a, b, c, d, e, f, g, h, i, j, k, l, m, n ,o, p, q, r, s);
       }
       catch (err) {
-        Utils.tagLog('*ERR*', 'Service API occured error.');
+        Utils.tagLog('*ERR*', 'Service API occured error. Please restart daemon.');
         console.log(err);
       }
     }
@@ -148,8 +148,8 @@ function ServiceAPI() {
     };
 
     _api.Authenticity = {
-      createUser: (username, displayname, password, privilege, callback) => {
-        _coregateway.Authenticity.createUser(username, displayname, password, privilege, _safe_callback(callback));
+      createUser: (username, displayname, password, privilege, detail, callback) => {
+        _coregateway.Authenticity.createUser(username, displayname, password, privilege, detail, _safe_callback(callback));
       },
 
       deleteUser: (username, callback) => {

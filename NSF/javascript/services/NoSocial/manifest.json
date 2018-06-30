@@ -1,27 +1,16 @@
 {
-  "name": "servicename",
-
+  "name": "NoSocial",
   "version": "0.0.0",
-
   "displayname": "Service fullname",
-
   "description": "Service description",
-
-  "Authors": ["Author"],
-
+  "Authors": [
+    "Author"
+  ],
   "implementation_api": false,
-
   "dependencies": {
-
-    "node_packages" : {
-
-    },
-
-    "services" : {
-
-    }
+    "node_packages": {},
+    "services": {}
   },
-
   "JSONfunciton_prototypes": {
     "jfunc_name": {
       "displayname": "JSONfunciton",

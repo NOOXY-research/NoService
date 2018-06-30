@@ -49,14 +49,14 @@
 
   "debug_service": "NoDebug",
 
+  "debug": false,
+
   "debug_config": {
   	"show_json": true,
 	"show_conn_data": false
   },
 
   "verbose": false,
-
-  "debug": true,
 
   "shell_client_service_delay": 0,
 
