@@ -16,7 +16,7 @@ function start(api) {
   let files_path = api.Me.FilesPath;
 
   // Access another service on this daemon
-  let admin_daemon_asock = api.Servcie.ActivitySocket.createDefaultAdminDeamonSocket('Another Service', (err, activitysocket)=> {
+  let admin_daemon_asock = api.Service.ActivitySocket.createDefaultAdminDeamonSocket('Another Service', (err, activitysocket)=> {
     // accessing other service
   });
 
@@ -60,7 +60,7 @@ function start(api) {
     console.log(data);
   }
   // Send data to client.
-  ss.sendData(entityID, 'My data to be transfer.');
+  ss.sendData('A entity ID', 'My data to be transfer.');
   // ServiceSocket.onConnect, in case on new connection.
   ss.onConnect = (entityID, callback) => {
     // Do something.

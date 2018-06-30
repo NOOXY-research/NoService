@@ -32,7 +32,8 @@
 
   "services": [
     "NoServiceManager",
-    "NoNoti"
+    "NoNoti",
+    "NoUser"
   ],
 
   "trusted_domains": [

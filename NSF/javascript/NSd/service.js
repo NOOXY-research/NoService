@@ -45,7 +45,6 @@ function Service() {
           "d": d,
         }
       };
-      console.log(_data);
       this.emitRouter(conn_profile, 'CA', _data);
     }
     for(let i=0; i<service_list.length; i++) {
@@ -339,8 +338,8 @@ function Service() {
     methods[data.m](connprofile, data.d);
   };
 
-  function ServiceSocket(service_name, Datacallback) {
-    let _jsonfunctions = {};
+  function ServiceSocket(service_name, Datacallback, prototype) {
+    let _jsonfunctions = prototype==null?{}:prototype;
     // JSON Function
 
     let _send_handler = null;
@@ -350,17 +349,22 @@ function Service() {
       return Object.keys(_jsonfunctions);
     };
 
+    this.returnJSONfuncDict = () => {
+      return _jsonfunctions;
+    };
+
     this.def = (name, callback) => {
-      _jsonfunctions[name] = callback;
+      _jsonfunctions[name] = _jsonfunctions[name] == null?{}:_jsonfunctions[name];
+      _jsonfunctions[name].obj = callback;
     };
 
     // sercurely define a JSONfunction
     this.sdef = (name, callback) => {
-      _jsonfunctions[name] = (json, entityID, returnJSON)=>{
+      this.def(name, (json, entityID, returnJSON)=>{
         _authorization_module.Authby.isSuperUserwithToken(entityID, ()=>{
           callback(json, entityID, returnJSON);
         });
-      }
+      });
     };
 
     this.sendData = (entityID, data) => {
@@ -388,7 +392,7 @@ function Service() {
 
     this.onJFCall = (entityID, JFname, jsons, callback) => {
       try {
-        _jsonfunctions[JFname](JSON.parse(jsons==null?'{}':jsons), entityID, (err, returnVal)=>{
+        _jsonfunctions[JFname].obj(JSON.parse(jsons==null?'{}':jsons), entityID, (err, returnVal)=>{
           callback(err, returnVal);
         });
       }
@@ -520,7 +524,6 @@ function Service() {
     let _service_module = null;
     let _service_manifest = null;
 
-
     this.launch = (depended_service_dict) => {
       // check node packages dependencies
 
@@ -569,7 +572,7 @@ function Service() {
         _entity_id = entity_id;
       });
 
-      _service_socket = new ServiceSocket(_service_name, Datacallback); // _onJFCAll = on JSONfunction call
+      _service_socket = new ServiceSocket(_service_name, Datacallback, _service_manifest.JSONfunciton_prototypes); // _onJFCAll = on JSONfunction call
 
       // create the service for module.
       try {
@@ -596,6 +599,10 @@ function Service() {
 
     this.returnJSONfuncList = () => {
       return _service_socket.returnJSONfuncList();
+    };
+
+    this.returnJSONfuncDict = () => {
+      return _service_socket.returnJSONfuncDict();
     };
 
     this.setupPath = (path) => {
@@ -756,6 +763,10 @@ function Service() {
 
   this.returnJSONfuncList = (service_name) => {
     return _local_services[service_name].returnJSONfuncList();
+  }
+
+  this.returnJSONfuncDict = (service_name) => {
+    return _local_services[service_name].returnJSONfuncDict();
   }
 
   this.returnList = () => {

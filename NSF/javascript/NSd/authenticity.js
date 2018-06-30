@@ -38,10 +38,8 @@ let Authdb = function () {
           this.privilege = row.privilege;
           this.detail = row.detail;
         }
-        _database.close();
         next(false);
       })
-
     };
 
     this.loadbyUserIdsql = (userid, next) => {
@@ -64,7 +62,6 @@ let Authdb = function () {
           this.privilege = row.privilege;
           this.detail = row.detail;
         }
-        _database.close();
         next(false);
       })
 
@@ -79,28 +76,36 @@ let Authdb = function () {
       }
       else {
         if(this.exisitence) {
-          sql = 'UPDATE users SET username=?, userid=?, displayname=?, pwdhash=?, token=?, tokenexpire=?, privilege=?, detail=? WHERE username = ?';
+          sql = 'UPDATE users SET username=?, userid=?, displayname=?, pwdhash=?, token=?, tokenexpire=?, privilege=?, detail=? WHERE username=?';
+          _database.run(sql, [this.username, this.userid, this.displayname, this.pwdhash, this.token, this.tokenexpire, this.privilege, this.detail, this.username], (err) => {
+            if(err) {
+              callback(err);
+            }
+            else {
+              this.exisitence = true;
+              callback(false);
+            }
+          });
         }
         else {
           sql = 'INSERT INTO users(username, userid, displayname, pwdhash, token, tokenexpire, privilege, detail) VALUES (?, ?, ?, ?, ?, ?, ?, ?);'
           this.userid = Utils.generateGUID();
+          _database.run(sql, [this.username, this.userid, this.displayname, this.pwdhash, this.token, this.tokenexpire, this.privilege, this.detail], (err) => {
+            if(err) {
+              callback(err);
+            }
+            else {
+              this.exisitence = true;
+              callback(false);
+            }
+          });
         }
-        _database.run(sql, [this.username, this.userid, this.displayname, this.pwdhash, this.token, this.tokenexpire, this.privilege, this.detail], (err) => {
-          if(err) {
-            callback(err);
-          }
-          else {
-            this.exisitence = true;
-            callback(false);
-          }
-        });
-
       }
     };
 
     // delete the user from database.
-    this.delete = () => {
-      _database.run('DELETE FROM users WHERE username=?;', [this.username])
+    this.delete = (callback) => {
+      _database.run('DELETE FROM users WHERE username=?;', [this.username], callback)
       this.exisitence = false;
       this.username = null;
       this.userid = null;
@@ -263,8 +268,6 @@ function Authenticity() {
       }
       callback(false, isValid);
     });
-
-
   };
 
   this.TokenisValid = (username, token, callback) => {
@@ -289,7 +292,7 @@ function Authenticity() {
       let expiredate = new Date();
       expiredate = Utils.addDays(expiredate, this.TokenExpirePeriod);
       user.token = Utils.generateGUID();
-      user.tokenexpire = Utils.DatatoSQL(expiredate);
+      user.tokenexpire = Utils.DatetoSQL(expiredate);
       user.updatesql((err)=>{
         if(!err) {
           callback(err, user.token);
@@ -309,7 +312,7 @@ function Authenticity() {
           let expiredate = Utils.SQLtoDate(user.tokenexpire);
           if(now > expiredate) {
             this.updateToken(username, (err, token) => {
-              callback(error, token);
+              callback(err, token);
             });
           }
           else {

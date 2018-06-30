@@ -152,7 +152,8 @@ SQLtoDate = (sqlDate) => {
   let sqlDateArr4 = sqlDateArr3[2].split(".");
   let sSecond = sqlDateArr4[0];
   let sMillisecond = sqlDateArr4[1];
-  return new Date(sYear,sMonth,sDay,sHour,sMinute,sSecond,sMillisecond);
+  // console.log(sYear, ' ', sMonth, ' ',  sDay, ' ',  sHour, ' ',  sMinute, ' ',  sSecond, ' ',  sMillisecond);
+  return new Date(sYear, sMonth, sDay, sHour, sMinute, sSecond);
 }
 
  DatetoSQL = (JsDate) => {

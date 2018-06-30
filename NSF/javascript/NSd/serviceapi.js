@@ -107,6 +107,10 @@ function ServiceAPI() {
 
       returnJSONfuncList: (service_name)=> {
         return _coregateway.Service.returnJSONfuncList(service_name);
+      },
+
+      returnJSONfuncDict: (service_name)=> {
+        return _coregateway.Service.returnJSONfuncDict(service_name);
       }
 
     };
@@ -156,8 +160,8 @@ function ServiceAPI() {
         _coregateway.Authenticity.updatePassword(username, newpassword, _safe_callback(callback));
       },
 
-      updateToken: (username) => {
-        return _coregateway.Authenticity.updateToken(username);
+      updateToken: (username, callback) => {
+        return _coregateway.Authenticity.updateToken(username, callback);
       },
 
       getUserMeta: (username, callback) => {

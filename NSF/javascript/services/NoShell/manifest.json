@@ -12,5 +12,30 @@
     "services" : {
       "NoServiceManager": "0.0.0"
     }
+  },
+
+  "JSONfunciton_prototypes": {
+    "sendC": {
+      "displayname": "send command.",
+      "description": "Send a command to shell service and return result.",
+      "protocol": {
+        "JSON_call": {
+          "c": "Plaintext of the command."
+        },
+        "JSON_return": {
+          "r": "Returned result."
+        }
+      }
+    },
+
+    "welcome": {
+      "displayname": "Welcome message",
+      "description": "Show welcome message from shell service.",
+      "protocol": {
+        "JSON_call": {
+        },
+        "JSON_return": "The welcome message."
+      }
+    }
   }
 }

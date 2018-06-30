@@ -1,10 +1,11 @@
 {
   "name": "NoUser",
   "version": "0.0.0",
-  "displayname": "Service fullname",
-  "description": "Service description",
+  "displayname": "NOOXY User management tools.",
+  "description": "Provide ability of creating, grouping, modifing of user data and profile(such as password or its displayname).",
   "Authors": [
-    "Author"
+    "NOOXY",
+    "noowyee"
   ],
   "implementation_api": false,
   "dependencies": {

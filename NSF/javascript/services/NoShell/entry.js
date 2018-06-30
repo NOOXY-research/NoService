@@ -98,14 +98,14 @@ function start(api) {
           '  daemon [settings]\n'+
           '[service]\n'+
           '  service [list|[manifest|create] {service name}]\n'+
-          '  service listjfunc {target service}\n'+
+          '  service [jfunclist|jfuncdict|jfuncshow] {target service}\n'+
           '  service jfunc {target service} {target username} {target jfunc} {JSON} ---Call a JSONfunction as target user.\n'+
           '  service entity [show {entityID}|list|count]\n'+
           '[auth]\n'+
           '  auth emit [password|token] {entityID}  ---Emit authorization proccess to targeted entity.\n'+
           '[me]\n'+
           '  me\n'+
-          '  me [entitymeta|chpasswd|usermeta]\n'+
+          '  me [entitymeta|chpasswd|usermeta|updatetoken]\n'+
           '[sniffer]\n'+
           '  sniffer router json [on|off]'+
           '[noti]\n'+
@@ -166,9 +166,18 @@ function start(api) {
             c1(false, {r:api.Service.returnServiceManifest(t1[0])});
           },
 
-          listjfunc: (t1, c1) => {
+          jfunclist: (t1, c1) => {
             c1(false, {r:api.Service.returnJSONfuncList(t1[0])});
           },
+
+          jfuncdict: (t1, c1) => {
+            c1(false, {r:JSON.stringify(api.Service.returnJSONfuncDict(t1[0]), null, 2)});
+          },
+
+          jfuncshow: (t1, c1) => {
+            c1(false, {r:JSON.stringify(api.Service.returnJSONfuncDict(t1[0])[t1[1]], null, 2)});
+          },
+
 
           jfunc: (t1, c1) => {
             api.Service.ActivitySocket.createDefaultDeamonSocket(t1[0], t1[1], (err, as)=> {
@@ -224,6 +233,11 @@ function start(api) {
               api.Authenticity.getUserMeta(api.Service.Entity.returnEntityOwner(entityID), (err, meta)=>{
                 c1(false, {r:meta});
               });
+            },
+            updatetoken: (t1, c1) => {
+              api.Authenticity.updateToken(api.Service.Entity.returnEntityOwner(entityID), (err)=>{
+                c1(false, {r:'Error->'+err});
+              })
             }
           }, c0);
         }
