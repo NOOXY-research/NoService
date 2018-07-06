@@ -7,25 +7,67 @@
 function start(api) {
   // Get the service socket of your service
   let ss = api.Service.ServiceSocket;
+
   // BEWARE! To prevent callback error crash the system.
   // If you call an callback function which is not API provided. Such as setTimeout(callback, timeout).
   // You need to wrap the callback funciton by api.SafeCallback.
   // E.g. setTimeout(api.SafeCallback(callback), timeout)
   let safec = api.SafeCallback;
+
   // Please save and manipulate your files in this directory
   let files_path = api.Me.FilesPath;
 
   // Access another service on this daemon
   let admin_daemon_asock = api.Service.ActivitySocket.createDefaultAdminDeamonSocket('Another Service', (err, activitysocket)=> {
-    // accessing other service
+    // Accessing other service
   });
 
   // JSONfunction is a function that can be defined, which others entities can call.
   // It is a NOOXY Service Framework Standard
-  ss.def('createUser', (json, entityID, returnJSON)=>{
+  ss.def('addUsertoGroup', (json, entityID, returnJSON)=> {
     let json_be_returned = {
-      "e": false,
-      "s": 'Unstated.'
+      "er": false,
+      "st": 'Unstated.'
+    }
+    // In case of superuser privilege.
+    if(json.pm <= 0) {
+      api.Authorization.Authby.isSuperUser(entityID, (err, pass)=> {
+        if(pass) {
+          api.Authorization.Authby.Password(entityID, (err, pass2)=>{
+            if(pass2) {
+              api.Authenticity.createUser(json.un, json.dn, json.pw, json.pm, json.dc, (err)=>{
+                json_be_returned.st = 'User created.';
+                returnJSON(false, json_be_returned);
+              });
+            }
+            else {
+              json_be_returned.er = true;
+              json_be_returned.st = 'Password invalid!';
+              returnJSON(false, json_be_returned);
+            }
+          });
+        }
+        else {
+          json_be_returned.er = true;
+          json_be_returned.st = 'You are not a superuser!';
+          returnJSON(false, json_be_returned);
+        }
+      });
+    }
+    else {
+      api.Authenticity.createUser(json.un, json.dn, json.pw, json.pm, json.dc, (err)=>{
+        json_be_returned.st = 'User created.';
+        returnJSON(false, json_be_returned);
+      });
+    }
+  });
+
+  // JSONfunction is a function that can be defined, which others entities can call.
+  // It is a NOOXY Service Framework Standard
+  ss.def('createUser', (json, entityID, returnJSON)=> {
+    let json_be_returned = {
+      "er": false,
+      "st": 'Unstated.'
     }
     // In case of Superuser privilege.
     if(json.pm <= 0) {
@@ -34,27 +76,27 @@ function start(api) {
           api.Authorization.Authby.Password(entityID, (err, pass2)=>{
             if(pass2) {
               api.Authenticity.createUser(json.un, json.dn, json.pw, json.pm, json.dc, (err)=>{
-                json_be_returned.s = 'User created.';
+                json_be_returned.st = 'User created.';
                 returnJSON(false, json_be_returned);
               });
             }
             else {
-              json_be_returned.e = true;
-              json_be_returned.s = 'Password invalid!';
+              json_be_returned.er = true;
+              json_be_returned.st = 'Password invalid!';
               returnJSON(false, json_be_returned);
             }
           });
         }
         else {
-          json_be_returned.e = true;
-          json_be_returned.s = 'You are not a superuser!';
+          json_be_returned.er = true;
+          json_be_returned.st = 'You are not a superuser!';
           returnJSON(false, json_be_returned);
         }
       });
     }
     else {
       api.Authenticity.createUser(json.un, json.dn, json.pw, json.pm, json.dc, (err)=>{
-        json_be_returned.s = 'User created.';
+        json_be_returned.st = 'User created.';
         returnJSON(false, json_be_returned);
       });
     }

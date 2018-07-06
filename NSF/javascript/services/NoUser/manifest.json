@@ -19,7 +19,7 @@
       "secure": true,
       "protocol": {
         "JSON_call": {
-          "c": "Plaintext of the command."
+          "un": "username"
         },
 
         "JSON_return": {
@@ -28,7 +28,7 @@
           "pm": "privilege",
           "dc": "description",
           "pp": "profilephoto",
-          
+
           "lg": "language",
           "em": "email",
           "ph": "phone",
@@ -56,12 +56,29 @@
           "ph": "phone",
           "gd": "gender",
           "ad": "physical address"
-
         },
 
         "JSON_return": {
-          "e": "error",
-          "s": "state"
+          "er": "error",
+          "st": "state",
+          "ui": "userid"
+        }
+      }
+    },
+
+    "addUsertoGroup": {
+      "displayname": "Add a NOOXY USER to group.",
+      "description": "Creating NOOXY user to specified group.",
+      "secure": true,
+      "protocol": {
+        "JSON_call": {
+          "un": "username",
+          "gp": "group"
+        },
+
+        "JSON_return": {
+          "er": "error",
+          "st": "state"
         }
       }
     }
