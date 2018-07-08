@@ -31,6 +31,7 @@
   "SHA256_key": "FATFROG",
 
   "services": [
+    "NoTester",
     "NoServiceManager",
     "NoNoti",
     "NoUser"

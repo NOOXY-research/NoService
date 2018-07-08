@@ -125,12 +125,12 @@ addDays = function(date, days) {
   return dat;
 }
 
-generateGUID = function() {
+generateGUID = () => {
   return s4() + s4() + '-' + s4() + '-' + s4() + '-' +s4() + '-' + s4() + s4() +
    s4();
 }
 
-searchObject = function(object, value) {
+searchObject = (object, value)=> {
   for (let prop in object) {
     if (object.hasOwnProperty(prop)) {
       if (object[prop] === value) {

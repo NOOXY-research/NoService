@@ -93,7 +93,12 @@ function ServiceAPI() {
           return _coregateway.Entity.returnEntitiesID();
         },
         getEntityConnProfile: (entityID, callback)=> {
-            _coregateway.Entity.getEntityConnProfile(entityID, callback);
+            _coregateway.Entity.getEntityConnProfile(entityID, _safe_callback(callback));
+        },
+        on: (type, callback)=> {
+          // type:
+          // EntityCreated
+          _coregateway.Entity.on(type, _safe_callback(callback));
         }
       },
 

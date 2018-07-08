@@ -549,6 +549,7 @@ function Service() {
       }
       catch (err) {
         Utils.tagLog('*ERR*', 'Service "'+_service_name+'" have wrong dependencies settings.');
+        console.log(err);
         process.exit();
       }
       depended_service_dict[_service_name] = _service_manifest.dependencies.services;

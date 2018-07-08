@@ -3,10 +3,11 @@
 // "entity.js" provide identity system for Service, Activity..., the perspective is this daemon. Entity is part of service module.
 // Copyright 2018 NOOXY. All Rights Reserved.
 
-let utils = require('./utilities');
+let Utils = require('./utilities');
 
 function Entity() {
-  let _seed = utils.generateGUID();
+  let _seed = Utils.generateGUID();
+  let _callbacks = {};
   let _entities = {};
 
   function EntityJson(entityID, Json, conn_profile) {
@@ -42,11 +43,21 @@ function Entity() {
     };
   }
 
+  this.on = (type, callback) => {
+    if(_callbacks[type] == null) {
+      _callbacks[type] = [];
+    }
+    _callbacks[type].push(callback);
+  };
+
   this.registerEntity = (entityJson, conn_profile, callback) => {
     let err = false;
-    let entityID = utils.generateUniqueID();
+    let entityID = Utils.generateUniqueID();
     _entities[entityID] = new EntityJson(entityID, entityJson, conn_profile);
     callback(err, entityID);
+    for(let i in _callbacks['EntityCreated']) {
+      (_callbacks['EntityCreated'])[i](entityID);
+    }
   };
 
   this.modifyEntityValue = (entityID, key, value) => {
@@ -127,6 +138,9 @@ function Entity() {
 
   this.deleteEntity = (entityID) => {
     delete _entities[entityID];
+    for(let i in _callbacks['EntityDeleted']) {
+      (_callbacks['EntityDeleted'])[i](entityID);
+    }
   };
 }
 

@@ -169,7 +169,7 @@ function Connection() {
         let vcs = sp.ClientSocket;
         // return virtual client socket to callback
         callback(false, vcs);
-        
+
         // trigger server and return server socket
         _virt_servers[rvirtip+':'+rvirtport].ClientConnect(_virtip, _virtport, vss);
       };
@@ -281,7 +281,7 @@ function Connection() {
 
       _ws.on('error', (error) => {
           Utils.tagLog('*ERR*', error);
-          vs.close();
+          _ws.close();
       });
 
       _ws.on('close', (error) => {
