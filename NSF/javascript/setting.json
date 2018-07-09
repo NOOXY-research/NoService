@@ -9,7 +9,7 @@
     {
       "type": "WebSocket",
       "ip": "0.0.0.0",
-      "port": 1267
+      "port": 1487
     },
     {
       "type": "TCP/IP",
@@ -31,7 +31,6 @@
   "SHA256_key": "FATFROG",
 
   "services": [
-    "NoTester",
     "NoServiceManager",
     "NoNoti",
     "NoUser"
@@ -50,7 +49,7 @@
 
   "debug_service": "NoDebug",
 
-  "debug": false,
+  "debug": true,
 
   "debug_config": {
   	"show_json": true,

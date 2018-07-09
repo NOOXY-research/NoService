@@ -7,8 +7,6 @@ $(function () {
   let line = 0;
 
 
-  _NSc.connect('127.0.0.1', '1487');
-  let shell_as = _NSc.createActivitySocket('NoShell');
 
   function gotoBottom(id){
    var element = document.getElementById(id);

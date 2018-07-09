@@ -3,6 +3,135 @@
 // "NSc.js" is a NOOXY Service framework client.
 // Copyright 2018 NOOXY. All Rights Reserved.
 function NSc() {
+  let settings = {
+    verbose: true,
+    debug: true,
+    user: null,
+    sercure: true
+  };
+
+  String.prototype.replaceAll = function(search, replacement) {
+      var target = this;
+      return target.split(search).join(replacement);
+  };
+
+  let Utils = {
+    printLOGO: (version, copyright) => {
+      console.log('88b 88  dP\'Yb   dP\'Yb  Yb  dP Yb  dP  TM')
+      console.log('88Yb88 dP   Yb dP   Yb  YbdP   YbdP  ')
+      console.log('88 Y88 Yb   dP Yb   dP  dPYb    88   ')
+      console.log('88  Y8  YbodP   YbodP  dP  Yb   88   Service Framework. ')
+      console.log('')
+      console.log('')
+      console.log('ver. '+version+'. '+copyright)
+      console.log('For more information or update -> www.nooxy.tk')
+      console.log('')
+    },
+    setCookie: (cname, cvalue, exdays)=> {
+      let d = new Date();
+      d.setTime(d.getTime() + (exdays * 24 * 60 * 60 * 1000));
+      let expires = "expires="+d.toUTCString();
+      document.cookie = cname + "=" + cvalue + ";" + expires + ";path=/";
+    },
+    getCookie: (cname)=> {
+        let name = cname + "=";
+        let ca = document.cookie.split(';');
+        for(let i = 0; i < ca.length; i++) {
+          let c = ca[i];
+          while (c.charAt(0) == ' ') {
+            c = c.substring(1);
+          }
+          if (c.indexOf(name) == 0) {
+            return c.substring(name.length, c.length);
+          }
+        }
+        return "";
+    },
+    eraseCookie: (name)=> {
+      setCookie(name,"",-1);
+    },
+    returnPassword: function(prompt) {
+        if (prompt) {
+          process.stdout.write(prompt);
+        }
+
+        var stdin = process.stdin;
+        stdin.resume();
+        stdin.setRawMode(true);
+        stdin.resume();
+        stdin.setEncoding('utf8');
+
+        var password = '';
+        stdin.on('data', function (ch) {
+            ch = ch.toString('utf8');
+
+            switch (ch) {
+            case "\n":
+            case "\r":
+            case "\u0004":
+                // They've finished typing their password
+                process.stdout.write('\n');
+                stdin.setRawMode(false);
+                stdin.pause();
+                return password;
+                break;
+            case "\u0003":
+                // Ctrl-C
+                return null;
+                break;
+            case BACKSPACE:
+                password = password.slice(0, password.length - 1);
+                process.stdout.clearLine();
+                process.stdout.cursorTo(0);
+                process.stdout.write(prompt);
+                process.stdout.write(password.split('').map(function () {
+                  return '*';
+                }).join(''));
+                break;
+            default:
+                // More passsword characters
+                process.stdout.write('*');
+                password += ch;
+                break;
+            }
+        });
+    },
+    tagLog: (tag, logstring) => {
+      if(typeof(logstring)!='string') {
+        logstring = JSON.stringify(logstring, null, 2);
+      }
+      let _space = 10;
+      tag = tag.substring(0, _space);
+      for(var i=0; i < _space-tag.length; i++) {
+        if(i%2 != 1) {
+          tag = tag + ' ';
+        }
+        else {
+          tag = ' ' + tag;
+        }
+      }
+      console.log('['+tag+'] '+logstring.replaceAll('\n', '\n['+tag+'] '));
+    },
+    generateUniqueID: () => {
+      return '_' + Math.random().toString(36).substr(2, 9);
+    },
+    generateGUID: () => {
+      let s4 = () => {
+        return Math.floor((1 + Math.random()) * 0x10000).toString(16).substring(1);
+      }
+      return s4() + s4() + '-' + s4() + '-' + s4() + '-' +s4() + '-' + s4() + s4() +
+       s4();
+    },
+    searchObject: (object, value)=> {
+      for (let prop in object) {
+        if (object.hasOwnProperty(prop)) {
+          if (object[prop] === value) {
+            return prop;
+          }
+        }
+      }
+    },
+  }
 
   let Connection = function () {
     let _default_local_ip_and_port = '';
@@ -78,20 +207,20 @@ function NSc() {
         let connprofile = null;
         _ws = new WebSocket('ws://'+ip+':'+port);
         connprofile = new ConnectionProfile(null, 'Server', 'WebSocket', ip, port, 'localhost', this);
-        _ws.on('open', function open() {
+        _ws.addEventListener('open', function open() {
           callback(false, connprofile);
           // ws.send('something');
         });
-        _ws.on('message', (message) => {
-          this.onData(connprofile, message);
+        _ws.addEventListener('message', (event) => {
+          this.onData(connprofile, event.data);
         });
 
-        _ws.on('error', (error) => {
+        _ws.addEventListener('error', (error) => {
             Utils.tagLog('*ERR*', error);
             _ws.close();
         });
 
-        _ws.on('close', (error) => {
+        _ws.addEventListener('close', (error) => {
             this.onClose(connprofile);
         });
 
@@ -498,11 +627,8 @@ function NSc() {
           delete connprofile;
         });
       };
-
-      _coregateway.Authenticity.emitRouter = this.emit;
       _coregateway.Service.emitRouter = this.emit;
       _coregateway.Implementation.emitRouter = this.emit;
-      _coregateway.Authorization.emitRouter = this.emit;
       _coregateway.NSPS.emitRouter = this.emit;
       _coregateway.Service.spwanClient = _coregateway.Connection.createClient;
 
@@ -734,21 +860,7 @@ function NSc() {
 
     // Service module launch
     this.launch = () => {
-      let launched_service = [];
-      let depended_service_dict = {};
-      for (var key in _local_services) {
-        _local_services[key].launch(depended_service_dict);
-        launched_service.push(key);
-      }
-      // check dependencies
-      for (let service_name in depended_service_dict) {
-        for(let depended in depended_service_dict[service_name]) {
-          if(!launched_service.includes(depended)) {
-            Utils.tagLog('*ERR*', 'Service "'+service_name+'" depend on another service "'+depended+'". But it doesn\'t launched.');
-            process.exit();
-          }
-        }
-      }
+
     };
 
     // Service module Owner
@@ -955,43 +1067,15 @@ function NSc() {
 
     this.emitRouter = () => {console.log('[*ERR*] emit not implemented');};
 
-    // daemon side
-    this.RsRouter = (connprofile, data) => {
-      let resume = _resumes[connprofile.returnGUID()];
-      _crypto_module.decryptString('RSA2048', _rsa_priv, data, (err, decrypted) => {
-        let json = null;
-        try {
-          json = JSON.parse(decrypted);
-
-          let host_rsa_pub = _rsa_pub;
-          let client_random_num = json.r;
-          _crypto_module.generateAESCBC256KeyByHash(host_rsa_pub, client_random_num, (err, aes_key) => {
-            if(aes_key == json.a) {
-              connprofile.setBundle('aes_256_cbc_key', aes_key);
-              connprofile.setBundle('NSPS', true);
-              connprofile.setBundle('NSPSremote', true);
-              resume(err, true);
-            }
-            else {
-              resume(err, false);
-            }
-
-          });
-        }
-        catch (err) {
-          console.log(err);
-          resume(false, false);
-        }
-      });
-    };
-
     // Nooxy service protocol sercure request ClientSide
     // in client need to be in implementation module
     this.RqRouter = (connprofile, data, data_sender) => {
+
       let host_rsa_pub = data.p;
       let client_random_num = _crypto_module.returnRandomInt(99999);
       connprofile.setBundle('host_rsa_pub_key', host_rsa_pub);
       _crypto_module.generateAESCBC256KeyByHash(host_rsa_pub, client_random_num, (err, aes_key) => {
+        alert('asdf');
         connprofile.setBundle('aes_256_cbc_key', aes_key);
         let _data = {
           r: client_random_num,
@@ -1023,158 +1107,64 @@ function NSc() {
     };
   };
 
-  let Utils = {
-    setCookie: (cname, cvalue, exdays)=> {
-      let d = new Date();
-      d.setTime(d.getTime() + (exdays * 24 * 60 * 60 * 1000));
-      let expires = "expires="+d.toUTCString();
-      document.cookie = cname + "=" + cvalue + ";" + expires + ";path=/";
-    },
-    getCookie: (cname)=> {
-        let name = cname + "=";
-        let ca = document.cookie.split(';');
-        for(let i = 0; i < ca.length; i++) {
-          let c = ca[i];
-          while (c.charAt(0) == ' ') {
-            c = c.substring(1);
-          }
-          if (c.indexOf(name) == 0) {
-            return c.substring(name.length, c.length);
-          }
-        }
-        return "";
-    },
-    eraseCookie: (name)=> {
-      setCookie(name,"",-1);
-    },
-    returnPassword: function(prompt) {
-        if (prompt) {
-          process.stdout.write(prompt);
-        }
-
-        var stdin = process.stdin;
-        stdin.resume();
-        stdin.setRawMode(true);
-        stdin.resume();
-        stdin.setEncoding('utf8');
-
-        var password = '';
-        stdin.on('data', function (ch) {
-            ch = ch.toString('utf8');
-
-            switch (ch) {
-            case "\n":
-            case "\r":
-            case "\u0004":
-                // They've finished typing their password
-                process.stdout.write('\n');
-                stdin.setRawMode(false);
-                stdin.pause();
-                return password;
-                break;
-            case "\u0003":
-                // Ctrl-C
-                return null;
-                break;
-            case BACKSPACE:
-                password = password.slice(0, password.length - 1);
-                process.stdout.clearLine();
-                process.stdout.cursorTo(0);
-                process.stdout.write(prompt);
-                process.stdout.write(password.split('').map(function () {
-                  return '*';
-                }).join(''));
-                break;
-            default:
-                // More passsword characters
-                process.stdout.write('*');
-                password += ch;
-                break;
-            }
-        });
-    },
-    tagLog: (tag, logstring) => {
-      if(typeof(logstring)!='string') {
-        logstring = JSON.stringify(logstring, null, 2);
-      }
-      let _space = 10;
-      tag = tag.substring(0, _space);
-      for(var i=0; i < _space-tag.length; i++) {
-        if(i%2 != 1) {
-          tag = tag + ' ';
-        }
-        else {
-          tag = ' ' + tag;
-        }
-      }
-      console.log('['+tag+'] '+logstring.replaceAll('\n', '\n['+tag+'] '));
-    },
-    generateUniqueID: () => {
-      return '_' + Math.random().toString(36).substr(2, 9);
-    },
-    generateGUID: () => {
-      let s4 = () => {
-        return Math.floor((1 + Math.random()) * 0x10000).toString(16).substring(1);
-      }
-      return s4() + s4() + '-' + s4() + '-' + s4() + '-' +s4() + '-' + s4() + s4() +
-       s4();
-    },
-    searchObject: (object, value)=> {
-      for (let prop in object) {
-        if (object.hasOwnProperty(prop)) {
-          if (object[prop] === value) {
-            return prop;
-          }
-        }
-      }
-    },
+  let Vars = {
+    'version': 'aphla',
+    'NSP_version': 'aphla',
+    'copyright': 'copyright(c)2018 NOOXY inc.',
+    'default_user': {
+      'username': 'admin',
+      'displayname': 'NSF Superuser',
+      'password': 'admin'
+    }
   }
-
-  let Core = function(settings) {
-    // initialize variables
-    let _connection = null;
-    let _authorization = null;
-    let _authorizationhandler = null;
-    let _authenticity = null;
-    let _router = null;
-    let _service = null;
-    let _entity = null;
-    let _serviceAPI = null;
-    let _implementation = null;
-    let _nocrypto = null;
-    let _nsps = null;
-
+  let Core = function() {
     let verbose = (tag, log) => {
       if(settings.verbose||settings.debug) {
         Utils.tagLog(tag, log);
       };
     };
-
-    this.checkandlaunch = () => {
-      // initialize environment
-      verbose('Daemon', 'Checking environment...')
-      if (this.isinitialized() == false) {
-        this.initialize(this.launch);
+    // setup variables
+    verbose('Daemon', 'Setting up variables.')
+    _connection = new Connection();
+    _authorizationhandler = new AuthorizationHandler();
+    _router = new Router();
+    _service = new Service();
+    _implementation = new Implementation();
+    _nocrypto = {
+      returnRandomInt: (max)=>{
+        let f = _implementation.returnImplement('returnRandomInt');
+        f(max);
+      },
+      generateAESCBC256KeyByHash: (string1, string2, callback) => {
+        let f = _implementation.returnImplement('generateAESCBC256KeyByHash');
+        f(string1, string2, callback);
+      },
+      encryptString: (algo, key, toEncrypt, callback)=>{
+        let f = _implementation.returnImplement('encryptString');
+        f(algo, key, toEncrypt, callback);
+      },
+      decryptString: (algo, key, toDecrypt, callback) => {
+        let f = _implementation.returnImplement('decryptString');
+        f(algo, key, toDecrypt, callback);
       }
-      else {
-        this.launch();
-      }
-      ;
     };
+    _nsps = new NSPS();
 
     this.launch = () => {
       Utils.printLOGO(Vars.version, Vars.copyright);
 
-      // setup variables
-      verbose('Daemon', 'Setting up variables.')
-      _connection = new Connection();
-      _authorizationhandler = new AuthorizationHandler();
-      _router = new Router();
-      _service = new Service();
-      _implementation = new Implementation();
-      _nocrypto = new NoCrypto();
-      _nsps = new NSPS();
+      _implementation.setImplement('returnRandomInt', (max)=>{
 
+      });
+      _implementation.setImplement('generateAESCBC256KeyByHash', (string1, string2, callback)=>{
+
+      });
+      _implementation.setImplement('encryptString', (string1, string2, callback)=>{
+
+      });
+      _implementation.setImplement('decryptString', (string1, string2, callback)=>{
+
+      });
       // setup Implementation on browser.
       // setup NSF Auth implementation
       _implementation.setImplement('signin', (conn_method, remote_ip, port, callback)=>{
@@ -1217,8 +1207,7 @@ function NSc() {
             Router: _router,
             Implementation: _implementation,
             NoCrypto: _nocrypto,
-            NSPS: _nsps,
-            Daemon: _daemon
+            NSPS: _nsps
           };
         verbose('Daemon', 'Creating coregateway done.')
 
@@ -1227,7 +1216,6 @@ function NSc() {
       }
 
       // setup NOOXY Service protocol secure
-      _nsps.importRSA2048KeyPair(fs.readFileSync(settings.rsa_2048_priv_key, 'utf8'), fs.readFileSync(settings.rsa_2048_pub_key, 'utf8'));
       _nsps.importCryptoModule(_nocrypto);
       // setup router
       _router.importCore(coregateway);
@@ -1241,50 +1229,15 @@ function NSc() {
       // setup implementation
       _implementation.importConnectionModule(_connection);
 
-      // setup authenticity
-      _authenticity.TokenExpirePeriod = settings.token_expire_period;
-      _authenticity.importDatabase(settings.database_path);
-
-      // setup entity
-      // pass
-
-      // setup Authorization
-      _authorization.importAuthenticityModule(_authenticity);
-      _authorization.importEntityModule(_entity);
-      _authorization.importTrustedDomains(settings.trusted_domains);
-      _authorization.importDaemonAuthKey(settings.daemon_authorization_key);
-
       // setup AuthorizationHandler
       _authorizationhandler.importImplementationModule(_implementation);
 
       // setup service
       _service.setDebug(settings.debug);
-      _service.setupServicesPath(settings.services_path);
-      _service.importAuthorization(_authorization);
-      // add shell related service to List.
-      if(settings.shell_service != null && settings.services.includes(settings.shell_service) == false) {
-        settings.services.push(settings.shell_service);
-      }
-      if(settings.shell_client_service != null && settings.services.includes(settings.shell_client_service) == false) {
-        settings.services.push(settings.shell_client_service);
-      }
-      // add debug
-      if(settings.debug == true && settings.debug_service != null && settings.services.includes(settings.debug_service) == false) {
-        settings.services.unshift(settings.debug_service);
-      }
       verbose('Daemon', 'Debug service enabled.');
 
-      _service.importServicesList(settings.services);
-      _service.importEntity(_entity);
-      _service.importAPI(_serviceAPI);
-      _service.importOwner(settings.local_services_owner);
-      _service.importDaemonAuthKey(settings.daemon_authorization_key);
-      // setup User
+      _service.importOwner(settings.user);
 
-      //
-
-      // setup api
-      _serviceAPI.importCore(coregateway);
 
       verbose('Daemon', 'Setting up variables done.');
 
@@ -1304,62 +1257,32 @@ function NSc() {
 
     }
 
-    this.isinitialized = () => {
-      if (fs.existsSync(_path+'eula.txt')&&fs.existsSync(settings.database_path)) {
+    this.getImplement = (callback) => {
+      callback(false, _implementation);
+    };
 
-        if(settings.sercure == false) {
-          return true;
-        }
-        else if(fs.existsSync(settings.rsa_2048_priv_key) && fs.existsSync(settings.rsa_2048_pub_key)) {
-          return true;
-        }
-        else {
-          Utils.tagLog('*ERR*', 'Secure is on. But RSA2048 Key Pair is not set. Please geneate it by openssl.');
-          Utils.tagLog('*ERR*', 'Your settings:');
-          Utils.tagLog('*ERR*', 'PrivateKey: '+settings.rsa_2048_priv_key);
-          Utils.tagLog('*ERR*', 'PublicKey: '+settings.rsa_2048_pub_key);
-          process.exit()
-          return false;
-        }
-      }
-      else {
-        return false;
-      }
-    }
-
-    this.initialize = (callback) => {
-      verbose('Daemon', 'Initializing NSd...')
-      verbose('Daemon', 'Creating eula...')
-
-      if (fs.existsSync(settings.database_path)) {
-        verbose('Daemon', 'Database already exist.')
-      }
-      verbose('Daemon', 'Creating database...')
-      let _auth = new Authenticity();
-      _auth.createDatabase(settings.database_path);
-      _auth.createUser(Vars.default_user.username, Vars.default_user.displayname, Vars.default_user.password, 0, null, (err)=> {
-        if(err) {
-          verbose('Daemon', '[ERR] Occur failure on creating database.');
-        }
-        else {
-          verbose('Daemon', 'NSF Superuser "'+Vars.default_user.username+'" with password "'+Vars.default_user.password+'" created. Please change password later for security.');
-        }
-        fs.writeFile('./eula.txt', '', function(err) {
-          if(err) {
-              return console.log(err);
-          }
-        });
-        verbose('Daemon', 'NSd initilalized.');
-        callback(err);
-      });
-    }
-  }
-
-  this.connect = (hostip, hostport) => {
+    this.createActivitySocket = (method, targetip, targetport, service, callback) => {
+      _service.createActivitySocket(method, targetip, targetport, service, callback);
+    };
 
   }
 
-  this.createActivitySocket = (service_name) => {
+  let _core = new Core();
 
+  this.createActivitySocket = (service, callback) => {
+    _core.createActivitySocket(settings.connmethod, settings.targetip, settings.targetport, service, callback);
   };
+
+  this.getImplement = (callback)=>{
+    _core.getImplement(callback);
+  };
+
+  this.connect = (targetip, targetport, username) =>{
+    settings.connmethod = 'WebSocket';
+    settings.targetip = targetip;
+    settings.targetport = targetport;
+    settings.user = username;
+    _core.launch();
+  };
+
 }

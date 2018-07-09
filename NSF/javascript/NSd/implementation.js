@@ -22,11 +22,6 @@ function Implementation() {
         callback(true, 'hash 32 char');
       },
 
-      generateRSA2048KeyPair: (callback) => {
-        Utils.tagLog('*ERR*', 'generateAESCBC256KeyByHash not implemented');
-        callback(true, 'priv', 'pub');
-      },
-
       encryptString: (key, toEncrypt, callback) => {
         Utils.tagLog('*ERR*', 'generateAESCBC256KeyByHash not implemented');
         callback(true, 'encrypted');
