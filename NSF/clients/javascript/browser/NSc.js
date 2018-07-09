@@ -7,7 +7,7 @@ function NSc() {
     verbose: true,
     debug: true,
     user: null,
-    sercure: true
+    secure: true
   };
 
   String.prototype.replaceAll = function(search, replacement) {
@@ -16,6 +16,42 @@ function NSc() {
   };
 
   let Utils = {
+    Base64toArrayBuffer: (b64str) => {
+      var raw = window.atob(b64str);
+      var rawLength = raw.length;
+      var array = new Uint8Array(new ArrayBuffer(rawLength));
+      for(i = 0; i < rawLength; i++) {
+        array[i] = raw.charCodeAt(i);
+      }
+      return array;
+    },
+    convertPemToBinary: (pem)=> {
+      var lines = pem.split('\n');
+      var encoded = '';
+      for (var i = 0; i < lines.length; i++) {
+        if (lines[i].trim().length > 0 &&
+          lines[i].indexOf('-----BEGIN RSA PRIVATE KEY-----') < 0 &&
+          lines[i].indexOf('-----BEGIN RSA PUBLIC KEY-----') < 0 &&
+          lines[i].indexOf('-----BEGIN PUBLIC KEY-----') < 0 &&
+          lines[i].indexOf('-----END PUBLIC KEY-----') < 0 &&
+          lines[i].indexOf('-----BEGIN PRIVATE KEY-----') < 0 &&
+          lines[i].indexOf('-----END PRIVATE KEY-----') < 0 &&
+          lines[i].indexOf('-----END RSA PRIVATE KEY-----') < 0 &&
+          lines[i].indexOf('-----END RSA PUBLIC KEY-----') < 0) {
+          encoded += lines[i].trim();
+        }
+      }
+      return Utils.Base64toArrayBuffer(encoded)
+    },
+    ArrayBuffertoBase64: (buffer)=> {
+      var binary = '';
+      var bytes = new Uint8Array(buffer);
+      var len = bytes.byteLength;
+      for (var i = 0; i < len; i++) {
+        binary += String.fromCharCode( bytes[ i ] );
+      }
+      return window.btoa( binary );
+    },
     printLOGO: (version, copyright) => {
       console.log('88b 88  dP\'Yb   dP\'Yb  Yb  dP Yb  dP  TM')
       console.log('88Yb88 dP   Yb dP   Yb  YbdP   YbdP  ')
@@ -154,7 +190,9 @@ function NSc() {
       let _hostport = hostport;
       let _clientip = clientip;
       let _conn = conn; // conn is wrapped!
-
+      if(settings.debug) {
+        Utils.tagLog('DEBUG', 'connection id: '+_GUID);
+      }
 
       this.closeConnetion = () => {
         // Utils.tagLog('*ERR*', 'closeConnetion not implemented. Of '+this.type);
@@ -337,12 +375,16 @@ function NSc() {
     let _locked_ip = [];
 
     let _tellJSONSniffers = (Json) => {
+      if(settings.debug) {
+        Utils.tagLog('DEBUG', Json);
+      };
       for(let i in _json_sniffers) {
         _json_sniffers[i](false, Json);
       }
     };
 
     let _tellRAWSniffers = (data) => {
+      Utils.tagLog('DEBUG', data);
       for(let i in _raw_sniffers) {
         _raw_sniffers[i](false, data);
       }
@@ -1075,7 +1117,6 @@ function NSc() {
       let client_random_num = _crypto_module.returnRandomInt(99999);
       connprofile.setBundle('host_rsa_pub_key', host_rsa_pub);
       _crypto_module.generateAESCBC256KeyByHash(host_rsa_pub, client_random_num, (err, aes_key) => {
-        alert('asdf');
         connprofile.setBundle('aes_256_cbc_key', aes_key);
         let _data = {
           r: client_random_num,
@@ -1117,6 +1158,7 @@ function NSc() {
       'password': 'admin'
     }
   }
+
   let Core = function() {
     let verbose = (tag, log) => {
       if(settings.verbose||settings.debug) {
@@ -1133,7 +1175,7 @@ function NSc() {
     _nocrypto = {
       returnRandomInt: (max)=>{
         let f = _implementation.returnImplement('returnRandomInt');
-        f(max);
+        return f(max);
       },
       generateAESCBC256KeyByHash: (string1, string2, callback) => {
         let f = _implementation.returnImplement('generateAESCBC256KeyByHash');
@@ -1153,17 +1195,95 @@ function NSc() {
     this.launch = () => {
       Utils.printLOGO(Vars.version, Vars.copyright);
 
-      _implementation.setImplement('returnRandomInt', (max)=>{
+      let _cry_algo = {
+        // key is in length 32 char
+        AESCBC256: {
+          encryptString: (key, toEncrypt, callback) => {
+            let iv = crypto.randomBytes(16);
+            let cipher = crypto.createCipheriv('aes-256-cbc', key, iv);
+            let crypted = cipher.update(toEncrypt,'utf8','base64');
+            crypted += cipher.final('base64');
+            crypted = iv.toString('base64')+crypted;
+            callback(false, crypted);
+          },
+          decryptString: (keystr, toDecrypt, callback) => {
+            console.log('key: '+keystr);
+            window.crypto.subtle.importKey(
+                "raw", //can be "jwk" or "raw"
+                new TextEncoder('utf-8').encode(keystr),
+                {   //this is the algorithm options
+                    name: "AES-CBC",
+                },
+                false, //whether the key is extractable (i.e. can be used in exportKey)
+                ["encrypt", "decrypt"] //can be "encrypt", "decrypt", "wrapKey", or "unwrapKey"
+            )
+            .then((key)=>{
+              let iv = Utils.Base64toArrayBuffer(toDecrypt.substring(0, 24));
+              toDecrypt = Utils.Base64toArrayBuffer(toDecrypt.substring(24));
+              window.crypto.subtle.decrypt(
+                {
+                    name: "AES-CBC",
+                    iv: iv, //The initialization vector you used to encrypt
+                },
+                key, //from generateKey or importKey above
+                toDecrypt //ArrayBuffer of the data
+              )
+              .then((decrypted)=>{;
+                callback(false, new TextDecoder('utf-8').decode(decrypted));
+              })
+              .catch((err2)=>{
+                console.error(err2);
+              });
+            })
+            .catch((err)=>{
+                console.error(err);
+            });
+          }
+        },
 
+        // Keys is in pem format
+        RSA2048: {
+          encryptString: (publicKey, toEncrypt, callback) => {
+            window.crypto.subtle.importKey(
+              "spki", //can be "jwk" (public or private), "spki" (public only), or "pkcs8" (private only)
+              Utils.convertPemToBinary(publicKey),
+              {   //these are the algorithm options
+                  name: "RSA-OAEP",
+                  hash: {name: "SHA-1"}, //can be "SHA-1", "SHA-256", "SHA-384", or "SHA-512"
+              },
+              false, //whether the key is extractable (i.e. can be used in exportKey)
+              ["encrypt"] //"encrypt" or "wrapKey" for public key import or
+                          //"decrypt" or "unwrapKey" for private key imports
+            )
+            .then((key)=> {
+                //returns a publicKey (or privateKey if you are importing a private key)
+              window.crypto.subtle.encrypt({"name": "RSA-OAEP"}, key, new TextEncoder('utf-8').encode(toEncrypt)).then((encrypted)=>{
+                callback(false, Utils.ArrayBuffertoBase64(encrypted));
+              });
+
+            })
+            .catch((err)=>{
+                console.log(err);
+            });
+
+          }
+        },
+
+      }
+
+      _implementation.setImplement('returnRandomInt', (max)=>{
+        return Math.floor(Math.random() * Math.floor(max));
       });
       _implementation.setImplement('generateAESCBC256KeyByHash', (string1, string2, callback)=>{
-
+        crypto.subtle.digest("SHA-256", new TextEncoder('utf-8').encode(string1+string2)).then((hash)=> {
+          callback(false, (Utils.ArrayBuffertoBase64(hash)).substring(0, 32));
+        });
       });
-      _implementation.setImplement('encryptString', (string1, string2, callback)=>{
-
+      _implementation.setImplement('encryptString', (algo, key, toEncrypt, callback)=>{
+        _cry_algo[algo].encryptString(key, toEncrypt, callback);
       });
-      _implementation.setImplement('decryptString', (string1, string2, callback)=>{
-
+      _implementation.setImplement('decryptString', (algo, key, toDecrypt, callback)=>{
+        _cry_algo[algo].decryptString(key, toDecrypt, callback);
       });
       // setup Implementation on browser.
       // setup NSF Auth implementation

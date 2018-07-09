@@ -41,7 +41,7 @@ function Connection() {
     this.getClientIP = (callback) => {callback(false, _clientip);}
     this.getConnMethod = (callback) => {callback(false, _connMethod);}
     this.getRemotePosition = (callback) => {callback(false, _pos);}
-    this.setBundle = (key, value) => {_bundle[key] = value;}
+    this.setBundle = (key, value) => {_bundle[key] = value;console.log(key+': '+value);}
     this.getBundle = (key, callback) => {callback(false, _bundle[key]);}
     this.getConn = (callback) => {callback(false, _conn)};
     this.getGUID = (callback) => {callback(false, _GUID)};
@@ -134,7 +134,6 @@ function Connection() {
     function Server(virtip, virtport) {
       // add this server to list of virtual servers
       _virt_servers[virtip+':'+virtport] = this;
-      let _clients = {};
       let _virtip = virtip;
       let _virtport = virtport;
 
@@ -204,7 +203,6 @@ function Connection() {
     let _hostip = null;
     let _serverID = id;
     let _wss = null;
-    let _clients = {};
 
     this.close = (GUID) => {_clients[GUID].close()};
 
@@ -295,7 +293,6 @@ function Connection() {
     let _hostip = null;
     let _serverID = id;
     let _netserver = null;
-    let _clients = {};
 
     this.close = (GUID) => {_clients[GUID].destroy()};
 
@@ -385,8 +382,6 @@ function Connection() {
   function LocalServer(id, virtnet) {
     let _serverID = id;
     let _vnets = null;
-    let _clients = {};
-
     this.close = (GUID) => {_clients[GUID].close()};
 
     this.onData = (connprofile, data) => {Utils.tagLog('*ERR*', 'LocalServer onData not implemented.');};

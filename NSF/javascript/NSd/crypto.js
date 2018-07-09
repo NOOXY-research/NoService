@@ -16,31 +16,38 @@ function NSPS() {
   // daemon side
   this.RsRouter = (connprofile, data) => {
     let resume = _resumes[connprofile.returnGUID()];
-    _crypto_module.decryptString('RSA2048', _rsa_priv, data, (err, decrypted) => {
-      let json = null;
-      try {
-        json = JSON.parse(decrypted);
+    try{
+      _crypto_module.decryptString('RSA2048', _rsa_priv, data, (err, decrypted) => {
+        let json = null;
+        try {
+          json = JSON.parse(decrypted);
 
-        let host_rsa_pub = _rsa_pub;
-        let client_random_num = json.r;
-        _crypto_module.generateAESCBC256KeyByHash(host_rsa_pub, client_random_num, (err, aes_key) => {
-          if(aes_key == json.a) {
-            connprofile.setBundle('aes_256_cbc_key', aes_key);
-            connprofile.setBundle('NSPS', true);
-            connprofile.setBundle('NSPSremote', true);
-            resume(err, true);
-          }
-          else {
-            resume(err, false);
-          }
+          let host_rsa_pub = _rsa_pub;
+          let client_random_num = json.r;
+          _crypto_module.generateAESCBC256KeyByHash(host_rsa_pub, client_random_num, (err, aes_key) => {
+            if(aes_key == json.a) {
+              connprofile.setBundle('aes_256_cbc_key', aes_key);
+              connprofile.setBundle('NSPS', true);
+              connprofile.setBundle('NSPSremote', true);
+              resume(err, true);
+            }
+            else {
+              resume(err, false);
+            }
 
-        });
-      }
-      catch (err) {
-        console.log(err);
-        resume(false, false);
-      }
-    });
+          });
+        }
+        catch (err) {
+          resume(true, false);
+        }
+      });
+    }
+    catch(er) {
+      console.log(er);
+      connprofile.closeConnetion();
+      resume(true, false);
+    }
+
   };
 
   // Nooxy service protocol sercure request ClientSide
