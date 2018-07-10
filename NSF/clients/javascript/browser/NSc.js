@@ -16,6 +16,15 @@ function NSc() {
   };
 
   let Utils = {
+    getQueryVariable: (variable)=>{
+           var query = window.location.search.substring(1);
+           var vars = query.split("&");
+           for (var i=0;i<vars.length;i++) {
+                   var pair = vars[i].split("=");
+                   if(pair[0] == variable){return pair[1];}
+           }
+           return(false);
+    },
     Base64toArrayBuffer: (b64str) => {
       var raw = window.atob(b64str);
       var rawLength = raw.length;
@@ -64,6 +73,7 @@ function NSc() {
       console.log('')
     },
     setCookie: (cname, cvalue, exdays)=> {
+      console.log(cname, cvalue, exdays);
       let d = new Date();
       d.setTime(d.getTime() + (exdays * 24 * 60 * 60 * 1000));
       let expires = "expires="+d.toUTCString();
@@ -326,6 +336,7 @@ function NSc() {
     let _trusted_domains = [];
 
     let _implts_callback = {
+      // Authby password
       'PW': (connprofile, data, data_sender) => {
         let AuthbyPassword = _implementation_module.returnImplement('AuthbyPassword');
         AuthbyPassword((err, password)=>{
@@ -339,6 +350,13 @@ function NSc() {
         })
       },
 
+      // Authby password failed
+      'PF': (connprofile, data, data_sender) => {
+        let AuthbyPasswordFailed = _implementation_module.returnImplement('AuthbyPasswordFailed');
+        AuthbyPasswordFailed();
+      },
+
+      // Authby token
       'TK': (connprofile, data, data_sender) => {
         let AuthbyToken = _implementation_module.returnImplement('AuthbyToken');
         AuthbyToken((err, token)=>{
@@ -352,7 +370,18 @@ function NSc() {
         })
       },
 
+      // Authby token failed
+      'TF': (connprofile, data, data_sender) => {
+        let AuthbyTokenFailed = _implementation_module.returnImplement('AuthbyTokenFailed');
+        AuthbyTokenFailed();
+      },
+
+      // Authby action
       'AC': () => {
+
+      },
+
+      'AF': ()=>{
 
       }
     };
@@ -384,7 +413,6 @@ function NSc() {
     };
 
     let _tellRAWSniffers = (data) => {
-      Utils.tagLog('DEBUG', data);
       for(let i in _raw_sniffers) {
         _raw_sniffers[i](false, data);
       }
@@ -516,7 +544,6 @@ function NSc() {
 
           let actions = {
             rq : _coregateway.AuthorizationHandler.RqRouter,
-            rs : _coregateway.Authorization.RsRouter
           }
           connprofile.getRemotePosition((err, pos)=> {
             if(rq_rs_pos[session] == pos || rq_rs_pos[session] == 'Both') {
@@ -1019,10 +1046,18 @@ function NSc() {
         callback(true, 'token');
       },
 
+      AuthbyTokenFailed: () => {
+        Utils.tagLog('*ERR*', 'AuthbyTokenFailed not implemented');
+      },
+
       // return for Server
       AuthbyPassword: (callback) => {
         Utils.tagLog('*ERR*', 'AuthbyPassword not implemented');
         callback(true, 'password');
+      },
+
+      AuthbyPasswordFailed: () => {
+        Utils.tagLog('*ERR*', 'AuthbyPasswordFailed not implemented');
       },
 
       // return for Client
@@ -1198,16 +1233,40 @@ function NSc() {
       let _cry_algo = {
         // key is in length 32 char
         AESCBC256: {
-          encryptString: (key, toEncrypt, callback) => {
-            let iv = crypto.randomBytes(16);
-            let cipher = crypto.createCipheriv('aes-256-cbc', key, iv);
-            let crypted = cipher.update(toEncrypt,'utf8','base64');
-            crypted += cipher.final('base64');
-            crypted = iv.toString('base64')+crypted;
-            callback(false, crypted);
+          encryptString: (keystr, toEncrypt, callback) => {
+            window.crypto.subtle.importKey(
+                "raw", //can be "jwk" or "raw"
+                new TextEncoder('utf-8').encode(keystr),
+                {   //this is the algorithm options
+                    name: "AES-CBC",
+                },
+                false, //whether the key is extractable (i.e. can be used in exportKey)
+                ["encrypt", "decrypt"] //can be "encrypt", "decrypt", "wrapKey", or "unwrapKey"
+            )
+            .then((key)=>{
+              let iv = new Uint8Array(16);
+              window.crypto.getRandomValues(iv);
+              toEncrypt = new TextEncoder('utf-8').encode(toEncrypt);
+              window.crypto.subtle.encrypt(
+                {
+                    name: "AES-CBC",
+                    iv: iv, //The initialization vector you used to encrypt
+                },
+                key, //from generateKey or importKey above
+                toEncrypt //ArrayBuffer of the data
+              )
+              .then((encrypted)=>{;
+                callback(false, Utils.ArrayBuffertoBase64(iv)+Utils.ArrayBuffertoBase64(encrypted));
+              })
+              .catch((err2)=>{
+                console.error(err2);
+              });
+            })
+            .catch((err)=>{
+                console.error(err);
+            });
           },
           decryptString: (keystr, toDecrypt, callback) => {
-            console.log('key: '+keystr);
             window.crypto.subtle.importKey(
                 "raw", //can be "jwk" or "raw"
                 new TextEncoder('utf-8').encode(keystr),
@@ -1275,7 +1334,8 @@ function NSc() {
         return Math.floor(Math.random() * Math.floor(max));
       });
       _implementation.setImplement('generateAESCBC256KeyByHash', (string1, string2, callback)=>{
-        crypto.subtle.digest("SHA-256", new TextEncoder('utf-8').encode(string1+string2)).then((hash)=> {
+        console.log(window.crypto)
+        window.crypto.subtle.digest("SHA-256", new TextEncoder('utf-8').encode(string1+string2)).then((hash)=> {
           callback(false, (Utils.ArrayBuffertoBase64(hash)).substring(0, 32));
         });
       });
@@ -1285,29 +1345,44 @@ function NSc() {
       _implementation.setImplement('decryptString', (algo, key, toDecrypt, callback)=>{
         _cry_algo[algo].decryptString(key, toDecrypt, callback);
       });
-      // setup Implementation on browser.
       // setup NSF Auth implementation
       _implementation.setImplement('signin', (conn_method, remote_ip, port, callback)=>{
         _implementation.setImplement('onToken', callback);
         console.log('Please signin your account.');
-        window.open('login.html?conn_method='+conn_method+'&remote_ip='+remote_ip+'&port='+port, '_blank');
+        window.location.replace('login.html?conn_method='+conn_method+'&remote_ip='+remote_ip+'&port='+port+'&redirect='+window.location.href);
+        // window.open('login.html?conn_method='+conn_method+'&remote_ip='+remote_ip+'&port='+port);
+      });
+
+      _implementation.setImplement('onToken', (err, token)=>{
+        console.log('token: ', token);
+        Utils.setCookie('NSToken', token, 7);
+        console.log('token: ', Utils.getCookie('NSToken'));
+        if(Utils.getQueryVariable('redirect')) {
+          window.location.replace(Utils.getQueryVariable('redirect'));
+        }
+
       });
 
       // setup NSF Auth implementation
       _implementation.setImplement('AuthbyToken', (callback) => {
+        console.log('token: ', Utils.getCookie('NSToken'));
         let pass = true;
-        if(_token == null) {
-          _implementation.returnImplement('signin')(DAEMONTYPE, DAEMONIP, DAEMONPORT, (err, token)=>{
-            _token = token;
-            if(_token != null) {
-              callback(false, _token);
-            }
-          });
+        if(Utils.getCookie('NSToken') == null) {
+          _implementation.returnImplement('signin')(settings.connmethod, settings.targetip, settings.targetport);
         }
         else {
-          callback(false, _token);
+          callback(false, Utils.getCookie('NSToken'));
         }
 
+      });
+      // setup NSF Auth implementation
+      _implementation.setImplement('AuthbyTokenFailed', () => {
+        _implementation.returnImplement('signin')(settings.connmethod, settings.targetip, settings.targetport, (err, token)=>{
+          Utils.setCookie('NSToken', token, 7);
+          if(Utils.getCookie('NSToken') != null) {
+            callback(false, Utils.getCookie('NSToken'));
+          }
+        });
       });
 
       // setup NSF Auth implementation

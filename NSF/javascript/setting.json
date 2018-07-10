@@ -49,7 +49,7 @@
 
   "debug_service": "NoDebug",
 
-  "debug": true,
+  "debug": false,
 
   "debug_config": {
   	"show_json": true,

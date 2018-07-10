@@ -127,15 +127,15 @@ function start(api) {
               if(pass) {
                 r = _(t1, {
                   show: (t2, c2) => {
-                    c2(false, {r:api.Service.Entity.returnEntityMetaData(t2[0])});
+                    c2(false, {r:JSON.stringify(api.Service.Entity.returnEntityMetaData(t2[0]), null, 2)});
                   },
 
                   list: (t2, c2) => {
-                    c2(false, {r:api.Service.Entity.returnEntitiesID()});
+                    c2(false, {r:JSON.stringify(api.Service.Entity.returnEntitiesID(), null, 2)});
                   },
 
                   count: (t2, c2)=> {
-                    c1(false, {r:api.Service.Entity.returnCount()});
+                    c1(false, {r:JSON.stringify(api.Service.Entity.returnCount(), null, 2)});
                   }
 
                 }, c1);
@@ -165,11 +165,11 @@ function start(api) {
           },
 
           manifest: (t1, c1) => {
-            c1(false, {r:api.Service.returnServiceManifest(t1[0])});
+            c1(false, {r:JSON.stringify(api.Service.returnServiceManifest(t1[0]), null, 2)});
           },
 
           jfunclist: (t1, c1) => {
-            c1(false, {r:api.Service.returnJSONfuncList(t1[0])});
+            c1(false, {r:JSON.stringify(api.Service.returnJSONfuncList(t1[0]), null, 2)});
           },
 
           jfuncdict: (t1, c1) => {
@@ -269,12 +269,12 @@ function start(api) {
 
       daemon: (t0, c0) => {
         if(t0.length == 0) {
-          c0(false, {r: settings.daemon_display_name+'('+settings.daemon_name+')\n'+settings.description});
+          c0(false, {r: JSON.stringify(settings.daemon_display_name+'('+settings.daemon_name+')\n'+settings.description, null, 2)});
         }
         else {
           _(t0, {
             settings: (t1, c1) => {
-              c1(false, {r:settings});
+              c1(false, {r:JSON.stringify(settings, null, 2)});
             }
           }, c0);
         }
@@ -324,7 +324,11 @@ function start(api) {
 
     replace(cmd, 'Me', entityID);
     _(cmd, c_dict, returnJSON);
-  });
+  },
+  (json, entityID, returnJSON)=>{
+    returnJSON(false, {r:'Auth Failed.'});
+  }
+  );
 
 
   // welcome msg

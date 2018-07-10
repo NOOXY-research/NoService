@@ -10,6 +10,7 @@ function AuthorizationHandler() {
   let _trusted_domains = [];
 
   let _implts_callback = {
+    // Authby password
     'PW': (connprofile, data, data_sender) => {
       let AuthbyPassword = _implementation_module.returnImplement('AuthbyPassword');
       AuthbyPassword((err, password)=>{
@@ -23,6 +24,13 @@ function AuthorizationHandler() {
       })
     },
 
+    // Authby password failed
+    'PF': (connprofile, data, data_sender) => {
+      let AuthbyPasswordFailed = _implementation_module.returnImplement('AuthbyPasswordFailed');
+      AuthbyPasswordFailed();
+    },
+
+    // Authby token
     'TK': (connprofile, data, data_sender) => {
       let AuthbyToken = _implementation_module.returnImplement('AuthbyToken');
       AuthbyToken((err, token)=>{
@@ -36,7 +44,18 @@ function AuthorizationHandler() {
       })
     },
 
+    // Authby token failed
+    'TF': (connprofile, data, data_sender) => {
+      let AuthbyTokenFailed = _implementation_module.returnImplement('AuthbyTokenFailed');
+      AuthbyTokenFailed();
+    },
+
+    // Authby action
     'AC': () => {
+
+    },
+
+    'AF': ()=>{
 
     }
   };
@@ -97,6 +116,7 @@ function Authorization() {
                   callback(false, true);
                 }
                 else {
+                  this.emitRouter(connprofile, 'AU', {m: 'PF'});
                   callback(false, false);
                 }
               });
@@ -131,20 +151,36 @@ function Authorization() {
           m: "TK"
         }
         _entity_module.getEntityConnProfile(entityID, (err, connprofile) => {
-          let op = (connprofile, data) => {
-            _authe_module.TokenisValid(user, data.d.t, (err, isValid) => {
+          let tk = connprofile.returnBundle('NSToken');
+          if(tk != null) {
+            _authe_module.TokenisValid(user, tk, (err, isValid) => {
               if(isValid) {
                 callback(false, true);
               }
               else {
+                this.emitRouter(connprofile, 'AU', {m: 'TF'});
                 callback(false, false);
               }
             });
           }
-          _queue_operation[connprofile.returnGUID()+'TK'] = op;
-          // set the timeout of clearing expired authorization.
-          setTimeout(() => {delete _queue_operation[connprofile.returnGUID()+'TK']}, _auth_timeout*1000);
-          this.emitRouter(connprofile, 'AU', data);
+          else {
+            let op = (connprofile, data) => {
+              _authe_module.TokenisValid(user, data.d.t, (err, isValid) => {
+                if(isValid) {
+                  connprofile.setBundle('NSToken', data.d.t);
+                  callback(false, true);
+                }
+                else {
+                  this.emitRouter(connprofile, 'AU', {m: 'TF'});
+                  callback(false, false);
+                }
+              });
+            }
+            _queue_operation[connprofile.returnGUID()+'TK'] = op;
+            // set the timeout of clearing expired authorization.
+            setTimeout(() => {delete _queue_operation[connprofile.returnGUID()+'TK']}, _auth_timeout*1000);
+            this.emitRouter(connprofile, 'AU', data);
+          }
         });
       }
       else {

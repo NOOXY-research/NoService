@@ -129,7 +129,9 @@ label {
 }
 .messages-container {
   width: 100%;
-  height: 160px;
+  /* max-height: 350px;
+  min-height: 300px; */
+  height: 350px;
   overflow-y: scroll;
   overflow-x: hidden;
   background-color: #ECEFF1;
@@ -146,10 +148,9 @@ label {
 }
 .messages li {
   position: relative;
-  padding: 0 10px;
-  height: 45px;
-  line-height: 45px;
-  white-space: nowrap;
+  padding: 5px 10px;
+  height: auto;
+  line-height: 13px;
   box-sizing: border-box;
   /*jelly anime*/
   -webkit-animation-name: animJelly;

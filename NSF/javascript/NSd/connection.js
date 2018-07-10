@@ -41,7 +41,7 @@ function Connection() {
     this.getClientIP = (callback) => {callback(false, _clientip);}
     this.getConnMethod = (callback) => {callback(false, _connMethod);}
     this.getRemotePosition = (callback) => {callback(false, _pos);}
-    this.setBundle = (key, value) => {_bundle[key] = value;console.log(key+': '+value);}
+    this.setBundle = (key, value) => {_bundle[key] = value;}
     this.getBundle = (key, callback) => {callback(false, _bundle[key]);}
     this.getConn = (callback) => {callback(false, _conn)};
     this.getGUID = (callback) => {callback(false, _GUID)};

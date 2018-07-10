@@ -263,6 +263,9 @@ function Service() {
         if(data.d.s == 'OK') {
           _ASockets[data.d.i].launch();
         }
+        else {
+          _ASockets[data.d.i].onClose();
+        }
       },
       // nooxy service protocol implementation of "Call Service: ServiceSocket"
       SS: (connprofile, data) => {
@@ -359,10 +362,15 @@ function Service() {
     };
 
     // sercurely define a JSONfunction
-    this.sdef = (name, callback) => {
+    this.sdef = (name, callback, fail) => {
       this.def(name, (json, entityID, returnJSON)=>{
-        _authorization_module.Authby.isSuperUserwithToken(entityID, ()=>{
-          callback(json, entityID, returnJSON);
+        _authorization_module.Authby.isSuperUserwithToken(entityID, (err, pass)=>{
+          if(pass) {
+            callback(json, entityID, returnJSON);
+          }
+          else {
+            fail(json, entityID, returnJSON);
+          }
         });
       });
     };

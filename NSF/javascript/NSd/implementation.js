@@ -49,10 +49,18 @@ function Implementation() {
       callback(true, 'token');
     },
 
+    AuthbyTokenFailed: () => {
+      Utils.tagLog('*ERR*', 'AuthbyTokenFailed not implemented');
+    },
+
     // return for Server
     AuthbyPassword: (callback) => {
       Utils.tagLog('*ERR*', 'AuthbyPassword not implemented');
       callback(true, 'password');
+    },
+
+    AuthbyPasswordFailed: () => {
+      Utils.tagLog('*ERR*', 'AuthbyPasswordFailed not implemented');
     },
 
     // return for Client

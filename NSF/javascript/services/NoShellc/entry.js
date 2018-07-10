@@ -85,9 +85,7 @@ function start(api) {
     if(_token == null) {
       api.Implementation.returnImplement('signin')(DAEMONTYPE, DAEMONIP, DAEMONPORT, (err, token)=>{
         _token = token;
-        if(_token != null) {
-          callback(false, _token);
-        }
+        callback(false, _token);
       });
     }
     else {

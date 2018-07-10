@@ -138,11 +138,23 @@ function NoCrypto() {
   };
 
   this.encryptString = (algo, key, toEncrypt, callback) => {
-    _algo[algo].encryptString(key, toEncrypt, callback);
+    try{
+      _algo[algo].encryptString(key, toEncrypt, callback);
+    }
+    catch(e) {
+      callback(e);
+    }
+
   };
 
   this.decryptString = (algo, key, toDecrypt, callback) => {
-    _algo[algo].decryptString(key, toDecrypt, callback);
+    try {
+      _algo[algo].decryptString(key, toDecrypt, callback);
+    }
+    catch(e) {
+      callback(e);
+    }
+
   };
 
 }

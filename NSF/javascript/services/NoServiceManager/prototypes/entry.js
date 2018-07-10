@@ -41,7 +41,12 @@ function start(api) {
     }
     // First parameter for error, next is JSON to be returned.
     returnJSON(false, json_be_returned);
-  });
+  },
+  // In case fail.
+  ()=>{
+    console.log('Auth Failed.');
+  }
+  );
 
   // ServiceSocket.onData, in case client send data to this Service.
   // You will need entityID to Authorize remote user. And identify remote.

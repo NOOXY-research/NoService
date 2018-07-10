@@ -115,6 +115,7 @@ function Core(settings) {
       // create gateway
       verbose('Daemon', 'Creating coregateway...')
       let coregateway = {
+          Utilities: Utils,
           Settings: settings,
           Authorization: _authorization,
           AuthorizationHandler: _authorizationhandler,
