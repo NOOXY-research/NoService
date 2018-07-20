@@ -275,6 +275,45 @@ function NSc() {
       }
     };
 
+    function WSSClient() {
+      let _ws = null
+
+      this.close = () => {
+        _ws.close();
+      };
+
+      this.onData = (connprofile, data) => {Utils.tagLog('*ERR*', 'onData not implemented');};
+
+      this.onClose = () => {Utils.tagLog('*ERR*', 'onClose not implemented');};
+
+      this.send = function(connprofile, data) {
+        _ws.send(data);
+      };
+
+      this.connect = (ip, port, callback) => {
+        let connprofile = null;
+        _ws = new WebSocket('wss://'+ip+':'+port);
+        connprofile = new ConnectionProfile(null, 'Server', 'WebSocket', ip, port, 'localhost', this);
+        _ws.addEventListener('open', function open() {
+          callback(false, connprofile);
+          // ws.send('something');
+        });
+        _ws.addEventListener('message', (event) => {
+          this.onData(connprofile, event.data);
+        });
+
+        _ws.addEventListener('error', (error) => {
+            Utils.tagLog('*ERR*', error);
+            _ws.close();
+        });
+
+        _ws.addEventListener('close', (error) => {
+            this.onClose(connprofile);
+        });
+
+      }
+    };
+
     this.createClient = (conn_method, remoteip, port, callback) => {
       if(conn_method == 'ws'||conn_method =='WebSocket') {
         let serverID = "WebSocket";
@@ -284,17 +323,12 @@ function NSc() {
         wsc.connect(remoteip, port, callback);
       }
 
-      else if(conn_method == 'loc'||conn_method =='Local') {
-        if(_have_local_server == false) {
-          Utils.tagLog('*ERR*', 'Local server not started.');
-        }
-        else {
-          let serverID = "LOCAL";
-          let locc = new LocalClient(_virtnet);
-          locc.onData = this.onData;
-          locc.onClose = this.onClose;
-          locc.connect('LOCALIP', 'LOCALPORT', callback);
-        }
+      else if(conn_method == 'wss'||conn_method =='WebSocketSecure') {
+        let serverID = "WebSocketSecure";
+        let wssc = new WSSClient(_virtnet);
+        wssc.onData = this.onData;
+        wssc.onClose = this.onClose;
+        wssc.connect(remoteip, port, callback);
       }
 
       else if(conn_method == 'TCP/IP'||conn_method =='TCP') {
@@ -1473,11 +1507,18 @@ function NSc() {
   };
 
   this.connect = (targetip, targetport, username) =>{
-    settings.connmethod = 'WebSocket';
+    settings.connmethod = 'WebSocketSecure';
     settings.targetip = targetip;
     settings.targetport = targetport;
     settings.user = username;
-    _core.launch();
+    try {
+      _core.launch();
+    }
+    catch(e) {
+      settings.connmethod = 'WebSocket';
+      _core.launch();
+    }
+
   };
 
 }

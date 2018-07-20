@@ -7,6 +7,11 @@
 
   "connection_servers": [
     {
+      "type": "WebSocketSecure",
+      "ip": "0.0.0.0",
+      "port": 1877
+    },
+    {
       "type": "WebSocket",
       "ip": "0.0.0.0",
       "port": 1487
@@ -49,7 +54,7 @@
 
   "debug_service": "NoDebug",
 
-  "debug": false,
+  "debug": true,
 
   "debug_config": {
   	"show_json": true,
@@ -72,6 +77,10 @@
 
   "rsa_2048_pub_key": "public_key.pem",
 
-  "rsa_2048_priv_key": "private_key.pem"
+  "rsa_2048_priv_key": "private_key.pem",
+
+  "ssl_priv_key": "ssl.key",
+
+  "ssl_cert": "ssl.crt"
 
 }

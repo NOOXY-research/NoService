@@ -95,7 +95,7 @@ function start(api) {
       help: (t0, c0) =>{
         c0(false, {r:
           '[daemon]\n'+
-          '  daemon [settings]\n'+
+          '  daemon [settings|stop]\n'+
           '[service]\n'+
           '  service [list|[manifest|create] {service name}]\n'+
           '  service [jfunclist|jfuncdict|jfuncshow] {target service}\n'+
@@ -275,6 +275,10 @@ function start(api) {
           _(t0, {
             settings: (t1, c1) => {
               c1(false, {r:JSON.stringify(settings, null, 2)});
+            },
+            stop: (t1, c1) => {
+              c1(false, {r: 'Stopping daemon...'});
+              api.Daemon.close();
             }
           }, c0);
         }

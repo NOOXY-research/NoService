@@ -6,8 +6,12 @@
 let Utils = require('./utilities');
 const WebSocket = require('ws');
 const Net = require('net');
+const Https = require('https');
 
-function Connection() {
+function Connection(options) {
+  if(options.allow_ssl_self_signed)
+    process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
+
   let _default_local_ip_and_port = '';
   let _servers = {};
   let _clients = {};
@@ -15,6 +19,8 @@ function Connection() {
   let _virtnet = null;
   let _blocked_ip = [];
   let _tcp_ip_chunk_token = '}{"""}<>';
+  let ssl_priv_key = null;
+  let ssl_cert = null;
 
 
   // define an profile of an connection
@@ -32,7 +38,7 @@ function Connection() {
 
     this.closeConnetion = () => {
       // Utils.tagLog('*ERR*', 'closeConnetion not implemented. Of '+this.type);
-      _conn.close(_GUID);
+      _conn.closeConnetion(_GUID);
     };
 
     this.getServerID = (callback) => {callback(false, _serverID);}
@@ -136,7 +142,7 @@ function Connection() {
       _virt_servers[virtip+':'+virtport] = this;
       let _virtip = virtip;
       let _virtport = virtport;
-
+      let _vsclient = {};
       // let _virt_sockets = {};
 
       type_callback = {
@@ -145,12 +151,12 @@ function Connection() {
 
       this.ClientConnect = (clientvirtip, _virtport, vs, callback)=>{
         type_callback['connection'] (vs);
-        _clients[clientvirtip] = vs;
+        _vsclient[clientvirtip] = vs;
       };
 
 
       this.ClientDisconnect = (clientvirtip)=>{
-        delete _clients[clientvirtip];
+        delete _vsclient[clientvirtip];
       };
 
       this.on = (type, callback) => {type_callback[type] = callback};
@@ -203,15 +209,19 @@ function Connection() {
     let _hostip = null;
     let _serverID = id;
     let _wss = null;
+    let _myclients = {};
 
-    this.close = (GUID) => {_clients[GUID].close()};
+    this.close = (GUID) => {
+      _myclients[GUID].close()
+      delete _myclients[GUID];
+    };
 
     this.onData = (connprofile, data) => {Utils.tagLog('*ERR*', 'onData not implemented');};
 
     this.onClose = (connprofile) => {Utils.tagLog('*ERR*', 'onClose not implemented');};
 
     this.send = function(connprofile, data) {
-      _clients[connprofile.returnGUID()].send(data);
+      _myclients[connprofile.returnGUID()].send(data);
     };
 
     this.broadcast = (data) => {
@@ -230,7 +240,7 @@ function Connection() {
       _wss.on('connection', (ws, req) => {
 
         let connprofile = new ConnectionProfile(_serverID, 'Client', 'WebSocket', ip, port, req.connection.remoteAddress, this);
-        _clients[connprofile.returnGUID()] = ws;
+        _myclients[connprofile.returnGUID()] = ws;
 
         ws.on('message', (message) => {
           this.onData(connprofile, message);
@@ -242,7 +252,7 @@ function Connection() {
         });
 
         ws.on('close', (message) => {
-          delete _clients[connprofile.returnGUID()];
+          delete _myclients[connprofile.returnGUID()];
           this.onClose(connprofile);
         });
 
@@ -253,7 +263,7 @@ function Connection() {
   function WSClient() {
     let _ws = null
 
-    this.close = () => {
+    this.closeConnetion = () => {
       _ws.close();
     };
 
@@ -289,25 +299,125 @@ function Connection() {
     }
   };
 
-  function TCPIPServer(id) {
+  // a wrapped WebSocket server for nooxy service framework
+  function WSSServer(id) {
     let _hostip = null;
     let _serverID = id;
-    let _netserver = null;
+    let _wss = null;
+    let _myclients = {};
 
-    this.close = (GUID) => {_clients[GUID].destroy()};
-
-    this.closeConnetion = ()=> {};
+    this.closeConnetion = (GUID) => {
+      _myclients[GUID].close()
+      delete _myclients[GUID];
+    };
 
     this.onData = (connprofile, data) => {Utils.tagLog('*ERR*', 'onData not implemented');};
 
     this.onClose = (connprofile) => {Utils.tagLog('*ERR*', 'onClose not implemented');};
 
     this.send = function(connprofile, data) {
-      _clients[connprofile.returnGUID()].write(_tcp_ip_chunk_token+data);
+      _myclients[connprofile.returnGUID()].send(data);
     };
 
     this.broadcast = (data) => {
-      for(let i in _clients) {
+      this._wss.clients.forEach(function each(client) {
+        if (client.readyState === WebSocket.OPEN) {
+          client.send(data);
+        }
+      });
+    };
+
+    this.start = (ip, port, origin = false) => {
+      // launch server
+      let credentials = { key: ssl_priv_key, cert: ssl_cert };
+      let httpsServer = Https.createServer(credentials);
+      httpsServer.listen(port, ip);
+      _wss = new WebSocket.Server({server: httpsServer});
+      _hostip = ip;
+
+      _wss.on('connection', (ws, req) => {
+
+        let connprofile = new ConnectionProfile(_serverID, 'Client', 'WebSocketSecure', ip, port, req.connection.remoteAddress, this);
+        _myclients[connprofile.returnGUID()] = ws;
+
+        ws.on('message', (message) => {
+          this.onData(connprofile, message);
+        });
+
+        ws.on('error', (message) => {
+          Utils.tagLog('*ERR*', message);
+          ws.close();
+        });
+
+        ws.on('close', (message) => {
+          delete _myclients[connprofile.returnGUID()];
+          this.onClose(connprofile);
+        });
+
+      });
+    }
+  }
+
+  function WSSClient() {
+    let _ws = null
+
+    this.closeConnetion = () => {
+      _ws.close();
+    };
+
+    this.onData = (connprofile, data) => {Utils.tagLog('*ERR*', 'onData not implemented');};
+
+    this.onClose = () => {Utils.tagLog('*ERR*', 'onClose not implemented');};
+
+    this.send = function(connprofile, data) {
+      _ws.send(data);
+    };
+
+    this.connect = (ip, port, callback) => {
+      let connprofile = null;
+      _ws = new WebSocket('wss://'+ip+':'+port);
+      connprofile = new ConnectionProfile(null, 'Server', 'WebSocketSecure', ip, port, 'localhost', this);
+      _ws.on('open', function open() {
+        callback(false, connprofile);
+        // ws.send('something');
+      });
+      _ws.on('message', (message) => {
+        this.onData(connprofile, message);
+      });
+
+      _ws.on('error', (error) => {
+          Utils.tagLog('*ERR*', error);
+          _ws.close();
+      });
+
+      _ws.on('close', (error) => {
+          this.onClose(connprofile);
+      });
+
+    }
+  };
+
+  function TCPIPServer(id) {
+    let _hostip = null;
+    let _serverID = id;
+    let _netserver = null;
+    let _myclients = {};
+
+    this.closeConnetion = (GUID) => {
+      _myclients[GUID].destroy()
+      delete _myclients[GUID];
+    };
+
+    this.onData = (connprofile, data) => {Utils.tagLog('*ERR*', 'onData not implemented');};
+
+    this.onClose = (connprofile) => {Utils.tagLog('*ERR*', 'onClose not implemented');};
+
+    this.send = function(connprofile, data) {
+      _myclients[connprofile.returnGUID()].write(_tcp_ip_chunk_token+data);
+    };
+
+    this.broadcast = (data) => {
+      for(let i in _myclients) {
         client.write(data);
       };
     };
@@ -317,7 +427,7 @@ function Connection() {
       _hostip = ip;
       Net.createServer((socket)=>{
         let connprofile = new ConnectionProfile(_serverID, 'Client', 'TCP/IP', ip, port, socket.remoteAddress, this);
-        _clients[connprofile.returnGUID()] = socket;
+        _myclients[connprofile.returnGUID()] = socket;
 
         socket.on('data', (data) => {
           data = data.toString('utf8');
@@ -333,7 +443,7 @@ function Connection() {
         });
 
         socket.on('close', (message) => {
-          delete _clients[connprofile.returnGUID()];
+          delete _myclients[connprofile.returnGUID()];
           this.onClose(connprofile);
         });
 
@@ -345,7 +455,7 @@ function Connection() {
   function TCPIPClient() {
     let _netc = null
 
-    this.close = (GUID) => {_netc.destroy()};
+    this.closeConnetion = (GUID) => {_netc.destroy()};
 
     this.onData = (connprofile, data) => {Utils.tagLog('*ERR*', 'onData not implemented');};
 
@@ -382,18 +492,23 @@ function Connection() {
   function LocalServer(id, virtnet) {
     let _serverID = id;
     let _vnets = null;
-    this.close = (GUID) => {_clients[GUID].close()};
+    let _myclients= {};
+
+    this.closeConnetion = (GUID) => {
+      _myclients[GUID].close();
+      delete _myclients[GUID];
+    };
 
     this.onData = (connprofile, data) => {Utils.tagLog('*ERR*', 'LocalServer onData not implemented.');};
 
     this.onClose = (connprofile) => {Utils.tagLog('*ERR*', 'LocalServer onClose not implemented');};
 
     this.send = (connprofile, data) => {
-      _clients[connprofile.returnGUID()].send(data);
+      _myclients[connprofile.returnGUID()].send(data);
     };
 
     this.broadcast = (data) => {
-      _clients.forEach((key, client) => {
+      _myclients.forEach((key, client) => {
         client.send(data);
       });
     }
@@ -402,7 +517,7 @@ function Connection() {
       _vnets = virtnet.createServer(virtip, virtport);
       _vnets.on('connection', (vs) => {
           let connprofile = new ConnectionProfile(_serverID, 'Client', 'Local', virtip, virtport, vs.returnRemoteIP(), this);
-          _clients[connprofile.returnGUID()] = vs;
+          _myclients[connprofile.returnGUID()] = vs;
 
           vs.on('message', (message) => {
             this.onData(connprofile, message);
@@ -410,14 +525,14 @@ function Connection() {
 
           vs.on('error', (err) => {
             Utils.tagLog('*ERR*', err);
-            delete _clients[connprofile.returnGUID()];
+            delete _myclients[connprofile.returnGUID()];
             this.onClose(connprofile);
             vs.close();
           });
 
           vs.on('close', (message) => {
             console('OwO');
-            delete _clients[connprofile.returnGUID()];
+            delete _myclients[connprofile.returnGUID()];
             this.onClose(connprofile);
           });
 
@@ -431,7 +546,7 @@ function Connection() {
     let _vnetc = null;
     let _vs = null
 
-    this.close = (GUID) => {_vs.close()};
+    this.closeConnetion = (GUID) => {_vs.close()};
 
     this.onData = (connprofile, data) => {Utils.tagLog('*ERR*', 'onData not implemented');};
 
@@ -477,6 +592,15 @@ function Connection() {
       wws.onClose = this.onClose;
     }
 
+    if(conn_method == 'wss' || conn_method =='WebSocketSecure') {
+      let _serverID = Utils.generateGUID();
+      let wws = new WSSServer(_serverID);
+      _servers[_serverID] = wws;
+      wws.start(ip, port);
+      wws.onData = this.onData;
+      wws.onClose = this.onClose;
+    }
+
     else if(conn_method == 'local'||conn_method =='Local') {
       if(_have_local_server == false) {
         let _serverID = "LOCAL";
@@ -510,6 +634,14 @@ function Connection() {
     if(conn_method == 'ws'||conn_method =='WebSocket') {
       let serverID = "WebSocket";
       let wsc = new WSClient(_virtnet);
+      wsc.onData = this.onData;
+      wsc.onClose = this.onClose;
+      wsc.connect(remoteip, port, callback);
+    }
+
+    else if(conn_method == 'wss'||conn_method =='WebSocketSecure') {
+      let serverID = "WebSocket";
+      let wsc = new WSSClient(_virtnet);
       wsc.onData = this.onData;
       wsc.onClose = this.onClose;
       wsc.connect(remoteip, port, callback);
@@ -572,6 +704,20 @@ function Connection() {
   this.killClient = (conn_profile) => {
 
   };
+
+  this.importSSLCert = (ssl_cert_in) => {
+    ssl_cert = ssl_cert_in;
+  };
+
+  this.importSSLPrivateKey = (ssl_priv_key_in) => {
+    ssl_priv_key = ssl_priv_key_in;
+  }
+
+  this.close = ()=>{
+    for(let i in _servers) {
+      _servers[i].close()
+    }
+  }
 
 }
 

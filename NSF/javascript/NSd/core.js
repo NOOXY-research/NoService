@@ -23,13 +23,20 @@ let NSPS = require('./crypto').NSPS;
 let Vars = require('./variables');
 
 function Core(settings) {
+  let verbose = (tag, log) => {
+    if(settings.verbose||settings.debug) {
+      Utils.tagLog(tag, log);
+    };
+  };
+
   let _runtime_id = Utils.generateGUID();
   let _path = settings['path'];
+  verbose('Daemon', 'Path setted as '+ _path);
   settings.services_path = _path+settings.services_path;
   settings.services_files_path = _path+settings.services_files_path;
-  settings.rsa_2048_priv_key = _path+settings.rsa_2048_priv_key;
-  settings.rsa_2048_pub_key = _path+settings.rsa_2048_pub_key;
-  settings.database_path = _path+settings.database_path;
+  settings.rsa_2048_priv_key = settings.rsa_2048_priv_key;
+  settings.rsa_2048_pub_key = settings.rsa_2048_pub_key;
+  settings.database_path = settings.database_path;
   // initialize variables
   let _connection = null;
   let _authorization = null;
@@ -43,11 +50,7 @@ function Core(settings) {
   let _nocrypto = null;
   let _nsps = null;
 
-  let verbose = (tag, log) => {
-    if(settings.verbose||settings.debug) {
-      Utils.tagLog(tag, log);
-    };
-  };
+
 
   this.checkandlaunch = () => {
     // initialize environment
@@ -79,10 +82,10 @@ function Core(settings) {
     // // let _nocrypto = null;
     // // let _nsps = null;
     // verbose('Daemon', 'Initializing variables done.')
-
+    verbose('Daemon', 'Starting directory: ' + process.cwd());
     // setup variables
     verbose('Daemon', 'Setting up variables.')
-    _connection = new Connection();
+    _connection = new Connection({allow_ssl_self_signed: true});
     _authorization = new Authorization();
     _authorizationhandler = new AuthorizationHandler();
     _authenticity = new Authenticity();
@@ -99,11 +102,12 @@ function Core(settings) {
         Settings: settings,
         close: () => {
           _connection.close();
+          _service.close();
+
           _authorization.close();
           _authorizationhandler.close();
           _authenticity.close();
           _router.close();
-          _service.close();
           _entity.close();
           _serviceAPI.close();
           _implementation.close();
@@ -149,6 +153,14 @@ function Core(settings) {
     _router.importCore(coregateway);
 
     // setup connection
+    if(settings.ssl_priv_key!=null && settings.ssl_cert!=null) {
+      // read ssl certificate
+      let privateKey = fs.readFileSync(settings.ssl_priv_key, 'utf8');
+      let certificate = fs.readFileSync(settings.ssl_cert, 'utf8');
+      _connection.importSSLPrivateKey(privateKey);
+      _connection.importSSLCert(certificate);
+    }
+
     for(var server in settings.connection_servers) {
       _connection.addServer(settings.connection_servers[server].type,
          settings.connection_servers[server].ip, settings.connection_servers[server].port);
@@ -221,7 +233,7 @@ function Core(settings) {
   }
 
   this.isinitialized = () => {
-    if (fs.existsSync(_path+'eula.txt')&&fs.existsSync(settings.database_path)) {
+    if (fs.existsSync('eula.txt')&&fs.existsSync(settings.database_path)) {
 
       if(settings.sercure == false) {
         return true;
