@@ -1,4 +1,3 @@
-![alt text](/imgs/NSFicon.png)
 ![alt text](/imgs/NSFdescription.png)
 
 Not completed yet. Don't use it.
