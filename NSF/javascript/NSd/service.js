@@ -68,21 +68,32 @@ function Service() {
 
   this.onConnectionClose = (connprofile, callback) => {
     let _entitiesID = connprofile.returnBundle('bundle_entities');
-    let i = 0;
-    if(_entitiesID==null) {
+
+    if(_entitiesID == null) {
       callback(true);
     }
     else if(_entitiesID.length) {
-      let loop = () => {
-        let theservice = _local_services[_entity_module.returnEntityValue(_entitiesID, 'service')];
-        theservice.sendSSClose(_entitiesID[i], (err)=>{
+      let Rpos = connprofile.returnRemotePosition();
+      if(connprofile.returnRemotePosition() == 'Client') {
+        console.log(_entitiesID);
+        let i = 0;
+        let loop = () => {
+          let theservice = _local_services[_entity_module.returnEntityValue(_entitiesID[i], 'service')];
+          _entity_module.deleteEntity(_entitiesID[i]);
+          theservice.sendSSClose(_entitiesID[i], (err)=>{
+
+          });
           if(i < _entitiesID.length-1) {
-            i++
+            i++;
             loop();
           }
-        });
-      };
-      callback(false);
+        };
+        loop();
+        callback(false);
+      }
+      else {
+
+      }
     }
     else {
       callback(false);
@@ -297,7 +308,8 @@ function Service() {
           this.emitRouter(connprofile, 'CS', _data);
         }
         else {
-          delete   _ActivityRsCEcallbacks[data.d.t];
+          delete  _ActivityRsCEcallbacks[data.d.t];
+          connprofile.closeConnetion();
         }
       }
     }
@@ -715,6 +727,9 @@ function Service() {
       _ActivityRsCEcallbacks[_data.d.t] = (connprofile, data) => {
         if(data.d.i != "FAIL") {
           _as.setEntityID(data.d.i);
+          connprofile.setBundle('entityID', data.d.i);
+          console.log(connprofile.returnBundle('entityID'));
+
           _ASockets[data.d.i] = _as;
           callback(false, _as);
         }
@@ -753,6 +768,8 @@ function Service() {
 
         if(data.d.i != "FAIL") {
           _as.setEntityID(data.d.i);
+          connprofile.setBundle('entityID', data.d.i);
+          console.log(connprofile.returnBundle('entityID'));
           _ASockets[data.d.i] = _as;
           callback(false, _as);
         }

@@ -34,7 +34,9 @@ function Connection(options) {
     let _hostport = hostport;
     let _clientip = clientip;
     let _conn = conn; // conn is wrapped!
-
+    if(Rpos == 'Server') {
+      _clients[_GUID] = this;
+    }
 
     this.closeConnetion = () => {
       // Utils.tagLog('*ERR*', 'closeConnetion not implemented. Of '+this.type);
@@ -47,7 +49,7 @@ function Connection(options) {
     this.getClientIP = (callback) => {callback(false, _clientip);}
     this.getConnMethod = (callback) => {callback(false, _connMethod);}
     this.getRemotePosition = (callback) => {callback(false, _pos);}
-    this.setBundle = (key, value) => {_bundle[key] = value;}
+    this.setBundle = (key, value) => {_bundle[key] = value; console.log(_GUID+key+value)}
     this.getBundle = (key, callback) => {callback(false, _bundle[key]);}
     this.getConn = (callback) => {callback(false, _conn)};
     this.getGUID = (callback) => {callback(false, _GUID)};
@@ -62,6 +64,11 @@ function Connection(options) {
     this.returnConn = () => {return _conn;};
     this.returnGUID = () => {return _GUID};
 
+    this.destroy= () => {
+      delete _conn;
+      delete this;
+      delete _clients[_GUID];
+    };
     // this.onConnectionDropout = () => {
     //   Utils.tagLog('*ERR*', 'onConnectionDropout not implemented');
     // }
@@ -211,7 +218,7 @@ function Connection(options) {
     let _wss = null;
     let _myclients = {};
 
-    this.close = (GUID) => {
+    this.closeConnetion = (GUID) => {
       _myclients[GUID].close()
       delete _myclients[GUID];
     };
@@ -690,7 +697,7 @@ function Connection(options) {
   };
 
   this.onClose = (connprofile) => {
-    Utils.tagLog('*ERR*', 'Connection module onData not implement');
+    Utils.tagLog('*ERR*', 'Connection module onClose not implement');
   }
 
   this.getServers = (callback) => {
@@ -714,8 +721,8 @@ function Connection(options) {
   }
 
   this.close = ()=>{
-    for(let i in _servers) {
-      _servers[i].close()
+    for(let i in _clients) {
+      _clients[i].closeConnetion();
     }
   }
 

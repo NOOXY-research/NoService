@@ -307,8 +307,7 @@ function Router() {
 
     _coregateway.Connection.onClose = (connprofile) => {
       _coregateway.Service.onConnectionClose(connprofile, (err)=>{
-        delete connprofile.returnConn();
-        delete connprofile;
+        connprofile.destroy();
       });
     };
 
