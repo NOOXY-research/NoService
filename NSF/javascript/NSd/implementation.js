@@ -137,6 +137,8 @@ function Implementation() {
   this.returnNSPSModule = () =>{
 
   };
+
+  this.close = () => {};
 }
 
 module.exports = Implementation;

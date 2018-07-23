@@ -67,15 +67,15 @@ function Service() {
   this.emitRouter = () => {Utils.tagLog('*ERR*', 'emitRouter not implemented');};
 
   this.onConnectionClose = (connprofile, callback) => {
-    let _entitiesID = connprofile.returnBundle('bundle_entities');
 
+    let _entitiesID = connprofile.returnBundle('bundle_entities');
     if(_entitiesID == null) {
+
       callback(true);
     }
     else if(_entitiesID.length) {
       let Rpos = connprofile.returnRemotePosition();
       if(connprofile.returnRemotePosition() == 'Client') {
-        console.log(_entitiesID);
         let i = 0;
         let loop = () => {
           let theservice = _local_services[_entity_module.returnEntityValue(_entitiesID[i], 'service')];
@@ -92,7 +92,10 @@ function Service() {
         callback(false);
       }
       else {
-
+        for(let i in _entitiesID) {
+          _ASockets[_entitiesID[i]].close();
+        }
+        callback(false);
       }
     }
     else {
@@ -248,6 +251,9 @@ function Service() {
           });
         }
         else {
+          if(_debug) {
+
+          }
           let _data = {
             "m": "CE",
             "d": {
@@ -447,14 +453,6 @@ function Service() {
     let wait_ops = [];
     let wait_launch_ops = [];
 
-    let entities_prev = conn_profile.returnBundle('bundle_entities');
-    if(entities_prev != null) {
-      conn_profile.setBundle('bundle_entities', [_entity_id].concat(entities_prev));
-    }
-    else {
-      conn_profile.setBundle('bundle_entities', [_entity_id]);
-    }
-
     let _conn_profile = conn_profile;
     let _jfqueue = {};
 
@@ -476,6 +474,13 @@ function Service() {
 
     this.setEntityID = (id) => {
       _entity_id = id;
+      let entities_prev = conn_profile.returnBundle('bundle_entities');
+      if(entities_prev != null) {
+        conn_profile.setBundle('bundle_entities', [_entity_id].concat(entities_prev));
+      }
+      else {
+        conn_profile.setBundle('bundle_entities', [_entity_id]);
+      }
     };
 
     this.sendJFReturn = (err, tempid, returnvalue) => {
@@ -527,8 +532,8 @@ function Service() {
           }
         }
         conn_profile.setBundle('bundle_entities', bundle);
-        if(!bundle.length) {
-          conn_profile.closeConnetion();
+        if(bundle.length == 0) {
+          _conn_profile.closeConnetion();
         }
       }
       exec(op);
@@ -648,8 +653,11 @@ function Service() {
 
     this.returnManifest = () => {
       return _service_manifest;
-    }
+    };
 
+    this.close = () => {
+      _service_module.close();
+    };
   };
 
   // Service module launch
@@ -797,6 +805,19 @@ function Service() {
 
   this.returnList = () => {
     return Object.keys(_local_services);
+  };
+
+  // service module close
+  this.close = () => {
+    for(let i in _local_services) {
+      try{
+        _local_services[i].close();
+      }
+      catch(e) {
+        Utils.tagLog('*ERR*', 'An error occured on closing service "'+i+'"');
+        console.log(e);
+      }
+    }
   };
 }
 

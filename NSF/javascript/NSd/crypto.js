@@ -86,6 +86,13 @@ function NSPS() {
     _rsa_priv = rsa_priv;
     _rsa_pub = rsa_pub;
   };
+
+  this.close = () => {
+    _rsa_pub = null;
+    _rsa_priv = null;
+    _resumes = {};
+    _crypto_module = null;
+  };
 };
 
 
@@ -157,6 +164,7 @@ function NoCrypto() {
 
   };
 
+  this.close = () => {};
 }
 
 module.exports = {

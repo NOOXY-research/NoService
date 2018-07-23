@@ -142,6 +142,11 @@ function Entity() {
       (_callbacks['EntityDeleted'])[i](entityID);
     }
   };
+
+  this.close = () => {
+    _callbacks = {};
+    _entities = {};
+  };
 }
 
 module.exports = Entity;

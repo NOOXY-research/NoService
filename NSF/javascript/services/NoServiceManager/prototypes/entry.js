@@ -3,6 +3,7 @@
 // "youservice/entry.js" description.
 // Copyright 2018 NOOXY. All Rights Reserved.
 
+let files_path;
 // Your service entry point
 function start(api) {
   // Get the service socket of your service
@@ -13,7 +14,7 @@ function start(api) {
   // E.g. setTimeout(api.SafeCallback(callback), timeout)
   let safec = api.SafeCallback;
   // Please save and manipulate your files in this directory
-  let files_path = api.Me.FilesPath;
+  files_path = api.Me.FilesPath;
 
   // Access another service on this daemon
   let admin_daemon_asock = api.Service.ActivitySocket.createDefaultAdminDeamonSocket('Another Service', (err, activitysocket)=> {
@@ -91,10 +92,9 @@ function start(api) {
 }
 
 // If the daemon stop, your service recieve close signal here.
-function close(api) {
+function close() {
   // Saving state of you service.
   // Please save and manipulate your files in this directory
-  let services_files_path = api.Me.FilesPath;
 }
 
 // Export your work for system here.

@@ -247,6 +247,10 @@ function ServiceAPI() {
   this.createActivityAPI = (callback) => {
 
   };
+
+  this.close = () => {
+    _coregateway = null;
+  };
 }
 
 module.exports = ServiceAPI;

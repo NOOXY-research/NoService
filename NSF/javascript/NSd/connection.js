@@ -49,7 +49,7 @@ function Connection(options) {
     this.getClientIP = (callback) => {callback(false, _clientip);}
     this.getConnMethod = (callback) => {callback(false, _connMethod);}
     this.getRemotePosition = (callback) => {callback(false, _pos);}
-    this.setBundle = (key, value) => {_bundle[key] = value; console.log(_GUID+key+value)}
+    this.setBundle = (key, value) => {_bundle[key] = value;}
     this.getBundle = (key, callback) => {callback(false, _bundle[key]);}
     this.getConn = (callback) => {callback(false, _conn)};
     this.getGUID = (callback) => {callback(false, _GUID)};
@@ -254,8 +254,10 @@ function Connection(options) {
         });
 
         ws.on('error', (message) => {
-          Utils.tagLog('*ERR*', message);
+          Utils.tagLog('*WARN*', 'An error occured on connection module.');
+          Utils.tagLog('*WARN*', message);
           ws.close();
+          this.onClose(connprofile);
         });
 
         ws.on('close', (message) => {
@@ -264,7 +266,11 @@ function Connection(options) {
         });
 
       });
-    }
+    };
+
+    this.close = () => {
+      _wss.close();
+    };
   }
 
   function WSClient() {
@@ -295,8 +301,10 @@ function Connection(options) {
       });
 
       _ws.on('error', (error) => {
-          Utils.tagLog('*ERR*', error);
-          _ws.close();
+        Utils.tagLog('*WARN*', 'An error occured on connection module.');
+        Utils.tagLog('*WARN*', message);
+        _ws.close();
+        this.onClose(connprofile);
       });
 
       _ws.on('close', (error) => {
@@ -351,9 +359,11 @@ function Connection(options) {
           this.onData(connprofile, message);
         });
 
-        ws.on('error', (message) => {
-          Utils.tagLog('*ERR*', message);
+        ws.on('error', (error) => {
+          Utils.tagLog('*WARN*', 'An error occured on connection module.');
+          Utils.tagLog('*WARN*', error);
           ws.close();
+          this.onClose(connprofile);
         });
 
         ws.on('close', (message) => {
@@ -362,7 +372,11 @@ function Connection(options) {
         });
 
       });
-    }
+    };
+
+    this.close = () => {
+      _wss.close();
+    };
   }
 
   function WSSClient() {
@@ -393,8 +407,10 @@ function Connection(options) {
       });
 
       _ws.on('error', (error) => {
-          Utils.tagLog('*ERR*', error);
-          _ws.close();
+        Utils.tagLog('*WARN*', 'An error occured on connection module.');
+        Utils.tagLog('*WARN*', error);
+        _ws.close();
+        this.onClose(connprofile);
       });
 
       _ws.on('close', (error) => {
@@ -432,7 +448,7 @@ function Connection(options) {
     this.start = (ip, port, origin = false) => {
       // launch server
       _hostip = ip;
-      Net.createServer((socket)=>{
+      _netserver = Net.createServer((socket)=>{
         let connprofile = new ConnectionProfile(_serverID, 'Client', 'TCP/IP', ip, port, socket.remoteAddress, this);
         _myclients[connprofile.returnGUID()] = socket;
 
@@ -444,9 +460,11 @@ function Connection(options) {
           }
         });
 
-        socket.on('error', (message) => {
-          Utils.tagLog('*ERR*', message);
+        socket.on('error', (error) => {
+          Utils.tagLog('*WARN*', 'An error occured on connection module.');
+          Utils.tagLog('*WARN*', error);
           socket.destroy();
+          this.onClose(connprofile);
         });
 
         socket.on('close', (message) => {
@@ -456,7 +474,11 @@ function Connection(options) {
 
       }).listen(port, ip);
 
-    }
+    };
+
+    this.close = () => {
+      _netserver.close();
+    };
   };
 
   function TCPIPClient() {
@@ -488,8 +510,15 @@ function Connection(options) {
         }
       });
 
+      _netc.on('error', (error) => {
+        Utils.tagLog('*WARN*', 'An error occured on connection module.');
+        Utils.tagLog('*WARN*', message);
+        _netc.destroy();
+        this.onClose(connprofile);
+      });
+
       _netc.on('close', () => {
-          this.onClose(connprofile);
+        this.onClose(connprofile);
       });
 
 
@@ -544,7 +573,10 @@ function Connection(options) {
           });
 
       });
-    }
+    };
+
+    this.close = () => {
+    };
   };
 
   function LocalClient(virtnet) {
@@ -579,8 +611,8 @@ function Connection(options) {
             vs.close();
         });
 
-        vs.on('close', (error) => {
-            Utils.tagLog('*ERR*', error);
+        vs.on('close', () => {
+          this.onClose(connprofile);
         });
 
       });
@@ -599,7 +631,7 @@ function Connection(options) {
       wws.onClose = this.onClose;
     }
 
-    if(conn_method == 'wss' || conn_method =='WebSocketSecure') {
+    else if(conn_method == 'wss' || conn_method =='WebSocketSecure') {
       let _serverID = Utils.generateGUID();
       let wws = new WSSServer(_serverID);
       _servers[_serverID] = wws;
@@ -720,12 +752,23 @@ function Connection(options) {
     ssl_priv_key = ssl_priv_key_in;
   }
 
-  this.close = ()=>{
+  this.close = () =>{
+    this.onClose = (connprofile) => {
+      Utils.tagLog('*ERR*', 'Connection module onClose not implement');
+    };
+    this.onData = (conn_profile, data) => {
+      Utils.tagLog('*ERR*', 'Connection module onData not implement');
+    };
     for(let i in _clients) {
+      console.log('c'+i);
       _clients[i].closeConnetion();
     }
+    for(let i in _servers) {
+      console.log(_servers);
+      console.log('s'+i);
+      _servers[i].close();
+    }
   }
-
 }
 
 

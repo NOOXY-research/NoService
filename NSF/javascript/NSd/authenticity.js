@@ -150,7 +150,13 @@ let Authdb = function () {
       }
       callback(err, _cacheduser[username]);
     });
-  }
+  };
+
+  this.close = ()=>{
+    _cacheduser = null;
+    _database.close();
+    _database = null;
+  };
 }
 
 // the authenticity module
@@ -334,6 +340,9 @@ function Authenticity() {
     });
   };
 
+  this.close = () => {
+    _authdb.close();
+  };
   // // Authenticity Router
   // this.GTRouter = () => {
   //

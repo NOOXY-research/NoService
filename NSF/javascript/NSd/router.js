@@ -3,6 +3,8 @@
 // "router.js" provide routing functions. Highly associated with nooxy service protocol.
 // Copyright 2018 NOOXY. All Rights Reserved.
 
+let Utils = require('./utilities');
+
 function Router() {
   let _coregateway = null;
   // nooxy service protocol sercure
@@ -10,6 +12,7 @@ function Router() {
   let _raw_sniffers = [];
   // for signup timeout
   let _locked_ip = [];
+  let _debug = false;
 
   let _tellJSONSniffers = (Json) => {
     for(let i in _json_sniffers) {
@@ -249,6 +252,7 @@ function Router() {
   // import the accessbility of core resource
   this.importCore = (coregateway) => {
     _coregateway = coregateway;
+    _debug = _coregateway.Settings.debug;
 
     // while recieve a data from connection
     _coregateway.Connection.onData = (connprofile, data) => {
@@ -299,16 +303,25 @@ function Router() {
         }
       }
       catch (er) {
-        if(_coregateway.Settings.debug) {
+        if(_debug) {
+          Utils.tagLog('*ERR*', 'An error occured in router module.');
           console.log(er);
         }
       }
     };
 
     _coregateway.Connection.onClose = (connprofile) => {
-      _coregateway.Service.onConnectionClose(connprofile, (err)=>{
-        connprofile.destroy();
-      });
+      try {
+        _coregateway.Service.onConnectionClose(connprofile, (err)=>{
+          connprofile.destroy();
+        });
+      }
+      catch (er) {
+        if(_debug) {
+          Utils.tagLog('*WARN*', 'An error occured in router module.');
+          console.log(er);
+        }
+      }
     };
 
     _coregateway.Authenticity.emitRouter = this.emit;
@@ -318,6 +331,13 @@ function Router() {
     _coregateway.NSPS.emitRouter = this.emit;
     _coregateway.Service.spwanClient = _coregateway.Connection.createClient;
 
+  };
+
+  this.close = () => {
+    _coregateway = null;
+    _json_sniffers = [];
+    _raw_sniffers = [];
+    _locked_ip = [];
   };
 
 }

@@ -1,0 +1,31 @@
+{
+  "name": "SimpleNoti",
+  "version": "0.0.0",
+  "displayname": "Service fullname",
+  "description": "Service description",
+  "Authors": [
+    "Author"
+  ],
+  "implementation_api": false,
+  "dependencies": {
+    "node_packages": {},
+    "services": {}
+  },
+  "JSONfunciton_prototypes": {
+    "jfunc_name": {
+      "displayname": "JSONfunciton",
+      "description": "JSONfunciton description.",
+      "secure": false,
+      "protocol": {
+        "JSON_call": {
+          "p1": "parameter one",
+          "p2": "parameter two"
+        },
+        "JSON_return": {
+          "p1": "parameter one",
+          "p2": "parameter two"
+        }
+      }
+    }
+  }
+}

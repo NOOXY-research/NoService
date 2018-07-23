@@ -67,6 +67,10 @@ function AuthorizationHandler() {
   this.importImplementationModule = (implementation_module) => {
     _implementation_module = implementation_module;
   };
+
+  this.close = () =>{
+    
+  }
 };
 
 // Serverside authorization emitter.
@@ -259,6 +263,9 @@ function Authorization() {
 
   this.getRealtimeToken = (callback) => {callback(_realtime_token);}
 
+  this.close = () =>{
+    _queue_operation = null;
+  }
 };
 
 module.exports = {

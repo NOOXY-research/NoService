@@ -189,12 +189,18 @@ function start(api) {
               }
               let json_string = "";
               for(let i=3; i<t1.length; i++) {
-                json_string += t1[i];
+                json_string += ' '+t1[i];
               }
-              as.call(t1[2], JSON.parse(json_string), (err, msg)=>{
-                c1(false, {r:'jfunc onData: \n'+ JSON.stringify(jfuncd==null?'{}':jfuncd, null, 2)+'\njfunc returnValue: '+JSON.stringify(msg)});
-                as.close();
-              });
+              try {
+                as.call(t1[2], JSON.parse(json_string), (err, msg)=>{
+                  as.close();
+                  c1(false, {r:'jfunc onData: \n'+ JSON.stringify(jfuncd==null?'{}':jfuncd, null, 2)+'\njfunc returnValue: '+JSON.stringify(msg)});
+                });
+              }
+              catch(e) {
+                c1(false, {r:'jfunc error.\n'+e.toString()});
+                console.log(e);
+              }
             });
           }
 
@@ -344,9 +350,13 @@ function start(api) {
 
     returnJSON(false, msg);
   });
-}
+};
+
+function close() {
+  console.log('NoShell closed.');
+};
 
 module.exports = {
   start: start,
-  close: null
+  close: close
 }

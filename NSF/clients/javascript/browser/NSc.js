@@ -5,7 +5,7 @@
 function NSc() {
   let settings = {
     verbose: true,
-    debug: true,
+    debug: false,
     user: null,
     secure: true
   };
@@ -901,6 +901,7 @@ function NSc() {
       };
 
       this.setEntityID = (id) => {
+        console.log('ActivitySocket created as id: '+id);
         _entity_id = id;
       };
 

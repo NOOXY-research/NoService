@@ -38,7 +38,8 @@
   "services": [
     "NoServiceManager",
     "NoNoti",
-    "NoUser"
+    "NoUser",
+    "SimpleNoti"
   ],
 
   "trusted_domains": [
@@ -54,7 +55,7 @@
 
   "debug_service": "NoDebug",
 
-  "debug": true,
+  "debug": false,
 
   "debug_config": {
   	"show_json": true,
@@ -81,6 +82,8 @@
 
   "ssl_priv_key": "ssl.key",
 
-  "ssl_cert": "ssl.crt"
+  "ssl_cert": "ssl.crt",
+
+  "kill_daemon_timeout": 3000
 
 }
