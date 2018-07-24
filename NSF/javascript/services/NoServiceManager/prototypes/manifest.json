@@ -38,5 +38,9 @@
         }
       }
     }
+  },
+
+  "settings": {
+    "parameter": "manage by yourself."
   }
 }

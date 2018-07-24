@@ -5,7 +5,7 @@
 function NSc() {
   let settings = {
     verbose: true,
-    debug: false,
+    debug: true,
     user: null,
     secure: true
   };
@@ -364,7 +364,7 @@ function NSc() {
 
   }
 
-  let AuthorizationHandler = function () {
+  function AuthorizationHandler() {
     let _implementation_module = null;
     let _daemon_auth_key = null;
     let _trusted_domains = [];
@@ -373,15 +373,7 @@ function NSc() {
       // Authby password
       'PW': (connprofile, data, data_sender) => {
         let AuthbyPassword = _implementation_module.returnImplement('AuthbyPassword');
-        AuthbyPassword((err, password)=>{
-          let _data = {
-            m:'PW',
-            d:{
-              p: password
-            }
-          }
-          data_sender(connprofile, 'AU', 'rs', _data);
-        })
+        AuthbyPassword(connprofile, data, data_sender);
       },
 
       // Authby password failed
@@ -393,15 +385,7 @@ function NSc() {
       // Authby token
       'TK': (connprofile, data, data_sender) => {
         let AuthbyToken = _implementation_module.returnImplement('AuthbyToken');
-        AuthbyToken((err, token)=>{
-          let _data = {
-            m:'TK',
-            d:{
-              t: token
-            }
-          }
-          data_sender(connprofile, 'AU', 'rs', _data);
-        })
+        AuthbyToken(connprofile, data, data_sender);
       },
 
       // Authby token failed
@@ -427,6 +411,10 @@ function NSc() {
     this.importImplementationModule = (implementation_module) => {
       _implementation_module = implementation_module;
     };
+
+    this.close = () =>{
+
+    }
   };
 
   let Router = function () {
@@ -732,6 +720,7 @@ function NSc() {
       };
       _coregateway.Service.emitRouter = this.emit;
       _coregateway.Implementation.emitRouter = this.emit;
+      _coregateway.Implementation.sendRouterData = _senddata;
       _coregateway.NSPS.emitRouter = this.emit;
       _coregateway.Service.spwanClient = _coregateway.Connection.createClient;
 
@@ -1032,7 +1021,7 @@ function NSc() {
     };
   };
 
-  let Implementation = function () {
+  let Implementation = function() {
     let _support_secure = false;
     let _connection_module = null;
 
@@ -1047,11 +1036,6 @@ function NSc() {
         generateAESCBC256KeyByHash: (string1, string2, callback) => {
           Utils.tagLog('*ERR*', 'generateAESCBC256KeyByHash not implemented');
           callback(true, 'hash 32 char');
-        },
-
-        generateRSA2048KeyPair: (callback) => {
-          Utils.tagLog('*ERR*', 'generateAESCBC256KeyByHash not implemented');
-          callback(true, 'priv', 'pub');
         },
 
         encryptString: (key, toEncrypt, callback) => {
@@ -1137,6 +1121,7 @@ function NSc() {
 
     this.emitRouter = () => {Utils.tagLog('*ERR*', 'emitRouter not implemented');};
 
+    this.sendRouterData = () => {Utils.tagLog('*ERR*', 'sendRouterData not implemented');};
     // get a temporary ConnectionProfile
     this.getClientConnProfile = (conn_method, remoteip, port, callback) => {
       _connection_module.createClient(conn_method, remoteip, port, callback);
@@ -1169,7 +1154,9 @@ function NSc() {
     this.returnNSPSModule = () =>{
 
     };
-  };
+
+    this.close = () => {};
+  }
 
   let NSPS = function () {
     let _rsa_pub = null;
@@ -1381,10 +1368,8 @@ function NSc() {
         _cry_algo[algo].decryptString(key, toDecrypt, callback);
       });
       // setup NSF Auth implementation
-      _implementation.setImplement('signin', (conn_method, remote_ip, port, callback)=>{
-        _implementation.setImplement('onToken', callback);
-        console.log('Please signin your account.');
-        window.location.replace('login.html?conn_method='+conn_method+'&remote_ip='+remote_ip+'&port='+port+'&redirect='+window.location.href);
+      _implementation.setImplement('signin', (conn_method, remote_ip, port, type)=>{
+        window.location.replace('login.html?conn_method='+conn_method+'&remote_ip='+remote_ip+'&port='+port+'&type='+type+'&redirect='+window.location.href);
         // window.open('login.html?conn_method='+conn_method+'&remote_ip='+remote_ip+'&port='+port);
       });
 
@@ -1398,12 +1383,26 @@ function NSc() {
 
       });
 
+      _implementation.setImplement('AuthbyTokenFailed', ()=>{
+        _implementation.returnImplement('signin')(settings.connmethod, settings.targetip, settings.targetport, 'token');
+      });
+
       // setup NSF Auth implementation
-      _implementation.setImplement('AuthbyToken', (callback) => {
+      _implementation.setImplement('AuthbyToken', (connprofile, data, data_sender) => {
+        let callback = (err, token)=>{
+          let _data = {
+            m:'TK',
+            d:{
+              t: data.d.t,
+              v: token
+            }
+          }
+          data_sender(connprofile, 'AU', 'rs', _data);
+        };
         console.log('token: ', Utils.getCookie('NSToken'));
         let pass = true;
         if(Utils.getCookie('NSToken') == null) {
-          _implementation.returnImplement('signin')(settings.connmethod, settings.targetip, settings.targetport);
+          _implementation.returnImplement('signin')(settings.connmethod, settings.targetip, settings.targetport, 'token');
         }
         else {
           callback(false, Utils.getCookie('NSToken'));
@@ -1411,20 +1410,9 @@ function NSc() {
 
       });
       // setup NSF Auth implementation
-      _implementation.setImplement('AuthbyTokenFailed', () => {
-        _implementation.returnImplement('signin')(settings.connmethod, settings.targetip, settings.targetport, (err, token)=>{
-          Utils.setCookie('NSToken', token, 7);
-          if(Utils.getCookie('NSToken') != null) {
-            callback(false, Utils.getCookie('NSToken'));
-          }
-        });
-      });
 
-      // setup NSF Auth implementation
-      _implementation.setImplement('AuthbyPassword', (callback) => {
-        _get_password((err, p) => {
-          callback(err, p);
-        });
+      _implementation.setImplement('AuthbyPassword', (connprofile, data, data_sender) => {
+        window.open('password.html?conn_method='+settings.connmethod+'&remote_ip='+settings.targetip+'&port='+settings.targetport+'&username='+settings.user+'&authtoken='+data.d.t+'&redirect='+window.location.href);
       });
 
         // create gateway

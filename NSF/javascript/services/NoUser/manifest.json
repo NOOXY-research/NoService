@@ -1,11 +1,10 @@
 {
   "name": "NoUser",
   "version": "0.0.0",
-  "displayname": "NOOXY User management tools.",
-  "description": "Provide ability of creating, grouping, modifing of user data and profile(such as password or its displayname).",
+  "displayname": "Service fullname",
+  "description": "Service description",
   "Authors": [
-    "NOOXY",
-    "noowyee"
+    "Author"
   ],
   "implementation_api": false,
   "dependencies": {
@@ -13,72 +12,18 @@
     "services": {}
   },
   "JSONfunciton_prototypes": {
-    "reProf": {
-      "displayname": "Return the NOOXY user's profile.",
-      "description": "Returning a full profile of a NOOXY user.",
-      "secure": true,
-      "protocol": {
-        "JSON_call": {
-          "un": "username"
-        },
-
-        "JSON_return": {
-          "un": "username",
-          "dn": "displayname",
-          "pm": "privilege",
-          "dc": "description",
-          "pp": "profilephoto",
-
-          "lg": "language",
-          "em": "email",
-          "ph": "phone",
-          "gd": "gender",
-          "ad": "physical address"
-        }
-      }
-    },
-
-    "createUser": {
-      "displayname": "Create a NOOXY USER",
-      "description": "Creating NOOXY user with specified settings.",
+    "jfunc_name": {
+      "displayname": "JSONfunciton",
+      "description": "JSONfunciton description.",
       "secure": false,
       "protocol": {
         "JSON_call": {
-          "un": "username",
-          "dn": "displayname",
-          "pw": "password",
-          "pm": "privilege",
-          "dc": "description",
-          "pp": "profilephoto",
-
-          "lg": "language",
-          "em": "email",
-          "ph": "phone",
-          "gd": "gender",
-          "ad": "physical address"
+          "p1": "parameter one",
+          "p2": "parameter two"
         },
-
         "JSON_return": {
-          "er": "error",
-          "st": "state",
-          "ui": "userid"
-        }
-      }
-    },
-
-    "addUsertoGroup": {
-      "displayname": "Add a NOOXY USER to group.",
-      "description": "Creating NOOXY user to specified group.",
-      "secure": true,
-      "protocol": {
-        "JSON_call": {
-          "un": "username",
-          "gp": "group"
-        },
-
-        "JSON_return": {
-          "er": "error",
-          "st": "state"
+          "p1": "parameter one",
+          "p2": "parameter two"
         }
       }
     }

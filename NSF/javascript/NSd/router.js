@@ -327,6 +327,7 @@ function Router() {
     _coregateway.Authenticity.emitRouter = this.emit;
     _coregateway.Service.emitRouter = this.emit;
     _coregateway.Implementation.emitRouter = this.emit;
+    _coregateway.Implementation.sendRouterData = _senddata;
     _coregateway.Authorization.emitRouter = this.emit;
     _coregateway.NSPS.emitRouter = this.emit;
     _coregateway.Service.spwanClient = _coregateway.Connection.createClient;

@@ -108,7 +108,12 @@ function Connection(options) {
         this.on = (type, callback)=>{_types[type] = callback;};
         this.emit = (type, d) =>{
           let _exe = _returntype(type);
-          _exe(d.msg);
+          if(d) {
+            _exe(d.msg);
+          }
+          else {
+            _exe();
+          }
         };
 
       };
@@ -567,7 +572,6 @@ function Connection(options) {
           });
 
           vs.on('close', (message) => {
-            console('OwO');
             delete _myclients[connprofile.returnGUID()];
             this.onClose(connprofile);
           });
@@ -760,12 +764,9 @@ function Connection(options) {
       Utils.tagLog('*ERR*', 'Connection module onData not implement');
     };
     for(let i in _clients) {
-      console.log('c'+i);
       _clients[i].closeConnetion();
     }
     for(let i in _servers) {
-      console.log(_servers);
-      console.log('s'+i);
       _servers[i].close();
     }
   }

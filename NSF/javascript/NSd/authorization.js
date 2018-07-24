@@ -3,6 +3,8 @@
 // "authorization.js" provide authorization actions.
 // Copyright 2018 NOOXY. All Rights Reserved.
 
+let Utils = require('./utilities');
+
 // Handling responses to authorization requests.
 function AuthorizationHandler() {
   let _implementation_module = null;
@@ -13,15 +15,7 @@ function AuthorizationHandler() {
     // Authby password
     'PW': (connprofile, data, data_sender) => {
       let AuthbyPassword = _implementation_module.returnImplement('AuthbyPassword');
-      AuthbyPassword((err, password)=>{
-        let _data = {
-          m:'PW',
-          d:{
-            p: password
-          }
-        }
-        data_sender(connprofile, 'AU', 'rs', _data);
-      })
+      AuthbyPassword(connprofile, data, data_sender);
     },
 
     // Authby password failed
@@ -33,15 +27,7 @@ function AuthorizationHandler() {
     // Authby token
     'TK': (connprofile, data, data_sender) => {
       let AuthbyToken = _implementation_module.returnImplement('AuthbyToken');
-      AuthbyToken((err, token)=>{
-        let _data = {
-          m:'TK',
-          d:{
-            t: token
-          }
-        }
-        data_sender(connprofile, 'AU', 'rs', _data);
-      })
+      AuthbyToken(connprofile, data, data_sender);
     },
 
     // Authby token failed
@@ -69,7 +55,7 @@ function AuthorizationHandler() {
   };
 
   this.close = () =>{
-    
+
   }
 };
 
@@ -85,8 +71,13 @@ function Authorization() {
   this.emitRouter = () => {console.log('[*ERR*] emit not implemented');};
 
   this.RsRouter = (connprofile, data) => {
-    let op = _queue_operation[connprofile.returnGUID()+data.m];
-    op(connprofile, data);
+    try {
+      let op = _queue_operation[data.d.t];
+      op(connprofile, data);
+    }
+    catch (e) {
+      console.log(e);
+    }
   };
 
   // function that import working authenticity module.
@@ -111,11 +102,12 @@ function Authorization() {
       if(mode == 'normal') {
         let user = _entity_module.returnEntityValue(entityID, 'owner');
         let data = {
-          m: "PW"
+          m: "PW",
+          d: {t: Utils.generateGUID()}
         }
         _entity_module.getEntityConnProfile(entityID, (err, connprofile) => {
           let op = (connprofile, data) => {
-              _authe_module.PasswordisValid(user, data.d.p, (err, isValid) => {
+              _authe_module.PasswordisValid(user, data.d.v, (err, isValid) => {
                 if(isValid) {
                   callback(false, true);
                 }
@@ -125,9 +117,9 @@ function Authorization() {
                 }
               });
           }
-          _queue_operation[connprofile.returnGUID()+'PW'] = op;
+          _queue_operation[data.d.t] = op;
           // set the timeout of this operation
-          setTimeout(() => {delete _queue_operation[connprofile.returnGUID()+'PW']}, _auth_timeout*1000);
+          setTimeout(() => {delete _queue_operation[data.d.t]}, _auth_timeout*1000);
           this.emitRouter(connprofile, 'AU', data);
         });
       }
@@ -152,26 +144,15 @@ function Authorization() {
       if(mode == 'normal') {
         let user = _entity_module.returnEntityValue(entityID, 'owner');
         let data = {
-          m: "TK"
+          m: "TK",
+          d: {t: Utils.generateGUID()}
         }
         _entity_module.getEntityConnProfile(entityID, (err, connprofile) => {
-          let tk = connprofile.returnBundle('NSToken');
-          if(tk != null) {
-            _authe_module.TokenisValid(user, tk, (err, isValid) => {
-              if(isValid) {
-                callback(false, true);
-              }
-              else {
-                this.emitRouter(connprofile, 'AU', {m: 'TF'});
-                callback(false, false);
-              }
-            });
-          }
-          else {
+          let _authonline = ()=> {
             let op = (connprofile, data) => {
-              _authe_module.TokenisValid(user, data.d.t, (err, isValid) => {
+              _authe_module.TokenisValid(user, data.d.v, (err, isValid) => {
                 if(isValid) {
-                  connprofile.setBundle('NSToken', data.d.t);
+                  connprofile.setBundle('NSToken', data.d.v);
                   callback(false, true);
                 }
                 else {
@@ -180,10 +161,24 @@ function Authorization() {
                 }
               });
             }
-            _queue_operation[connprofile.returnGUID()+'TK'] = op;
+            _queue_operation[data.d.t] = op;
             // set the timeout of clearing expired authorization.
-            setTimeout(() => {delete _queue_operation[connprofile.returnGUID()+'TK']}, _auth_timeout*1000);
+            setTimeout(() => {delete _queue_operation[data.d.t]}, _auth_timeout*1000);
             this.emitRouter(connprofile, 'AU', data);
+          };
+          let tk = connprofile.returnBundle('NSToken');
+          if(tk != null) {
+            _authe_module.TokenisValid(user, tk, (err, isValid) => {
+              if(isValid) {
+                callback(false, true);
+              }
+              else {
+                _authonline();
+              }
+            });
+          }
+          else {
+            _authonline();
           }
         });
       }

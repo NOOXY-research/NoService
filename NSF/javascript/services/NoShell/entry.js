@@ -104,7 +104,7 @@ function start(api) {
           '[auth]\n'+
           '  auth emit [password|token] {entityID}  ---Emit authorization proccess to targeted entity.\n'+
           '[user]\n'+
-          '  user create {username} {displayname} {password} {privilege} {description} {profilephoto} {language} {email} {phone} {gender} {physical address}  ---Create a NOOXY user.\n'+
+          '  user create {username} {displayname} {password} {detail} {firstname} {lastname} ---Create a NOOXY user.\n'+
           '[me]\n'+
           '  me\n'+
           '  me [entitymeta|chpasswd|usermeta|updatetoken]\n'+
@@ -215,8 +215,8 @@ function start(api) {
                 c1(false, {r:'Failed'});
               }
               else {
-                as.call('createUser', {un: t1[0], dn: t1[1], pw: t1[2], pm: t1[3], dc: t1[4], pp: t1[5],lg: t1[6], em: t1[7],ph: t1[8],gd: t1[9], ad: t1[10]}, (err, msg)=>{
-                  c1(false, {r:msg});
+                as.call('createUser', {un: t1[0], dn: t1[1], pw: t1[2], dt: t1[3], fn: t1[4], ln: t1[5]}, (err, json)=>{
+                  c1(false, {r:json.s});
                   as.close();
                 });
               }
@@ -342,13 +342,16 @@ function start(api) {
 
 
   // welcome msg
-  ss.def('welcome', (json, entityID, returnJSON)=>{
+  ss.sdef('welcome', (json, entityID, returnJSON)=>{
     let emeta = api.Service.Entity.returnEntityMetaData(entityID);
     let settings = api.Daemon.Settings;
     let msg = '\nHello. '+emeta.owner+'(as entity '+entityID+').\n  Welcome accessing NoShell service of Daemon "'+settings.daemon_name+'".\n';
     msg = msg + '  Daemon description: \n  ' + settings.description+'\n';
 
     returnJSON(false, msg);
+  },
+  ()=>{
+
   });
 };
 

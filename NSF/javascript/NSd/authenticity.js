@@ -21,7 +21,7 @@ let Authdb = function () {
     this.loadsql = (next) => {
 
       // sql statement
-      let sql = 'SELECT username, userid, displayname, pwdhash, token, tokenexpire, detail, privilege FROM users WHERE username = ?';
+      let sql = 'SELECT username, userid, displayname, pwdhash, token, tokenexpire, detail, privilege, firstname, lastname FROM users WHERE username = ?';
       _database.get(sql, [username], (err, row) => {
         if(err || typeof(row) == 'undefined') {
           this.username = username;
@@ -37,6 +37,8 @@ let Authdb = function () {
           this.tokenexpire = row.tokenexpire;
           this.privilege = row.privilege;
           this.detail = row.detail;
+          this.firstname = row.firstname;
+          this.lastname = row.lastname;
         }
         next(false);
       })
@@ -45,7 +47,7 @@ let Authdb = function () {
     this.loadbyUserIdsql = (userid, next) => {
 
       // sql statement
-      let sql = 'SELECT username, userid, displayname, pwdhash, token, tokenexpire, detail, privilege FROM users WHERE userid = ?';
+      let sql = 'SELECT username, userid, displayname, pwdhash, token, tokenexpire, detail, privilege, firstname, lastname FROM users WHERE userid = ?';
 
       _database.get(sql, [userid], (err, row) => {
         if(err || typeof(row) == 'undefined') {
@@ -61,6 +63,8 @@ let Authdb = function () {
           this.tokenexpire = row.tokenexpire;
           this.privilege = row.privilege;
           this.detail = row.detail;
+          this.firstname = row.firstname;
+          this.lastname = row.lastname;
         }
         next(false);
       })
@@ -75,9 +79,10 @@ let Authdb = function () {
         callback(new Error('username undefined.'));
       }
       else {
+        let datenow = Utils.DatetoSQL(new Date());
         if(this.exisitence) {
-          sql = 'UPDATE users SET username=?, userid=?, displayname=?, pwdhash=?, token=?, tokenexpire=?, privilege=?, detail=? WHERE username=?';
-          _database.run(sql, [this.username, this.userid, this.displayname, this.pwdhash, this.token, this.tokenexpire, this.privilege, this.detail, this.username], (err) => {
+          sql = 'UPDATE users SET username=?, userid=?, displayname=?, pwdhash=?, token=?, tokenexpire=?, privilege=?, detail=?, firstname=?, lastname=?, modifydate=? WHERE username=?';
+          _database.run(sql, [this.username, this.userid, this.displayname, this.pwdhash, this.token, this.tokenexpire, this.detail, this.privilege, this.firstname, this.lastname, datenow], (err) => {
             if(err) {
               callback(err);
             }
@@ -88,9 +93,9 @@ let Authdb = function () {
           });
         }
         else {
-          sql = 'INSERT INTO users(username, userid, displayname, pwdhash, token, tokenexpire, privilege, detail) VALUES (?, ?, ?, ?, ?, ?, ?, ?);'
+          sql = 'INSERT INTO users(username, userid, displayname, pwdhash, token, tokenexpire, detail, privilege, firstname, lastname, createdate) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);'
           this.userid = Utils.generateGUID();
-          _database.run(sql, [this.username, this.userid, this.displayname, this.pwdhash, this.token, this.tokenexpire, this.privilege, this.detail], (err) => {
+          _database.run(sql, [this.username, this.userid, this.displayname, this.pwdhash, this.token, this.tokenexpire, this.detail, this.privilege, this.firstname, this.lastname, datenow], (err) => {
             if(err) {
               callback(err);
             }
@@ -115,6 +120,8 @@ let Authdb = function () {
       this.tokenexpire = null;
       this.privilege = null;
       this.detail = null;
+      this.firstname = null;
+      this.lastname = null;
     };
   }
 
@@ -125,7 +132,7 @@ let Authdb = function () {
   this.createDatabase = (path) => {
     _database = new sqlite3.Database(path);
     let expiredate = Utils.DatetoSQL(Utils.addDays(new Date(), 7));
-    _database.run('CREATE TABLE users(username text, userid text, displayname text,  pwdhash text, token text, tokenexpire datetime, privilege text, detail text)');
+    _database.run('CREATE TABLE users(username text, userid text, displayname text,  pwdhash text, token text, tokenexpire datetime, privilege text, detail text, firstname text, lastname text, createdate datetime, modifydate datetime)');
   };
 
   this.getUser = (username, callback) => {
@@ -191,6 +198,8 @@ function Authenticity() {
   this.getUserMeta = (username, callback) => {
     _authdb.getUser(username, (err, user) => {
       let user_meta = {
+        firstname: user.firstname,
+        lastname: user.lastname,
         exisitence : user.exisitence,
         username : user.username,
         userid : user.userid,
@@ -217,10 +226,38 @@ function Authenticity() {
     });
   };
 
-  this.createUser = (username, displayname, password, privilege, detail, callback) => {
+  this.createUser = (username, displayname, password, privilege, detail, firstname, lastname, callback) => {
     let pwdhash = null;
     _authdb.getUser(username, (err, user)=>{
-      if(user.exisitence == false || username == null|| password == null || privilege == null) {
+      if(user.exisitence == true) {
+        let err = new Error("User existed.");
+        callback(err);
+      }
+      else if(Number.isInteger(privilege) == false) {
+        let err = new Error("Privilege invalid.");
+        callback(err);
+      }
+      else if(username == null || / /.test(username)) {
+        let err = new Error("Username invalid.");
+        callback(err);
+      }
+      else if(firstname == null || /\d/.test(firstname)) {
+        let err = new Error("First name invalid.");
+        callback(err);
+      }
+      else if(lastname == null || /\d/.test(lastname)) {
+        let err = new Error("Last name invalid.");
+        callback(err);
+      }
+      else if(password == null) {
+        let err = new Error("Password invalid.");
+        callback(err);
+      }
+      else if(password.length < 5) {
+        let err = new Error("Password must be longer then or equal to 5.");
+        callback(err);
+      }
+      else {
         let expiredate = new Date();
         expiredate = Utils.addDays(expiredate, this.TokenExpirePeriod);
         user.username = username;
@@ -230,12 +267,10 @@ function Authenticity() {
         user.tokenexpire = Utils.DatetoSQL(expiredate);
         user.privilege = privilege;
         user.detail = detail;
+        user.firstname = firstname;
+        user.lastname = lastname;
         user.updatesql(callback);
       }
-      else {
-        let err = new Error("[Authenticity] User create error.");
-        callback(err);
-      };
     });
 
 
@@ -265,16 +300,46 @@ function Authenticity() {
     }
   };
 
+  this.updatePrivilege = (username, privilege, callback) => {
+    _authdb.getUser(username, (err, user)=>{
+      user.privilege = privilege;
+      user.updatesql(callback);
+    });
+  };
+
+  this.updateName = (username, firstname, lastname, callback) => {
+    if(firstname == null || /\d/.test(firstname)) {
+      let err = new Error(firstname+"First name invalid.");
+      callback(err);
+    }
+    else if(lastname == null || /\d/.test(lastname)) {
+      let err = new Error("Last name invalid.");
+      callback(err);
+    }
+    else {
+      _authdb.getUser(username, (err, user)=>{
+        user.firstname = firstname;
+        user.lastname = lastname;
+        user.updatesql(callback);
+      });
+    }
+  };
+
   this.PasswordisValid = (username, password, callback) => {
     let isValid = false;
-    _authdb.getUser(username, (err, user) => {
-      let pwdhash = user.pwdhash;
-      let pwdhashalpha = crypto.createHmac('sha256', SHA256KEY).update(password).digest('hex');
-      if(pwdhash == pwdhashalpha) {
-        isValid = true;
-      }
-      callback(false, isValid);
-    });
+    try{
+      _authdb.getUser(username, (err, user) => {
+        let pwdhash = user.pwdhash;
+        let pwdhashalpha = crypto.createHmac('sha256', SHA256KEY).update(password).digest('hex');
+        if(pwdhash == pwdhashalpha) {
+          isValid = true;
+        }
+        callback(false, isValid);
+      });
+    }
+    catch(e) {
+      callback(e);
+    }
   };
 
   this.TokenisValid = (username, token, callback) => {

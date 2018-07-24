@@ -549,16 +549,16 @@ function Service() {
     let _service_module = null;
     let _service_manifest = null;
 
-    this.launch = (depended_service_dict) => {
+    this.launch = (depended_service_dict, callback) => {
+      let erreport = null;
       // check node packages dependencies
 
       try{
         _service_manifest = Utils.returnJSONfromFile(_service_path+'/manifest.json');
       }
       catch(err) {
-        Utils.tagLog('*ERR*', 'Service "'+_service_name+'" load manifest.json with failure.');
+        erreport = new Error('Service "'+_service_name+'" load manifest.json with failure.');
         console.log(err);
-        process.exit();
       };
       // check node packages dependencies
       try {
@@ -567,15 +567,14 @@ function Service() {
             require.resolve(package_name);
           }
           catch (err) {
-            Utils.tagLog('*ERR*', 'Service "'+_service_name+'" require node package "'+package_name+'".');
-            process.exit();
+            erreport = new Error('Service "'+_service_name+'" require node package "'+package_name+'".');
+            console.log(err);
           }
         }
       }
       catch (err) {
-        Utils.tagLog('*ERR*', 'Service "'+_service_name+'" have wrong dependencies settings.');
+        erreport = new Error('Service "'+_service_name+'" have wrong dependencies settings.');
         console.log(err);
-        process.exit();
       }
       depended_service_dict[_service_name] = _service_manifest.dependencies.services;
       _service_module = require(_service_path+'/entry');
@@ -603,7 +602,7 @@ function Service() {
       // create the service for module.
       try {
         if(_service_manifest.name != _service_name) {
-          throw new Error('Service name in manifest must fit with name "'+_service_name+'". Please check manifest file.');
+          erreport = new Error('Service name in manifest must fit with name "'+_service_name+'". Please check manifest file.\n');
         }
         if(_service_manifest.implementation_api == false) {
           _serviceapi_module.createServiceAPI(_service_socket, _service_manifest, (err, api) => {
@@ -618,9 +617,10 @@ function Service() {
 
       }
       catch(err) {
-        Utils.tagLog('*ERR*', 'Service "'+_service_name+'" ended with failure.');
+        erreport = new Error('Service "'+_service_name+'" ended with failure.');
         console.log(err);
       }
+      return erreport;
     };
 
     this.returnJSONfuncList = () => {
@@ -664,9 +664,15 @@ function Service() {
   this.launch = () => {
     let launched_service = [];
     let depended_service_dict = {};
-    for (var key in _local_services) {
-      _local_services[key].launch(depended_service_dict);
-      launched_service.push(key);
+    for (let key in _local_services) {
+      let err = _local_services[key].launch(depended_service_dict);
+      if(err) {
+        Utils.tagLog('*ERR*', 'Error occured while launching service "'+key+'".');
+        Utils.tagLog('*ERR*', err.toString());
+      }
+      else {
+        launched_service.push(key);
+      }
     }
     // check dependencies
     for (let service_name in depended_service_dict) {

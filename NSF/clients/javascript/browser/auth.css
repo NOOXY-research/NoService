@@ -17,6 +17,15 @@ a {
 label {
   font-size: 12px;
 }
+hr {
+  box-shadow: none;
+  border-style: solid;
+  border-bottom-width: 1px;
+  border-top-width: 0px;
+  border-right-width: 0px;
+  border-left-width: 0px;
+  border-color: #ECEFF1;
+}
 .img-in-text {
   vertical-align:middle;
 }

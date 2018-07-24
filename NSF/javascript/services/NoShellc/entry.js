@@ -29,6 +29,7 @@ function start(api) {
   let _password = null;
   let _token = null;
   let _mutex = true;
+  let commandread;
 
   // setup up remote shell service by daemon default connciton
   let DEFAULT_SERVER = api.Daemon.Settings.default_server;
@@ -80,8 +81,17 @@ function start(api) {
   });
 
   // setup NSF Auth implementation
-  api.Implementation.setImplement('AuthbyToken', (callback) => {
-    let pass = true;
+  api.Implementation.setImplement('AuthbyToken', (connprofile, data, data_sender) => {
+    let callback = (err, token)=>{
+      let _data = {
+        m:'TK',
+        d:{
+          t: data.d.t,
+          v: token
+        }
+      }
+      data_sender(connprofile, 'AU', 'rs', _data);
+    };
     if(_token == null) {
       api.Implementation.returnImplement('signin')(DAEMONTYPE, DAEMONIP, DAEMONPORT, (err, token)=>{
         _token = token;
@@ -94,8 +104,29 @@ function start(api) {
 
   });
 
+  api.Implementation.setImplement('AuthbyTokenFailed', () => {
+    let signin = ()=>{
+      api.Implementation.returnImplement('signin')(DAEMONTYPE, DAEMONIP, DAEMONPORT, (err, token)=>{
+        if(token == null) {signin();};
+        _token = token;
+        commandread();
+      });
+    }
+    signin();
+  });
+
   // setup NSF Auth implementation
-  api.Implementation.setImplement('AuthbyPassword', (callback) => {
+  api.Implementation.setImplement('AuthbyPassword', (connprofile, data, data_sender) => {
+    let callback = (err, password)=>{
+      let _data = {
+        m:'PW',
+        d:{
+          t: data.d.t,
+          v: password
+        }
+      }
+      data_sender(connprofile, 'AU', 'rs', _data);
+    };
     _get_password((err, p) => {
       callback(err, p);
     });
@@ -123,17 +154,17 @@ function start(api) {
         }
         as.call('welcome', null, (err, msg) => {
           console.log(msg);
-          var recursiveAsyncReadLine = () => {
-            rl.question('>>> ', function (cmd) {
+          commandread = () => {
+            rl.question('>>> ', (cmd)=> {
               if (cmd == 'exit') //we need some base case, for recursion
                 return rl.close(); //closing RL and returning from function.
               as.call('sendC', {c: cmd}, (err, json)=>{
                 console.log(json.r);
-                recursiveAsyncReadLine(); //Calling this function again to ask new question
+                commandread(); //Calling this function again to ask new question
               });
             });
           };
-          recursiveAsyncReadLine();
+          commandread();
         });
       });
     // });

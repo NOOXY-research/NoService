@@ -135,10 +135,10 @@ function ServiceAPI() {
           _coregateway.Authorization.Authby.isSuperUser(entityID, _safe_callback(callback));
         },
         Domain: (entityID, callback) => {
-          _coregateway.Authorization.Authby.Domain(entityID, callback);
+          _coregateway.Authorization.Authby.Domain(entityID, _safe_callback(callback));
         },
         DaemonAuthKey: (entityID, callback) => {
-          _coregateway.Authorization.Authby.DaemonAuthKey(entityID, callback);
+          _coregateway.Authorization.Authby.DaemonAuthKey(entityID, _safe_callback(callback));
         }
       },
       importTrustDomains: (domains) => {
@@ -153,8 +153,8 @@ function ServiceAPI() {
     };
 
     _api.Authenticity = {
-      createUser: (username, displayname, password, privilege, detail, callback) => {
-        _coregateway.Authenticity.createUser(username, displayname, password, privilege, detail, _safe_callback(callback));
+      createUser: (username, displayname, password, privilege, detail, firstname, lastname, callback) => {
+        _coregateway.Authenticity.createUser(username, displayname, password, privilege, detail, firstname, lastname, _safe_callback(callback));
       },
 
       deleteUser: (username, callback) => {
@@ -166,15 +166,23 @@ function ServiceAPI() {
       },
 
       updateToken: (username, callback) => {
-        return _coregateway.Authenticity.updateToken(username, callback);
+        return _coregateway.Authenticity.updateToken(username, _safe_callback(callback));
+      },
+
+      updatePrivilege: (username, privilege, callback) => {
+        _coregateway.Authenticity.updatePrivilege(usernamem, privilege, _safe_callback(callback));
+      },
+
+      updateName: (username, privilege, callback) => {
+        _coregateway.Authenticity.updateName(username, privilege, _safe_callback(callback));
       },
 
       getUserMeta: (username, callback) => {
-        _coregateway.Authenticity.getUserMeta(username, callback);
+        _coregateway.Authenticity.getUserMeta(username, _safe_callback(callback));
       },
 
       getUserID: (username, callback) => {
-        _coregateway.Authenticity.getUserID(username, callback);
+        _coregateway.Authenticity.getUserID(username, _safe_callback(callback));
       }
     };
 
@@ -219,6 +227,7 @@ function ServiceAPI() {
     _get_normal_api((err, api) => {
       api.Service.ServiceSocket = service_socket;
       api.Me = {
+        Settings: manifest.settings,
         Manifest: manifest,
         FilesPath: api.Daemon.Settings.services_files_path+manifest.name+'/'
       }
@@ -233,6 +242,7 @@ function ServiceAPI() {
       api.Service.ServiceSocket = service_socket;
       api.Implementation = _coregateway.Implementation;
       api.Me = {
+        Settings: manifest.settings,
         Manifest: manifest,
         FilesPath: api.Daemon.Settings.services_files_path+manifest.name+'/'
       }

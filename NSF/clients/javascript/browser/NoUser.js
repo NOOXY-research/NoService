@@ -28,27 +28,4 @@ $(function () {
     }
     return false;
   });
-
-  $('#passwordform-username').val(getQueryVariable('username'));
-  $('#passwordform').submit(function(e){
-    try{
-      _NSc.getImplement((err, implement_module)=>{
-        implement_module.getClientConnProfile(getQueryVariable('conn_method'), getQueryVariable('remote_ip'), getQueryVariable('port'), (err, connprofile) => {
-          let _data = {
-            m: 'PW',
-            d: {
-              t: getQueryVariable('authtoken'),
-              v: $('#passwordform-password').val()
-            }
-          }
-          implement_module.sendRouterData(connprofile, 'AU', 'rs', _data);
-          window.close();
-        });
-      });
-    }
-    catch(e) {
-      console.log(e);
-    }
-    return false;
-  });
 });

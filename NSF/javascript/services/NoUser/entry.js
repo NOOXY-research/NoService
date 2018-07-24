@@ -3,147 +3,72 @@
 // "youservice/entry.js" description.
 // Copyright 2018 NOOXY. All Rights Reserved.
 
+let files_path;
 // Your service entry point
 function start(api) {
   // Get the service socket of your service
   let ss = api.Service.ServiceSocket;
-
   // BEWARE! To prevent callback error crash the system.
   // If you call an callback function which is not API provided. Such as setTimeout(callback, timeout).
   // You need to wrap the callback funciton by api.SafeCallback.
   // E.g. setTimeout(api.SafeCallback(callback), timeout)
   let safec = api.SafeCallback;
-
   // Please save and manipulate your files in this directory
-  let files_path = api.Me.FilesPath;
+  files_path = api.Me.FilesPath;
 
   // Access another service on this daemon
   let admin_daemon_asock = api.Service.ActivitySocket.createDefaultAdminDeamonSocket('Another Service', (err, activitysocket)=> {
-    // Accessing other service
+    // accessing other service
   });
 
   // JSONfunction is a function that can be defined, which others entities can call.
   // It is a NOOXY Service Framework Standard
-  ss.def('addUsertoGroup', (json, entityID, returnJSON)=> {
-    let json_be_returned = {
-      "er": false,
-      "st": 'Unstated.'
-    }
-    // In case of superuser privilege.
-    if(json.pm <= 0) {
-      api.Authorization.Authby.isSuperUser(entityID, (err, pass)=> {
-        if(pass) {
-          api.Authorization.Authby.Password(entityID, (err, pass2)=>{
-            if(pass2) {
-              api.Authenticity.createUser(json.un, json.dn, json.pw, json.pm, json.dc, (err)=>{
-                json_be_returned.st = 'User created.';
-                returnJSON(false, json_be_returned);
-              });
-            }
-            else {
-              json_be_returned.er = true;
-              json_be_returned.st = 'Password invalid!';
-              returnJSON(false, json_be_returned);
-            }
-          });
-        }
-        else {
-          json_be_returned.er = true;
-          json_be_returned.st = 'You are not a superuser!';
-          returnJSON(false, json_be_returned);
-        }
-      });
-    }
-    else {
-      api.Authenticity.createUser(json.un, json.dn, json.pw, json.pm, json.dc, (err)=>{
-        json_be_returned.st = 'User created.';
-        returnJSON(false, json_be_returned);
-      });
-    }
-  });
-
-  // JSONfunction is a function that can be defined, which others entities can call.
-  // It is a NOOXY Service Framework Standard
-  ss.def('createUser', (json, entityID, returnJSON)=> {
-    let json_be_returned = {
-      "er": false,
-      "st": 'Unstated.'
-    }
-    // In case of Superuser privilege.
-    if(json.pm <= 0) {
-      api.Authorization.Authby.isSuperUser(entityID, (err, pass)=>{
-        if(pass) {
-          api.Authorization.Authby.Password(entityID, (err, pass2)=>{
-            if(pass2) {
-              api.Authenticity.createUser(json.un, json.dn, json.pw, json.pm, json.dc, (err)=>{
-                json_be_returned.st = 'User created.';
-                returnJSON(false, json_be_returned);
-              });
-            }
-            else {
-              json_be_returned.er = true;
-              json_be_returned.st = 'Password invalid!';
-              returnJSON(false, json_be_returned);
-            }
-          });
-        }
-        else {
-          json_be_returned.er = true;
-          json_be_returned.st = 'You are not a superuser!';
-          returnJSON(false, json_be_returned);
-        }
-      });
-    }
-    else {
-      api.Authenticity.createUser(json.un, json.dn, json.pw, json.pm, json.dc, (err)=>{
-        json_be_returned.st = 'User created.';
-        returnJSON(false, json_be_returned);
-      });
-    }
-  });
-
-  // CreateUser of function.
-  // ss.sdef('getUserProfile', (json, entityID, returnJSON)=>{
-  //   let json_be_returned = {
-  //     s: 'Unsuccessful.'
-  //   }
-  //
-  //   api.Authenticity.createUser(json.u, json.u, json.p, json.p, (err)=> {
-  //
-  //     // First parameter for error, next is JSON to be returned.
-  //     returnJSON(false, json_be_returned);
-  //   });
-  // });
-
-  // Safe define a JSONfunction.
-  ss.sdef('SafeJSONfunction', (json, entityID, returnJSON)=>{
+  ss.def('createUser', (json, entityID, returnJSON)=>{
     // Code here for JSONfunciton
     // Return Value for JSONfunction call. Otherwise remote will not recieve funciton return value.
     let json_be_returned = {
-      d: 'Hello! NOOXY Service Framework!'
+      s: 'Succeessfully created.'
     }
     // First parameter for error, next is JSON to be returned.
-    returnJSON(false, json_be_returned);
+    api.Authenticity.createUser(json.un, json.dn, json.pw, 1, json.dt, json.fn, json.ln, (err)=>{
+      if(err) {
+        json_be_returned.s = err.toString();
+      }
+      returnJSON(false, json_be_returned);
+    });
+  });
+
+  // Safe define a JSONfunction.
+  ss.sdef('SafeJSONfunction', (json, entityID, returnJSON)=>{
+  //   // Code here for JSONfunciton
+  //   // Return Value for JSONfunction call. Otherwise remote will not recieve funciton return value.
+  //   let json_be_returned = {
+  //     d: 'Hello! NOOXY Service Framework!'
+  //   }
+  //   // First parameter for error, next is JSON to be returned.
+  //   returnJSON(false, json_be_returned);
+  // },
+  // // In case fail.
+  // ()=>{
+  //   console.log('Auth Failed.');
   });
 
   // ServiceSocket.onData, in case client send data to this Service.
   // You will need entityID to Authorize remote user. And identify remote.
   ss.onData = (entityID, data) => {
-    // Get Username and process your work.
-    let username = api.Service.Entity.returnEntityOwner(entityID);
-    // To store your data and associated with userid INSEAD OF USERNAME!!!
-    // Since userid can be promised as a unique identifer!!!
-    let userid = null;
-    // Get userid from API
-    api.Authenticity.getUserID(username, (err, id) => {
-      userid = id;
-    });
-    // process you operation here
-    console.log('recieve a data');
-    console.log(data);
+    // // Get Username and process your work.
+    // let username = api.Service.Entity.returnEntityOwner(entityID);
+    // // To store your data and associated with userid INSEAD OF USERNAME!!!
+    // // Since userid can be promised as a unique identifer!!!
+    // let userid = null;
+    // // Get userid from API
+    // api.Authenticity.getUserID(username, (err, id) => {
+    //   userid = id;
+    // });
+    // // process you operation here
+    // console.log('recieve a data');
+    // console.log(data);
   }
-  // Send data to client.
-  // ss.sendData('A entity ID', 'My data to be transfer.');
   // ServiceSocket.onConnect, in case on new connection.
   ss.onConnect = (entityID, callback) => {
     // Do something.
@@ -152,27 +77,26 @@ function start(api) {
   }
   // ServiceSocket.onClose, in case connection close.
   ss.onClose = (entityID, callback) => {
-    // Get Username and process your work.
-    let username = api.Service.Entity.returnEntityOwner(entityID);
-    // To store your data and associated with userid INSEAD OF USERNAME!!!
-    // Since userid can be promised as a unique identifer!!!
-    let userid = null;
-    // Get userid from API
-    api.Authenticity.getUserID(username, (err, id) => {
-      userid = id;
-    });
-    // process you operation here
-    console.log('ServiceSocket closed');
-    // report error;
+    // // Get Username and process your work.
+    // let username = api.Service.Entity.returnEntityOwner(entityID);
+    // // To store your data and associated with userid INSEAD OF USERNAME!!!
+    // // Since userid can be promised as a unique identifer!!!
+    // let userid = null;
+    // // Get userid from API
+    // api.Authenticity.getUserID(username, (err, id) => {
+    //   userid = id;
+    // });
+    // // process you operation here
+    // console.log('ServiceSocket closed');
+    // // report error;
     callback(false);
   }
 }
 
 // If the daemon stop, your service recieve close signal here.
-function close(api) {
+function close() {
   // Saving state of you service.
   // Please save and manipulate your files in this directory
-  let services_files_path = api.Me.FilesPath;
 }
 
 // Export your work for system here.

@@ -105,6 +105,7 @@ function Implementation() {
 
   this.emitRouter = () => {Utils.tagLog('*ERR*', 'emitRouter not implemented');};
 
+  this.sendRouterData = () => {Utils.tagLog('*ERR*', 'sendRouterData not implemented');};
   // get a temporary ConnectionProfile
   this.getClientConnProfile = (conn_method, remoteip, port, callback) => {
     _connection_module.createClient(conn_method, remoteip, port, callback);

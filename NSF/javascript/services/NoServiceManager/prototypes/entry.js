@@ -4,6 +4,7 @@
 // Copyright 2018 NOOXY. All Rights Reserved.
 
 let files_path;
+let settings;
 // Your service entry point
 function start(api) {
   // Get the service socket of your service
@@ -15,6 +16,8 @@ function start(api) {
   let safec = api.SafeCallback;
   // Please save and manipulate your files in this directory
   files_path = api.Me.FilesPath;
+  // Your settings in manifest file.
+  settings = Me.Settings;
 
   // Access another service on this daemon
   let admin_daemon_asock = api.Service.ActivitySocket.createDefaultAdminDeamonSocket('Another Service', (err, activitysocket)=> {
@@ -46,8 +49,7 @@ function start(api) {
   // In case fail.
   ()=>{
     console.log('Auth Failed.');
-  }
-  );
+  });
 
   // ServiceSocket.onData, in case client send data to this Service.
   // You will need entityID to Authorize remote user. And identify remote.

@@ -56,7 +56,14 @@ function Core(settings) {
     // initialize environment
     verbose('Daemon', 'Checking environment...')
     if (this.isinitialized() == false) {
-      this.initialize(this.launch);
+      this.initialize((err)=>{
+        if(err) {
+          process.exit();
+        }
+        else {
+          this.launch();
+        }
+      });
     }
     else {
       this.launch();
@@ -103,7 +110,6 @@ function Core(settings) {
           Settings: settings,
           close: () => {
             _connection.close();
-            console.log('s');
             _router.close();
             _service.close();
             _authorization.close();
@@ -114,14 +120,20 @@ function Core(settings) {
             _implementation.close();
             _nocrypto.close();
             _nsps.close();
+            verbose('Daemon', 'Stopping daemon in '+settings.kill_daemon_timeout+'ms.');
+            setTimeout(process.exit, settings.kill_daemon_timeout);
           },
           restart: ()=> {
             _daemon.close();
           },
           Variables: Vars
         }
+        process.on('SIGINT', () => {
+          verbose('Daemon', 'Caught interrupt signal.');
+          _daemon.close();
+        });
         // create gateway
-        verbose('Daemon', 'Creating coregateway...')
+        verbose('Daemon', 'Creating coregateway...');
         let coregateway = {
             Utilities: Utils,
             Settings: settings,
@@ -145,6 +157,10 @@ function Core(settings) {
             "ip": "LOCALIP",
             "port": "LOCALPORT"
       });
+
+      if(settings.default_server == 'Local' || settings.default_server == null ) {
+        settings.default_server = settings.connection_servers.length-1;
+      }
 
       for(let i in settings.connection_servers) {
         settings.trusted_domains.push(settings.connection_servers[i].ip);
@@ -263,27 +279,36 @@ function Core(settings) {
   this.initialize = (callback) => {
     verbose('Daemon', 'Initializing NSd...')
     verbose('Daemon', 'Creating eula...')
-
+    let _auth = new Authenticity();
     if (fs.existsSync(settings.database_path)) {
       verbose('Daemon', 'Database already exist.')
+      _auth.importDatabase(settings.database_path);
     }
-    verbose('Daemon', 'Creating database...')
-    let _auth = new Authenticity();
-    _auth.createDatabase(settings.database_path);
-    _auth.createUser(Vars.default_user.username, Vars.default_user.displayname, Vars.default_user.password, 0, null, (err)=> {
+    else {
+      verbose('Daemon', 'Creating database...')
+      _auth.createDatabase(settings.database_path);
+    }
+    _auth.createUser(Vars.default_user.username, Vars.default_user.displayname, Vars.default_user.password, 0, null, 'The', 'Admin', (err)=> {
       if(err) {
-        verbose('Daemon', '[ERR] Occur failure on creating database.');
+        Utils.tagLog('*ERR*', 'Occur failure on creating database.');
+        console.log(err);
+        callback(err);
       }
       else {
         verbose('Daemon', 'NSF Superuser "'+Vars.default_user.username+'" with password "'+Vars.default_user.password+'" created. Please change password later for security.');
+        fs.writeFile('./eula.txt', '', function(err) {
+          if(err) {
+            Utils.tagLog('*ERR*', 'Writing EULA error.');
+            console.log(err);
+            callback(err);
+          }
+          else {
+            verbose('Daemon', 'NSd initilalized.');
+            callback(err);
+          }
+        });
+
       }
-      fs.writeFile('./eula.txt', '', function(err) {
-        if(err) {
-            return console.log(err);
-        }
-      });
-      verbose('Daemon', 'NSd initilalized.');
-      callback(err);
     });
   }
 }
