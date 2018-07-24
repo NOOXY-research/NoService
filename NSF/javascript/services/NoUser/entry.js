@@ -34,6 +34,9 @@ function start(api) {
       if(err) {
         json_be_returned.s = err.toString();
       }
+      else if (json.pw != json.cp) {
+        json_be_returned.s = 'Error: password not match.'
+      }
       returnJSON(false, json_be_returned);
     });
   });

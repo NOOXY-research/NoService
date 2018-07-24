@@ -104,7 +104,7 @@ function start(api) {
           '[auth]\n'+
           '  auth emit [password|token] {entityID}  ---Emit authorization proccess to targeted entity.\n'+
           '[user]\n'+
-          '  user create {username} {displayname} {password} {detail} {firstname} {lastname} ---Create a NOOXY user.\n'+
+          '  user create {username} {displayname} {password} {comfirm} {detail} {firstname} {lastname} ---Create a NOOXY user.\n'+
           '[me]\n'+
           '  me\n'+
           '  me [entitymeta|chpasswd|usermeta|updatetoken]\n'+
@@ -215,7 +215,7 @@ function start(api) {
                 c1(false, {r:'Failed'});
               }
               else {
-                as.call('createUser', {un: t1[0], dn: t1[1], pw: t1[2], dt: t1[3], fn: t1[4], ln: t1[5]}, (err, json)=>{
+                as.call('createUser', {un: t1[0], dn: t1[1], pw: t1[2], cp: t1[3], dt: t1[4], fn: t1[5], ln: t1[6]}, (err, json)=>{
                   c1(false, {r:json.s});
                   as.close();
                 });

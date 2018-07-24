@@ -228,6 +228,7 @@ function Authenticity() {
 
   this.createUser = (username, displayname, password, privilege, detail, firstname, lastname, callback) => {
     let pwdhash = null;
+    username = username.toLowerCase();
     _authdb.getUser(username, (err, user)=>{
       if(user.exisitence == true) {
         let err = new Error("User existed.");
@@ -237,15 +238,15 @@ function Authenticity() {
         let err = new Error("Privilege invalid.");
         callback(err);
       }
-      else if(username == null || / /.test(username)) {
+      else if(username.length < 5 || username == null || / /.test(username)) {
         let err = new Error("Username invalid.");
         callback(err);
       }
-      else if(firstname == null || /\d/.test(firstname)) {
+      else if(firstname.length < 2 || firstname == null || /\d/.test(firstname)) {
         let err = new Error("First name invalid.");
         callback(err);
       }
-      else if(lastname == null || /\d/.test(lastname)) {
+      else if(lastname.length < 2 || lastname == null || /\d/.test(lastname)) {
         let err = new Error("Last name invalid.");
         callback(err);
       }
@@ -289,14 +290,22 @@ function Authenticity() {
   };
 
   this.updatePassword = (username, newpassword, callback) => {
-    if(newpassword != null && newpassword.length ) {
+    if(newpassword != null && newpassword.length  < 5) {
       _authdb.getUser(username, (err, user)=>{
         user.pwdhash = crypto.createHmac('sha256', SHA256KEY).update(newpassword).digest('hex');
-        user.updatesql(callback);
+        user.updatesql((err)=>{
+          if(err) {
+            callback(err);
+          }
+          else {
+            this.updateToken(username, callback);
+          }
+        });
       });
     }
     else {
-      callback(true);
+      let err = new Error("Password must be longer then or equal to 5.");
+      callback(err);
     }
   };
 
