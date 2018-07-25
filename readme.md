@@ -22,79 +22,79 @@ This project is still in aphla!
 ## Architecture
 
 ## APIs
-  api.Utils.returnPassword(prompt)
-  api.Utils.returnJSONfromFile(filename)
-  api.Utils.printLOGO(version, copyright)
-  api.Utils.tagLog(tag, logstring)
-  api.Utils.generateUniqueID()
-  api.Utils.hashString(string)
-  api.Utils.removeHTML(string)
-  api.Utils.generateGUID()
-  api.Utils.searchObject(object, value)
-  api.Utils.addDays(date, days)
-  api.Utils.DatetoSQL(sqlDate)
-  api.Utils.SQLtoDate(JsDate)
-  api.SafeCallback(callback)
-  api.Service.ActivitySocket.createSocket(method, targetip, targetport, service, owner, callback)
-  api.Service.ActivitySocket.createDefaultDeamonSocket(service, owner, callback)
-  api.Service.ActivitySocket.createDeamonSocket(method, targetip, targetport, service, owner, callback)
-  api.Service.ActivitySocket.createAdminDeamonSocket(method, targetip, targetport, service, callback)
-  api.Service.ActivitySocket.createDefaultAdminDeamonSocket(service, callback)
-  api.Service.Entity.getfliteredEntitiesMetaData: (key, value, callback)
-  api.Service.Entity.getfliteredEntitiesList: (query, callback)
-  api.Service.Entity.returnEntityValue(entityID, key)
-  api.Service.Entity.returnEntityOwner(entityID, key)
-  api.Service.Entity.getEntitiesMetaData(callback)
-  api.Service.Entity.returnEntityMetaData(entityID)
-  api.Service.Entity.returnCount()
-  api.Service.Entity.getEntities(callback)
-  api.Service.Entity.returnEntitiesID()
-  api.Service.Entity.getEntityConnProfile(entityId, callback)
-  api.Service.Entity.on(type, callback)
-  api.Service.returnList()
-  api.Service.returnServiceManifest(service_name)
-  api.Service.returnJSONfuncList(service_name)
-  api.ServicereturnJSONfuncDict(service_name)
-  api.Authorization.Authby.Token: (entityID, callback)
-  api.Authorization.Authby.Password(entityID, callback)
-  api.Authorization.Authby.isSuperUser(entityID, callback)
-  api.Authorization.Authby.Domain(entityID, callback) 
-  api.Authorization.Authby.DaemonAuthKey(entityID, callback)
-  api.Authorization.importTrustDomains(domains);
-  api.Daemon.Settings
-  api.Daemon.close()
-  api.Daemon.Variables
-  api.Authenticity.createUser(username, displayname, password, privilege, detail, firstname, lastname, callback)
-  api.Authenticity.deleteUser(username, callback)
-  api.Authenticity.updatePassword(username, newpassword, callback)
-  api.Authenticity.updateToken(username, callback)
-  api.Authenticity.updatePrivilege(username, privilege, callback) 
-  api.Authenticity.updateName(username, privilege, callback)
-  api.Authenticity.getUserMeta(username, callback)
-  api.Authenticity.getUserID(username, callback)
-  api.Connection.getServers(callback)
-  api.Connection.getClients(callback)
-  api.Connection.addServer(conn_method, ip, port)
-  api.Crypto.encryptString(algo, key, toEncrypt, callback)
-  api.Crypto.decryptString(algo, key, toDecrypt, callback)
-  api.Me.Settings
-  api.Me.Manifest
-  api.Me.FilesPath
+  api.Utils.returnPassword(prompt)\
+  api.Utils.returnJSONfromFile(filename)\
+  api.Utils.printLOGO(version, copyright)\
+  api.Utils.tagLog(tag, logstring)\
+  api.Utils.generateUniqueID()\
+  api.Utils.hashString(string)\
+  api.Utils.removeHTML(string)\
+  api.Utils.generateGUID()\
+  api.Utils.searchObject(object, value)\
+  api.Utils.addDays(date, days)\
+  api.Utils.DatetoSQL(sqlDate)\
+  api.Utils.SQLtoDate(JsDate)\
+  api.SafeCallback(callback)\
+  api.Service.ActivitySocket.createSocket(method, targetip, targetport, service, owner, callback)\
+  api.Service.ActivitySocket.createDefaultDeamonSocket(service, owner, callback)\
+  api.Service.ActivitySocket.createDeamonSocket(method, targetip, targetport, service, owner, callback)\
+  api.Service.ActivitySocket.createAdminDeamonSocket(method, targetip, targetport, service, callback)\
+  api.Service.ActivitySocket.createDefaultAdminDeamonSocket(service, callback)\
+  api.Service.Entity.getfliteredEntitiesMetaData: (key, value, callback)\
+  api.Service.Entity.getfliteredEntitiesList: (query, callback)\
+  api.Service.Entity.returnEntityValue(entityID, key)\
+  api.Service.Entity.returnEntityOwner(entityID, key)\
+  api.Service.Entity.getEntitiesMetaData(callback)\
+  api.Service.Entity.returnEntityMetaData(entityID)\
+  api.Service.Entity.returnCount()\
+  api.Service.Entity.getEntities(callback)\
+  api.Service.Entity.returnEntitiesID()\
+  api.Service.Entity.getEntityConnProfile(entityId, callback)\
+  api.Service.Entity.on(type, callback)\
+  api.Service.returnList()\
+  api.Service.returnServiceManifest(service_name)\
+  api.Service.returnJSONfuncList(service_name)\
+  api.ServicereturnJSONfuncDict(service_name)\
+  api.Authorization.Authby.Token: (entityID, callback)\
+  api.Authorization.Authby.Password(entityID, callback)\
+  api.Authorization.Authby.isSuperUser(entityID, callback)\
+  api.Authorization.Authby.Domain(entityID, callback)\
+  api.Authorization.Authby.DaemonAuthKey(entityID, callback)\
+  api.Authorization.importTrustDomains(domains)\
+  api.Daemon.Settings\
+  api.Daemon.close()\
+  api.Daemon.Variables\
+  api.Authenticity.createUser(username, displayname, password, privilege, detail, firstname, lastname, callback)\
+  api.Authenticity.deleteUser(username, callback)\
+  api.Authenticity.updatePassword(username, newpassword, callback)\
+  api.Authenticity.updateToken(username, callback)\
+  api.Authenticity.updatePrivilege(username, privilege, callback)\
+  api.Authenticity.updateName(username, privilege, callback)\
+  api.Authenticity.getUserMeta(username, callback)\
+  api.Authenticity.getUserID(username, callback)\
+  api.Connection.getServers(callback)\
+  api.Connection.getClients(callback)\
+  api.Connection.addServer(conn_method, ip, port)\
+  api.Crypto.encryptString(algo, key, toEncrypt, callback)\
+  api.Crypto.decryptString(algo, key, toDecrypt, callback)\
+  api.Me.Settings\
+  api.Me.Manifest\
+  api.Me.FilesPath\
   
-  ActivitySocket.call(name, Json, callback)
-  ActivitySocket.sendData(data)
-  ActivitySocket.returnEntityID()
-  ActivitySocket.onData(data)
-  ActivitySocket.onClose()
-  ActivitySocket.close()
+  ActivitySocket.call(name, Json, callback)\
+  ActivitySocket.sendData(data)\
+  ActivitySocket.returnEntityID()\
+  ActivitySocket.onData(data)\
+  ActivitySocket.onClose()\
+  ActivitySocket.close()\
   
-  ServiceSocket.def(name, callback)
-  ServiceSocket.sdef(name, callback, failopearation)
-  ServiceSocket.sendData(entityID, data)
-  ServiceSocket.broadcastData(data) 
-  ServiceSocket.onData(entityID, data)
-  ServiceSocket.onClose(entityID, callback)
-  ServiceSocket.onConnect(entityID, callback)
+  ServiceSocket.def(name, callback)\
+  ServiceSocket.sdef(name, callback, failopearation)\
+  ServiceSocket.sendData(entityID, data)\
+  ServiceSocket.broadcastData(data)\
+  ServiceSocket.onData(entityID, data)\
+  ServiceSocket.onClose(entityID, callback)\
+  ServiceSocket.onConnect(entityID, callback)\
   
 ## Protocol
 ### Basic
