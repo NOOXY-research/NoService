@@ -94,7 +94,7 @@ function NSc() {
         return "";
     },
     eraseCookie: (name)=> {
-      setCookie(name,"",-1);
+      Utils.setCookie(name,"",-1);
     },
     returnPassword: function(prompt) {
         if (prompt) {
@@ -200,13 +200,13 @@ function NSc() {
       let _hostport = hostport;
       let _clientip = clientip;
       let _conn = conn; // conn is wrapped!
-      if(settings.debug) {
-        Utils.tagLog('DEBUG', 'connection id: '+_GUID);
+      if(Rpos == 'Server') {
+        _clients[_GUID] = this;
       }
 
       this.closeConnetion = () => {
         // Utils.tagLog('*ERR*', 'closeConnetion not implemented. Of '+this.type);
-        _conn.close(_GUID);
+        _conn.closeConnetion(_GUID);
       };
 
       this.getServerID = (callback) => {callback(false, _serverID);}
@@ -230,6 +230,11 @@ function NSc() {
       this.returnConn = () => {return _conn;};
       this.returnGUID = () => {return _GUID};
 
+      this.destroy= () => {
+        delete _conn;
+        delete this;
+        delete _clients[_GUID];
+      };
       // this.onConnectionDropout = () => {
       //   Utils.tagLog('*ERR*', 'onConnectionDropout not implemented');
       // }
@@ -239,7 +244,7 @@ function NSc() {
     function WSClient() {
       let _ws = null
 
-      this.close = () => {
+      this.closeConnetion = () => {
         _ws.close();
       };
 
@@ -248,29 +253,35 @@ function NSc() {
       this.onClose = () => {Utils.tagLog('*ERR*', 'onClose not implemented');};
 
       this.send = function(connprofile, data) {
-        _ws.send(data);
+        try {
+          _ws.send(data);
+        }
+        catch(e) {
+          this.onClose(connprofile);
+          _ws.close();
+        }
       };
 
       this.connect = (ip, port, callback) => {
         let connprofile = null;
         _ws = new WebSocket('ws://'+ip+':'+port);
         connprofile = new ConnectionProfile(null, 'Server', 'WebSocket', ip, port, 'localhost', this);
-        _ws.addEventListener('open', function open() {
+        _ws.onopen = () => {
           callback(false, connprofile);
           // ws.send('something');
-        });
-        _ws.addEventListener('message', (event) => {
+        }
+        _ws.onmessage = (event) => {
           this.onData(connprofile, event.data);
-        });
+        }
 
-        _ws.addEventListener('error', (error) => {
+        _ws.onerror =  (error) => {
             Utils.tagLog('*ERR*', error);
             _ws.close();
-        });
+        }
 
-        _ws.addEventListener('close', (error) => {
+        _ws.onclose =  () => {
             this.onClose(connprofile);
-        });
+        }
 
       }
     };
@@ -278,7 +289,7 @@ function NSc() {
     function WSSClient() {
       let _ws = null
 
-      this.close = () => {
+      this.closeConnetion = () => {
         _ws.close();
       };
 
@@ -287,29 +298,35 @@ function NSc() {
       this.onClose = () => {Utils.tagLog('*ERR*', 'onClose not implemented');};
 
       this.send = function(connprofile, data) {
-        _ws.send(data);
+        try {
+          _ws.send(data);
+        }
+        catch(e) {
+          this.onClose(connprofile);
+          _ws.close();
+        }
       };
 
       this.connect = (ip, port, callback) => {
         let connprofile = null;
-        _ws = new WebSocket('wss://'+ip+':'+port);
+        _ws = new WebSocket('ws://'+ip+':'+port);
         connprofile = new ConnectionProfile(null, 'Server', 'WebSocket', ip, port, 'localhost', this);
-        _ws.addEventListener('open', function open() {
+        _ws.onopen = () => {
           callback(false, connprofile);
           // ws.send('something');
-        });
-        _ws.addEventListener('message', (event) => {
+        }
+        _ws.onmessage = (event) => {
           this.onData(connprofile, event.data);
-        });
+        }
 
-        _ws.addEventListener('error', (error) => {
+        _ws.onerror =  (error) => {
             Utils.tagLog('*ERR*', error);
             _ws.close();
-        });
+        }
 
-        _ws.addEventListener('close', (error) => {
+        _ws.onclose =  () => {
             this.onClose(connprofile);
-        });
+        }
 
       }
     };
@@ -355,7 +372,7 @@ function NSc() {
     };
 
     this.onClose = (connprofile) => {
-      Utils.tagLog('*ERR*', 'Connection module onData not implement');
+      Utils.tagLog('*ERR*', 'Connection module onClose not implement');
     }
 
     this.getClients = (callback) => {
@@ -394,9 +411,10 @@ function NSc() {
         AuthbyTokenFailed();
       },
 
-      // Authby action
-      'AC': () => {
-
+      // Sign in
+      'SI': (connprofile, data, data_sender) => {
+        let Signin = _implementation_module.returnImplement('signin');
+        Signin(connprofile, data, data_sender);
       },
 
       'AF': ()=>{
@@ -665,59 +683,78 @@ function NSc() {
     // import the accessbility of core resource
     this.importCore = (coregateway) => {
       _coregateway = coregateway;
+      _debug = _coregateway.Settings.debug;
 
       // while recieve a data from connection
       _coregateway.Connection.onData = (connprofile, data) => {
         _tellRAWSniffers(data);
-        if(_coregateway.Settings.secure == true && connprofile.returnConnMethod() != 'Local' && connprofile.returnConnMethod() != 'local') {
-          // upgrade protocol
-          if(connprofile.returnBundle('NSPS') == 'pending') {
-            let json = JSON.parse(data);
-            _tellJSONSniffers(json);
-            methods[json.m].handler(connprofile, json.s, json.d);
-          }
-          else if(connprofile.returnBundle('NSPS') != true && connprofile.returnRemotePosition() == 'Client') {
-            _coregateway.NSPS.upgradeConnection(connprofile, (err, succeess)=>{
-              if(succeess) {
-                let json = JSON.parse(data);
-                _tellJSONSniffers(json);
-                methods[json.m].handler(connprofile, json.s, json.d);
-              }
-              else {
-                connprofile.closeConnetion();
-              }
-            });
-          }
-          else if(connprofile.returnBundle('NSPS') != true) {
-            let json = JSON.parse(data);
-            _tellJSONSniffers(json);
-            methods[json.m].handler(connprofile, json.s, json.d);
-          }
-          else if(connprofile.returnBundle('NSPS') == true) {
-            // true
-
-            _coregateway.NoCrypto.decryptString('AESCBC256', connprofile.returnBundle('aes_256_cbc_key'), data, (err, decrypted)=> {
-
-              let json = JSON.parse(decrypted);
+        try {
+          if(_coregateway.Settings.secure == true && connprofile.returnConnMethod() != 'Local' && connprofile.returnConnMethod() != 'local') {
+            // upgrade protocol
+            if(connprofile.returnBundle('NSPS') == 'pending') {
+              let json = JSON.parse(data);
               _tellJSONSniffers(json);
               methods[json.m].handler(connprofile, json.s, json.d);
-            });
+            }
+            else if(connprofile.returnBundle('NSPS') != true && connprofile.returnRemotePosition() == 'Client') {
+              _coregateway.NSPS.upgradeConnection(connprofile, (err, succeess)=>{
+                if(succeess) {
+                  let json = JSON.parse(data);
+                  _tellJSONSniffers(json);
+                  methods[json.m].handler(connprofile, json.s, json.d);
+                }
+                else {
+                  connprofile.closeConnetion();
+                }
+              });
+            }
+            else if(connprofile.returnBundle('NSPS') != true) {
+              let json = JSON.parse(data);
+              _tellJSONSniffers(json);
+              methods[json.m].handler(connprofile, json.s, json.d);
+            }
+            else if(connprofile.returnBundle('NSPS') == true) {
+              // true
+
+              _coregateway.NoCrypto.decryptString('AESCBC256', connprofile.returnBundle('aes_256_cbc_key'), data, (err, decrypted)=> {
+                if(err&&_coregateway.Settings.debug) {
+                  console.log(err);
+                }
+                let json = JSON.parse(decrypted);
+                _tellJSONSniffers(json);
+                methods[json.m].handler(connprofile, json.s, json.d);
+
+              });
+            }
+          }
+          else {
+            let json = JSON.parse(data);
+            _tellJSONSniffers(json);
+            methods[json.m].handler(connprofile, json.s, json.d);
           }
         }
-        else {
-          let json = JSON.parse(data);
-          _tellJSONSniffers(json);
-          methods[json.m].handler(connprofile, json.s, json.d);
+        catch (er) {
+          if(_debug) {
+            Utils.tagLog('*ERR*', 'An error occured in router module.');
+            console.log(er);
+          }
         }
-
       };
 
       _coregateway.Connection.onClose = (connprofile) => {
-        _coregateway.Service.onConnectionClose(connprofile, (err)=>{
-          delete connprofile.returnConn();
-          delete connprofile;
-        });
+        try {
+          _coregateway.Service.onConnectionClose(connprofile, (err)=>{
+            connprofile.destroy();
+          });
+        }
+        catch (er) {
+          if(_debug) {
+            Utils.tagLog('*WARN*', 'An error occured in router module.');
+            console.log(er);
+          }
+        }
       };
+
       _coregateway.Service.emitRouter = this.emit;
       _coregateway.Implementation.emitRouter = this.emit;
       _coregateway.Implementation.sendRouterData = _senddata;
@@ -749,22 +786,36 @@ function NSc() {
     this.emitRouter = () => {Utils.tagLog('*ERR*', 'emitRouter not implemented');};
 
     this.onConnectionClose = (connprofile, callback) => {
+
       let _entitiesID = connprofile.returnBundle('bundle_entities');
-      let i = 0;
-      if(_entitiesID==null) {
+      console.log(_entitiesID);
+      if(_entitiesID == null) {
         callback(true);
       }
       else if(_entitiesID.length) {
-        let loop = () => {
-          let theservice = _local_services[_entity_module.returnEntityValue(_entitiesID, 'service')];
-          theservice.sendSSClose(_entitiesID[i], (err)=>{
+        let Rpos = connprofile.returnRemotePosition();
+        if(connprofile.returnRemotePosition() == 'Client') {
+          let i = 0;
+          let loop = () => {
+            let theservice = _local_services[_entity_module.returnEntityValue(_entitiesID[i], 'service')];
+            _entity_module.deleteEntity(_entitiesID[i]);
+            theservice.sendSSClose(_entitiesID[i], (err)=>{
+
+            });
             if(i < _entitiesID.length-1) {
-              i++
+              i++;
               loop();
             }
-          });
-        };
-        callback(false);
+          };
+          loop();
+          callback(false);
+        }
+        else {
+          for(let i in _entitiesID) {
+            _ASockets[_entitiesID[i]].onClose();
+          }
+          callback(false);
+        }
       }
       else {
         callback(false);
@@ -862,14 +913,6 @@ function NSc() {
       let wait_ops = [];
       let wait_launch_ops = [];
 
-      let entities_prev = conn_profile.returnBundle('bundle_entities');
-      if(entities_prev != null) {
-        conn_profile.setBundle('bundle_entities', [_entity_id].concat(entities_prev));
-      }
-      else {
-        conn_profile.setBundle('bundle_entities', [_entity_id]);
-      }
-
       let _conn_profile = conn_profile;
       let _jfqueue = {};
 
@@ -890,8 +933,14 @@ function NSc() {
       };
 
       this.setEntityID = (id) => {
-        console.log('ActivitySocket created as id: '+id);
         _entity_id = id;
+        let entities_prev = conn_profile.returnBundle('bundle_entities');
+        if(entities_prev != null) {
+          conn_profile.setBundle('bundle_entities', [_entity_id].concat(entities_prev));
+        }
+        else {
+          conn_profile.setBundle('bundle_entities', [_entity_id]);
+        }
       };
 
       this.sendJFReturn = (err, tempid, returnvalue) => {
@@ -943,8 +992,8 @@ function NSc() {
             }
           }
           conn_profile.setBundle('bundle_entities', bundle);
-          if(!bundle.length) {
-            conn_profile.closeConnetion();
+          if(bundle.length == 0) {
+            _conn_profile.closeConnetion();
           }
         }
         exec(op);
@@ -1368,8 +1417,8 @@ function NSc() {
         _cry_algo[algo].decryptString(key, toDecrypt, callback);
       });
       // setup NSF Auth implementation
-      _implementation.setImplement('signin', (conn_method, remote_ip, port, type)=>{
-        window.location.replace('login.html?conn_method='+conn_method+'&remote_ip='+remote_ip+'&port='+port+'&type='+type+'&redirect='+window.location.href);
+      _implementation.setImplement('signin', (connprofile, data, data_sender)=>{
+        window.location.replace('login.html?conn_method='+settings.connmethod+'&remote_ip='+settings.targetip+'&port='+settings.targetport+'&redirect='+window.location.href);
         // window.open('login.html?conn_method='+conn_method+'&remote_ip='+remote_ip+'&port='+port);
       });
 
@@ -1380,11 +1429,20 @@ function NSc() {
         if(Utils.getQueryVariable('redirect')) {
           window.location.replace(Utils.getQueryVariable('redirect'));
         }
-
       });
 
-      _implementation.setImplement('AuthbyTokenFailed', ()=>{
-        _implementation.returnImplement('signin')(settings.connmethod, settings.targetip, settings.targetport, 'token');
+      _implementation.setImplement('setUser', (err, username)=>{
+        Utils.setCookie('NSUser', username, 365);
+      });
+
+      _implementation.setImplement('logout', (err, Username)=>{
+        Utils.eraseCookie('NSUser');
+        Utils.eraseCookie('NSToken');
+        location.reload();
+      });
+
+      _implementation.setImplement('AuthbyTokenFailed', (connprofile, data, data_sender)=>{
+        _implementation.returnImplement('signin')(connprofile, data, data_sender, 'token');
       });
 
       // setup NSF Auth implementation
@@ -1402,7 +1460,7 @@ function NSc() {
         console.log('token: ', Utils.getCookie('NSToken'));
         let pass = true;
         if(Utils.getCookie('NSToken') == null) {
-          _implementation.returnImplement('signin')(settings.connmethod, settings.targetip, settings.targetport, 'token');
+          _implementation.returnImplement('signin')(connprofile, data, data_sender, 'token');
         }
         else {
           callback(false, Utils.getCookie('NSToken'));
@@ -1495,11 +1553,14 @@ function NSc() {
     _core.getImplement(callback);
   };
 
-  this.connect = (targetip, targetport, username) =>{
+  this.connect = (targetip, targetport) =>{
     settings.connmethod = 'WebSocketSecure';
     settings.targetip = targetip;
     settings.targetport = targetport;
-    settings.user = username;
+    settings.user = Utils.getCookie('NSUser');
+    if(settings.user == "") {
+      settings.user = null;
+    };
     try {
       _core.launch();
     }
@@ -1507,7 +1568,6 @@ function NSc() {
       settings.connmethod = 'WebSocket';
       _core.launch();
     }
-
   };
 
 }

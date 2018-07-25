@@ -1,5 +1,5 @@
 let _NSc = new NSc();
-_NSc.connect('www.nooxy.tk', '1487', null);
+_NSc.connect('www.nooxy.tk', '1487');
 _NSc.createActivitySocket('NoUser', (err, as)=>{
   $(function() {
     let status = $('#status');
@@ -9,6 +9,7 @@ _NSc.createActivitySocket('NoUser', (err, as)=>{
        {un: $("#signupform-username").val(),
        dn: null,
        pw: $("#signupform-password").val(),
+       cp: $("#signupform-passwordcomfirm").val(),
        dt: null,
        fn: $("#signupform-firstname").val(),
        ln: $("#signupform-lastname").val()},

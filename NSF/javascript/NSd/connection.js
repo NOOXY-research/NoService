@@ -669,7 +669,7 @@ function Connection(options) {
     }
 
     else {
-      Utils.tagLog('*ERR*', ''+conn_method+' not implemented. Skipped.');
+      Utils.tagLog('*ERR*', 'ConnType '+conn_method+' not implemented. Skipped.');
     }
   }
 
@@ -712,7 +712,7 @@ function Connection(options) {
     }
 
     else {
-      Utils.tagLog('*ERR*', ''+conn_method+' not implemented. Skipped.');
+      Utils.tagLog('*ERR*', 'ConnType '+conn_method+' not implemented. Skipped.');
     }
   };
 

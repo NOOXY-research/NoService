@@ -66,18 +66,18 @@ function start(api) {
   }
 
   // setup NSF Auth implementation
-  api.Implementation.setImplement('signin', (conn_method, remoteip, port, callback)=>{
-    api.Implementation.setImplement('onToken', callback);
+  api.Implementation.setImplement('signin', (connprofile, data, data_sender)=>{
     console.log('Please signin your account.');
-    _get_username_and_password((err, u, p)=>{
-      api.Implementation.getClientConnProfile(conn_method, remoteip, port, (err, connprofile) => {
-        let _data = {
-          u: u,
-          p: p
-        }
-        api.Implementation.emitRouter(connprofile, 'GT', _data);
-      });
+    _get_password((err, p)=>{
+      let _data = {
+        u: _username,
+        p: p
+      }
+      _username = _data.u;
+      api.Implementation.emitRouter(connprofile, 'GT', _data);
+      commandread();
     });
+
   });
 
   // setup NSF Auth implementation
@@ -93,10 +93,7 @@ function start(api) {
       data_sender(connprofile, 'AU', 'rs', _data);
     };
     if(_token == null) {
-      api.Implementation.returnImplement('signin')(DAEMONTYPE, DAEMONIP, DAEMONPORT, (err, token)=>{
-        _token = token;
-        callback(false, _token);
-      });
+      api.Implementation.returnImplement('signin')(connprofile, data, data_sender);
     }
     else {
       callback(false, _token);
@@ -104,7 +101,11 @@ function start(api) {
 
   });
 
-  api.Implementation.setImplement('AuthbyTokenFailed', () => {
+  api.Implementation.setImplement('onToken', (err, token)=>{
+    _token = token;
+  });
+
+  api.Implementation.setImplement('AuthbyTokenFailed', (connprofile, data, data_sender) => {
     let signin = ()=>{
       api.Implementation.returnImplement('signin')(DAEMONTYPE, DAEMONIP, DAEMONPORT, (err, token)=>{
         if(token == null) {signin();};
@@ -112,7 +113,7 @@ function start(api) {
         commandread();
       });
     }
-    signin();
+    signin(connprofile, data, data_sender);
   });
 
   // setup NSF Auth implementation
@@ -144,8 +145,22 @@ function start(api) {
     //     console.log('Auth failed.');
     //   }
     //   _token = token;
+    rl.question('Login as: ', (uname)=> {
+      console.log('');
+      _username = uname;
       let cmd = null;
-      api.Service.ActivitySocket.createSocket(DAEMONTYPE, DAEMONIP, DAEMONPORT, 'NoShell', (err, as) => {
+      api.Service.ActivitySocket.createSocket(DAEMONTYPE, DAEMONIP, DAEMONPORT, 'NoShell', _username, (err, as) => {
+        commandread = () => {
+          rl.question('>>> ', (cmd)=> {
+            if (cmd == 'exit') //we need some base case, for recursion
+              return rl.close(); //closing RL and returning from function.
+            as.call('sendC', {c: cmd}, (err, json)=>{
+              console.log(json.r);
+              commandread(); //Calling this function again to ask new question
+            });
+          });
+        };
+
         console.log('connected.');
         as.onData = (data) => {
           if(data.t == 'stream') {
@@ -154,19 +169,12 @@ function start(api) {
         }
         as.call('welcome', null, (err, msg) => {
           console.log(msg);
-          commandread = () => {
-            rl.question('>>> ', (cmd)=> {
-              if (cmd == 'exit') //we need some base case, for recursion
-                return rl.close(); //closing RL and returning from function.
-              as.call('sendC', {c: cmd}, (err, json)=>{
-                console.log(json.r);
-                commandread(); //Calling this function again to ask new question
-              });
-            });
-          };
+
           commandread();
         });
       });
+    });
+
     // });
 
 

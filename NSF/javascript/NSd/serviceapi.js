@@ -46,8 +46,8 @@ function ServiceAPI() {
     _api.SafeCallback = _safe_callback;
     _api.Service = {
       ActivitySocket: {
-        createSocket: (method, targetip, targetport, service, callback) => {
-          _coregateway.Service.createActivitySocket(method, targetip, targetport, service, _safe_callback(callback));
+        createSocket: (method, targetip, targetport, service, owner, callback) => {
+          _coregateway.Service.createActivitySocket(method, targetip, targetport, service, owner, _safe_callback(callback));
         },
         createDefaultDeamonSocket: (service, owner, callback) => {
           _coregateway.Service.createDaemonActivitySocket(DAEMONTYPE, DAEMONIP, DAEMONPORT, service, owner, _safe_callback(callback));

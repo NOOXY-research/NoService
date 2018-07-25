@@ -70,7 +70,6 @@ function Service() {
 
     let _entitiesID = connprofile.returnBundle('bundle_entities');
     if(_entitiesID == null) {
-
       callback(true);
     }
     else if(_entitiesID.length) {
@@ -93,7 +92,7 @@ function Service() {
       }
       else {
         for(let i in _entitiesID) {
-          _ASockets[_entitiesID[i]].close();
+          _ASockets[_entitiesID[i]].onClose();
         }
         callback(false);
       }
@@ -222,6 +221,10 @@ function Service() {
             connectiontype:connprofile.returnConnMethod(),
             description: data.d
           };
+
+          if(_entity_json.owner == "") {
+            _entity_json.owner = null;
+          }
 
           if(_entity_json.mode == null) {
             _entity_json.mode = 'normal';
@@ -723,13 +726,13 @@ function Service() {
   }
 
   // Service module create activity socket
-  this.createActivitySocket = (method, targetip, targetport, service, callback) => {
+  this.createActivitySocket = (method, targetip, targetport, service, owner, callback) => {
     let err = false;
     let _data = {
       "m": "CE",
       "d": {
         t: Utils.generateGUID(),
-        o: _local_services_owner,
+        o: owner,
         m: 'normal',
         s: service,
         od: targetip,
@@ -754,7 +757,6 @@ function Service() {
       }
       this.emitRouter(connprofile, 'CS', _data);
     });
-
   };
 
   this.createAdminDaemonActivitySocket = (method, targetip, targetport, service, callback) => {

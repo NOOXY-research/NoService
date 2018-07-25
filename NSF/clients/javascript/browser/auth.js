@@ -1,5 +1,5 @@
 let _NSc = new NSc();
-_NSc.connect('127.0.0.1', '1487', 'admin');
+_NSc.connect('www.nooxy.tk', '1487');
 function getQueryVariable(variable)
 {
        var query = window.location.search.substring(1);
@@ -19,6 +19,7 @@ $(function () {
             u: $('#loginform-username').val(),
             p: $('#loginform-password').val()
           }
+          implement_module.returnImplement('setUser')(false, _data.u);
           implement_module.emitRouter(connprofile, 'GT', _data);
         });
       });
