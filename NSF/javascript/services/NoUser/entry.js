@@ -31,12 +31,14 @@ function start(api) {
     }
     // First parameter for error, next is JSON to be returned.
     if (json.pw != json.cp) {
+      json_be_returned.e = true;
       json_be_returned.s = 'Error: password not match.';
       returnJSON(false, json_be_returned);
     }
     else {
       api.Authenticity.createUser(json.un, json.dn, json.pw, 1, json.dt, json.fn, json.ln, (err)=>{
         if(err) {
+          json_be_returned.e = true;
           json_be_returned.s = err.toString();
         }
         returnJSON(false, json_be_returned);

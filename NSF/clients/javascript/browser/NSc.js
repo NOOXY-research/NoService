@@ -309,7 +309,7 @@ function NSc() {
 
       this.connect = (ip, port, callback) => {
         let connprofile = null;
-        _ws = new WebSocket('ws://'+ip+':'+port);
+        _ws = new WebSocket('wss://'+ip+':'+port);
         connprofile = new ConnectionProfile(null, 'Server', 'WebSocket', ip, port, 'localhost', this);
         _ws.onopen = () => {
           callback(false, connprofile);

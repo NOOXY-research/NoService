@@ -10,7 +10,7 @@ a {
   color: rgb(0, 137, 123);
 }
 @media screen and (max-width: 450px) {
-  .auth-box{
+  .nouser-box{
     width: 320px !important;
   }
 }
@@ -25,6 +25,10 @@ hr {
   border-right-width: 0px;
   border-left-width: 0px;
   border-color: #ECEFF1;
+}
+ul {
+  list-style-type: none;
+  padding: 0;
 }
 .img-in-text {
   vertical-align:middle;
@@ -45,7 +49,7 @@ hr {
   display: block;
   height: 24px;
 }
-.auth-box {
+.nouser-box {
   -webkit-flex-shrink: 0;
   flex-shrink: 0;
   background: #fff;
@@ -58,7 +62,7 @@ hr {
   width: 450px;
   background-color: white;
 }
-.auth-box-contain {
+.nouser-box-contain {
   height: auto;
   width: auto;
   min-height: 300px;
@@ -66,14 +70,14 @@ hr {
   padding: 25px 20px 20px;
   box-sizing: border-box;
 }
-.auth-box-contain > *{
+.nouser-box-contain > *{
   display: block;
 }
-.auth-box-contain-title{
+.nouser-box-contain-title{
   height: 35px;
   line-height: 35px;
 }
-.auth-box-contain-title > *{
+.nouser-box-contain-title > *{
   line-height: inherit;
   font-size: 13px;
   font-weight: normal;
@@ -82,14 +86,14 @@ hr {
   display: inline-block;
   vertical-align:middle
 }
-.auth-box-contain-form {
+.nouser-box-contain-form {
   height: auto;
   width: 100%;
 }
-.auth-box-contain-form > *{
+.nouser-box-contain-form > *{
   margin: 0 0 16px 0;
 }
-.auth-box-contain-bottom {
+.nouser-box-contain-bottom {
   font-size: 12px;
 }
 .input-flat {
@@ -135,6 +139,47 @@ hr {
 .button-flat:focus {
   background: rgb(40,40,40);
   font-size: 1.4rem!important;
+}
+.nouser-settings-list li{
+  padding: 0;
+  border-radius: 3px;
+  margin: 0;
+  transition: 0.35s;
+}
+.nouser-settings-list-detail{
+  transition: 0.35s;
+}
+.nouser-settings-list-detail:hover{
+  background-color: #f4f4f4;
+}
+.nouser-settings-list-detail:hover label{
+  font-size: 14px;
+}
+.nouser-settings-list-detail:hover p{
+  padding: 0 0 0 10px;
+
+  font-size: 23px;
+}
+.nouser-settings-list-detail label{
+  transition: 0.35s;
+  font-size: 12px;
+}
+.nouser-settings-list-detail p{
+  min-height: 18px;
+  padding: 0 0 0 5px;
+  transition: 0.35s;
+  font-size: 18px;
+  color: #424242;
+  margin: 0;
+}
+.nouser-settings-list-textinput{
+  background-color: inherit;
+  border: none;
+  width: 90%;
+  font-size: 23px;
+}
+input:focus, textarea:focus {
+  outline: none;
 }
 .messages-container {
   width: 100%;
