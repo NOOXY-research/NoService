@@ -81,8 +81,8 @@ let Authdb = function () {
       else {
         let datenow = Utils.DatetoSQL(new Date());
         if(this.exisitence) {
-          sql = 'UPDATE users SET username=?, userid=?, displayname=?, pwdhash=?, token=?, tokenexpire=?, privilege=?, detail=?, firstname=?, lastname=?, modifydate=? WHERE username=?';
-          _database.run(sql, [this.username, this.userid, this.displayname, this.pwdhash, this.token, this.tokenexpire, this.detail, this.privilege, this.firstname, this.lastname, datenow], (err) => {
+          sql = 'UPDATE users SET username=?, userid=?, displayname=?, pwdhash=?, token=?, tokenexpire=?, detail=?, privilege=?, firstname=?, lastname=?, modifydate=? WHERE username=?';
+          _database.run(sql, [this.username, this.userid, this.displayname, this.pwdhash, this.token, this.tokenexpire, this.detail, this.privilege, this.firstname, this.lastname, datenow, this.username], (err) => {
             if(err) {
               callback(err);
             }
@@ -132,7 +132,7 @@ let Authdb = function () {
   this.createDatabase = (path) => {
     _database = new sqlite3.Database(path);
     let expiredate = Utils.DatetoSQL(Utils.addDays(new Date(), 7));
-    _database.run('CREATE TABLE users(username text, userid text, displayname text,  pwdhash text, token text, tokenexpire datetime, privilege text, detail text, firstname text, lastname text, createdate datetime, modifydate datetime)');
+    _database.run('CREATE TABLE users(username text, userid text, displayname text,  pwdhash text, token text, tokenexpire datetime, privilege integer, detail text, firstname text, lastname text, createdate datetime, modifydate datetime)');
   };
 
   this.getUser = (username, callback) => {

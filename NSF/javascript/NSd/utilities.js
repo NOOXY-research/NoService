@@ -166,6 +166,7 @@ SQLtoDate = (sqlDate) => {
 }
 
 module.exports = {
+  isEnglish: isEnglish,
   returnPassword: returnPassword,
   returnJSONfromFile: returnJSONfromFile,
   printLOGO: printLOGO,
