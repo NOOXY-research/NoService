@@ -53,6 +53,10 @@ function returnPassword(prompt) {
     });
 }
 
+let isEnglish = (string) => {
+  return /^[A-Za-z0-9]*$/.test(string);
+};
+
 // read a file and return a parsed JSON obj
 returnJSONfromFile = (filename) => {
   return JSON.parse(fs.readFileSync(filename, 'utf8'));;

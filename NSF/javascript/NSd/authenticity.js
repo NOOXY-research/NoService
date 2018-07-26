@@ -238,7 +238,7 @@ function Authenticity() {
         let err = new Error("Privilege invalid.");
         callback(err);
       }
-      else if(username.length < 5 || username == null || / /.test(username)) {
+      else if(username.length < 5 || username == null || / /.test(username) || !Utils.isEnglish(username)) {
         let err = new Error("Username invalid.");
         callback(err);
       }
@@ -290,7 +290,7 @@ function Authenticity() {
   };
 
   this.updatePassword = (username, newpassword, callback) => {
-    if(newpassword != null && newpassword.length  < 5) {
+    if(newpassword != null && newpassword.length >= 5) {
       _authdb.getUser(username, (err, user)=>{
         user.pwdhash = crypto.createHmac('sha256', SHA256KEY).update(newpassword).digest('hex');
         user.updatesql((err)=>{
