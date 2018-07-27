@@ -173,8 +173,8 @@ function ServiceAPI() {
         _coregateway.Authenticity.updatePrivilege(usernamem, privilege, _safe_callback(callback));
       },
 
-      updateName: (username, privilege, callback) => {
-        _coregateway.Authenticity.updateName(username, privilege, _safe_callback(callback));
+      updateName: (username, firstname, lastname, callback) => {
+        _coregateway.Authenticity.updateName(username, firstname, lastname, _safe_callback(callback));
       },
 
       getUserMeta: (username, callback) => {

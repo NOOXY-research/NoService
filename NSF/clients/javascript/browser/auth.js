@@ -43,7 +43,7 @@ $(function () {
             }
           }
           implement_module.sendRouterData(connprofile, 'AU', 'rs', _data);
-          window.close();
+          setTimeout(()=>{window.close();}, 500);
         });
       });
     }

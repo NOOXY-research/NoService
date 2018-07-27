@@ -38,6 +38,11 @@ _NSc.createActivitySocket('NoUser', (err, as)=>{
          else {
            status.html('<span style="color: #4CAF50">'+json.s+'</span>');
          }
+         _NSc.getImplement((err, implement_module)=>{
+           _implementation.returnImplement('logout')();
+           window.location.replace('NoUserSettings.html');
+         });
+
       });
       return false;
     })
@@ -46,6 +51,9 @@ _NSc.createActivitySocket('NoUser', (err, as)=>{
     // user profile
     let profile_list = $('#profile-list');
     let additem_p = (label, contain)=>{
+      if(contain==null) {
+        contain = '';
+      }
       profile_list.append('<li id="'+label+'" class="nouser-settings-list-detail"><label for="'+label+'-contain">'+label+'</label><p id="'+label+'-contain">'+contain+'</p></li>');
       return $('#'+label);
     }
@@ -137,19 +145,44 @@ _NSc.createActivitySocket('NoUser', (err, as)=>{
       });
     };
     if(profile_list.length != 0) {
-      let username = additem_p('username', 'myusername');
-      editable_text(additem_p('firstname', 'Allen'));
-      editable_text(additem_p('lastname', 'Liu'));
-      editable_text(additem_p('email', 'nanan@gmail.com'));
-      editable_select(additem_p('gender', 'other'), ['male', 'female', 'other']);
-      editable_text(additem_p('phone', '0912312312'));
-      editable_date(additem_p('birthday', '2014-02-09'));
-      editable_select(additem_p('country', 'Taiwan'), country_list);
-      editable_text(additem_p('address', 'Taiwan, taipei'));
-      editable_text(additem_p('aboutme', 'a little about me.'), true);
-      let password = additem_p('password', 'click to change.');
+      as.call('returnUserMeta', {}, (err, json)=>{
+        let username = additem_p('username', json.username);
+        let userid = additem_p('userid', json.userid);
+        editable_text(additem_p('firstname', json.firstname));
+        editable_text(additem_p('lastname', json.lastname));
+        editable_text(additem_p('email', json.email));
+        editable_select(additem_p('gender', json.gender), ['male', 'female', 'other']);
+        editable_text(additem_p('phone', json.phonenumber));
+        editable_date(additem_p('birthday', json.birthday));
+        editable_select(additem_p('country', json.country), country_list);
+        editable_text(additem_p('address', json.address));
+        editable_text(additem_p('aboutme', json.aboutme), true);
+        let password = additem_p('newpassword', '<input class="nouser-settings-list-textinput" id="newpassword-text" type="password" placeholder="newpassword">');
+        let comfirmpassword = additem_p('comfirm newpassword', '<input class="nouser-settings-list-textinput" id="comfirmpassword-text" type="password" placeholder="comfirm">');
+        $('#update-submit').click(()=>{
+          as.call('updateUser', {
+            firstname: $('#firstname-contain').html(),
+            lastname: $('#lastname-contain').html(),
+            email: $('#email-contain').html(),
+            gender: $('#gender-contain').html(),
+            phonenumber: $('#phone-contain').html(),
+            birthday: $('#birthday-contain').html(),
+            country: $('#country-contain').html(),
+            address: $('#address-contain').html(),
+            aboutme: $('#aboutme-contain').html(),
+            pw: $('#newpassword-text').val(),
+            cp: $('#comfirmpassword-text').val()
+          }, (err, json)=>{
+            if(json.e) {
+              status.html('<span style="color: #E91E63">'+json.s+'</span>');
+            }
+            else {
+              status.html('<span style="color: #4CAF50">'+json.s+'</span>');
+            }
+          })
+        });
+      })
     }
-
     as.onClose=()=>{
 
     };

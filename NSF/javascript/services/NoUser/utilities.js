@@ -171,6 +171,7 @@ SQLtoDate = (sqlDate) => {
 }
 
 module.exports = {
+  validateEmail: validateEmail,
   isEnglish: isEnglish,
   returnPassword: returnPassword,
   returnJSONfromFile: returnJSONfromFile,

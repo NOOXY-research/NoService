@@ -15,9 +15,9 @@ function start(api) {
   let _online_users = {};
 
   // Access another service on this daemon
-  let admin_daemon_asock = api.Service.ActivitySocket.createDefaultAdminDeamonSocket('Another Service', (err, activitysocket)=> {
-    // accessing other service
-  });
+  // let admin_daemon_asock = api.Service.ActivitySocket.createDefaultAdminDeamonSocket('Another Service', (err, activitysocket)=> {
+  //   // accessing other service
+  // });
 
   Notisys.onNotis = (userid , Notis) => {
     let entitiesID = _online_users[userid];

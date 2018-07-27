@@ -261,7 +261,7 @@ function start(api) {
             },
             usermeta: (t1, c1) => {
               api.Authenticity.getUserMeta(api.Service.Entity.returnEntityOwner(entityID), (err, meta)=>{
-                c1(false, {r:meta});
+                c1(false, {r:JSON.stringify(meta, null, 2)});
               });
             },
             updatetoken: (t1, c1) => {

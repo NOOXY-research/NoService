@@ -84,6 +84,11 @@ function start(api) {
 
   // ServiceSocket.onConnect, in case on new connection.
   ss.onConnect = (entityID, callback) => {
+    let username = api.Service.Entity.returnEntityOwner(entityID);
+    if(username==null) {
+      username = 'guest';
+    }
+    queue_noti.push('Welcome! '+username+'. Your NOOXY service entity ('+entityID+').');
     ss.sendData(entityID, queue_noti);
     // Do something.
     // report error
