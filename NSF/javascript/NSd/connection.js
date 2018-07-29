@@ -21,6 +21,8 @@ function Connection(options) {
   let _tcp_ip_chunk_token = '}{"""}<>';
   let ssl_priv_key = null;
   let ssl_cert = null;
+  let heartbeat_phrase = '{m:"HB"}';
+  let heartbeat_cycle = 60000;
 
 
   // define an profile of an connection
@@ -237,11 +239,9 @@ function Connection(options) {
     };
 
     this.broadcast = (data) => {
-      this._wss.clients.forEach(function each(client) {
-        if (client.readyState === WebSocket.OPEN) {
-          client.send(data);
-        }
-      });
+      for(let i in _myclients) {
+        _myclients[i].send(data);
+      }
     };
 
     this.start = (ip, port, origin = false) => {
@@ -340,11 +340,9 @@ function Connection(options) {
     };
 
     this.broadcast = (data) => {
-      this._wss.clients.forEach(function each(client) {
-        if (client.readyState === WebSocket.OPEN) {
-          client.send(data);
-        }
-      });
+      for(let i in _myclients) {
+        _myclients[i].send(data);
+      }
     };
 
     this.start = (ip, port, origin = false) => {
@@ -446,8 +444,8 @@ function Connection(options) {
 
     this.broadcast = (data) => {
       for(let i in _myclients) {
-        client.write(data);
-      };
+        _myclients[i].write(_tcp_ip_chunk_token+data);
+      }
     };
 
     this.start = (ip, port, origin = false) => {
@@ -549,9 +547,9 @@ function Connection(options) {
     };
 
     this.broadcast = (data) => {
-      _myclients.forEach((key, client) => {
-        client.send(data);
-      });
+      for(let i in _myclients) {
+        _myclients[i].send(data);
+      };
     }
 
     this.start = function(virtip, virtport) {
@@ -626,6 +624,7 @@ function Connection(options) {
   };
 
   this.addServer = (conn_method, ip, port) => {
+
     if(conn_method == 'ws' || conn_method =='WebSocket') {
       let _serverID = Utils.generateGUID();
       let wws = new WSServer(_serverID);
@@ -671,13 +670,30 @@ function Connection(options) {
     else {
       Utils.tagLog('*ERR*', 'ConnType '+conn_method+' not implemented. Skipped.');
     }
+    // Heartbeat
+    if(Object.keys(_servers).length==1) {
+      setInterval(()=>{
+        for(let i in _servers) {
+          _servers[i].broadcast(heartbeat_phrase);
+        };
+      }, heartbeat_cycle);
+    };
   }
 
   this.createClient = (conn_method, remoteip, port, callback) => {
+    // Heartbeat
+    let onData_wrapped = (connprofile, data)=> {
+      if(data!=heartbeat_phrase) {
+        this.onData(connprofile, data);
+      }
+      else {
+      }
+    };
+
     if(conn_method == 'ws'||conn_method =='WebSocket') {
       let serverID = "WebSocket";
       let wsc = new WSClient(_virtnet);
-      wsc.onData = this.onData;
+      wsc.onData = onData_wrapped;
       wsc.onClose = this.onClose;
       wsc.connect(remoteip, port, callback);
     }
@@ -685,7 +701,7 @@ function Connection(options) {
     else if(conn_method == 'wss'||conn_method =='WebSocketSecure') {
       let serverID = "WebSocket";
       let wsc = new WSSClient(_virtnet);
-      wsc.onData = this.onData;
+      wsc.onData = onData_wrapped;
       wsc.onClose = this.onClose;
       wsc.connect(remoteip, port, callback);
     }
@@ -697,7 +713,7 @@ function Connection(options) {
       else {
         let serverID = "LOCAL";
         let locc = new LocalClient(_virtnet);
-        locc.onData = this.onData;
+        locc.onData = onData_wrapped;
         locc.onClose = this.onClose;
         locc.connect('LOCALIP', 'LOCALPORT', callback);
       }
@@ -706,7 +722,7 @@ function Connection(options) {
     else if(conn_method == 'TCP/IP'||conn_method =='TCP') {
       let serverID = "TCP/IP";
       let netc = new TCPIPClient(_virtnet);
-      netc.onData = this.onData;
+      netc.onData = onData_wrapped;
       netc.onClose = this.onClose;
       netc.connect(remoteip, port, callback);
     }

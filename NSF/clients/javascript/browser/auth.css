@@ -26,6 +26,9 @@ hr {
   border-left-width: 0px;
   border-color: #ECEFF1;
 }
+input:focus, textarea:focus {
+  outline: none;
+}
 .img-in-text {
   vertical-align:middle;
 }
@@ -93,7 +96,7 @@ hr {
   font-size: 12px;
 }
 .input-flat {
-  border: 1;
+  border-width: 1px;
   width: 100%;
   height: 45px;
   box-sizing: border-box;
@@ -106,6 +109,7 @@ hr {
   transition: 0.35s;
 }
 .input-flat:hover {
+  border-width: 0;
   box-shadow: 0 2px 2px 0 rgba(0,0,0,0.14), 0 3px 1px -2px rgba(0,0,0,0.12), 0 1px 5px 0 rgba(0,0,0,0.2);
 }
 .input-flat:focus {

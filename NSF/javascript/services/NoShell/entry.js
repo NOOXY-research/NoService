@@ -108,8 +108,6 @@ function start(api) {
           '[me]\n'+
           '  me\n'+
           '  me [entitymeta|chpasswd|usermeta|updatetoken]\n'+
-          '[sniffer]\n'+
-          '  sniffer router json [on|off]\n'+
           '[noti]\n'+
           '  noti ---NOOXY notification\n'+
           '[others]\n'+
@@ -350,8 +348,13 @@ function start(api) {
 
     returnJSON(false, msg);
   },
-  ()=>{
+  (json, entityID, returnJSON)=>{
+    let emeta = api.Service.Entity.returnEntityMetaData(entityID);
+    let settings = api.Daemon.Settings;
+    let msg = '\nHello. '+emeta.owner+'(as entity '+entityID+').\n  You have no NoShell access to "'+settings.daemon_name+'".\n';
+    msg = msg + '  Daemon description: \n  ' + settings.description+'\n';
 
+    returnJSON(false, msg);
   });
 };
 

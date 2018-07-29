@@ -85,11 +85,15 @@ function start(api) {
   // ServiceSocket.onConnect, in case on new connection.
   ss.onConnect = (entityID, callback) => {
     let username = api.Service.Entity.returnEntityOwner(entityID);
+    let notibesent = [];
     if(username==null) {
       username = 'guest';
+      notibesent.push('Welcome! '+username+'. Your entityID ('+entityID+'). <a style="color:#2196f3;" href="https://www.nooxy.tk/static/nsf/login.html?conn_method=WebSocketSecure&remote_ip=www.nooxy.tk&port=1487&redirect=https://www.nooxy.tk">login</a>');
     }
-    queue_noti.push('Welcome! '+username+'. Your NOOXY service entity ('+entityID+').');
-    ss.sendData(entityID, queue_noti);
+    else {
+      notibesent.push('Welcome! '+username+'. Your entityID ('+entityID+').');
+    }
+    ss.sendData(entityID, notibesent.concat(queue_noti));
     // Do something.
     // report error
     callback(false);

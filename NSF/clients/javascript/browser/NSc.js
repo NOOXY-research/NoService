@@ -187,6 +187,7 @@ function NSc() {
     let _virtnet = null;
     let _blocked_ip = [];
     let _tcp_ip_chunk_token = '}{"""}<>';
+    let heartbeat_phrase = '{m:"HB"}';
 
 
     // define an profile of an connection
@@ -332,10 +333,18 @@ function NSc() {
     };
 
     this.createClient = (conn_method, remoteip, port, callback) => {
+
+      // Heartbeat
+      let onData_wrapped = (connprofile, data)=> {
+        if(data!=heartbeat_phrase) {
+          this.onData(connprofile, data);
+        }
+      };
+
       if(conn_method == 'ws'||conn_method =='WebSocket') {
         let serverID = "WebSocket";
         let wsc = new WSClient(_virtnet);
-        wsc.onData = this.onData;
+        wsc.onData = onData_wrapped;
         wsc.onClose = this.onClose;
         wsc.connect(remoteip, port, callback);
       }
@@ -343,7 +352,7 @@ function NSc() {
       else if(conn_method == 'wss'||conn_method =='WebSocketSecure') {
         let serverID = "WebSocketSecure";
         let wssc = new WSSClient(_virtnet);
-        wssc.onData = this.onData;
+        wssc.onData = onData_wrapped;
         wssc.onClose = this.onClose;
         wssc.connect(remoteip, port, callback);
       }
@@ -351,7 +360,7 @@ function NSc() {
       else if(conn_method == 'TCP/IP'||conn_method =='TCP') {
         let serverID = "TCP/IP";
         let netc = new TCPIPClient(_virtnet);
-        netc.onData = this.onData;
+        netc.onData = onData_wrapped;
         netc.onClose = this.onClose;
         netc.connect(remoteip, port, callback);
       }
