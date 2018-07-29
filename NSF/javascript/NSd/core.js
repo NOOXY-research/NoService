@@ -186,6 +186,8 @@ function Core(settings) {
            settings.connection_servers[server].ip, settings.connection_servers[server].port);
       }
 
+      _connection.importHeartBeatCycle(settings.heartbeat_cycle);
+
       // setup implementation
       _implementation.importConnectionModule(_connection);
 

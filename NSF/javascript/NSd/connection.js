@@ -772,6 +772,10 @@ function Connection(options) {
     ssl_priv_key = ssl_priv_key_in;
   }
 
+  this.importHeartBeatCycle = (cycle) => {
+    heartbeat_cycle = cycle;
+  };
+
   this.close = () =>{
     this.onClose = (connprofile) => {
       Utils.tagLog('*ERR*', 'Connection module onClose not implement');

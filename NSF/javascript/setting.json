@@ -84,6 +84,8 @@
 
   "ssl_cert": "ssl.crt",
 
-  "kill_daemon_timeout": 3000
+  "kill_daemon_timeout": 3000,
+
+  "heartbeat_cycle": 60000
 
 }
