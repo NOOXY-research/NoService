@@ -2,6 +2,7 @@
 // Description:
 // "api.js" provide interface of core interacting.
 // Copyright 2018 NOOXY. All Rights Reserved.
+'use strict';
 
 let Utils = require('./utilities');
 

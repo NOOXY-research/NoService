@@ -2,6 +2,7 @@
 // Description:
 // "authorization.js" provide authorization actions.
 // Copyright 2018 NOOXY. All Rights Reserved.
+'use strict';
 
 let Utils = require('./utilities');
 
@@ -67,6 +68,7 @@ function Authorization() {
   let _authe_module = null;
   let _entity_module = null;
   let _auth_timeout = 320;
+  let _daemon_auth_key = null;
   let _queue_operation = {};
 
   this.emitRouter = () => {console.log('[*ERR*] emit not implemented');};

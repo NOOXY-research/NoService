@@ -2,6 +2,7 @@
 // Description:
 // "connection.js" provide connection interface.
 // Copyright 2018 NOOXY. All Rights Reserved.
+'use strict';
 
 let Utils = require('./utilities');
 const WebSocket = require('ws');
@@ -67,7 +68,6 @@ function Connection(options) {
     this.returnGUID = () => {return _GUID};
 
     this.destroy= () => {
-      delete _conn;
       delete this;
       delete _clients[_GUID];
     };
@@ -159,7 +159,7 @@ function Connection(options) {
       let _vsclient = {};
       // let _virt_sockets = {};
 
-      type_callback = {
+      let type_callback = {
         'connection': null
       }
 

@@ -2,6 +2,7 @@
 // Description:
 // "services.js" provide functions of services stuff.
 // Copyright 2018 NOOXY. All Rights Reserved.
+'use strict';
 
 let fs = require('fs');
 let Utils = require('./utilities');
@@ -764,8 +765,6 @@ function Service() {
         if(data.d.i != "FAIL") {
           _as.setEntityID(data.d.i);
           connprofile.setBundle('entityID', data.d.i);
-          console.log(connprofile.returnBundle('entityID'));
-
           _ASockets[data.d.i] = _as;
           callback(false, _as);
         }

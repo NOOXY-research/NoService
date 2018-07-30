@@ -2,6 +2,8 @@
 // Description:
 // "utilities.js" provides general function to be widely used.
 // Copyright 2018 NOOXY. All Rights Reserved.
+'use strict';
+
 var fs = require('fs');
 
 const BACKSPACE = String.fromCharCode(127);
@@ -63,7 +65,7 @@ let isEnglish = (string) => {
 };
 
 // read a file and return a parsed JSON obj
-returnJSONfromFile = (filename) => {
+let returnJSONfromFile = (filename) => {
   return JSON.parse(fs.readFileSync(filename, 'utf8'));;
 };
 
@@ -73,7 +75,7 @@ String.prototype.replaceAll = function(search, replacement) {
 };
 
 // print the NSF LOGO
-printLOGO = (version, copyright) => {
+let printLOGO = (version, copyright) => {
   console.log('88b 88  dP\'Yb   dP\'Yb  Yb  dP Yb  dP  TM')
   console.log('88Yb88 dP   Yb dP   Yb  YbdP   YbdP  ')
   console.log('88 Y88 Yb   dP Yb   dP  dPYb    88   ')
@@ -86,7 +88,7 @@ printLOGO = (version, copyright) => {
 };
 
 // print log with tag
-tagLog = (tag, logstring) => {
+let tagLog = (tag, logstring) => {
   if(typeof(logstring)!='string') {
     logstring = JSON.stringify(logstring, null, 2);
   }
@@ -104,11 +106,11 @@ tagLog = (tag, logstring) => {
 };
 
 // generateGUID
-generateUniqueID = () => {
+let generateUniqueID = () => {
   return '_' + Math.random().toString(36).substr(2, 9);
 };
 
-hashString = (s) => {
+let hashString = (s) => {
   var s = 0, i, chr;
   if (s.length === 0) return hash;
   for (i = 0; i < s.length; i++) {
@@ -119,27 +121,27 @@ hashString = (s) => {
   return hash;
 };
 
-removeHTML = function(str) {
+let removeHTML = function(str) {
   return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g,
     '&gt;').replace(/"/g, '&quot;');
 }
 
-function s4() {
+let s4 = () => {
   return Math.floor((1 + Math.random()) * 0x10000).toString(16).substring(1);
 }
 
-addDays = (date, days)=> {
+let addDays = (date, days)=> {
   var dat = date;
   dat.setDate(dat.getDate() + days);
   return dat;
 }
 
-generateGUID = () => {
+let generateGUID = () => {
   return s4() + s4() + '-' + s4() + '-' + s4() + '-' +s4() + '-' + s4() + s4() +
    s4();
 }
 
-searchObject = (object, value)=> {
+let searchObject = (object, value)=> {
   for (let prop in object) {
     if (object.hasOwnProperty(prop)) {
       if (object[prop] === value) {
@@ -149,7 +151,7 @@ searchObject = (object, value)=> {
   }
 };
 
-SQLtoDate = (sqlDate) => {
+let SQLtoDate = (sqlDate) => {
   let sqlDateArr1 = sqlDate.split("-");
   let sYear = sqlDateArr1[0];
   let sMonth = (Number(sqlDateArr1[1]) - 1).toString();
@@ -165,7 +167,7 @@ SQLtoDate = (sqlDate) => {
   return new Date(sYear, sMonth, sDay, sHour, sMinute, sSecond);
 }
 
- DatetoSQL = (JsDate) => {
+ let DatetoSQL = (JsDate) => {
   iso = JsDate.toISOString();
   return iso.slice(0, 19).replace('T', ' ');
 }

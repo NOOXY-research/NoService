@@ -2,8 +2,9 @@
 // Description:
 // "crypto.js" provide wrapped crypto api for nooxy service framework.
 // Copyright 2018 NOOXY. All Rights Reserved.
-const crypto = require('crypto');
+'use strict';
 
+const crypto = require('crypto');
 // NOOXY service protocol sercure
 function NSPS() {
   let _rsa_pub = null;

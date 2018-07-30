@@ -2,7 +2,7 @@
 // Description:
 // "authenticity.js" provide users authenticity base on sqldatabase.
 // Copyright 2018 NOOXY. All Rights Reserved.
-
+'use strict';
 
 let crypto = require('crypto');
 let sqlite3 = require('sqlite3');

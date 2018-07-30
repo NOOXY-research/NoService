@@ -2,6 +2,7 @@
 // Description:
 // "core.js" control main behavior of deamon.
 // Copyright 2018 NOOXY. All Rights Reserved.
+'use strict';
 
 var fs = require('fs');
 
