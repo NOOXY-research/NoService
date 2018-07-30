@@ -210,6 +210,7 @@ function Core(settings) {
       // setup service
       _service.setDebug(settings.debug);
       _service.setupServicesPath(settings.services_path);
+      _service.setupServicesFilesPath(settings.services_files_path);
       _service.importAuthorization(_authorization);
       // add shell related service to List.
       if(settings.shell_service != null && settings.services.includes(settings.shell_service) == false) {

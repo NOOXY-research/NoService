@@ -3,6 +3,7 @@
 // "services.js" provide functions of services stuff.
 // Copyright 2018 NOOXY. All Rights Reserved.
 
+let fs = require('fs');
 let Utils = require('./utilities');
 
 function Service() {
@@ -10,6 +11,7 @@ function Service() {
   let _local_services = {};
   let _activities = {};
   let _local_services_path = null;
+  let _local_services_files_path = null;
   let _local_services_owner = null;
   let _entity_module = null;
   let _serviceapi_module = null;
@@ -50,6 +52,7 @@ function Service() {
     for(let i=0; i<service_list.length; i++) {
       let _s = new ServiceObj(service_list[i], _ascallback);
       _s.setupPath(_local_services_path+service_list[i]);
+      _s.setupFilesPath(_local_services_files_path+service_list[i]);
       _local_services[service_list[i]] = _s;
     }
   };
@@ -548,6 +551,7 @@ function Service() {
     let _entity_id = null;
     let _service_socket = null;
     let _service_path = null;
+    let _service_files_path = null;
     let _service_name = service_name;
     let _service_module = null;
     let _service_manifest = null;
@@ -607,6 +611,12 @@ function Service() {
         if(_service_manifest.name != _service_name) {
           erreport = new Error('Service name in manifest must fit with name "'+_service_name+'". Please check manifest file.\n');
         }
+        else if(!fs.existsSync(_service_files_path)) {
+          fs.mkdirSync(_service_files_path);
+          if(_debug) {
+            Utils.tagLog('Service', 'Created service files folder at '+_service_files_path);
+          }
+        }
         if(_service_manifest.implementation_api == false) {
           _serviceapi_module.createServiceAPI(_service_socket, _service_manifest, (err, api) => {
             _service_module.start(api);
@@ -636,6 +646,10 @@ function Service() {
 
     this.setupPath = (path) => {
       _service_path = path;
+    };
+
+    this.setupFilesPath = (path) => {
+      _service_files_path = path;
     };
 
     this.sendSSConnection = (entityID, callback) => {
@@ -691,6 +705,11 @@ function Service() {
   // Service module Path
   this.setupServicesPath = (path) => {
     _local_services_path = path;
+  };
+
+  // Service files module Path
+  this.setupServicesFilesPath = (path) => {
+    _local_services_files_path = path;
   };
 
   // Service module Owner
