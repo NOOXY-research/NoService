@@ -4,12 +4,12 @@
 // Copyright 2018 NOOXY. All Rights Reserved.
 'use strict';
 
-var fs = require('fs');
+let fs = require('fs');
 
 const BACKSPACE = String.fromCharCode(127);
 
 function validateEmail(email) {
-    var re = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+    let re = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
     return re.test(String(email).toLowerCase());
 }
 
@@ -18,13 +18,13 @@ function returnPassword(prompt) {
       process.stdout.write(prompt);
     }
 
-    var stdin = process.stdin;
+    let stdin = process.stdin;
     stdin.resume();
     stdin.setRawMode(true);
     stdin.resume();
     stdin.setEncoding('utf8');
 
-    var password = '';
+    let password = '';
     stdin.on('data', function (ch) {
         ch = ch.toString('utf8');
 
@@ -70,7 +70,7 @@ let returnJSONfromFile = (filename) => {
 };
 
 String.prototype.replaceAll = function(search, replacement) {
-    var target = this;
+    let target = this;
     return target.split(search).join(replacement);
 };
 
@@ -94,7 +94,7 @@ let tagLog = (tag, logstring) => {
   }
   let _space = 10;
   tag = tag.substring(0, _space);
-  for(var i=0; i < _space-tag.length; i++) {
+  for(let i=0; i < _space-tag.length; i++) {
     if(i%2 != 1) {
       tag = tag + ' ';
     }
@@ -111,7 +111,7 @@ let generateUniqueID = () => {
 };
 
 let hashString = (s) => {
-  var s = 0, i, chr;
+  let i, chr;
   if (s.length === 0) return hash;
   for (i = 0; i < s.length; i++) {
     chr   = s.charCodeAt(i);
@@ -131,7 +131,7 @@ let s4 = () => {
 }
 
 let addDays = (date, days)=> {
-  var dat = date;
+  let dat = date;
   dat.setDate(dat.getDate() + days);
   return dat;
 }
@@ -168,7 +168,7 @@ let SQLtoDate = (sqlDate) => {
 }
 
  let DatetoSQL = (JsDate) => {
-  iso = JsDate.toISOString();
+  let iso = JsDate.toISOString();
   return iso.slice(0, 19).replace('T', ' ');
 }
 

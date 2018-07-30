@@ -32,17 +32,19 @@ _NSc.createActivitySocket('NoUser', (err, as)=>{
        fn: $("#signupform-firstname").val(),
        ln: $("#signupform-lastname").val()},
        (err, json) => {
-         if(json.s.includes('Error')) {
+         if(json.e) {
            status.html('<span style="color: #E91E63">'+json.s+'</span>');
          }
          else {
            status.html('<span style="color: #4CAF50">'+json.s+'</span>');
-         }
-         _NSc.getImplement((err, implement_module)=>{
-           _implementation.returnImplement('logout')();
-           window.location.replace('NoUserSettings.html');
-         });
+					 _NSc.getImplement((err, implement_module)=>{
 
+						 setTimeout(()=>{
+							 _implementation.returnImplement('logout')();
+							 window.location.replace('NoUserSettings.html');
+						 }, 1000);
+	         });
+         }
       });
       return false;
     })
