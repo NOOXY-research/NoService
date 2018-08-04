@@ -17,7 +17,7 @@ function start(api) {
   // Please save and manipulate your files in this directory
   files_path = api.Me.FilesPath;
   // Your settings in manifest file.
-  settings = Me.Settings;
+  settings = api.Me.Settings;
 
   // Access another service on this daemon
   let admin_daemon_asock = api.Service.ActivitySocket.createDefaultAdminDeamonSocket('Another Service', (err, activitysocket)=> {

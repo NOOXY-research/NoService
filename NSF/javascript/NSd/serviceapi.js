@@ -184,6 +184,10 @@ function ServiceAPI() {
 
       getUserID: (username, callback) => {
         _coregateway.Authenticity.getUserID(username, _safe_callback(callback));
+      },
+
+      getUsernamebyId: (userid, callback) => {
+        _coregateway.Authenticity.getUsernamebyId(userid, _safe_callback(callback));
       }
     };
 

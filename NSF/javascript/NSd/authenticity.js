@@ -153,9 +153,9 @@ let Authdb = function () {
     let user = new User();
     user.loadbyUserIdsql(userid, (err)=>{
       if(typeof(_cacheduser[user.username]) == 'undefined') {
-          _cacheduser[username] = user;
+          _cacheduser[user.username] = user;
       }
-      callback(err, _cacheduser[username]);
+      callback(err, _cacheduser[user.username]);
     });
   };
 

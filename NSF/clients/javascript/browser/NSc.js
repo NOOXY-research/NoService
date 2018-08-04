@@ -278,6 +278,7 @@ function NSc() {
         _ws.onerror =  (error) => {
             Utils.tagLog('*ERR*', error);
             _ws.close();
+            this.onClose(connprofile);
         }
 
         _ws.onclose =  () => {
@@ -323,6 +324,7 @@ function NSc() {
         _ws.onerror =  (error) => {
             Utils.tagLog('*ERR*', error);
             _ws.close();
+            this.onClose(connprofile);
         }
 
         _ws.onclose =  () => {
@@ -851,7 +853,7 @@ function NSc() {
             _ASockets[data.d.i].sendJFReturn(false, data.d.t, data.d.r);
           }
           else {
-            _ASockets[data.d.i].sendJFReturn(true, data.d.t, data.d.r);
+            _ASockets[data.d.i].sendJFReturn(data.d.s, data.d.t, data.d.r==null?'{}':JSON.parse(data.d.r));
           }
         },
         // nooxy service protocol implementation of "Call Activity: createEntity"

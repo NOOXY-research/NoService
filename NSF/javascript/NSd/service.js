@@ -82,9 +82,8 @@ function Service() {
         let i = 0;
         let loop = () => {
           let theservice = _local_services[_entity_module.returnEntityValue(_entitiesID[i], 'service')];
-          _entity_module.deleteEntity(_entitiesID[i]);
           theservice.sendSSClose(_entitiesID[i], (err)=>{
-
+            _entity_module.deleteEntity(_entitiesID[i]);
           });
           if(i < _entitiesID.length-1) {
             i++;
@@ -176,7 +175,7 @@ function Service() {
                   // status
                   "t": data.t,
                   "i": data.i,
-                  "s": err
+                  "s": err.toString()
                 }
               };
             }
@@ -430,6 +429,10 @@ function Service() {
         });
       }
       catch (err) {
+        if(_debug) {
+          Utils.tagLog('*ERR*', 'An error occured on JSON function call.');
+          console.log(err);
+        }
         callback(err);
       }
 
