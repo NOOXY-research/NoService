@@ -137,7 +137,10 @@ let Authdb = function () {
 
   this.getUser = (username, callback) => {
     let err = null;
-    if(typeof(_cacheduser[username]) == 'undefined') {
+    if(username== null) {
+      callback(true);
+    }
+    else if(typeof(_cacheduser[username]) == 'undefined') {
       let user = new User(username);
       user.loadsql((err)=>{
         _cacheduser[username] = user;
@@ -352,19 +355,23 @@ function Authenticity() {
   };
 
   this.TokenisValid = (username, token, callback) => {
-    let err = false;
-    let isValid = false;
-    _authdb.getUser(username, (err, user) => {
-      let now = new Date();
-      let expiredate = Utils.SQLtoDate(user.tokenexpire);
-      if(now > expiredate|| token != user.token) {
-        callback(err, false);
-      }
-      else {
-        callback(err, true);
-      }
-    });
-
+    if(token != null && username!=null && token.length > 10) {
+      let err = false;
+      let isValid = false;
+      _authdb.getUser(username, (err, user) => {
+        let now = new Date();
+        let expiredate = Utils.SQLtoDate(user.tokenexpire);
+        if(now > expiredate|| token != user.token) {
+          callback(err, false);
+        }
+        else {
+          callback(err, true);
+        }
+      });
+    }
+    else {
+      callback(false, false);
+    }
   };
 
   this.updateToken = (username, callback) => {

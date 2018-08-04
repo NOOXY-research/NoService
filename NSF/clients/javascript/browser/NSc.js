@@ -1429,7 +1429,7 @@ function NSc() {
       });
       // setup NSF Auth implementation
       _implementation.setImplement('signin', (connprofile, data, data_sender)=>{
-        window.location.replace('login.html?conn_method='+settings.connmethod+'&remote_ip='+settings.targetip+'&port='+settings.targetport+'&redirect='+window.location.href);
+        top.window.location.replace('login.html?conn_method='+settings.connmethod+'&remote_ip='+settings.targetip+'&port='+settings.targetport+'&redirect='+top.window.location.href);
         // window.open('login.html?conn_method='+conn_method+'&remote_ip='+remote_ip+'&port='+port);
       });
 
