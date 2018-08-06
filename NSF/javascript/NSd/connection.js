@@ -674,7 +674,14 @@ function Connection(options) {
     if(Object.keys(_servers).length==1) {
       setInterval(()=>{
         for(let i in _servers) {
-          _servers[i].broadcast(heartbeat_phrase);
+          try{
+            _servers[i].broadcast(heartbeat_phrase);
+          }
+          catch(e) {
+            if(_debug) {
+              Utils.tagLog('*WARN*', 'Server '+i+' occured error on heartbeat. Skipped.');
+            }
+          }
         };
       }, heartbeat_cycle);
     };
