@@ -1564,6 +1564,10 @@ function NSc() {
     _core.getImplement(callback);
   };
 
+  this.returnUserName = ()=>{
+    return settings.user;
+  }
+
   this.connect = (targetip, targetport) =>{
     settings.connmethod = 'WebSocketSecure';
     settings.targetip = targetip;
