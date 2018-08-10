@@ -101,6 +101,8 @@ function start(api) {
           '  service [jfunclist|jfuncdict|jfuncshow] {target service}\n'+
           '  service jfunc {target service} {target username} {target jfunc} {JSON} ---Call a JSONfunction as target user.\n'+
           '  service entity [show {entityID}|list|count]\n'+
+          '[jfunc]\n'+
+          '  jfunc {target service} {target jfunc} {JSON} ---Call a JSONfunction as admin.\n'+
           '[auth]\n'+
           '  auth emit [password|token] {entityID}  ---Emit authorization proccess to targeted entity.\n'+
           '[user]\n'+
@@ -203,6 +205,29 @@ function start(api) {
           }
 
         }, c0);
+      },
+
+      jfunc: (t0, c0) => {
+        api.Service.ActivitySocket.createDefaultDeamonSocket(t0[0], 'admin', (err, as)=> {
+          let jfuncd = {};
+          as.onData = (data) => {
+            jfuncd['onData no.'+Object.keys(jfuncd).length] = data;
+          }
+          let json_string = "";
+          for(let i=2; i<t0.length; i++) {
+            json_string += ' '+t0[i];
+          }
+          try {
+            as.call(t0[1], JSON.parse(json_string), (err, msg)=>{
+              as.close();
+              c0(false, {r:'jfunc onData: \n'+ JSON.stringify(jfuncd==null?'{}':jfuncd, null, 2)+'\njfunc returnValue: '+JSON.stringify(msg)});
+            });
+          }
+          catch(e) {
+            c0(false, {r:'jfunc error.\n'+e.toString()});
+            console.log(e);
+          }
+        });
       },
 
       user: (t0, c0) => {
