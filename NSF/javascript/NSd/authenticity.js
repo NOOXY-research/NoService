@@ -188,45 +188,52 @@ function Authenticity() {
     _authdb.createDatabase(path);
   };
 
-  // create a temp user which will not exist in database.
-  this.getGuest = (callback) => {
-    let err = null;
-    let user = null;
-
-    user = new User('GUEST', true);
-
-    callback(err, user);
-  };
-
   this.getUserMeta = (username, callback) => {
-    _authdb.getUser(username, (err, user) => {
-      let user_meta = {
-        firstname: user.firstname,
-        lastname: user.lastname,
-        exisitence : user.exisitence,
-        username : user.username,
-        userid : user.userid,
-        displayname : user.displayname,
-        tokenexpire : user.tokenexpire,
-        privilege : user.privilege,
-        detail : user.detail
-      }
-      callback(false, user_meta);
-    });
+    try {
+      _authdb.getUser(username, (err, user) => {
+        let user_meta = {
+          firstname: user.firstname,
+          lastname: user.lastname,
+          exisitence : user.exisitence,
+          username : user.username,
+          userid : user.userid,
+          displayname : user.displayname,
+          tokenexpire : user.tokenexpire,
+          privilege : user.privilege,
+          detail : user.detail
+        }
+        callback(false, user_meta);
+      });
+    }
+    catch(e) {
+      callback(e);
+    }
   };
 
   this.getUserID = (username, callback) => {
-    _authdb.getUser(username, (err, user) => {
-      let id = user.userid;
-      callback(false, id);
-    });
+    try {
+      _authdb.getUser(username, (err, user) => {
+        let id = user.userid;
+        callback(err, id);
+      });
+    }
+    catch(e) {
+      callback(e);
+    }
+
   };
 
   this.getUsernamebyId = (userid, callback) => {
-    _authdb.getUserbyId(userid, (err, user) => {
-      let username = user.username;
-      callback(false, username);
-    });
+    try {
+      _authdb.getUserbyId(userid, (err, user) => {
+        let username = user.username;
+        callback(false, username);
+      });
+    }
+    catch(e) {
+      callback(e);
+    }
+
   };
 
   this.createUser = (username, displayname, password, privilege, detail, firstname, lastname, callback) => {

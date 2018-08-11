@@ -81,9 +81,10 @@ function Service() {
       if(connprofile.returnRemotePosition() == 'Client') {
         let i = 0;
         let loop = () => {
-          let theservice = _local_services[_entity_module.returnEntityValue(_entitiesID[i], 'service')];
-          theservice.sendSSClose(_entitiesID[i], (err)=>{
-            _entity_module.deleteEntity(_entitiesID[i]);
+          let nowidx = i;
+          let theservice = _local_services[_entity_module.returnEntityValue(_entitiesID[nowidx], 'service')];
+          theservice.sendSSClose(_entitiesID[nowidx], (err)=>{
+            _entity_module.deleteEntity(_entitiesID[nowidx]);
           });
           if(i < _entitiesID.length-1) {
             i++;
