@@ -43,18 +43,20 @@ function Router() {
     };
     let json = JSON.stringify(wrapped);
     // finally sent the data through the connection.
-    if(connprofile.returnBundle('NSPS') == true) {
-      _coregateway.NoCrypto.encryptString('AESCBC256', connprofile.returnBundle('aes_256_cbc_key'), json, (err, encrypted)=> {
-        _coregateway.Connection.send(connprofile, encrypted);
-      });
-    }
-    else if (connprofile.returnBundle('NSPS') == 'finalize') {
-      connprofile.setBundle('NSPS', true);
-      _coregateway.Connection.send(connprofile, json);
+    if(connprofile) {
+      if(connprofile.returnBundle('NSPS') == true) {
+        _coregateway.NoCrypto.encryptString('AESCBC256', connprofile.returnBundle('aes_256_cbc_key'), json, (err, encrypted)=> {
+          _coregateway.Connection.send(connprofile, encrypted);
+        });
+      }
+      else if (connprofile.returnBundle('NSPS') == 'finalize') {
+        connprofile.setBundle('NSPS', true);
+        _coregateway.Connection.send(connprofile, json);
 
-    }
-    else {
-      _coregateway.Connection.send(connprofile, json);
+      }
+      else {
+        _coregateway.Connection.send(connprofile, json);
+      }
     }
   }
 
