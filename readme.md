@@ -2,16 +2,24 @@
 
 This project is still in aphla!
 
-# Overview
-- Orientation
-- Architecture
-- APIs
-- Protocol
-- Figures
+# NOOXY Service Framework
 
-## Orientation
-1. Entities system(Services, Activities), each entities have it’s profile(with contain that showing attached user and user’s domain) for deciding should it be trusted. 
-2. User Orientation, User(in a daemon or a client) can create entities(activities, services). Entities and Users are both owned(registered) by NSd(NOOXY Service daemon) of particular domain.
+## Target version
+* daemon: alpha 0.0.0
+* protocol: NSP alpha
+## Document Overview
+1. Orientation
+2. Architecture
+3. serverside module
+4. clientside module
+5. Service, ServiceSocket and ServiceAPI
+6. Activities and ActivitySocket(Client socket) 
+7. NSP(NOOXY Service Protocol)
+8. Preinstalled Service
+9. Setting file
+
+## NSF's Orientation
+1. Entities system(Services, Activities), each entities have it’s profile(with contain that showing attached user and user’s domain) for deciding should it be trusted. 2. User Orientation, User(in a daemon or a client) can create entities(activities, services). Entities and Users are both owned(registered) by NSd(NOOXY Service daemon) of particular domain.
 3. Server(we call it “Services”) , client(we call it “Activities”) structure.
 4. Authorization API for Services. Services have responsibilities to protect their contains itself
 5. Module idea, “Everything based on service” concept.
@@ -20,8 +28,110 @@ This project is still in aphla!
 8. NSP(NOOXY Service Protocol) is request response style protocol.
 
 ## Architecture
+![](https://i.imgur.com/Vi7RhkX.png)
 
-## APIs
+
+## Serverside module
+### Core
+Objective: setting up environment for NOOXY service daemon.
+
+### Connection
+Objective: Create a interface to get communication with remote device.
+
+### Router
+Objective: A parser and a router. To phrase Json from connection and do local operations. And to switch and trigger between different operations of remotes.
+
+### Authorization
+Objective: To provide function(API) to take authoritative actions. Confirming the sensitive data or operation is secured.
+
+### Authenticity
+Objective: To interact with Authenticity database. Providing Users  caching, Creating User Obj, User identification.
+
+### Service
+Objective: Loading and managing services, and routing the messages on internet. Also provide service socket, activity socket.
+
+### Crypto
+Objective: Providing AES, RSA, Hasing abilities for NSPS(NOOXY Service Protocol Secured).
+
+
+### Entity(as part of service)
+Objective: Create identity system for Service , Activity or future stuff. Entities are generated and being realtime. So there is no need for databases.
+
+## Clientside module
+
+### Core
+Objective: setting up environment for NOOXY service client.
+
+### Router
+Objective: A parser and a router. To phrase Json from connection and do local operations. And to switch and trigger between different operations of remotes.
+
+### Service
+Objective: Loading and managing services, and routing the messages on internet. Also provide service socket, activity socket.
+
+### Authorization Handler
+Objective: To handle authoritative actions. Confirming the sensitive data or operation is secured.
+
+### Crypto
+Objective: Providing AES, RSA, Hasing abilities for NSPS(NOOXY Service Protocol Secured).
+
+## Service, ServiceSocket and ServiceAPI
+### Explaination of how service work
+Once the core of the NSF is started.
+The core of NSF will navigate the directories of “services” directory which is under the root of NSF files. And in that directory it will exist a file called “entry.js”. The figure below can help you understand the concept.
+```
+------|--(NSd(NOOXY Service deamon))-- ...
+      |
+      |--(services)--|--(services_A)--|--(entry.js)
+      |              |                |--(manifest.json)
+      |              |
+      |              |--(services_B)--|--(entry.js)
+      |              |                |--(manifest.json)
+      |
+      |--(service_files)-- ...
+      |
+      |--(launch.js)
+      |--(settings.json)
+```
+After the core finish navigating the directories under “services”. It will call the entry.js and call it’s function “start()” and pass API parameter in to start() function. Below show how the “entry.js” file might be.
+``` nodejs
+// NSF/services/youservice/entry.js
+// Description:
+// "youservice/entry.js" description.
+// Copyright 2018 NOOXY. All Rights Reserved.
+
+let files_path;
+let settings;
+// Your service entry point
+function start(api) {
+    // Get the service socket of your service
+  let ss = api.Service.ServiceSocket;
+  // BEWARE! To prevent callback error crash the system.
+  // If you call an callback function which is not API provided. Such as setTimeout(callback, timeout).
+  // You need to wrap the callback funciton by api.SafeCallback.
+  // E.g. setTimeout(api.SafeCallback(callback), timeout)
+  let safec = api.SafeCallback;
+  // Please save and manipulate your files in this directory
+  files_path = api.Me.FilesPath;
+  // Your settings in manifest file.
+  settings = api.Me.Settings;
+}
+
+// If the daemon stop, your service recieve close signal here.
+function close() {
+  // Saving state of you service.
+  // Please save and manipulate your files in this directory
+}
+
+// Export your work for system here.
+module.exports = {
+  start: start,
+  close: close
+}
+```
+Beware that code in Service is ran as a superuser
+
+
+### APIs
   api.Utils.returnPassword(prompt)\
   api.Utils.returnJSONfromFile(filename)\
   api.Utils.printLOGO(version, copyright)\
@@ -38,7 +148,7 @@ This project is still in aphla!
   api.Service.ActivitySocket.createSocket(method, targetip, targetport, service, owner, callback)\
   api.Service.ActivitySocket.createDefaultDeamonSocket(service, owner, callback)\
   api.Service.ActivitySocket.createDeamonSocket(method, targetip, targetport, service, owner, callback)\
-  api.Service.ActivitySocket.createAdminDeamonSocket(method, targetip, targetport, service, callback)\
+  api.Service.ActivitySocket.createAdminDeamonSocket(method, targetip, targetport, service, callback)
   api.Service.ActivitySocket.createDefaultAdminDeamonSocket(service, callback)\
   api.Service.Entity.getfliteredEntitiesMetaData: (key, value, callback)\
   api.Service.Entity.getfliteredEntitiesList: (query, callback)\
@@ -79,14 +189,14 @@ This project is still in aphla!
   api.Crypto.decryptString(algo, key, toDecrypt, callback)\
   api.Me.Settings\
   api.Me.Manifest\
-  api.Me.FilesPath\
+  api.Me.FilesPath
   
   ActivitySocket.call(name, Json, callback)\
   ActivitySocket.sendData(data)\
   ActivitySocket.returnEntityID()\
   ActivitySocket.onData(data)\
   ActivitySocket.onClose()\
-  ActivitySocket.close()\
+  ActivitySocket.close()
   
   ServiceSocket.def(name, callback)\
   ServiceSocket.sdef(name, callback, failopearation)\
@@ -94,24 +204,67 @@ This project is still in aphla!
   ServiceSocket.broadcastData(data)\
   ServiceSocket.onData(entityID, data)\
   ServiceSocket.onClose(entityID, callback)\
-  ServiceSocket.onConnect(entityID, callback)\
+  ServiceSocket.onConnect(entityID, callback)
   
-## Protocol
+## NOOXY Service Protocol
 ### Basic
-1. NSP is based on text, based on Json data structure.
-2. It’s communication style is like http.Existing a method, a request and a response.
-3. NSP method is designed to be handle by core, not recommend to let service have direct access.
+1. NSP(NOOXY Service Protocol) is based on text, based on Json data structure.
+2. It’s communication style is like http. Existing a method, a request and a response.
+3. NSP is designed to be handle by core, not recommended to let service have direct access.
 4. Once a NSP package was sent. It contains 3 main parts. 
 > 	1. “method” for identify the type of operation
 > 	2. “session” for identify the stage of request or response.
 > 	3. “data” for the actual data that be transferred.
 5. There are following standard methods for NSP.
-> 	1.
+> 	1. SP(Sercure protocol) for updrading to encrypted communication.
+> 	2. GT(Get token) for getting token.
+> 	3. AU(Authorization) for authorize user identity.
+> 	4. CS(Call Service) client call daemon.
+> 	5. CA(Call Activity) daemon call client.
 6. In order to focus on data that be transferred We will abridge some terms.
 > 	1. “method” refer to “m”
 > 	2. “session” refer to “s”
 > 	3. “data” refer to “d”
-> 	4. method terms will be explained next page
+> 	
+### Detail
+#### SP(Sercure protocol)
+```
+"Sercure protocol"
+RSA_Public = text
+Request(daemon):
+{
+       m: “SP”,
+       s: “rq”,
+       d: {p: RSA_Public}
+} 
 
-## Figures
-![alt text](/imgs/login.png)
+RSA_Public_encrypted = text
+Response(client):
+{
+       m: “SP”,
+       s: “rs”,
+       d: RSA_Public_encrypted
+}
+
+decrypted "RSA_Public_encrypted" should be like:
+client_random_num = int, aes_key = text(base64, generated by hashing 
+pub_key+client_random_num with sha256 algo. And substring 32.)
+{
+        r: client_random_num,
+        a: aes_key
+}
+
+after updraded protocol, data will be transfer as:
+aes_iv(base64)+data_encrypted(base64)
+```
+#### GT(Get token)
+#### AU(Authorization)
+#### CS(Call Service)
+#### CA(Call Activity)
+
+## Preinstalled Service
+### list
+1. NoShell
+2. NoServiceManager
+3. NoUser
+4. NoShellc
