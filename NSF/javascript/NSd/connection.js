@@ -24,6 +24,7 @@ function Connection(options) {
   let ssl_cert = null;
   let heartbeat_phrase = '{m:"HB"}';
   let heartbeat_cycle = 60000;
+  let _debug = false;
 
 
   // define an profile of an connection
@@ -769,6 +770,10 @@ function Connection(options) {
 
   this.killClient = (conn_profile) => {
 
+  };
+
+  this.setDebug = (bool) => {
+    _debug = bool;
   };
 
   this.importSSLCert = (ssl_cert_in) => {

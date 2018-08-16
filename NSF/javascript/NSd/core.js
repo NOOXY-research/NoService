@@ -174,6 +174,7 @@ function Core(settings) {
       _router.importCore(coregateway);
 
       // setup connection
+      _connection.setDebug(settings.debug);
       if(settings.ssl_priv_key!=null && settings.ssl_cert!=null) {
         // read ssl certificate
         let privateKey = fs.readFileSync(settings.ssl_priv_key, 'utf8');
@@ -188,6 +189,7 @@ function Core(settings) {
       }
 
       _connection.importHeartBeatCycle(settings.heartbeat_cycle);
+
 
       // setup implementation
       _implementation.importConnectionModule(_connection);
