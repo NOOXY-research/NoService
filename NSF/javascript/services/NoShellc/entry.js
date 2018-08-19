@@ -106,14 +106,7 @@ function start(api) {
   });
 
   api.Implementation.setImplement('AuthbyTokenFailed', (connprofile, data, data_sender) => {
-    let signin = ()=>{
-      api.Implementation.returnImplement('signin')(DAEMONTYPE, DAEMONIP, DAEMONPORT, (err, token)=>{
-        if(token == null) {signin();};
-        _token = token;
-        commandread();
-      });
-    }
-    signin(connprofile, data, data_sender);
+    api.Implementation.returnImplement('signin')(connprofile, data, data_sender);
   });
 
   // setup NSF Auth implementation
