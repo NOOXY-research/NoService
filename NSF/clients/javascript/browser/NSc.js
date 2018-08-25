@@ -407,7 +407,7 @@ function NSc() {
       // Authby password failed
       'PF': (connprofile, data, data_sender) => {
         let AuthbyPasswordFailed = _implementation_module.returnImplement('AuthbyPasswordFailed');
-        AuthbyPasswordFailed();
+        AuthbyPasswordFailed(connprofile, data, data_sender);
       },
 
       // Authby token
@@ -419,17 +419,13 @@ function NSc() {
       // Authby token failed
       'TF': (connprofile, data, data_sender) => {
         let AuthbyTokenFailed = _implementation_module.returnImplement('AuthbyTokenFailed');
-        AuthbyTokenFailed();
+        AuthbyTokenFailed(connprofile, data, data_sender);
       },
 
       // Sign in
       'SI': (connprofile, data, data_sender) => {
         let Signin = _implementation_module.returnImplement('signin');
         Signin(connprofile, data, data_sender);
-      },
-
-      'AF': ()=>{
-
       }
     };
 
