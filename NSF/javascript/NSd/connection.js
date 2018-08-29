@@ -741,15 +741,31 @@ function Connection(options) {
   };
 
   this.send = (connprofile, data) => {
-    connprofile.getConn((err, conn) => {
-      conn.send(connprofile, data);
-    });
+    try {
+      connprofile.getConn((err, conn) => {
+        conn.send(connprofile, data);
+      });
+    }
+    catch (e) {
+      if(_debug) {
+        Utils.tagLog('*WARN*', 'Error occured while sending Data.');
+        console.log(e);
+      }
+    }
   };
 
   this.broadcast = (data) => {
-    _servers.forEach((key, server) => {
-      server.broadcast(data);
-    });
+    try {
+      _servers.forEach((key, server) => {
+        server.broadcast(data);
+      });
+    }
+    catch (e) {
+      if(_debug) {
+        Utils.tagLog('*WARN*', 'Error occured while broadcasting Data.');
+        console.log(e);
+      }
+    }
   };
 
   this.onData = (conn_profile, data) => {

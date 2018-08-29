@@ -89,11 +89,17 @@ function start(api) {
     if(username==null) {
       username = 'guest';
       notibesent.push('Welcome! '+username+'. Your entityID ('+entityID+'). <a style="color:#2196f3;" href="https://www.nooxy.tk/static/nsf/login.html?conn_method=WebSocketSecure&remote_ip=www.nooxy.tk&port=1487&redirect=https://www.nooxy.tk">login</a>');
+      ss.sendData(entityID, notibesent.concat(queue_noti));
     }
     else {
-      notibesent.push('Welcome! '+username+'. Your entityID ('+entityID+').');
+      api.Authorization.Authby.Token(entityID, (err, pass)=>{
+        if(pass) {
+          notibesent.push('Welcome back! '+username+'. Your entityID ('+entityID+').');
+          ss.sendData(entityID, notibesent.concat(queue_noti));
+        }
+      });
     }
-    ss.sendData(entityID, notibesent.concat(queue_noti));
+
     // Do something.
     // report error
     callback(false);
