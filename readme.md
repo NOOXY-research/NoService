@@ -4,6 +4,23 @@ This project is still in aphla!
 
 # NOOXY Service Framework
 
+## Why we build NOOXY Service framework?
+
+### security
+NSF has built-in sercure protocol bulit by AES and RSA to sercure your data. It also has authorization API, provides you ability to authorize user to protect your data. Besides, you can block IPs and domains.
+### lightweight
+NSF is superlightweight both in client and daemon. But it has lots of feature. And it's features can be expanded by services.
+### communication between services
+The design of NSF sockets that we called service socket and activity socket. With the characteristic of those sockets, services can communicate each others.
+### realtime
+NSF is design for realtime purpose.
+### services
+NSF is built for service. From it's protocol to it's structure. It also have user authorization system natively integrated with protocol and software.
+### for general conditions
+NSF is design for any kind of condition such as game, IoT, text contain. However, we have only implemented game([reversi](https://nooxy.org/noversi)), notification([NOOXY](https://nooxy.org)), shell([NoShell](https://www.nooxy.org/static/nsf/shell.html)). Nevertheless the development of NSF is still in progress. We can fix bugs and add features to comfirm other abilities.
+### cross platform
+Now, NSF can run on browser(javascript) and desktop(javascript). It also supports TCP/IP, websocket connections. Other languages is still on the way.
+
 ## Target version
 * daemon: alpha 0.0.0
 * protocol: NSP alpha
