@@ -7,7 +7,7 @@ This project is still in aphla!
 ## Why we build NOOXY Service framework?
 
 ### security
-NSF has built-in sercure protocol bulit by AES and RSA to sercure your data. It also has authorization API, provides you ability to authorize user to protect your data. Besides, you can block IPs and domains.
+NSF has built-in sercure protocol bulit by AES and RSA to sercure your data. It also has authorization API, provides you ability to authorize user to protect your data. Besides, you can block IPs and domains. The operations on daemon will not be executed until the client has the right response of authorization that emited from daemon side.
 ### lightweight
 NSF is superlightweight both in client and daemon. But it has lots of feature. And it's features can be expanded by services.
 ### communication between services
