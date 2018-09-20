@@ -236,6 +236,12 @@ function Authenticity() {
 
   };
 
+  this.getUserExistence = (username, callback) => {
+    authdb.getUser(username, (err, user)=>{
+      callback(false, user.exisitence);
+    });
+  };
+
   this.createUser = (username, displayname, password, privilege, detail, firstname, lastname, callback) => {
     let pwdhash = null;
     username = username.toLowerCase();
