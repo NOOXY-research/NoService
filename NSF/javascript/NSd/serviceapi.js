@@ -188,6 +188,10 @@ function ServiceAPI() {
 
       getUsernamebyId: (userid, callback) => {
         _coregateway.Authenticity.getUsernamebyId(userid, _safe_callback(callback));
+      },
+
+      getUserExistence: (username, callback)=>{
+        _coregateway.Authenticity.getUserExistence(username, _safe_callback(callback));
       }
     };
 

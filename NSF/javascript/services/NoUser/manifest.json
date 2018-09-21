@@ -13,18 +13,47 @@
     "services": {}
   },
   "JSONfunciton_prototypes": {
-    "jfunc_name": {
-      "displayname": "JSONfunciton",
-      "description": "JSONfunciton description.",
+    "createUser": {
+      "displayname": "Create a User.",
+      "description": "Create a NSF user. And create database for NoUser service.",
       "secure": false,
       "protocol": {
         "JSON_call": {
-          "p1": "parameter one",
-          "p2": "parameter two"
+          "un": "Username.",
+          "dn": "Displayname.",
+          "pw": "Password.",
+          "cp": "Comfirm password.",
+          "dt": "Detail for user.",
+          "fn": "Firstname.",
+          "ln": "Lastname."
         },
         "JSON_return": {
-          "p1": "parameter one",
-          "p2": "parameter two"
+          "s": "Status.",
+          "e": "Error status."
+        }
+      }
+    },
+
+    "returnUserMeta": {
+      "displayname": "Create a User.",
+      "description": "Create a NSF user. And create database for NoUser service.",
+      "secure": false,
+      "protocol": {
+        "JSON_call": {
+        },
+        "JSON_return": "User's metadata."
+      }
+    },
+
+    "updateUser": {
+      "displayname": "Create a User.",
+      "description": "Create a NSF user. And create database for NoUser service.",
+      "secure": false,
+      "protocol": {
+        "JSON_call": "A json datastructure for NoUser.",
+        "JSON_return": {
+          "s": "Status.",
+          "e": "Error status."
         }
       }
     }

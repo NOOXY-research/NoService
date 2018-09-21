@@ -572,6 +572,7 @@ function Service() {
       catch(err) {
         erreport = new Error('Service "'+_service_name+'" load manifest.json with failure.');
         console.log(err);
+        return erreport;
       };
       // check node packages dependencies
       try {
