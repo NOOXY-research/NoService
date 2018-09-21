@@ -4,7 +4,6 @@
   "description": "no description",
   "private": true,
   "dependencies": {
-    "readline-sync": "^1.4.9",
     "sqlite3": "^4.0.1",
     "ws": "^4.0.0"
   }
