@@ -1,5 +1,5 @@
 {
-  "name": "NoChat",
+  "name": "NoTalk",
   "version": "0.0.0",
   "displayname": "NOOXY Chat Service",
   "description": "A service that provide live chat, channel and other features.",
@@ -19,11 +19,12 @@
   "JSONfunciton_prototypes": {
     "createCh": {
       "displayname": "Create a channel.",
-      "description": "Create a NoChat channel.",
+      "description": "Create a NoTalk channel.",
       "secure": false,
       "protocol": {
         "JSON_call": {
           "t": "Type of channel for example 'live' or 'normal'",
+          "p": "Privaty of channel for example 'public', 'locked' or 'private'",
           "n": "Channel's name.",
           "d": "Channel's discribtion."
         },
@@ -61,7 +62,10 @@
         },
         "JSON_return": {
           "s": "Status.",
-          "e": "Error status."
+          "e": "Error status.",
+          "r": [
+            ["row number", "type", "data"]
+          ]
         }
       }
     },
@@ -136,7 +140,7 @@
 
     "addChUsers": {
       "displayname": "Add users.",
-      "description": "Add NoChat users into a channel.",
+      "description": "Add NoTalk users into a channel.",
       "secure": false,
       "protocol": {
         "JSON_call": {
@@ -154,7 +158,7 @@
 
     "editChUsers": {
       "displayname": "Edit user.",
-      "description": "Edit NoChat users in a channel.",
+      "description": "Edit NoTalk users in a channel.",
       "secure": false,
       "protocol": {
         "JSON_call": {
