@@ -83,7 +83,7 @@ let printLOGO = (version, copyright) => {
   console.log('')
   console.log('')
   console.log('ver. '+version+'. '+copyright)
-  console.log('For more information or update -> www.nooxy.tk')
+  console.log('For more information or update -> www.nooxy.org')
   console.log('')
 };
 

@@ -467,6 +467,7 @@ function Service() {
     let _conn_profile = conn_profile;
     let _jfqueue = {};
 
+    // For waiting connection is absolutly established. We need to wrap operations and make it queued.
     let exec = (callback) => {
       if(_launched != false) {
         callback();
@@ -723,7 +724,7 @@ function Service() {
     _local_services_owner = username;
   };
 
-  // ss callback
+  // Service Socket callback
   let _sscallback = (conn_profile, i, d) => {
     let _data2 = {
       "m": "SS",
