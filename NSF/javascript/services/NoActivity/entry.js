@@ -3,6 +3,8 @@
 // "youservice/entry.js" description.
 // Copyright 2018 NOOXY. All Rights Reserved.
 
+let files_path;
+let settings;
 // Your service entry point
 function start(api) {
   // Get the service socket of your service
@@ -13,7 +15,9 @@ function start(api) {
   // E.g. setTimeout(api.SafeCallback(callback), timeout)
   let safec = api.SafeCallback;
   // Please save and manipulate your files in this directory
-  let files_path = api.Me.FilesPath;
+  files_path = api.Me.FilesPath;
+  // Your settings in manifest file.
+  settings = api.Me.Settings;
 
   // Access another service on this daemon
   let admin_daemon_asock = api.Service.ActivitySocket.createDefaultAdminDeamonSocket('Another Service', (err, activitysocket)=> {
@@ -41,6 +45,10 @@ function start(api) {
     }
     // First parameter for error, next is JSON to be returned.
     returnJSON(false, json_be_returned);
+  },
+  // In case fail.
+  ()=>{
+    console.log('Auth Failed.');
   });
 
   // ServiceSocket.onData, in case client send data to this Service.
@@ -60,7 +68,7 @@ function start(api) {
     console.log(data);
   }
   // Send data to client.
-  ss.sendData('A entity ID', 'My data to be transfer.');
+  // ss.sendData('A entity ID', 'My data to be transfer.');
   // ServiceSocket.onConnect, in case on new connection.
   ss.onConnect = (entityID, callback) => {
     // Do something.
@@ -86,10 +94,9 @@ function start(api) {
 }
 
 // If the daemon stop, your service recieve close signal here.
-function close(api) {
+function close() {
   // Saving state of you service.
   // Please save and manipulate your files in this directory
-  let services_files_path = api.Me.FilesPath;
 }
 
 // Export your work for system here.

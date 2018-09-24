@@ -1,10 +1,11 @@
 {
   "name": "NoActivity",
   "version": "0.0.0",
-  "displayname": "Service fullname",
-  "description": "Service description",
+  "displayname": "NOOXY Activity",
+  "description": "An realtime activity monitor and logger for NSF.",
   "Authors": [
-    "Author"
+    "NOOXY",
+    "noowyee"
   ],
   "implementation_api": false,
   "dependencies": {
@@ -12,18 +13,19 @@
     "services": {}
   },
   "JSONfunciton_prototypes": {
-    "jfunc_name": {
-      "displayname": "JSONfunciton",
-      "description": "JSONfunciton description.",
-      "secure": false,
+    "get_activity": {
+      "displayname": "Get activity",
+      "description": "Get activity of specified user.",
+      "secure": true,
       "protocol": {
         "JSON_call": {
-          "p1": "parameter one",
-          "p2": "parameter two"
+          "u": "username"
         },
         "JSON_return": {
-          "p1": "parameter one",
-          "p2": "parameter two"
+          "c": "active entity count",
+          "d": {
+            "entitymeta1": "metadata1"
+          }
         }
       }
     }

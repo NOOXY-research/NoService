@@ -39,6 +39,7 @@
     "NoServiceManager",
     "NoNoti",
     "NoUser",
+    "NoActivity",
     "SimpleNoti"
   ],
 

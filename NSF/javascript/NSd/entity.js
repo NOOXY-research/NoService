@@ -57,7 +57,7 @@ function Entity() {
     _entities[entityID] = new EntityJson(entityID, entityJson, conn_profile);
     callback(err, entityID);
     for(let i in _callbacks['EntityCreated']) {
-      (_callbacks['EntityCreated'])[i](entityID);
+      (_callbacks['EntityCreated'])[i](entityID, entityJson);
     }
   };
 

@@ -1,5 +1,5 @@
 let Variables = {
-  'version': 'aphla-1',
+  'version': 'aphla-0.1.0',
   'NSP_version': 'aphla',
   'copyright': 'copyright(c)2018 NOOXY inc.',
   'default_user': {
