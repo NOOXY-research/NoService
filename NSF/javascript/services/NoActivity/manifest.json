@@ -1,0 +1,51 @@
+{
+  "name": "NoActivity",
+  "version": "0.0.0",
+  "displayname": "NOOXY Activity",
+  "description": "An realtime activity monitor and logger for NSF.",
+  "Authors": [
+    "NOOXY",
+    "noowyee"
+  ],
+  "implementation_api": false,
+  "dependencies": {
+    "node_packages": {},
+    "services": {}
+  },
+  "JSONfunciton_prototypes": {
+    "getActivity": {
+      "displayname": "Get activity",
+      "description": "Get activity of specified user.",
+      "secure": true,
+      "protocol": {
+        "JSON_call": {
+          "u": "username"
+        },
+        "JSON_return": {
+          "c": "active entity count",
+          "d": {
+            "entityid1": "metadata1"
+          }
+        }
+      }
+    },
+
+    "getOnline": {
+      "displayname": "Get Online",
+      "description": "Get online users list.",
+      "secure": true,
+      "protocol": {
+        "JSON_call": {
+        },
+        "JSON_return": {
+          "d": "list"
+        }
+      }
+    }
+  },
+  "settings": {
+    "entity_log": true,
+    "entity_log_simplify": false,
+    "protocol_log": true
+  }
+}

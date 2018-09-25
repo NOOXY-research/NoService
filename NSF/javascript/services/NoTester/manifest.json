@@ -1,0 +1,12 @@
+{
+  "name": "NoTester",
+  "version": "0.0.0",
+  "displayname": "tester",
+  "description": "no description",
+  "Authors": ["NOOXY", "noowyee"],
+  "implementation_api": false,
+  "dependencies": {
+    "node_packages": {},
+    "services": {}
+  }
+}

@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <!--
+    888b      88    ,ad8888ba,      ,ad8888ba,  8b        d8  8b        d8
+    8888b     88   d8"'    `"8b    d8"'    `"8b  Y8,    ,8P    Y8,    ,8P
+    88 `8b    88  d8'        `8b  d8'        `8b  `8b  d8'      Y8,  ,8P
+    88  `8b   88  88          88  88          88    Y88P         "8aa8"
+    88   `8b  88  88          88  88          88    d88b          `88'
+    88    `8b 88  Y8,        ,8P  Y8,        ,8P  ,8P  Y8,         88
+    88     `8888   Y8a.    .a8P    Y8a.    .a8P  d8'    `8b        88
+    88      `888    `"Y8888Y"'      `"Y8888Y"'  8P        Y8       88
+    -->
+    <title>NOOXY Service Signup</title>
+    <meta charset="UTF-8">
+    <meta name="description" content="NOOXY Service Signup">
+    <meta name="keywords" content="">
+    <meta name="author" content="Yves Chen, magneticchen">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link rel="stylesheet" href="auth.css">
+    <link href="https://fonts.googleapis.com/css?family=Quicksand" rel="stylesheet">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <script src="NSc.js"></script>
+    <script src="NoUser.js"></script>
+  </head>
+  <body>
+    <div class="auth-container">
+      <div class="auth-box">
+        <div class="auth-box-contain">
+          <div class="auth-box-contain-title">
+            <img class="img-in-text" src="nooxy.png" width="123" height="35">&nbsp;<h1>Service Signup</h1>
+          </div>
+          <p id="status">
+              Enter your information to signup your account.
+          </p>
+          <div class="">
+            <form id="signupform" class="auth-box-contain-form">
+              <div class="BLOCK" style="height:8px"></div>
+              <label for="signupform-username">User Name</label>
+              <input id="signupform-username" type="text" autofocus class="input-flat" placeholder="username" autocomplete="on">
+              <hr/>
+              <label for="signupform-firstname">First Name</label>
+              <input id="signupform-firstname" type="text" class="input-flat" placeholder="firstname" autocomplete="on">
+              <label for="signupform-lastname">Last Name</label>
+              <input id="signupform-lastname" type="text"class="input-flat" placeholder="lastname" autocomplete="on">
+              <hr/>
+              <label for="signupform-password">Password</label>
+              <input id="signupform-password" type="password" class="input-flat" placeholder="password" autocomplete="on">
+              <label for="signupform-passwordcomfirm">Password Comfirm</label>
+              <input id="signupform-passwordcomfirm" type="password" class="input-flat" placeholder="password" autocomplete="on">
+              <div class="BLOCK" style="height:8px"></div>
+              <input id="signupform-submit" type="submit" class="button-flat" value="signup"></input>
+            </form>
+          </div>
+          <div class="auth-box-contain-bottom">powered by <a href="https://github.com/NOOXY-research/NSF" target="_blank">NSF</a>(NOOXY Service Framework).</div>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>
