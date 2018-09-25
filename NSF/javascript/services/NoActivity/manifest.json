@@ -29,5 +29,10 @@
         }
       }
     }
+  },
+  "settings": {
+    "entitylog": true,
+    
+    "entitylog_simplify": false
   }
 }

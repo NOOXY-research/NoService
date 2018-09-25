@@ -2,9 +2,11 @@
 // Description:
 // "youservice/entry.js" description.
 // Copyright 2018 NOOXY. All Rights Reserved.
+'use strict';
 
 let files_path;
 let settings;
+const fs = require('fs');
 // Your service entry point
 function start(api) {
   // Get the service socket of your service
@@ -19,10 +21,33 @@ function start(api) {
   // Your settings in manifest file.
   settings = api.Me.Settings;
 
+  let user_entities = {};
   // Access another service on this daemon
-  let admin_daemon_asock = api.Service.ActivitySocket.createDefaultAdminDeamonSocket('Another Service', (err, activitysocket)=> {
-    // accessing other service
+  // let admin_daemon_asock = api.Service.ActivitySocket.createDefaultAdminDeamonSocket('Another Service', (err, activitysocket)=> {
+  //   // accessing other service
+  // });
+
+
+  api.Service.Entity.on('EntityCreated', (entityID, entitymeta)=>{
+    // save logs
+    if(settings.entitylog) {
+      let date = new Date();
+      date = date.toISOString().replace(/T/, ' ').replace(/\..+/, '') ;
+      let meta = [];
+      if(settings.entitylog_simplify) {
+        for(let key in entitymeta) {
+          meta.push(entitymeta[key]);
+        }
+      }
+      else {
+        meta = entitymeta;
+      }
+      fs.appendFile(files_path+'entity.log', '['+date+'] '+entityID+' '+JSON.stringify(meta, null, 0)+'\n', safec((err)=> {
+      if (err) throw err;
+      }));
+    }
   });
+
 
   // JSONfunction is a function that can be defined, which others entities can call.
   // It is a NOOXY Service Framework Standard

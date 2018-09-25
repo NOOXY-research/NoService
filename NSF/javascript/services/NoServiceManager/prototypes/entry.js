@@ -2,6 +2,7 @@
 // Description:
 // "youservice/entry.js" description.
 // Copyright 2018 NOOXY. All Rights Reserved.
+'use strict';
 
 let files_path;
 let settings;

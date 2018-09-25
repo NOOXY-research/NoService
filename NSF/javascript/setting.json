@@ -44,7 +44,7 @@
   ],
 
   "trusted_domains": [
-    "www.nooxy.tk",
+    "www.nooxy.org",
     "127.0.0.1",
     "0.0.0.0",
     "localhost"
