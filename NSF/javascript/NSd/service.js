@@ -717,6 +717,9 @@ function Service() {
   // Service files module Path
   this.setupServicesFilesPath = (path) => {
     _local_services_files_path = path;
+    if (!fs.existsSync(path)) {
+      fs.mkdirSync(path);
+    }
   };
 
   // Service module Owner
