@@ -36,7 +36,8 @@ Now, NSF can run on browser(javascript) and desktop(javascript). It also support
 9. Setting file
 
 ## NSF's Orientation
-1. Entities system(Services, Activities), each entities have it’s profile(with contain that showing attached user and user’s domain) for deciding should it be trusted. 2. User Orientation, User(in a daemon or a client) can create entities(activities, services). Entities and Users are both owned(registered) by NSd(NOOXY Service daemon) of particular domain.
+1. Entities system(Services, Activities), each entities have it’s profile(with contain that showing attached user and user’s domain) for deciding should it be trusted. 
+2. User Orientation, User(in a daemon or a client) can create entities(activities, services). Entities and Users are both owned(registered) by NSd(NOOXY Service daemon) of particular domain.
 3. Server(we call it “Services”) , client(we call it “Activities”) structure.
 4. Authorization API for Services. Services have responsibilities to protect their contains itself
 5. Module idea, “Everything based on service” concept.
@@ -91,7 +92,7 @@ Objective: To handle authoritative actions. Confirming the sensitive data or ope
 ### Crypto
 Objective: Providing AES, RSA, Hasing abilities for NSPS(NOOXY Service Protocol Secured).
 
-## Service, ServiceSocket and ServiceAPI
+## Service and Sockets
 ### Explaination of how service work
 Once the core of the NSF is started.
 The core of NSF will navigate the directories of “services” directory which is under the root of NSF files. And in that directory it will exist a file called “entry.js”. The figure below can help you understand the concept.
@@ -147,8 +148,152 @@ module.exports = {
 ```
 Beware that code in Service is ran as a superuser
 
+### Service socket and Activity socket
 
-### APIs
+#### Sending data
+Here is an example of sending data from service to client, client to service can be done by same way.
+
+In service
+``` nodejs
+// Your service's entry.js
+function start(api) {
+  // Get the service socket of your service
+  let ss = api.Service.ServiceSocket;
+  ss.onConnect = (entityID, callback) => {
+    // Send msg on connected entity.
+    ss.sendData(entityID, 'Hello world!');
+    callback(false);
+  }
+  
+}
+```
+In client(browser)
+``` javascript
+// In your browser
+let _NSc = new NSc();
+  _NSc.connect('HostIP', 'HostPort');
+  _NSc.createActivitySocket('MyService', (err, as)=>{
+    as.onData = (data) => {
+      console.log(data); // "Print Hello world!"
+    }
+  });
+```
+
+#### JSON function(recommended)
+JSON function is a framework for self-defined protocol that with "json datastructure" and "request, response" style. It is included by NOOXY service framework. And with JSON function NOOXY shell service can natively support the command that call your service.
+Note that the function name should be short as possible. Since it will be sent in NSP(NOOXY service protocol).
+
+In client(browser)
+JSON function called by client
+``` javascript
+// In your browser
+let _NSc = new NSc();
+  _NSc.connect('HostIP', 'HostPort');
+  _NSc.createActivitySocket('MyService', (err, as)=>{
+      // 2nd parameter is for function input
+      as.call('Hello', {d:'I am client.'}, (err, json)=>{
+        if(err) {
+          console.log(err);
+        }
+        else {
+          console.log(json.d); // Print "Hello! NOOXY Service Framework!""
+        }
+      });
+      
+      as.call('HelloSecured', {d:'I am client.'}, (err, json)=>{
+        if(err) {
+          console.log(err);
+        }
+        else {
+          console.log(json.d); 
+          // Print "Hello! NOOXY Service Framework! Secured." If is admin.
+        }
+      });
+  });
+  
+```
+
+JSON function defined in service
+``` nodejs
+// Your service's entry.js
+function start(api) {
+  // Normally define a JSONfunction
+  ss.def('Hello', (json, entityID, returnJSON)=>{
+    console.log(json.d); // Print "I am client.".
+    let json_be_returned = {
+      d: 'Hello! NOOXY Service Framework!'
+    }
+    
+    returnJSON(false, json_be_returned);
+  });
+
+  // Safe define a JSONfunction. User should be admin.
+  ss.sdef('HelloSecured', (json, entityID, returnJSON)=>{
+    console.log(json.d); // Print "I am client.".
+    let json_be_returned = {
+      d: 'Hello! NOOXY Service Framework! Secured.'
+    }
+    // First parameter for error, next is JSON to be returned.
+    returnJSON(false, json_be_returned);
+  },
+  // In case fail.
+  ()=>{
+    console.log('Auth Failed.');
+  });
+  
+}
+```
+In order to well defined your protocol. It's sugesst to defined your protocol in manifest.json file. (optional)
+
+in your manifest.json:
+```JSON
+"JSONfunciton_prototypes": {
+    "Hello": {
+      "displayname": "Hello",
+      "description": "Hello description.",
+      "secure": false,
+      "protocol": {
+        "JSON_call": {
+          "d": "data from client"
+        },
+        "JSON_return": {
+          "d": "data from service"
+        }
+      }
+    },
+    
+    "HelloSecured": {
+      "displayname": "HelloSecured",
+      "description": "HelloSecured description.",
+      "secure": true,
+      "protocol": {
+        "JSON_call": {
+          "d": "data from client"
+        },
+        "JSON_return": {
+          "d": "data from service"
+        }
+      }
+    }
+  },
+```
+### Authorization API
+In case that the service that user acesses might be sensitive. You can call many kinds of api to protect your data.
+
+For example:
+``` nodejs
+// Token can vertify that the userA is that true userA.
+api.Authorization.Authby.Token(entityID, (err, pass)=>{
+  if(pass) {
+      // what ever you want.
+  }
+  else {
+      // failed.
+  }
+}
+```
+
+## APIs
   api.Utils.returnPassword(prompt)\
   api.Utils.returnJSONfromFile(filename)\
   api.Utils.printLOGO(version, copyright)\
