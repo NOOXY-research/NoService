@@ -111,7 +111,7 @@ The core of NSF will navigate the directories of “services” directory which 
       |--(settings.json)
 ```
 After the core finish navigating the directories under “services”. It will call the entry.js and call it’s function “start()” and pass API parameter in to start() function. Below show how the “entry.js” file might be.
-``` nodejs
+``` javascript
 // NSF/services/youservice/entry.js
 // Description:
 // "youservice/entry.js" description.
@@ -154,7 +154,7 @@ Beware that code in Service is ran as a superuser
 Here is an example of sending data from service to client, client to service can be done by same way.
 
 In service
-``` nodejs
+``` javascript
 // Your service's entry.js
 function start(api) {
   // Get the service socket of your service
@@ -214,7 +214,7 @@ let _NSc = new NSc();
 ```
 
 JSON function defined in service
-``` nodejs
+``` javascript
 // Your service's entry.js
 function start(api) {
   // Normally define a JSONfunction
@@ -281,7 +281,7 @@ in your manifest.json:
 In case that the service that user acesses might be sensitive. You can call many kinds of api to protect your data.
 
 For example:
-``` nodejs
+``` javascript
 // Token can vertify that the userA is that true userA.
 api.Authorization.Authby.Token(entityID, (err, pass)=>{
   if(pass) {
