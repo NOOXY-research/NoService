@@ -148,6 +148,17 @@ module.exports = {
 ```
 Beware that code in Service is ran as a superuser
 
+### Creating a service
+launch NSF
+``` sh
+node launch.js
+```
+
+type command
+``` 
+service create "Your Service name"
+```
+
 ### Service socket and Activity socket
 
 #### Sending data
