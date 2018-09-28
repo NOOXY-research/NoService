@@ -114,6 +114,7 @@ function NSc() {
           tag = ' ' + tag;
         }
       }
+      console.log('['+tag+'] '+logstring.replaceAll('\n', '\n['+tag+'] '));
     },
     generateUniqueID: () => {
       return '_' + Math.random().toString(36).substr(2, 9);

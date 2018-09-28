@@ -3,6 +3,12 @@
 // "youservice/entry.js" description.
 // Copyright 2018 NOOXY. All Rights Reserved.
 
+let NoTalk = require('./NoTalk');
+let fs = require('fs');
+
+let files_path;
+let notalk = new NoTalk();
+
 // Your service entry point
 function start(api) {
   // Get the service socket of your service
@@ -16,7 +22,7 @@ function start(api) {
   let files_path = api.Me.FilesPath;
 
   // Access another service on this daemon
-  let admin_daemon_asock = api.Servcie.ActivitySocket.createDefaultAdminDeamonSocket('Another Service', (err, activitysocket)=> {
+  let admin_daemon_asock = api.Service.ActivitySocket.createDefaultAdminDeamonSocket('Another Service', (err, activitysocket)=> {
     // accessing other service
   });
 

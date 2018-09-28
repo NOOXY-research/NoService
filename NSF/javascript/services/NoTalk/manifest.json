@@ -58,14 +58,12 @@
         "JSON_call": {
           "c": "Channel's ID.",
           "s": "Start row of data from the channel.",
-          "e": "End row of data from the channel.",
+          "e": "End row of data from the channel."
         },
         "JSON_return": {
           "s": "Status.",
           "e": "Error status.",
-          "r": [
-            ["row number", "type", "data"]
-          ]
+          "r": ["row number", "type", "data"]
         }
       }
     },
@@ -92,8 +90,7 @@
       "description": "List channels of the user have.",
       "secure": false,
       "protocol": {
-        "JSON_call": {
-        },
+        "JSON_call": null,
         "JSON_return": {
           "s": "Status.",
           "e": "Error status."
