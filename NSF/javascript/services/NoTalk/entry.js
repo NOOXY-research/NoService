@@ -56,7 +56,7 @@ function start(api) {
   }
 
   // ServiceSocket.onClose, in case connection close.
-  ss.onClose = (entityID) => {
+  ss.onClose = (entityID, callback) => {
     // Get Username and process your work.
     let username = api.Service.Entity.returnEntityOwner(entityID);
     // To store your data and associated with userid INSEAD OF USERNAME!!!
@@ -67,7 +67,14 @@ function start(api) {
       userid = id;
     });
     // process you operation here
-    console.log('ServiceSocket closed');
+    callback(false);
+  }
+
+  ss.onConnect = (entityID, callback) => {
+    // Do something.
+    // report error;
+    ss.sendData(entityID, 'A messege from service.');
+    callback(false);
   }
 }
 

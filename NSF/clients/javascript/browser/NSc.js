@@ -13,6 +13,10 @@ function NSc() {
     secure: true
   };
 
+  this.setDebug = (boo)=>{
+    settings.debug = boo;
+  }
+
   String.prototype.replaceAll = function(search, replacement) {
       var target = this;
       return target.split(search).join(replacement);
@@ -1135,6 +1139,10 @@ function NSc() {
       _connection_module.createClient(conn_method, remoteip, port, callback);
     }
 
+    this.getDefaultClientConnProfile = (callback) => {
+      _connection_module.createClient(settings.connmethod, settings.targetip, settings.targetport, callback);
+    }
+
     this.importConnectionModule = (connection_module) => {
       _connection_module = connection_module;
     };
@@ -1391,6 +1399,9 @@ function NSc() {
 
       _implementation.setImplement('setUser', (err, username)=>{
         Utils.setCookie('NSUser', username, 365);
+        if(!username) {
+          Utils.eraseCookie('NSUser');
+        }
       });
 
       _implementation.setImplement('logout', (err, Username)=>{
