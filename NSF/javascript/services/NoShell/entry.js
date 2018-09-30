@@ -298,9 +298,24 @@ function start(api) {
       user: (t0, c0) => {
         _(t0, {
           meta: (t1, c1) => {
-            api.Authenticity.getUserMeta(t1[0], (err, meta)=>{
-              c1(false, {r:JSON.stringify(meta, null, 2)});
+            api.Service.ActivitySocket.createDefaultDeamonSocket('NoUser', t1[0], (err, as)=> {
+              if(err) {
+                c1(false, {r:err});
+              }
+              else {
+                as.call('returnUserMeta', null, (err, json)=>{
+                  if(err) {
+                    c1(false, {r:err});
+                  }
+                  else {
+                    c1(false, {r:JSON.stringify(json, null, 2)});
+                  }
+                });
+              }
             });
+            // api.Authenticity.getUserMeta(t1[0], (err, meta)=>{
+            //   c1(false, {r:JSON.stringify(meta, null, 2)});
+            // });
           },
 
           chpasswd: (t1, c1) => {
