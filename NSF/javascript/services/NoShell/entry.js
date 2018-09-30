@@ -108,8 +108,11 @@ function start(api) {
           '  jfunc {target service} {target jfunc} {JSON} ---Call a JSONfunction as admin.\n'+
           '[auth]\n'+
           '  auth emit [password|token] {entityID}  ---Emit authorization proccess to targeted entity.\n'+
+          '  auth updatetoken {username}  ---Update a users\' token.\n'+
           '[user]\n'+
           '  user create {username} {displayname} {password} {comfirm} {detail} {firstname} {lastname} ---Create a NOOXY user.\n'+
+          '  user chpasswd {username} {password}  ---Change a user\'s password.\n'+
+          '  user meta {username}  ---Get a user\'s detail.\n'+
           '[me]\n'+
           '  me\n'+
           '  me [entitymeta|chpasswd|usermeta|updatetoken]\n'+
@@ -294,6 +297,18 @@ function start(api) {
 
       user: (t0, c0) => {
         _(t0, {
+          meta: (t1, c1) => {
+            api.Authenticity.getUserMeta(t1[0], (err, meta)=>{
+              c1(false, {r:JSON.stringify(meta, null, 2)});
+            });
+          },
+
+          chpasswd: (t1, c1) => {
+            api.Authenticity.updatePassword(t1[0], t1[1],(err)=>{
+              c1(false, {r:'Error->'+err});
+            })
+          },
+
           create: (t1, c1) => {
             api.Service.ActivitySocket.createDefaultAdminDeamonSocket('NoUser', (err, as)=> {
               if(err) {
@@ -312,6 +327,11 @@ function start(api) {
 
       auth: (t0, c0) => {
         _(t0, {
+          updatetoken: (t1, c1) => {
+            api.Authenticity.updateToken(t1[0], (err)=>{
+              c1(false, {r:'Error->'+err});
+            })
+          },
           emit: (t1, c1) => {
             _(t1, {
               password: (t2, c2) => {
