@@ -149,7 +149,8 @@ function Core(settings) {
             Implementation: _implementation,
             NoCrypto: _nocrypto,
             NSPS: _nsps,
-            Daemon: _daemon
+            Daemon: _daemon,
+            Variables: Vars
           };
         verbose('Daemon', 'Creating coregateway done.')
       // trust myself

@@ -45,6 +45,7 @@ function ServiceAPI() {
     let _api = new _prototype();
     _api.Utils = require('./utilities');
     _api.SafeCallback = _safe_callback;
+    _api.Variables = _coregateway.Variables;
     _api.Service = {
       ActivitySocket: {
         createSocket: (method, targetip, targetport, service, owner, callback) => {
@@ -171,7 +172,7 @@ function ServiceAPI() {
       },
 
       updatePrivilege: (username, privilege, callback) => {
-        _coregateway.Authenticity.updatePrivilege(usernamem, privilege, _safe_callback(callback));
+        _coregateway.Authenticity.updatePrivilege(username, privilege, _safe_callback(callback));
       },
 
       updateName: (username, firstname, lastname, callback) => {

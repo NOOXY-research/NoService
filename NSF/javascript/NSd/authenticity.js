@@ -327,8 +327,15 @@ function Authenticity() {
 
   this.updatePrivilege = (username, privilege, callback) => {
     _authdb.getUser(username, (err, user)=>{
-      user.privilege = privilege;
-      user.updatesql(callback);
+      if(user.exisitence&&Number.isInteger(parseInt(privilege))) {
+
+        user.privilege = parseInt(privilege);
+        user.updatesql(callback);
+      }
+      else {
+        let err = new Error("User not existed or privilege level is not a Int.");
+        callback(err);
+      }
     });
   };
 

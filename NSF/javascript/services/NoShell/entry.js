@@ -96,31 +96,41 @@ function start(api) {
         c0(false, {r:
           '[daemon]\n'+
           '  daemon [settings|stop]\n'+
+          '\n'+
           '[service]\n'+
           '  service [list|[manifest|create] {service name}]\n'+
           '  service [jfunclist|jfuncdict|jfuncshow] {target service}\n'+
           '  service jfunc {target service} {target username} {target jfunc} {JSON} ---Call a JSONfunction as target user.\n'+
           '  service entity [show {entityID}|list|count|showuser {username}]\n'+
+          '\n'+
           '[activity]\n'+
           '  activity [listuser|showuser {username}]\n'+
+          '\n'+
           // '  log [entity|protocol] {last N line of log}\n'+
           '[jfunc]\n'+
           '  jfunc {target service} {target jfunc} {JSON} ---Call a JSONfunction as admin.\n'+
+          '\n'+
           '[auth]\n'+
           '  auth emit [password|token] {entityID}  ---Emit authorization proccess to targeted entity.\n'+
-          '  auth updatetoken {username}  ---Update a users\' token.\n'+
+          '  auth updatetoken {username}  ---Update a user\'s token.\n'+
+          '  auth updateprivilege {username} {value} ---Update a user\'s privilege.\n'+
+          '\n'+
           '[user]\n'+
           '  user create {username} {displayname} {password} {comfirm} {detail} {firstname} {lastname} ---Create a NOOXY user.\n'+
           '  user chpasswd {username} {password}  ---Change a user\'s password.\n'+
           '  user meta {username}  ---Get a user\'s detail.\n'+
+          '\n'+
           '[me]\n'+
           '  me\n'+
           '  me [entitymeta|chpasswd|usermeta|updatetoken]\n'+
+          '\n'+
           '[noti]\n'+
           '  noti ---NOOXY notification\n'+
+          '\n'+
           '[others]\n'+
           '  echo {keyword|text} ---Echo plain text.\n'+
           '  help ---This menu.\n'+
+          '\n'+
           'Keywords: \n'+
           '  Me -> your entityID.'
         });;
@@ -344,6 +354,24 @@ function start(api) {
 
       auth: (t0, c0) => {
         _(t0, {
+          updateprivilege: (t1, c1) => {
+            if(t1[0] == api.Variables.default_user.username) {
+              c1(false, {r:'You should not change "'+api.Variables.default_user.username+'"\'s privilege.'});
+            }
+            else {
+              api.Authorization.Authby.Password(entityID, (err, pass)=>{
+                if(pass) {
+                  api.Authenticity.updatePrivilege(t1[0], t1[1], (err)=>{
+                    c1(false, {r:'Error->'+err});
+                  })
+                }
+                else {
+                  c1(false, {r:'Auth failed.'});
+                }
+              });
+            }
+
+          },
           updatetoken: (t1, c1) => {
             api.Authenticity.updateToken(t1[0], (err)=>{
               c1(false, {r:'Error->'+err});
