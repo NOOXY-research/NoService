@@ -306,9 +306,11 @@ function start(api) {
                 as.call('returnUserMeta', null, (err, json)=>{
                   if(err) {
                     c1(false, {r:err});
+                    as.close();
                   }
                   else {
                     c1(false, {r:JSON.stringify(json, null, 2)});
+                    as.close();
                   }
                 });
               }
