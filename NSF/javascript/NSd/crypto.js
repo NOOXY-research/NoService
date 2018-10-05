@@ -11,44 +11,50 @@ function NSPS() {
   let _rsa_priv = null;
   let _resumes = {};
   let _crypto_module = null;
+  let _operation_timeout = 60; // seconds
+
+  this.importOperationTimeout = (timeout) => {
+    _operation_timeout = timeout;
+  };
 
   this.emitRouter = () => {console.log('[*ERR*] emit not implemented');};
 
   // daemon side
   this.RsRouter = (connprofile, data) => {
     let resume = _resumes[connprofile.returnGUID()];
-    try{
-      _crypto_module.decryptString('RSA2048', _rsa_priv, data, (err, decrypted) => {
-        let json = null;
-        try {
-          json = JSON.parse(decrypted);
+    if(resume) {
+      try{
+        _crypto_module.decryptString('RSA2048', _rsa_priv, data, (err, decrypted) => {
+          let json = null;
+          try {
+            json = JSON.parse(decrypted);
 
-          let host_rsa_pub = _rsa_pub;
-          let client_random_num = json.r;
-          _crypto_module.generateAESCBC256KeyByHash(host_rsa_pub, client_random_num, (err, aes_key) => {
-            if(aes_key == json.a) {
-              connprofile.setBundle('aes_256_cbc_key', aes_key);
-              connprofile.setBundle('NSPS', true);
-              connprofile.setBundle('NSPSremote', true);
-              resume(err, true);
-            }
-            else {
-              resume(err, false);
-            }
+            let host_rsa_pub = _rsa_pub;
+            let client_random_num = json.r;
+            _crypto_module.generateAESCBC256KeyByHash(host_rsa_pub, client_random_num, (err, aes_key) => {
+              if(aes_key == json.a) {
+                connprofile.setBundle('aes_256_cbc_key', aes_key);
+                connprofile.setBundle('NSPS', true);
+                connprofile.setBundle('NSPSremote', true);
+                resume(err, true);
+              }
+              else {
+                resume(err, false);
+              }
 
-          });
-        }
-        catch (err) {
-          resume(true, false);
-        }
-      });
-    }
-    catch(er) {
-      console.log(er);
-      connprofile.closeConnetion();
-      resume(true, false);
-    }
-
+            });
+          }
+          catch (err) {
+            resume(true, false);
+          }
+        });
+      }
+      catch(er) {
+        console.log(er);
+        connprofile.closeConnetion();
+        resume(true, false);
+      }
+    };
   };
 
   // Nooxy service protocol sercure request ClientSide
@@ -72,6 +78,11 @@ function NSPS() {
 
   this.upgradeConnection = (connprofile, callback) => {
     _resumes[connprofile.returnGUID()] = callback;
+    // operation timeout
+    setTimeout(()=>{
+      delete _resumes[connprofile.returnGUID()];
+    }, _operation_timeout*1000);
+
     let _data = {
       p: _rsa_pub// RSA publicKey
     };
@@ -124,13 +135,13 @@ function NoCrypto() {
     // Keys is in pem format
     RSA2048: {
       encryptString: (publicKey, toEncrypt, callback) => {
-        var buffer = new Buffer.from(toEncrypt);
-        var encrypted = crypto.publicEncrypt(publicKey, buffer);
+        let buffer = new Buffer.from(toEncrypt);
+        let encrypted = crypto.publicEncrypt(publicKey, buffer);
         callback(false, encrypted.toString("base64"));
       },
       decryptString: (privateKey, toDecrypt, callback) => {
-        var buffer = new Buffer.from(toDecrypt, "base64");
-        var decrypted = crypto.privateDecrypt(privateKey, buffer);
+        let buffer = new Buffer.from(toDecrypt, "base64");
+        let decrypted = crypto.privateDecrypt(privateKey, buffer);
         callback(false, decrypted.toString("utf8"));
       }
     },

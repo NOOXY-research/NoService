@@ -36,7 +36,7 @@ function Router() {
 
   // a convinient function fo sending data
   let _senddata = (connprofile, method, session, data) => {
-    var wrapped = {
+    let wrapped = {
       m : method,
       s : session,
       d : data

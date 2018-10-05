@@ -2,6 +2,7 @@
 // Description:
 // "NoShell/entry.js" is a NSF Shell service.
 // Copyright 2018 NOOXY. All Rights Reserved.
+'use strict';
 
 function start(api) {
   let ss = api.Service.ServiceSocket;
@@ -9,7 +10,7 @@ function start(api) {
   let sniffonRAW = false;
 
   api.Sniffer.onRouterJSON((err, json)=>{
-    j = JSON.stringify(json, null, 2);
+    let j = JSON.stringify(json, null, 2);
     if(sniffonJSON) {
       try {
         api.Service.Entity.getfliteredEntitiesList("service=NoShell", (err, list)=>{

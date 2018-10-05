@@ -67,7 +67,7 @@ function Authorization() {
   let _trusted_domains = [];
   let _authe_module = null;
   let _entity_module = null;
-  let _auth_timeout = 320;
+  let _auth_timeout = 180;
   let _daemon_auth_key = null;
   let _queue_operation = {};
 
@@ -77,6 +77,7 @@ function Authorization() {
     try {
       let op = _queue_operation[data.d.t];
       op(connprofile, data);
+      delete _queue_operation[data.d.t];
     }
     catch (e) {
       console.log(e);
@@ -135,7 +136,7 @@ function Authorization() {
             }
             _queue_operation[data.d.t] = op;
             // set the timeout of this operation
-            setTimeout(() => {delete _queue_operation[data.d.t]}, _auth_timeout*1000);
+            setTimeout(() => {if(_queue_operation[data.d.t]) {delete _queue_operation[data.d.t]}}, _auth_timeout*1000);
             this.emitRouter(connprofile, 'AU', data);
           });
         });
@@ -184,6 +185,7 @@ function Authorization() {
               setTimeout(() => {delete _queue_operation[data.d.t]}, _auth_timeout*1000);
               this.emitRouter(connprofile, 'AU', data);
             };
+
             let tk = connprofile.returnBundle('NSToken');
             if(tk != null) {
               _authe_module.TokenisValid(user, tk, (err, isValid) => {

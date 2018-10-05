@@ -76,7 +76,11 @@ function Core(settings) {
     let launchwrap = ()=>{
       Utils.printLOGO(Vars.version, Vars.copyright);
 
-      process.title = 'NSF-daemon';
+      process.title = settings.daemon_name;
+
+      if (process.pid) {
+        verbose('Daemon', 'Process Id: ' + process.pid);
+      }
       // initialize variables
       // verbose('Daemon', 'Initializing variables.')
       // // let _connection = null;
@@ -171,6 +175,7 @@ function Core(settings) {
       // setup NOOXY Service protocol secure
       _nsps.importRSA2048KeyPair(fs.readFileSync(settings.rsa_2048_priv_key, 'utf8'), fs.readFileSync(settings.rsa_2048_pub_key, 'utf8'));
       _nsps.importCryptoModule(_nocrypto);
+      _nsps.importOperationTimeout(settings.operations_timeout);
       // setup router
       _router.importCore(coregateway);
 
@@ -184,7 +189,7 @@ function Core(settings) {
         _connection.importSSLCert(certificate);
       }
 
-      for(var server in settings.connection_servers) {
+      for(let server in settings.connection_servers) {
         _connection.addServer(settings.connection_servers[server].type,
            settings.connection_servers[server].ip, settings.connection_servers[server].port);
       }

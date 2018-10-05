@@ -1,7 +1,7 @@
 {
   "name": "NSF",
   "version": "0.0.0",
-  "description": "no description",
+  "description": "NOOXY Service Framework",
   "private": true,
   "dependencies": {
     "sqlite3": "^4.0.1",

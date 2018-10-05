@@ -10,7 +10,6 @@ let Utils = require('./utilities');
 function Service() {
   // need add service event system
   let _local_services = {};
-  let _activities = {};
   let _local_services_path = null;
   let _local_services_files_path = null;
   let _local_services_owner = null;
@@ -21,6 +20,8 @@ function Service() {
   let _daemon_auth_key = null;
   let _ASockets = {};
   let _debug = false;
+
+  let ActivitySocketDestroyTimeout = 1000;
 
   this.setDebug = (boolean) => {
     _debug = boolean;
@@ -97,6 +98,9 @@ function Service() {
       else {
         for(let i in _entitiesID) {
           _ASockets[_entitiesID[i]].onClose();
+          setTimeout(()=>{
+            delete _ASockets[_entitiesID[i]];
+          }, ActivitySocketDestroyTimeout);
         }
         callback(false);
       }
@@ -538,7 +542,7 @@ function Service() {
     this.close = () => {
       let op = ()=> {
         let bundle = conn_profile.returnBundle('bundle_entities');
-        for (var i=bundle.length-1; i>=0; i--) {
+        for (let i=bundle.length-1; i>=0; i--) {
           if (bundle[i] === _entity_id) {
               bundle.splice(i, 1);
           }
