@@ -252,7 +252,9 @@ function ServiceAPI() {
     _get_normal_api((err, api) => {
       // console.log(api);
       api.Service.ServiceSocket = service_socket;
-      api.Implementation = _coregateway.Implementation;
+      api.getImplementation = (callback)=>{
+        callback(false, _coregateway.Implementation);
+      };
       api.getMe = (callback)=>{
         callback(false, {
           Settings: manifest.settings,

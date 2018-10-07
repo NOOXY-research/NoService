@@ -133,6 +133,10 @@ function Implementation() {
     return _implts[name];
   };
 
+  this.getImplement = (name, callback) => {
+    callback(false, _implts[name]);
+  };
+
   this.returnImplementBundle = () => {
     return _implts;
   };

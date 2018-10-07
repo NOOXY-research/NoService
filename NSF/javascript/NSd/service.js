@@ -76,6 +76,7 @@ function Service() {
   this.onConnectionClose = (connprofile, callback) => {
 
     let _entitiesID = connprofile.returnBundle('bundle_entities');
+    console.log(connprofile.returnRemotePosition(), _entitiesID);
     if(_entitiesID == null) {
       callback(true);
     }
@@ -98,6 +99,7 @@ function Service() {
         callback(false);
       }
       else {
+
         for(let i in _entitiesID) {
           _ASockets[_entitiesID[i]].onClose();
           setTimeout(()=>{
@@ -551,7 +553,7 @@ function Service() {
         }
         conn_profile.setBundle('bundle_entities', bundle);
         if(bundle.length == 0) {
-          _conn_profile.closeConnetion();
+          conn_profile.closeConnetion();
         }
       }
       exec(op);

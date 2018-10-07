@@ -6,21 +6,23 @@
 // Parent message protocol
 // message.t
 // 0 worker established {t, a: api tree, p: service module path}
-// 1 callback {t, p: parameters, i: callback_id, o:{arg_index, [obj_id, callback_tree]}}
+// 1 callback {t, p: [obj_id, callback_path], a: arguments, o:{arg_index, [obj_id, callback_tree]}}
 
 'use strict';
 
 const fork = require('child_process').fork;
-const Utils = require('./utilities')
+const Utils = require('./utilities');
 process.title = 'NSF_worker';
 
 function WorkerClient() {
-  let _local_callbacks = {};
+  let _local_obj_callbacks_dict = {};
   let _service_module = null;
+  let _api;
+  let _clear_obj_garbage_timeout = 3000;
 
-  let createLocalCallback = (callback)=> {
+  let createLocalObjCallbacks = (obj)=> {
     let _Id = Utils.generateUniqueID();
-    _local_callbacks[_Id] = callback;
+    _local_callbacks[_Id] = obj;
     return _Id;
   };
 
@@ -33,37 +35,39 @@ function WorkerClient() {
 
   };
 
-  const callParentAPI = (APIpath, args) => {
+  const callParentAPI = ([id, APIpath], args) => {
     let _data = {
       t: 1,
       p: APIpath,
       a: args,
-      c: {}
+      o: {}
     };
     for(let i in args) {
-      if(typeof(args[i])=='function') {
-        _data.c[i] = createLocalCallback(args[i]);
+      if(Utils.hasFunction(args[i])) {
+        let _Id = Utils.generateUniqueID();
+        _local_obj_callbacks_dict[_Id] = args[i];
+        _data.o[i] = [_Id, Utils.generateObjCallbacksTree(args[i])];
       }
     }
     process.send(_data);
   }
 
-  const generateAPI = (apilist) => {
-    let deeper = (subapi, api_path_list)=> {
-      if(typeof(subapi) == 'object' && subapi!=null) {
-        for(let key in subapi) {
-          subapi[key]=deeper(subapi[key], api_path_list.concat([key]));
-        }
-      }
-      else {
-        subapi = (...args)=> {
-          callParentAPI(api_path_list, args)
-        };
-      }
-      return subapi;
+  this.emitParentCallback = ([obj_id, path], args) => {
+    let _data = {
+      t: 2,
+      p: [obj_id, path],
+      a: args,
+      o: {}
     }
 
-    return deeper(apilist, [])
+    for(let i in args) {
+      if(Utils.hasFunction(args[i])) {
+        let _Id = Utils.generateUniqueID();
+        _local_obj_callbacks_dict[_Id] = args[i];
+        _data.o[i] = [_Id, Utils.generateObjCallbacksTree(args[i])];
+      }
+    }
+    process.send(_data);
   }
 
   process.on('message', message => {
@@ -75,14 +79,27 @@ function WorkerClient() {
     if(message.t == 0) {
       process.title = 'NSF_worker: '+message.p;
       _service_module = require(message.p);
-      let api = generateAPI(message.a);
-      api.getMe((err, Me)=>{
-        _service_module.start(Me, api);
+      _api = Utils.generateObjCallbacks(_api, message.a, callParentAPI);
+      _api.getMe((err, Me)=>{
+        // add api
+        _api.SafeCallback = (callback) => {
+          return (...args) => {
+            try {
+              callback.apply(null, args);
+            }
+            catch (err) {
+              Utils.tagLog('*ERR*', 'Service API occured error. Please restart daemon.');
+              console.log(err);
+            }
+          }
+        };
+        _api.Utils = Utils;
+        _service_module.start(Me, _api);
       });
     }
     // function return
     else if(message.t == 1) {
-      onLocalCallback(message.i, message.p);
+      Utils.callObjCallback(_local_obj_callbacks_dict[message.p[0]], message.p[1], message.a, message.o, this.emitParentCallback);
     }
     else {
 

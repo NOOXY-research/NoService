@@ -7,85 +7,71 @@
 // Client message protocol
 // message.t
 // 0 worker established {t}
-// 1 api call {t, p, a: arguments, c:{arg_index, callback_id}}
-// 2 accessobj {t, p, a: arguments, c:{arg_index, callback_id}}
+// 1 api call {t, p, a: arguments, o:{arg_index, [obj_id, callback_tree]}}
+// 2 accessobj {t, p, a: arguments, o:{arg_index, [obj_id, callback_tree]}}
 
 'use strict';
 
 const {fork} = require('child_process');
+const Utils = require('./utilities');
 
 function WorkerDaemon() {
   let _worker_clients = [];
-  let _local_obj_callbacks = {};
   let _close_worker_timeout = 3000;
+  let _clear_obj_garbage_timeout = 10000;
+  let _local_obj_callbacks_dict = {};
 
-  const generateAPITree = (api_raw) => {
-    let deeper = (subapi)=> {
-      let api_tree = {};
-      if(typeof(subapi) == 'object') {
-        for(let key in subapi) {
-          api_tree[key] = deeper(subapi[key]);
-        }
-      }
-      else {
-        api_tree = null;
-      }
-      return api_tree;
-    }
-
-    return deeper(api_raw)
-  }
+  // garbage cleaning
+  setInterval(()=>{
+    console.log('---------');
+    console.log(_local_obj_callbacks_dict);
+    console.log('---------', Object.keys(_local_obj_callbacks_dict).length)
+  }, _clear_obj_garbage_timeout);
 
   function WorkerClient(path) {
     let _serviceapi = null;
     let child = null;
 
-    this.callChildCallback = (callback_id, args) => {
-      console.log(callback_id);
+    this.emitChildCallback = ([obj_id, path], args) => {
       let _data = {
-        t: 1
+        t: 1,
+        p: [obj_id, path],
+        a: args,
         o: {}
       }
 
-      let createLocalCallback = (callback)=> {
-        let _Id = Utils.generateUniqueID();
-        _local_callbacks[_Id] = callback;
-        return _Id;
-      };
-
       for(let i in args) {
-        if(typeof(args[i])=='function') {
-          _data.o[i] = createLocalCallback(args[i]);
+        if(Utils.hasFunction(args[i])) {
+          let _Id = Utils.generateUniqueID();
+          _local_obj_callbacks_dict[_Id] = args[i];
+          if(typeof(args[i])=='function') {
+            _local_obj_callbacks_dict[_Id] = (...a)=>{
+              args[i].apply(null, a);
+              delete _local_obj_callbacks_dict[_Id];
+            };
+          }
+          else {
+            _local_obj_callbacks_dict[_Id] = args[i];
+          }
+          _data.o[i] = [_Id, Utils.generateObjCallbacksTree(args[i])];
         }
       }
-      child.send({t:1, p: args, i: callback_id});
+      child.send(_data);
     }
 
-    this.callAPI = (APIpath, args, callbacks)=> {
-      let getTargetAPI = (path, subapi)=> {
-        if(path.length) {
-          return getTargetAPI(path.slice(1), subapi[path[0]]);
-        }
-        else {
-          return subapi;
-        }
-      }
-
-      for(let i in callbacks) {
-        args[i] = (...args2)=> {
-          this.callChildCallback(callbacks[i], args2);
-        }
-      }
-      let f = getTargetAPI(APIpath, _serviceapi);
-      f.apply(null, args);
+    this.callAPICallback = (APIpath, args, arg_objs_trees)=> {
+      Utils.callObjCallback(_serviceapi, APIpath, args, arg_objs_trees, this.emitChildCallback);
     }
 
     this.onMessage = (message)=>{
       if(message.t == 0) {
-        child.send({t:0, p: path, a: generateAPITree(_serviceapi)});
+        child.send({t:0, p: path, a: Utils.generateObjCallbacksTree(_serviceapi)});
       }
       else if(message.t == 1) {
-        this.callAPI(message.p, message.a, message.c);
+        this.callAPICallback(message.p, message.a, message.o);
+      }
+      else if(message.t == 2) {
+        Utils.callObjCallback(_local_obj_callbacks_dict[message.p[0]], message.p[1], message.a, message.o, this.emitChildCallback);
       }
     };
 

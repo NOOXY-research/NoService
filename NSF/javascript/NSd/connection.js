@@ -108,7 +108,7 @@ function Connection(options) {
           return _types[type];
         }
         this.close = () => {Utils.tagLog('*ERR*', 'VirtualSocket onClose not implemented. Of '+this.type)};
-        this.on = (type, callback)=>{_types[type] = callback;};
+        this.on = (type, callback)=> {_types[type] = callback;};
         this.emit = (type, d) =>{
           let _exe = _returntype(type);
           if(d) {
@@ -137,10 +137,12 @@ function Connection(options) {
 
       _vcs.close = (msg) => {
         _vss.emit('close');
+        _vcs.emit('close');
         selfdestruct();
       };
 
       _vss.close = (msg) => {
+        _vss.emit('close');
         _vcs.emit('close');
         selfdestruct();
       };
@@ -199,7 +201,6 @@ function Connection(options) {
       };
 
       this.close = () => {
-        vss.onclose();
         _virt_servers[rvirtip].ClientDisconnect(lvirtip);
       };
 
@@ -308,7 +309,7 @@ function Connection(options) {
 
       _ws.on('error', (error) => {
         Utils.tagLog('*WARN*', 'An error occured on connection module.');
-        Utils.tagLog('*WARN*', message);
+        Utils.tagLog('*WARN*', error);
         _ws.close();
         this.onClose(connprofile);
       });

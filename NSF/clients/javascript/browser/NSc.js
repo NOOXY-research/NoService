@@ -825,7 +825,7 @@ function NSc() {
             this.emitRouter(connprofile, 'CS', _data);
           }
           else {
-            delete   _ActivityRsCEcallbacks[data.d.t];
+            delete  _ActivityRsCEcallbacks[data.d.t];
           }
         }
       }

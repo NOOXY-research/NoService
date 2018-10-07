@@ -44,19 +44,23 @@ function Router() {
     let json = JSON.stringify(wrapped);
     // finally sent the data through the connection.
     if(connprofile) {
-      if(connprofile.returnBundle('NSPS') == true) {
-        _coregateway.NoCrypto.encryptString('AESCBC256', connprofile.returnBundle('aes_256_cbc_key'), json, (err, encrypted)=> {
-          _coregateway.Connection.send(connprofile, encrypted);
-        });
-      }
-      else if (connprofile.returnBundle('NSPS') == 'finalize') {
-        connprofile.setBundle('NSPS', true);
-        _coregateway.Connection.send(connprofile, json);
+      connprofile.getBundle('NSPS', (err, NSPS)=>{
+        if(NSPS == true) {
+          connprofile.getBundle('aes_256_cbc_key', (err, key)=>{
+            _coregateway.NoCrypto.encryptString('AESCBC256', key, json, (err, encrypted)=> {
+              _coregateway.Connection.send(connprofile, encrypted);
+            });
+          })
+        }
+        else if (NSPS == 'finalize') {
+          connprofile.setBundle('NSPS', true);
+          _coregateway.Connection.send(connprofile, json);
 
-      }
-      else {
-        _coregateway.Connection.send(connprofile, json);
-      }
+        }
+        else {
+          _coregateway.Connection.send(connprofile, json);
+        }
+      });
     }
   }
 
@@ -329,7 +333,13 @@ function Router() {
 
     _coregateway.Authenticity.emitRouter = this.emit;
     _coregateway.Service.emitRouter = this.emit;
-    _coregateway.Implementation.emitRouter = this.emit;
+    _coregateway.Implementation.emitRouter = (connprofile, data, data_sender)=>{
+      _coregateway.Connection.getClients((er, clients)=>{
+        connprofile.getGUID((er, id)=>{
+          this.emit(clients[id], data, data_sender);
+        });
+      });
+    };
     _coregateway.Implementation.sendRouterData = _senddata;
     _coregateway.Authorization.emitRouter = this.emit;
     _coregateway.NSPS.emitRouter = this.emit;

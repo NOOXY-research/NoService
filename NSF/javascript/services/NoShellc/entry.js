@@ -64,109 +64,113 @@ function start(Me, api) {
         callback(false, p);
       });
     }
+    api.getImplementation((err, Implementation)=>{
+      // setup NSF Auth implementation
+      Implementation.setImplement('signin', (connprofile, data, data_sender)=>{
+        console.log('Please signin your account.');
+        _get_password((err, p)=>{
+          let _data = {
+            u: _username,
+            p: p
+          }
+          _username = _data.u;
+          Implementation.emitRouter(connprofile, 'GT', _data);
+          commandread();
+        });
 
-    // setup NSF Auth implementation
-    api.Implementation.setImplement('signin', (connprofile, data, data_sender)=>{
-      console.log('Please signin your account.');
-      _get_password((err, p)=>{
-        let _data = {
-          u: _username,
-          p: p
-        }
-        _username = _data.u;
-        api.Implementation.emitRouter(connprofile, 'GT', _data);
-        commandread();
       });
 
-    });
-
-    // setup NSF Auth implementation
-    api.Implementation.setImplement('AuthbyToken', (connprofile, data, data_sender) => {
-      let callback = (err, token)=>{
-        let _data = {
-          m:'TK',
-          d:{
-            t: data.d.t,
-            v: token
-          }
-        }
-        data_sender(connprofile, 'AU', 'rs', _data);
-      };
-      if(_token == null) {
-        api.Implementation.returnImplement('signin')(connprofile, data, data_sender);
-      }
-      else {
-        callback(false, _token);
-      }
-
-    });
-
-    api.Implementation.setImplement('onToken', (err, token)=>{
-      _token = token;
-    });
-
-    api.Implementation.setImplement('AuthbyTokenFailed', (connprofile, data, data_sender) => {
-      api.Implementation.returnImplement('signin')(connprofile, data, data_sender);
-    });
-
-    // setup NSF Auth implementation
-    api.Implementation.setImplement('AuthbyPassword', (connprofile, data, data_sender) => {
-      let callback = (err, password)=>{
-        let _data = {
-          m:'PW',
-          d:{
-            t: data.d.t,
-            v: password
-          }
-        }
-        data_sender(connprofile, 'AU', 'rs', _data);
-      };
-      _get_password((err, p) => {
-        callback(err, p);
-      });
-    });
-
-    setTimeout(()=> {
-      let _manifest = Me.Manifest;
-      let _daemon_display_name = daemon_setting.daemon_display_name;
-      console.log(_manifest.displayname+' started.');
-      console.log(_manifest.description);
-      console.log('connecting to default server of daemon(nsp('+DAEMONTYPE+')://'+DAEMONIP+':'+DAEMONPORT+')...');
-      // console.log('To access '+_daemon_display_name+'. You need to auth yourself.');
-      // api.Implementation.returnImplement('signin')(DAEMONTYPE, DAEMONIP, DAEMONPORT, (err, token)=>{
-      //   if(err) {
-      //     console.log('Auth failed.');
-      //   }
-      //   _token = token;
-      rl.question('Login as: ', (uname)=> {
-        console.log('');
-        _username = uname;
-        let cmd = null;
-        api.Service.ActivitySocket.createSocket(DAEMONTYPE, DAEMONIP, DAEMONPORT, 'NoShell', _username, (err, as) => {
-          commandread = () => {
-            rl.question('>>> ', (cmd)=> {
-              if (cmd == 'exit') //we need some base case, for recursion
-                return rl.close(); //closing RL and returning from function.
-              as.call('sendC', {c: cmd}, (err, json)=>{
-                console.log(json.r);
-                commandread(); //Calling this function again to ask new question
-              });
-            });
-          };
-
-          console.log('connected.');
-          as.onData = (data) => {
-            if(data.t == 'stream') {
-              console.log(data.d);
+      // setup NSF Auth implementation
+      Implementation.setImplement('AuthbyToken', (connprofile, data, data_sender) => {
+        let callback = (err, token)=>{
+          let _data = {
+            m:'TK',
+            d:{
+              t: data.d.t,
+              v: token
             }
           }
-          as.call('welcome', null, (err, msg) => {
-            console.log(msg);
-
-            commandread();
+          data_sender(connprofile, 'AU', 'rs', _data);
+        };
+        if(_token == null) {
+          Implementation.getImplement('signin', (err, im)=>{
+            im(connprofile, data, data_sender);
           });
+        }
+        else {
+          callback(false, _token);
+        }
+
+      });
+
+      Implementation.setImplement('onToken', (err, token)=>{
+        _token = token;
+      });
+
+      Implementation.setImplement('AuthbyTokenFailed', (connprofile, data, data_sender) => {
+        Implementation.returnImplement('signin')(connprofile, data, data_sender);
+      });
+
+      // setup NSF Auth implementation
+      Implementation.setImplement('AuthbyPassword', (connprofile, data, data_sender) => {
+        let callback = (err, password)=>{
+          let _data = {
+            m:'PW',
+            d:{
+              t: data.d.t,
+              v: password
+            }
+          }
+          data_sender(connprofile, 'AU', 'rs', _data);
+        };
+        _get_password((err, p) => {
+          callback(err, p);
         });
       });
+
+      setTimeout(()=> {
+        let _manifest = Me.Manifest;
+        let _daemon_display_name = daemon_setting.daemon_display_name;
+        console.log(_manifest.displayname+' started.');
+        console.log(_manifest.description);
+        console.log('connecting to default server of daemon(nsp('+DAEMONTYPE+')://'+DAEMONIP+':'+DAEMONPORT+')...');
+        // console.log('To access '+_daemon_display_name+'. You need to auth yourself.');
+        // Implementation.returnImplement('signin')(DAEMONTYPE, DAEMONIP, DAEMONPORT, (err, token)=>{
+        //   if(err) {
+        //     console.log('Auth failed.');
+        //   }
+        //   _token = token;
+        rl.question('Login as: ', (uname)=> {
+          console.log('');
+          _username = uname;
+          let cmd = null;
+          api.Service.ActivitySocket.createSocket(DAEMONTYPE, DAEMONIP, DAEMONPORT, 'NoShell', _username, (err, as) => {
+            commandread = () => {
+              rl.question('>>> ', (cmd)=> {
+                if (cmd == 'exit') //we need some base case, for recursion
+                  return rl.close(); //closing RL and returning from function.
+                as.call('sendC', {c: cmd}, (err, json)=>{
+                  console.log(json.r);
+                  commandread(); //Calling this function again to ask new question
+                });
+              });
+            };
+
+            console.log('connected.');
+            as.onData = (data) => {
+              if(data.t == 'stream') {
+                console.log(data.d);
+              }
+            }
+            as.call('welcome', null, (err, msg) => {
+              console.log(msg);
+
+              commandread();
+            });
+          });
+        });
+    });
+
 
       // });
 
