@@ -2,6 +2,8 @@
 // Description:
 // "api.js" provide interface of core interacting.
 // Copyright 2018 NOOXY. All Rights Reserved.
+// All api tree's top should be callable! For worker calling.
+
 'use strict';
 
 let Utils = require('./utilities');
@@ -11,9 +13,9 @@ function ServiceAPI() {
 
   // prevent callback crash whole nooxy service framework system
   let _safe_callback = (callback) => {
-    return (a, b, c, d, e, f, g, h, i, j, k, l, m, n ,o, p, q, r, s) => {
+    return (...args) => {
       try {
-        callback(a, b, c, d, e, f, g, h, i, j, k, l, m, n ,o, p, q, r, s);
+        callback.apply(null, args);
       }
       catch (err) {
         Utils.tagLog('*ERR*', 'Service API occured error. Please restart daemon.');
@@ -22,30 +24,26 @@ function ServiceAPI() {
     }
   };
 
-  // in case forget
-  function _prototype() {
-    this.Service = null;
-    this.Authorization = null;
-    this.Deamon = null;
-    this.Notification = null;
-  };
-
   // import core in order to bind realtime modules to api
   this.importCore = (coregateway) => {
     _coregateway = coregateway;
   };
 
-  let _get_normal_api = (callback)=> {
+  let _get_normal_api = (callback_with_api)=> {
     // setup up remote shell service by daemon default connciton
     let DEFAULT_SERVER = _coregateway.Daemon.Settings.default_server;
     let DAEMONTYPE = _coregateway.Daemon.Settings.connection_servers[DEFAULT_SERVER].type;
     let DAEMONIP = _coregateway.Daemon.Settings.connection_servers[DEFAULT_SERVER].ip;
     let DAEMONPORT = _coregateway.Daemon.Settings.connection_servers[DEFAULT_SERVER].port;
 
-    let _api = new _prototype();
-    _api.Utils = require('./utilities');
+    let _api = {};
+
     _api.SafeCallback = _safe_callback;
-    _api.Variables = _coregateway.Variables;
+
+    _api.getVariables = (callback)=> {
+      _safe_callback(callback(false, _coregateway.Variables));
+    };
+
     _api.Service = {
       ActivitySocket: {
         createSocket: (method, targetip, targetport, service, owner, callback) => {
@@ -73,26 +71,26 @@ function ServiceAPI() {
         getfliteredEntitiesList: (query, callback) => {
           _coregateway.Entity.getfliteredEntitiesList(query, callback);
         },
-        returnEntityValue: (entityID, key) => {
-          return _coregateway.Entity.returnEntityValue(entityID, key);
+        getEntityValue: (entityID, key, callback) => {
+          _safe_callback(callback(false, _coregateway.Entity.returnEntityValue(entityID, key)));
         },
-        returnEntityOwner: (entityID, key) => {
-          return _coregateway.Entity.returnEntityOwner(entityID, key);
+        getEntityOwner: (entityID, key, callback) => {
+          _safe_callback(callback(false, _coregateway.Entity.returnEntityOwner(entityID, key)));
         },
         getEntitiesMetaData: (callback) => {
           _coregateway.Entity.getEntitiesMeta(_safe_callback(callback));
         },
-        returnEntityMetaData: (entityID) => {
-          return _coregateway.Entity.returnEntityMetaData(entityID);
+        getEntityMetaData: (entityID, callback) => {
+          _safe_callback(callback(false, _coregateway.Entity.returnEntityMetaData(entityID)));
         },
-        returnCount: () => {
-          return _coregateway.Entity.returnEntitycount();
+        getCount: (callback) => {
+          _safe_callback(callback(false, _coregateway.Entity.returnEntitycount()));
         },
         getEntities: (callback) => {
           _coregateway.Entity.getEntitiesMeta(_safe_callback(callback));
         },
-        returnEntitiesID: () => {
-          return _coregateway.Entity.returnEntitiesID();
+        returnEntitiesID: (callback) => {
+          _safe_callback(callback(false, _coregateway.Entity.returnEntitiesID()));
         },
         getEntityConnProfile: (entityID, callback)=> {
             _coregateway.Entity.getEntityConnProfile(entityID, _safe_callback(callback));
@@ -104,20 +102,20 @@ function ServiceAPI() {
         }
       },
 
-      returnList: () => {
-        return _coregateway.Service.returnList();
+      getList: (callback) => {
+        _safe_callback(callback(false, _coregateway.Service.returnList()));
       },
 
-      returnServiceManifest: (service_name)=> {
-        return _coregateway.Service.returnServiceManifest(service_name);
+      getServiceManifest: (service_name, callback)=> {
+        _safe_callback(callback(false, _coregateway.Service.returnServiceManifest(service_name)));
       },
 
-      returnJSONfuncList: (service_name)=> {
-        return _coregateway.Service.returnJSONfuncList(service_name);
+      getJSONfuncList: (service_name, callback)=> {
+        _safe_callback(callback(false, _coregateway.Service.returnJSONfuncList(service_name)));
       },
 
-      returnJSONfuncDict: (service_name)=> {
-        return _coregateway.Service.returnJSONfuncDict(service_name);
+      getJSONfuncDict: (service_name)=> {
+        _safe_callback(callback(false, _coregateway.Service.returnJSONfuncDict(service_name)));
       }
 
     };
@@ -149,9 +147,10 @@ function ServiceAPI() {
     };
 
     _api.Daemon = {
-      Settings: _coregateway.Daemon.Settings,
-      close: _coregateway.Daemon.close,
-      Variables: _coregateway.Daemon.Variables
+      getSettings: (callback)=>{
+        _safe_callback(callback(false, _coregateway.Daemon.Settings));
+      },
+      close: ()=>{_coregateway.Daemon.close()}
     };
 
     _api.Authenticity = {
@@ -168,7 +167,7 @@ function ServiceAPI() {
       },
 
       updateToken: (username, callback) => {
-        return _coregateway.Authenticity.updateToken(username, _safe_callback(callback));
+        _coregateway.Authenticity.updateToken(username, _safe_callback(callback));
       },
 
       updatePrivilege: (username, privilege, callback) => {
@@ -226,7 +225,7 @@ function ServiceAPI() {
       onRouterRawData: _coregateway.Router.addRAWSniffer,
     }
 
-    callback(false, _api);
+    callback_with_api(false, _api);
   };
 
   let _block_super_user_api = (api, callback) => {
@@ -236,10 +235,12 @@ function ServiceAPI() {
   this.createServiceAPI = (service_socket, manifest, callback) => {
     _get_normal_api((err, api) => {
       api.Service.ServiceSocket = service_socket;
-      api.Me = {
-        Settings: manifest.settings,
-        Manifest: manifest,
-        FilesPath: api.Daemon.Settings.services_files_path+manifest.name+'/'
+      api.getMe = (callback)=>{
+        callback(false, {
+          Settings: manifest.settings,
+          Manifest: manifest,
+          FilesPath: _coregateway.Daemon.Settings.services_files_path+manifest.name+'/'
+        });
       }
       _block_super_user_api(api, (err, blocked_api)=>{
         callback(false, blocked_api);
@@ -249,12 +250,15 @@ function ServiceAPI() {
 
   this.createServiceAPIwithImplementaion = (service_socket, manifest, callback) => {
     _get_normal_api((err, api) => {
+      // console.log(api);
       api.Service.ServiceSocket = service_socket;
       api.Implementation = _coregateway.Implementation;
-      api.Me = {
-        Settings: manifest.settings,
-        Manifest: manifest,
-        FilesPath: api.Daemon.Settings.services_files_path+manifest.name+'/'
+      api.getMe = (callback)=>{
+        callback(false, {
+          Settings: manifest.settings,
+          Manifest: manifest,
+          FilesPath: _coregateway.Daemon.Settings.services_files_path+manifest.name+'/'
+        });
       }
       callback(false, api);
     });

@@ -5,7 +5,7 @@
 
 var fs = require('fs');
 // Service entry point
-function start(api) {
+function start(Me, api) {
   // Get the service socket of your service
   let ss = api.Service.ServiceSocket;
   let safec = api.SafeCallback;

@@ -3,9 +3,10 @@
 // "services.js" provide functions of services stuff.
 // Copyright 2018 NOOXY. All Rights Reserved.
 'use strict';
-// test branch
+
 let fs = require('fs');
 let Utils = require('./utilities');
+let WorkerDaemon = require('./workerd');
 
 function Service() {
   // need add service event system
@@ -20,6 +21,7 @@ function Service() {
   let _daemon_auth_key = null;
   let _ASockets = {};
   let _debug = false;
+  let _workerd = new WorkerDaemon();
 
   let ActivitySocketDestroyTimeout = 1000;
 
@@ -563,7 +565,7 @@ function Service() {
     let _service_path = null;
     let _service_files_path = null;
     let _service_name = service_name;
-    let _service_module = null;
+    let _worker = null;
     let _service_manifest = null;
 
     this.launch = (depended_service_dict, callback) => {
@@ -595,7 +597,7 @@ function Service() {
         console.log(err);
       }
       depended_service_dict[_service_name] = _service_manifest.dependencies.services;
-      _service_module = require(_service_path+'/entry');
+      _worker = _workerd.returnWorker(_service_path+'/entry');
       // load module from local service directory
 
       // create a description of this service entity.
@@ -630,12 +632,14 @@ function Service() {
         }
         if(_service_manifest.implementation_api == false) {
           _serviceapi_module.createServiceAPI(_service_socket, _service_manifest, (err, api) => {
-            _service_module.start(api);
+            _worker.importAPI(api);
+            _worker.launch();
           });
         }
         else {
           _serviceapi_module.createServiceAPIwithImplementaion(_service_socket, _service_manifest, (err, api) => {
-            _service_module.start(api);
+            _worker.importAPI(api);
+            _worker.launch();
           });
         }
 
@@ -684,7 +688,7 @@ function Service() {
     };
 
     this.close = () => {
-      _service_module.close();
+      _worker.close();
     };
   };
 
@@ -779,10 +783,10 @@ function Service() {
           _as.setEntityID(data.d.i);
           connprofile.setBundle('entityID', data.d.i);
           _ASockets[data.d.i] = _as;
-          callback(false, _as);
+          callback(false, _ASockets[data.d.i]);
         }
         else{
-          callback(true, _as);
+          callback(true, _ASockets[data.d.i]);
         }
 
       }

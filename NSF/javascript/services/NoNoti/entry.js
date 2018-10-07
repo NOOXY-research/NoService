@@ -7,10 +7,10 @@ let Notification = require('./noti');
 let Notisys = new Notification();
 
 // service entry point
-function start(api) {
+function start(Me, api) {
   let ss = api.Service.ServiceSocket;
   let safec = api.SafeCallback;
-  let files_path = api.Me.FilesPath;
+  let files_path = Me.FilesPath;
   Notisys.importDatabase(files_path+'test.sqlite3');
   let _online_users = {};
 

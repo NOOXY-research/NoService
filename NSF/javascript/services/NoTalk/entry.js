@@ -10,7 +10,7 @@ let files_path;
 let notalk = new NoTalk();
 
 // Your service entry point
-function start(api) {
+function start(Me, api) {
   // Get the service socket of your service
   let ss = api.Service.ServiceSocket;
   // BEWARE! To prevent callback error crash the system.
@@ -19,7 +19,7 @@ function start(api) {
   // E.g. setTimeout(api.SafeCallback(callback), timeout)
   let safec = api.SafeCallback;
   // Please save and manipulate your files in this directory
-  let files_path = api.Me.FilesPath;
+  let files_path = Me.FilesPath;
 
   // Access another service on this daemon
   let admin_daemon_asock = api.Service.ActivitySocket.createDefaultAdminDeamonSocket('Another Service', (err, activitysocket)=> {

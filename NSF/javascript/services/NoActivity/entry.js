@@ -8,7 +8,7 @@ let files_path;
 let settings;
 const fs = require('fs');
 // Your service entry point
-function start(api) {
+function start(Me, api) {
   // Get the service socket of your service
   let ss = api.Service.ServiceSocket;
   // BEWARE! To prevent callback error crash the system.
@@ -17,22 +17,23 @@ function start(api) {
   // E.g. setTimeout(api.SafeCallback(callback), timeout)
   let safec = api.SafeCallback;
   // Please save and manipulate your files in this directory
-  files_path = api.Me.FilesPath;
+  files_path = Me.FilesPath;
   // Your settings in manifest file.
-  settings = api.Me.Settings;
+  settings = Me.Settings;
 
   let user_entities = {};
   // Access another service on this daemon
   // let admin_daemon_asock = api.Service.ActivitySocket.createDefaultAdminDeamonSocket('Another Service', (err, activitysocket)=> {
   //   // accessing other service
   // });
-  if(api.Daemon.Settings.debug) {
-    api.Sniffer.onRouterJSON((err, Json)=>{
-      api.Utils.tagLog('DEGUG', 'Received a Json.');
-      api.Utils.tagLog('DEGUG', Json);
-    })
-  }
-
+  api.Daemon.getSettings((err, daemon_setting)=>{
+    if(daemon_setting.debug) {
+      api.Sniffer.onRouterJSON((err, Json)=>{
+        api.Utils.tagLog('DEGUG', 'Received a Json.');
+        api.Utils.tagLog('DEGUG', Json);
+      })
+    }
+  });
   if(settings.protocol_log) {
     api.Sniffer.onRouterJSON((err, Json)=>{
       let date = new Date();
