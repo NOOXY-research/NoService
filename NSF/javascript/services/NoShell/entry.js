@@ -144,11 +144,15 @@ function start(Me, api) {
                   if(pass) {
                     r = _(t1, {
                       show: (t2, c2) => {
-                        c2(false, {r:JSON.stringify(api.Service.Entity.returnEntityMetaData(t2[0]), null, 2)});
+                        api.Service.Entity.getEntityMetaData(t2[0], (err, r)=>{
+                          c2(false, {r:JSON.stringify(r, null, 2)});
+                        });
                       },
 
                       list: (t2, c2) => {
-                        c2(false, {r:JSON.stringify(api.Service.Entity.returnEntitiesID(), null, 2)});
+                        api.Service.Entity.getEntitiesId((err, r)=>{
+                          c2(false, {r: JSON.stringify(r, null, 2)});
+                        });
                       },
 
                       count: (t2, c2)=> {
@@ -402,23 +406,31 @@ function start(Me, api) {
             else {
               _(t0, {
                 chpasswd: (t1, c1) => {
-                  api.Authenticity.updatePassword(api.Service.Entity.returnEntityOwner(entityID), t1[0],(err)=>{
-                    c1(false, {r:'Error->'+err});
-                  })
-
-                },
-                entitymeta: (t1, c1) => {
-                  c1(false, {r:api.Service.Entity.returnEntityMetaData(entityID)});
-                },
-                usermeta: (t1, c1) => {
-                  api.Authenticity.getUserMeta(api.Service.Entity.returnEntityOwner(entityID), (err, meta)=>{
-                    c1(false, {r:JSON.stringify(meta, null, 2)});
+                  api.Service.Entity.getEntityOwner(entityID, (err, r)=>{
+                    api.Authenticity.updatePassword(r, t1[0],(err)=>{
+                      c1(false, {r:'Error->'+err});
+                    })
                   });
                 },
+                entitymeta: (t1, c1) => {
+                  api.Service.Entity.getEntityMetaData(entityID, (err, r)=>{
+                    c1(false, {r: r});
+                  });
+                },
+                usermeta: (t1, c1) => {
+                  api.Service.Entity.getEntityOwner(entityID, (err, r)=>{
+                    api.Authenticity.getUserMeta(r, (err, meta)=>{
+                      c1(false, {r:JSON.stringify(meta, null, 2)});
+                    });
+                  });
+
+                },
                 updatetoken: (t1, c1) => {
-                  api.Authenticity.updateToken(api.Service.Entity.returnEntityOwner(entityID), (err)=>{
-                    c1(false, {r:'Error->'+err});
-                  })
+                  api.Service.Entity.getEntityOwner(entityID, (err, r)=>{
+                    api.Authenticity.updateToken(r, (err)=>{
+                      c1(false, {r:'Error->'+err});
+                    })
+                  });
                 }
               }, c0);
             }

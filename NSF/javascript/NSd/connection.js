@@ -69,7 +69,8 @@ function Connection(options) {
     this.returnGUID = () => {return _GUID};
 
     this.destroy= () => {
-      delete this;
+      // for worker deletetion
+      this.worker_cancel_refer = true;
       delete _clients[_GUID];
     };
     // this.onConnectionDropout = () => {

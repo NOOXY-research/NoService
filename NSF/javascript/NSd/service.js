@@ -76,7 +76,6 @@ function Service() {
   this.onConnectionClose = (connprofile, callback) => {
 
     let _entitiesID = connprofile.returnBundle('bundle_entities');
-    console.log(connprofile.returnRemotePosition(), _entitiesID);
     if(_entitiesID == null) {
       callback(true);
     }
@@ -103,6 +102,8 @@ function Service() {
         for(let i in _entitiesID) {
           _ASockets[_entitiesID[i]].onClose();
           setTimeout(()=>{
+            // for worker abort referance
+            _ASockets[_entity_id].worker_cancel_refer = true;
             delete _ASockets[_entitiesID[i]];
           }, ActivitySocketDestroyTimeout);
         }
@@ -548,7 +549,13 @@ function Service() {
         let bundle = conn_profile.returnBundle('bundle_entities');
         for (let i=bundle.length-1; i>=0; i--) {
           if (bundle[i] === _entity_id) {
-              bundle.splice(i, 1);
+            this.onClose();
+            setTimeout(()=>{
+              // tell worker abort referance
+              _ASockets[_entity_id].worker_cancel_refer = true;
+              delete _ASockets[_entity_id];
+            }, ActivitySocketDestroyTimeout);
+            bundle.splice(i, 1);
           }
         }
         conn_profile.setBundle('bundle_entities', bundle);
@@ -822,7 +829,6 @@ function Service() {
         if(data.d.i != "FAIL") {
           _as.setEntityID(data.d.i);
           connprofile.setBundle('entityID', data.d.i);
-          console.log(connprofile.returnBundle('entityID'));
           _ASockets[data.d.i] = _as;
           callback(false, _as);
         }

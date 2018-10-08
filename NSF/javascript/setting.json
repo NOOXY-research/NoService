@@ -40,7 +40,8 @@
     "NoNoti",
     "NoUser",
     "NoActivity",
-    "NoTalk"
+    "NoTalk",
+    "Noversi"
   ],
 
   "trusted_domains": [
@@ -75,7 +76,7 @@
 
   "daemon_authorization_key": "WHATAKEY",
 
-  "secure": true,
+  "secure": false,
 
   "rsa_2048_pub_key": "public_key.pem",
 

@@ -74,8 +74,8 @@ function ServiceAPI() {
         getEntityValue: (entityID, key, callback) => {
           _safe_callback(callback(false, _coregateway.Entity.returnEntityValue(entityID, key)));
         },
-        getEntityOwner: (entityID, key, callback) => {
-          _safe_callback(callback(false, _coregateway.Entity.returnEntityOwner(entityID, key)));
+        getEntityOwner: (entityID, callback) => {
+          _safe_callback(callback(false, _coregateway.Entity.returnEntityOwner(entityID)));
         },
         getEntitiesMetaData: (callback) => {
           _coregateway.Entity.getEntitiesMeta(_safe_callback(callback));

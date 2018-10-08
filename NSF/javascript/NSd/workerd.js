@@ -10,6 +10,9 @@
 // 1 api call {t, p, a: arguments, o:{arg_index, [obj_id, callback_tree]}}
 // 2 accessobj {t, p, a: arguments, o:{arg_index, [obj_id, callback_tree]}}
 
+
+// memory leak on ActivitySocket!!!
+
 'use strict';
 
 const {fork} = require('child_process');
@@ -18,14 +21,17 @@ const Utils = require('./utilities');
 function WorkerDaemon() {
   let _worker_clients = [];
   let _close_worker_timeout = 3000;
-  let _clear_obj_garbage_timeout = 10000;
+  let _clear_obj_garbage_timeout = 30000;
   let _local_obj_callbacks_dict = {};
+  let _services_relaunch_cycle = 1000*60*60*24;
 
   // garbage cleaning
   setInterval(()=>{
-    console.log('---------');
-    console.log(_local_obj_callbacks_dict);
-    console.log('---------', Object.keys(_local_obj_callbacks_dict).length)
+    for(let key in _local_obj_callbacks_dict) {
+      if(_local_obj_callbacks_dict[key].worker_cancel_refer){
+        delete _local_obj_callbacks_dict[key];
+      }
+    }
   }, _clear_obj_garbage_timeout);
 
   function WorkerClient(path) {
@@ -43,7 +49,6 @@ function WorkerDaemon() {
       for(let i in args) {
         if(Utils.hasFunction(args[i])) {
           let _Id = Utils.generateUniqueID();
-          _local_obj_callbacks_dict[_Id] = args[i];
           if(typeof(args[i])=='function') {
             _local_obj_callbacks_dict[_Id] = (...a)=>{
               args[i].apply(null, a);
