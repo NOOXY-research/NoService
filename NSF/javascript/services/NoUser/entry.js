@@ -144,7 +144,7 @@ function start(Me, api) {
           returnJSON(false, json_be_returned);
         }
       });
-    }):
+    });
 
   });
 

@@ -1,6 +1,7 @@
 // NSF/NSd/api.js
 // Description:
-// "api.js" provide interface of core interacting.
+// "api.js" provide interface of interacting with core. This module is desgined
+// for multithreading.
 // Copyright 2018 NOOXY. All Rights Reserved.
 // All api tree's top should be callable! For worker calling.
 
@@ -10,6 +11,34 @@ let Utils = require('./utilities');
 
 function ServiceAPI() {
   let _coregateway = null;
+
+  function RemoteCallback() {
+    let
+    this.run = ()=> {
+
+    };
+
+    this.unbindRemote = ()=> {
+
+    };
+  }
+
+  function
+
+  // garbage cleaning
+  setInterval(()=>{
+    try {
+      for(let key in _local_obj_callbacks_dict) {
+        if(_local_obj_callbacks_dict[key].worker_cancel_refer){
+          delete _local_obj_callbacks_dict[key];
+        }
+      }
+    }
+    catch(e) {
+      console.log(e);
+    }
+
+  }, _clear_obj_garbage_timeout);
 
   // prevent callback crash whole nooxy service framework system
   let _safe_callback = (callback) => {
@@ -29,7 +58,7 @@ function ServiceAPI() {
     _coregateway = coregateway;
   };
 
-  let _get_normal_api = (callback_with_api)=> {
+  function API() {
     // setup up remote shell service by daemon default connciton
     let DEFAULT_SERVER = _coregateway.Daemon.Settings.default_server;
     let DAEMONTYPE = _coregateway.Daemon.Settings.connection_servers[DEFAULT_SERVER].type;
@@ -37,6 +66,65 @@ function ServiceAPI() {
     let DAEMONPORT = _coregateway.Daemon.Settings.connection_servers[DEFAULT_SERVER].port;
 
     let _api = {};
+    let _LCBO = {};
+    let _emitRemoteCallback;
+    let _emitRemoteUnbind;
+
+    // Local callback object
+    function LCBO(obj, obj_contructor) {
+      let _RCBO = {};
+      let _syncRefer = ()=>{
+
+      }
+      let _obj = obj;
+      let _callbacks = obj_contructor(_syncRefer);
+
+      this.unbindAllRCBORemote = ()=> {
+        for(let id in _RCBO) {
+          _RCBP[id].unbindRemote();
+        }
+      };
+
+      this.callCallback = (APIpath, args, arg_objs_trees, this.emitChildCallback)=>{
+
+      }
+
+      this.returnObj = ()=> {
+        return _callbacks;
+      }
+    };
+
+    // Remote callback object
+    function RCBO(obj_tree) {
+      let _obj_id;
+      this.run = (path, args)=> {
+
+      }
+    }
+
+    this.emitAPIRq = ()=> {
+
+    }
+
+    this.emitCallbackRq = ()=> {
+
+    }
+
+    this.setRemoteCallbackEmitter = (emitter)=> {
+      _emitRemoteCallback = emmiter;
+    };
+
+    this.setRemoteUnbindEmitter = (emitter)=> {
+      _emitRemoteUnbind = emmiter;
+    };
+
+    this.addAPI = (dict)=> {
+
+    };
+
+    this.getAPITree = () => {
+
+    };
 
     _api.SafeCallback = _safe_callback;
 
@@ -46,8 +134,37 @@ function ServiceAPI() {
 
     _api.Service = {
       ActivitySocket: {
-        createSocket: (method, targetip, targetport, service, owner, callback) => {
-          _coregateway.Service.createActivitySocket(method, targetip, targetport, service, owner, _safe_callback(callback));
+        createSocket: (method, targetip, targetport, service, owner, remote_callback_obj) => {
+          _coregateway.Service.createActivitySocket(method, targetip, targetport, service, owner, (err, as)=> {
+            let local_callback_obj = new LCBO(as, (syncRefer)=> {
+              return ({
+                  call: (name, Json, remote_callback_obj_2)=> {
+                    syncRefer(remote_callback_obj_2);
+                    as.call(name, Json, (err, json)=> {
+                      remote_callback_obj_2.run([], [err, json]);
+                      remote_callback_obj_2.unbindRemote();
+                    });
+                  },
+
+                  getEntityID: (remote_callback_obj_2)=> {
+                    syncRefer(remote_callback_obj_2);
+                    as.getEntityID((err, entityID)=>{
+                      remote_callback_obj_2.run([], [err, entityID]);
+                      remote_callback_obj_2.unbindRemote();
+                    });
+                  },
+
+                  on: (type, remote_callback_obj_2)=> {
+                    syncRefer(remote_callback_obj_2);
+                    as.getEntityID((err, entityID)=>{
+                      remote_callback_obj_2.run([], [err, entityID]);
+                    });
+                  }
+              })
+            });
+            remote_callback_obj.run([], [err, local_callback_obj.returnObj()]);
+            remote_callback_obj.unbindRemote();
+          });
         },
         createDefaultDeamonSocket: (service, owner, callback) => {
           _coregateway.Service.createDaemonActivitySocket(DAEMONTYPE, DAEMONIP, DAEMONPORT, service, owner, _safe_callback(callback));
@@ -224,8 +341,10 @@ function ServiceAPI() {
       onRouterJSON: _coregateway.Router.addJSONSniffer,
       onRouterRawData: _coregateway.Router.addRAWSniffer,
     }
+  }
 
-    callback_with_api(false, _api);
+  let _get_normal_api = (callback_with_api)=> {
+    callback_with_api(false, new API());
   };
 
   let _block_super_user_api = (api, callback) => {
@@ -265,14 +384,6 @@ function ServiceAPI() {
       callback(false, api);
     });
   }
-
-  this.createSuperUserServiceAPI = (ervice_socket, manifest, callback) => {
-
-  }
-
-  this.createActivityAPI = (callback) => {
-
-  };
 
   this.close = () => {
     _coregateway = null;

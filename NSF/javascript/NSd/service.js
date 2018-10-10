@@ -23,6 +23,7 @@ function Service() {
   let _debug = false;
   let _workerd = new WorkerDaemon();
 
+
   let ActivitySocketDestroyTimeout = 1000;
 
   this.setDebug = (boolean) => {
@@ -67,6 +68,7 @@ function Service() {
 
   this.importAPI = (serviceapi_module) => {
     _serviceapi_module = serviceapi_module;
+    _workerd.importAPI(serviceapi_module);
   };
 
   this.spwanClient = () => {Utils.tagLog('*ERR*', 'spwanClient not implemented');};
@@ -346,7 +348,7 @@ function Service() {
     let methods = {
       // nooxy service protocol implementation of "Call Activity: ActivitySocket"
       AS: () => {
-        _ASockets[data.d.i].onData(data.d.d);
+        _ASockets[data.d.i].emitOnData(data.d.d);
         let _data = {
           "m": "AS",
           "d": {
@@ -475,6 +477,10 @@ function Service() {
 
     let _conn_profile = conn_profile;
     let _jfqueue = {};
+    let _on_dict = {
+      data: ()=> {Utils.tagLog('*ERR*', 'onData not implemented');},
+      close: ()=> {Utils.tagLog('*ERR*', 'onClose not implemented');}
+    };
 
     // For waiting connection is absolutly established. We need to wrap operations and make it queued.
     let exec = (callback) => {
@@ -525,8 +531,8 @@ function Service() {
       exec(op);
     }
 
-    this.returnEntityID = () => {
-      return _entity_id;
+    this.getEntityID = (callback) => {
+      callback(false, _entity_id);
     };
 
     this.sendData = (data) => {
@@ -536,12 +542,16 @@ function Service() {
       exec(op);
     };
 
-    this.onData = (data) => {
-      Utils.tagLog('*ERR*', 'onData not implemented');
+    this.on = (type, callback)=> {
+      _on_dict[type] = callback;
+    };
+
+    this.emitOnData = (data) => {
+      _on_dict['data'](false, data);
     };
 
     this.onClose = () => {
-      Utils.tagLog('*ERR*', 'onClose not implemented');
+      _on_dict['close'](false);
     };
 
     this.close = () => {

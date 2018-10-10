@@ -7,18 +7,23 @@
 // message.t
 // 0 worker established {t, a: api tree, p: service module path}
 // 1 callback {t, p: [obj_id, callback_path], a: arguments, o:{arg_index, [obj_id, callback_tree]}}
-
+// 2 unbindobj {};
 'use strict';
 
 const fork = require('child_process').fork;
 const Utils = require('./utilities');
 process.title = 'NSF_worker';
 
+
 function WorkerClient() {
   let _local_obj_callbacks_dict = {};
   let _service_module = null;
   let _api;
   let _clear_obj_garbage_timeout = 3000;
+
+  setInterval(()=>{
+    console.log(_local_obj_callbacks_dict);
+  }, _clear_obj_garbage_timeout);
 
   let createLocalObjCallbacks = (obj)=> {
     let _Id = Utils.generateUniqueID();

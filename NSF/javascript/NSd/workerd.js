@@ -15,28 +15,19 @@
 
 'use strict';
 
-const {fork} = require('child_process');
+const {fork} = require('_child_process');
 const Utils = require('./utilities');
 
 function WorkerDaemon() {
   let _worker_clients = [];
   let _close_worker_timeout = 3000;
   let _clear_obj_garbage_timeout = 30000;
-  let _local_obj_callbacks_dict = {};
   let _services_relaunch_cycle = 1000*60*60*24;
-
-  // garbage cleaning
-  setInterval(()=>{
-    for(let key in _local_obj_callbacks_dict) {
-      if(_local_obj_callbacks_dict[key].worker_cancel_refer){
-        delete _local_obj_callbacks_dict[key];
-      }
-    }
-  }, _clear_obj_garbage_timeout);
+  let _serviceapi_module;
 
   function WorkerClient(path) {
     let _serviceapi = null;
-    let child = null;
+    let _child = null;
 
     this.emitChildCallback = ([obj_id, path], args) => {
       let _data = {
@@ -61,28 +52,29 @@ function WorkerDaemon() {
           _data.o[i] = [_Id, Utils.generateObjCallbacksTree(args[i])];
         }
       }
-      child.send(_data);
+      _child.send(_data);
     }
 
     this.callAPICallback = (APIpath, args, arg_objs_trees)=> {
+
       Utils.callObjCallback(_serviceapi, APIpath, args, arg_objs_trees, this.emitChildCallback);
     }
 
     this.onMessage = (message)=>{
       if(message.t == 0) {
-        child.send({t:0, p: path, a: Utils.generateObjCallbacksTree(_serviceapi)});
+        _child.send({t:0, p: path, a: Utils.generateObjCallbacksTree(_serviceapi)});
       }
       else if(message.t == 1) {
-        this.callAPICallback(message.p, message.a, message.o);
+        _serviceapi.emitAPIRq(message.p, message.a, message.o);
       }
       else if(message.t == 2) {
-        Utils.callObjCallback(_local_obj_callbacks_dict[message.p[0]], message.p[1], message.a, message.o, this.emitChildCallback);
+        _serviceapi.emitCallbackRq(message.p, message.a, message.o);
       }
     };
 
     this.launch = ()=> {
-      child = fork(require.resolve('./worker.js'));
-      child.on('message', message => {
+      _child = fork(require.resolve('./worker.js'));
+      _child.on('message', message => {
         this.onMessage(message);
       });
     };
@@ -103,6 +95,10 @@ function WorkerDaemon() {
   this.returnWorker = (path) => {
     return new WorkerClient(path);
   }
+
+  this.importAPI = (serviceapi_module) => {
+    _serviceapi_module = serviceapi_module;
+  };
 }
 
 module.exports = WorkerDaemon;
