@@ -13,21 +13,6 @@ function ServiceAPI() {
   let _coregateway = null;
   let _clear_obj_garbage_timeout = 30000;
 
-  // garbage cleaning
-  setInterval(()=>{
-    try {
-      for(let key in _local_obj_callbacks_dict) {
-        if(_local_obj_callbacks_dict[key].worker_cancel_refer){
-          delete _local_obj_callbacks_dict[key];
-        }
-      }
-    }
-    catch(e) {
-      console.log(e);
-    }
-
-  }, _clear_obj_garbage_timeout);
-
   // prevent callback crash whole nooxy service framework system
   let _safe_callback = (callback) => {
     return (...args) => {
@@ -54,32 +39,64 @@ function ServiceAPI() {
     let DAEMONPORT = _coregateway.Daemon.Settings.connection_servers[DEFAULT_SERVER].port;
 
     let _api = {};
-    let _LCBO = {};
+    let _LCBOs = {};
     let _emitRemoteCallback;
     let _emitRemoteUnbind;
     let _api_tree = {};
 
+    // garbage cleaning
+    setInterval(()=>{
+      try {
+        for(let key in _LCBOs) {
+          if(_LCBOs[key].isReferCanceled() == false) {
+            _LCBOs[key].destroy();
+          }
+        }
+      }
+      catch(e) {
+        console.log(e);
+      }
+
+    }, _clear_obj_garbage_timeout);
+
     // Local callback object
-    function LCBO(obj, obj_contructor) {
-      let _RCBO = {};
-      let _syncRefer = ()=>{
+    function LCBO(obj, obj_contructor, isOneTimeObj) {
+      let _RCBOs = {};
+      let _id = Utils.generateUniqueID();
+      _LCBOs[_id] = this;
+
+      let _syncRefer = ()=> {
 
       }
+
       let _obj = obj;
       let _callbacks = obj_contructor(_syncRefer);
 
-      this.unbindAllRCBORemote = ()=> {
-        for(let id in _RCBO) {
-          _RCBO[id].unbindRemote();
+      this.isLCBO = true;
+
+      this.isReferCanceled = ()=>{
+        return obj.worker_cancel_refer;
+      }
+
+      this.destroy = ()=> {
+        delete _LCBOs[_id];
+        for(let id in _RCBOs) {
+          _RCBOs[id].unbindRemote();
         }
       };
 
-      this.callCallback = (APIpath, args, arg_objs_trees)=>{
-
+      this.callCallback = (path, args, arg_objs_trees)=>{
+        Utils.callObjCallback(_callbacks, path, args, arg_objs_trees, null,
+        (remoteobjid, remoteobjtree)=>{
+          return(new RCBO(remoteobjid, remoteobjtree));
+        });
+        if(isOneTimeObj) {
+          delete _LCBOs[_id]
+        }
       }
 
-      this.returnObj = ()=> {
-        return _callbacks;
+      this.returnTree = ()=> {
+        return [_id, Utils.generateObjCallbacksTree(_callbacks)];
       }
     };
 
@@ -87,7 +104,16 @@ function ServiceAPI() {
     function RCBO(obj_id, obj_tree) {
 
       this.run = (path, args)=> {
-        let _runable = Utils.generateObjCallbacks(obj_id, obj_tree, _emitRemoteCallback);
+        let _runable = Utils.generateObjCallbacks(obj_id, obj_tree, ([obj_id, path], args)=>{
+          let _arg_objs_trees = {};
+          for(let i in args) {
+            if(args[i].isLCBO) {
+              _arg_objs_trees[i] = args[i].returnTree();
+              args[i] = null;
+            }
+          }
+          _emitRemoteCallback([obj_id, path], args, _arg_objs_trees);
+        });
         _runable.apply(null, args);
       };
 
@@ -97,15 +123,15 @@ function ServiceAPI() {
     }
 
     this.emitAPIRq = (path, args, argsobj)=> {
-      console.log(path);
       Utils.callObjCallback(_api, path, args, argsobj, null,
       (remoteobjid, remoteobjtree)=>{
         return(new RCBO(remoteobjid, remoteobjtree));
       });
     }
 
-    this.emitCallbackRq = ()=> {
-
+    this.emitCallbackRq = ([id, path], args, argsobj)=> {
+      let _LCBO = _LCBOs[id];
+      _LCBO.callCallback(path, args, argsobj);
     }
 
     this.returnObj = ()=> {
@@ -146,8 +172,8 @@ function ServiceAPI() {
     _api.Service = {
       ActivitySocket: {
         createSocket: (method, targetip, targetport, service, owner, remote_callback_obj) => {
-          _coregateway.Service.createActivitySocket(method, targetip, targetport, service, owner, (err, as)=> {
-            let local_callback_obj = new LCBO(as, (syncRefer)=> {
+          _coregateway.Service.createActivitySocket(method, targetip, targetport, service, owner, (err, activitysocket)=> {
+            let activitysocket_LCBO = new LCBO(as, (syncRefer)=> {
               return ({
                   call: (name, Json, remote_callback_obj_2)=> {
                     syncRefer(remote_callback_obj_2);
@@ -173,7 +199,7 @@ function ServiceAPI() {
                   }
               })
             });
-            remote_callback_obj.run([], [err, local_callback_obj.returnObj()]);
+            remote_callback_obj.run([], [err, activitysocket_LCBO]);
             remote_callback_obj.unbindRemote();
           });
         },
@@ -212,10 +238,14 @@ function ServiceAPI() {
                     as.getEntityID((err, entityID)=>{
                       remote_callback_obj_2.run([], [err, entityID]);
                     });
+                  },
+
+                  close: ()=> {
+                    as.close();
                   }
               })
             });
-            remote_callback_obj.run([], [err, local_callback_obj.returnObj()]);
+            remote_callback_obj.run([], [err, local_callback_obj]);
             remote_callback_obj.unbindRemote();
           }));
         },
@@ -397,26 +427,26 @@ function ServiceAPI() {
   this.createServiceAPI = (service_socket, manifest, callback) => {
     _get_normal_api((err, api) => {
       api.addAPI(['Service', 'ServiceSocket'], (LCBO)=> {
-        let local_callback_obj = new LCBO(service_socket, (syncRefer)=> {
-          return ({
-            def: (name, Json, remote_callback_obj_2)=> {
-              syncRefer(remote_callback_obj_2);
+        return ({
+          def: (name, remote_callback_obj)=> {
+            service_socket.def(name, (json, entityID, returnJSON)=> {
+              let returnJSON_LCBO = new LCBO(returnJSON, (returnJSON_syncRefer)=> {
+                return ((err, json_be_returned)=>{
+                  returnJSON(err, json_be_returned);
+                });
+              }, true);
+              remote_callback_obj.run([], [json, entityID, returnJSON_LCBO])
+            });
+          },
 
-            },
+          sdef: (remote_callback_obj)=> {
 
-            sdef: (remote_callback_obj_2)=> {
-              syncRefer(remote_callback_obj_2);
+          },
 
-            },
+          on: (type, remote_callback_obj)=> {
 
-            on: (type, remote_callback_obj_2)=> {
-              syncRefer(remote_callback_obj_2);
-              
-            }
-          })
-
-        });
-        return local_callback_obj.returnObj();
+          }
+        })
       });
       api.addAPI(['getMe'], (LCBO)=> {
         return((remote_callback_obj)=> {

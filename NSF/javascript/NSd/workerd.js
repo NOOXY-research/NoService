@@ -4,7 +4,7 @@
 // services is multithreaded.
 // Copyright 2018 NOOXY. All Rights Reserved.
 
-// Client message protocol
+// NOOXY Service WorkerClient protocol
 // message.t
 // 0 worker established {t}
 // 1 api call {t, p, a: arguments, o:{arg_index, [obj_id, callback_tree]}}
@@ -27,7 +27,7 @@ function WorkerDaemon() {
   function WorkerClient(path) {
     let _serviceapi = null;
     let _child = null;
-    
+
     process.on('exit', ()=> {
       this.emitChildClose();
     });
@@ -40,35 +40,14 @@ function WorkerDaemon() {
       _child.send({t:2, i: id});
     }
 
-    this.emitChildCallback = ([obj_id, path], args) => {
+    this.emitChildCallback = ([obj_id, path], args, argsobj) => {
       let _data = {
         t: 1,
         p: [obj_id, path],
         a: args,
-        o: {}
-      }
-
-      for(let i in args) {
-        if(Utils.hasFunction(args[i])) {
-          let _Id = Utils.generateUniqueID();
-          if(typeof(args[i])=='function') {
-            _local_obj_callbacks_dict[_Id] = (...a)=>{
-              args[i].apply(null, a);
-              delete _local_obj_callbacks_dict[_Id];
-            };
-          }
-          else {
-            _local_obj_callbacks_dict[_Id] = args[i];
-          }
-          _data.o[i] = [_Id, Utils.generateObjCallbacksTree(args[i])];
-        }
+        o: argsobj
       }
       _child.send(_data);
-    }
-
-    this.callAPICallback = (APIpath, args, arg_objs_trees)=> {
-
-      Utils.callObjCallback(_serviceapi, APIpath, args, arg_objs_trees, this.emitChildCallback);
     }
 
     this.onMessage = (message)=>{

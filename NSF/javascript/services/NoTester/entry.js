@@ -14,7 +14,6 @@ let log = (obj)=>{
 function start(Me, api) {
   // Get the service socket of your service
   let ss = api.Service.ServiceSocket;
-  console.log(ss);
   // BEWARE! To prevent callback error crash the system.
   // If you call an callback function which is not API provided. Such as setTimeout(callback, timeout).
   // You need to wrap the callback funciton by api.SafeCallback.
@@ -25,17 +24,13 @@ function start(Me, api) {
   // Your settings in manifest file.
   settings = Me.getSettings;
 
-  // Access another service on this daemon
-  api.Service.ActivitySocket.createDefaultAdminDeamonSocket('NoTester', (err, activitysocket)=> {
-    activitysocket.call('jfunc1', {d:'client'}, (err, json )=> {
-      log(json);
-    });
-    // accessing other service
-  });
+
 
   // JSONfunction is a function that can be defined, which others entities can call.
   // It is a NOOXY Service Framework Standard
+  log('ServiceSocket Test');
   ss.def('jfunc1', (json, entityID, returnJSON)=>{
+    log(json);
     // Code here for JSONfunciton
     // Return Value for JSONfunction call. Otherwise remote will not recieve funciton return value.
     let json_be_returned = {
@@ -43,6 +38,15 @@ function start(Me, api) {
     }
     // First parameter for error, next is JSON to be returned.
     returnJSON(false, json_be_returned);
+  });
+
+  // Access another service on this daemon
+  api.Service.ActivitySocket.createDefaultAdminDeamonSocket('NoTester', (err, activitysocket)=> {
+    activitysocket.call('jfunc1', {d:'Hello! From client!'}, (err, json)=> {
+      log(json);
+      activitysocket.close();
+    });
+    // accessing other service
   });
 
   // Safe define a JSONfunction.

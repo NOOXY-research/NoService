@@ -3,7 +3,7 @@
 // "worker.js" is service worker client for NOOXY service framework.
 // Copyright 2018 NOOXY. All Rights Reserved.
 
-// Parent message protocol
+// NOOXY Service WorkerDaemon protocol
 // message.t
 // 0 worker established {t, a: api tree, p: service module path, c: closetimeout}
 // 1 callback {t, p: [obj_id, callback_path], a: arguments, o:{arg_index, [obj_id, callback_tree]}}
@@ -22,10 +22,6 @@ function WorkerClient() {
   let _api;
   let _clear_obj_garbage_timeout = 3000;
   let _close_timeout = 1000;
-
-  setInterval(()=>{
-    console.log(_local_obj_callbacks_dict);
-  }, _clear_obj_garbage_timeout);
 
   let createLocalObjCallbacks = (obj)=> {
     let _Id = Utils.generateUniqueID();
@@ -78,7 +74,6 @@ function WorkerClient() {
   }
 
   process.on('message', message => {
-    console.log(message);
     this.onMessage(message);
   });
 
@@ -88,7 +83,7 @@ function WorkerClient() {
       process.title = 'NSF_worker: '+message.p;
       _service_module = require(message.p);
       _close_timeout = message.c;
-      _api = Utils.generateObjCallbacks(_api, message.a, callParentAPI);
+      _api = Utils.generateObjCallbacks('API', message.a, callParentAPI);
       _api.getMe((err, Me)=>{
         // add api
         _api.SafeCallback = (callback) => {
@@ -117,7 +112,6 @@ function WorkerClient() {
       Utils.callObjCallback(_local_obj_callbacks_dict[message.p[0]], message.p[1], message.a, message.o, this.emitParentCallback, Utils.generateObjCallbacks);
     }
     else if(message.t == 2) {
-      console.log(message);
       delete _local_obj_callbacks_dict[message.i];
     }
     else if(message.t == 99) {
