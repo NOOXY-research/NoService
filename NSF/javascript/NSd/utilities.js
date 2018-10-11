@@ -34,7 +34,7 @@ const generateObjCallbacks = (id, obj_tree, callback) => {
   }
 }
 // route remote call to local obj callback
-const callObjCallback = (Obj, Objpath, args, arg_objs_trees, obj_callback_policy)=> {
+const callObjCallback = (Obj, Objpath, args, arg_objs_trees, obj_callback_policy, generate_obj_policy)=> {
   let getTargetObj = (path, subobj)=> {
     if(path.length) {
       return getTargetObj(path.slice(1), subobj[path[0]]);
@@ -44,7 +44,7 @@ const callObjCallback = (Obj, Objpath, args, arg_objs_trees, obj_callback_policy
     }
   }
   for(let i in arg_objs_trees) {
-    args[parseInt(i)] = generateObjCallbacks(arg_objs_trees[i][0], arg_objs_trees[i][1], obj_callback_policy);
+    args[parseInt(i)] = generate_obj_policy(arg_objs_trees[i][0], arg_objs_trees[i][1], obj_callback_policy);
   }
   let f = getTargetObj(Objpath, Obj);
   f.apply(null, args);

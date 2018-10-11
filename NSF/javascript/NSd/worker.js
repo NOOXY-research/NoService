@@ -5,9 +5,10 @@
 
 // Parent message protocol
 // message.t
-// 0 worker established {t, a: api tree, p: service module path}
+// 0 worker established {t, a: api tree, p: service module path, c: closetimeout}
 // 1 callback {t, p: [obj_id, callback_path], a: arguments, o:{arg_index, [obj_id, callback_tree]}}
-// 2 unbindobj {};
+// 2 unbindobj {t, i: id};
+// 99 close
 'use strict';
 
 const fork = require('child_process').fork;
@@ -20,6 +21,7 @@ function WorkerClient() {
   let _service_module = null;
   let _api;
   let _clear_obj_garbage_timeout = 3000;
+  let _close_timeout = 1000;
 
   setInterval(()=>{
     console.log(_local_obj_callbacks_dict);
@@ -76,6 +78,7 @@ function WorkerClient() {
   }
 
   process.on('message', message => {
+    console.log(message);
     this.onMessage(message);
   });
 
@@ -84,6 +87,7 @@ function WorkerClient() {
     if(message.t == 0) {
       process.title = 'NSF_worker: '+message.p;
       _service_module = require(message.p);
+      _close_timeout = message.c;
       _api = Utils.generateObjCallbacks(_api, message.a, callParentAPI);
       _api.getMe((err, Me)=>{
         // add api
@@ -99,15 +103,26 @@ function WorkerClient() {
           }
         };
         _api.Utils = Utils;
-        _service_module.start(Me, _api);
+        try {
+          _service_module.start(Me, _api);
+        }
+        catch(e) {
+          console.log(e);
+        }
+
       });
     }
     // function return
     else if(message.t == 1) {
-      Utils.callObjCallback(_local_obj_callbacks_dict[message.p[0]], message.p[1], message.a, message.o, this.emitParentCallback);
+      Utils.callObjCallback(_local_obj_callbacks_dict[message.p[0]], message.p[1], message.a, message.o, this.emitParentCallback, Utils.generateObjCallbacks);
     }
-    else {
-
+    else if(message.t == 2) {
+      console.log(message);
+      delete _local_obj_callbacks_dict[message.i];
+    }
+    else if(message.t == 99) {
+      _service_module.close();
+      setTimeout(()=> {process.exit()}, _close_timeout);
     }
   }
 
@@ -117,4 +132,7 @@ function WorkerClient() {
 }
 
 let w = new WorkerClient();
+process.on('SIGINT', () => {
+  console.log('Child SIGINT');
+});
 w.launch();

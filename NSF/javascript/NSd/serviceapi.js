@@ -11,19 +11,7 @@ let Utils = require('./utilities');
 
 function ServiceAPI() {
   let _coregateway = null;
-
-  function RemoteCallback() {
-    let
-    this.run = ()=> {
-
-    };
-
-    this.unbindRemote = ()=> {
-
-    };
-  }
-
-  function
+  let _clear_obj_garbage_timeout = 30000;
 
   // garbage cleaning
   setInterval(()=>{
@@ -69,6 +57,7 @@ function ServiceAPI() {
     let _LCBO = {};
     let _emitRemoteCallback;
     let _emitRemoteUnbind;
+    let _api_tree = {};
 
     // Local callback object
     function LCBO(obj, obj_contructor) {
@@ -81,11 +70,11 @@ function ServiceAPI() {
 
       this.unbindAllRCBORemote = ()=> {
         for(let id in _RCBO) {
-          _RCBP[id].unbindRemote();
+          _RCBO[id].unbindRemote();
         }
       };
 
-      this.callCallback = (APIpath, args, arg_objs_trees, this.emitChildCallback)=>{
+      this.callCallback = (APIpath, args, arg_objs_trees)=>{
 
       }
 
@@ -95,36 +84,58 @@ function ServiceAPI() {
     };
 
     // Remote callback object
-    function RCBO(obj_tree) {
-      let _obj_id;
-      this.run = (path, args)=> {
+    function RCBO(obj_id, obj_tree) {
 
-      }
+      this.run = (path, args)=> {
+        let _runable = Utils.generateObjCallbacks(obj_id, obj_tree, _emitRemoteCallback);
+        _runable.apply(null, args);
+      };
+
+      this.unbindRemote = ()=> {
+        _emitRemoteUnbind(obj_id);
+      };
     }
 
-    this.emitAPIRq = ()=> {
-
+    this.emitAPIRq = (path, args, argsobj)=> {
+      console.log(path);
+      Utils.callObjCallback(_api, path, args, argsobj, null,
+      (remoteobjid, remoteobjtree)=>{
+        return(new RCBO(remoteobjid, remoteobjtree));
+      });
     }
 
     this.emitCallbackRq = ()=> {
 
     }
 
+    this.returnObj = ()=> {
+      return _api;
+    }
+
     this.setRemoteCallbackEmitter = (emitter)=> {
-      _emitRemoteCallback = emmiter;
+      _emitRemoteCallback = emitter;
     };
 
     this.setRemoteUnbindEmitter = (emitter)=> {
-      _emitRemoteUnbind = emmiter;
+      _emitRemoteUnbind = emitter;
     };
 
-    this.addAPI = (dict)=> {
-
+    this.returnAPITree = () => {
+      return _api_tree;
     };
 
-    this.getAPITree = () => {
+    this.addAPI = (list, construct_function)=> {
+      let _target = _api;
+      for(let i=0; i<list.length-1; i++) {
+        let key = list[i];
+        if( !_target[key] ) _target[key] = {}
+        _target = _target[key];
+      }
 
-    };
+      _target[list[list.length-1]] = construct_function(LCBO);
+      // generate API Tree
+      _api_tree = Utils.generateObjCallbacksTree(_api);
+    }
 
     _api.SafeCallback = _safe_callback;
 
@@ -176,8 +187,37 @@ function ServiceAPI() {
           _coregateway.Service.createAdminDaemonActivitySocket(method, targetip, targetport, service, _safe_callback(callback));
         },
 
-        createDefaultAdminDeamonSocket: (service, callback) => {
-          _coregateway.Service.createAdminDaemonActivitySocket(DAEMONTYPE, DAEMONIP, DAEMONPORT, service, _safe_callback(callback));
+        createDefaultAdminDeamonSocket: (service, remote_callback_obj) => {
+          _coregateway.Service.createAdminDaemonActivitySocket(DAEMONTYPE, DAEMONIP, DAEMONPORT, service, _safe_callback((err, as)=> {
+            let local_callback_obj = new LCBO(as, (syncRefer)=> {
+              return ({
+                  call: (name, Json, remote_callback_obj_2)=> {
+                    syncRefer(remote_callback_obj_2);
+                    as.call(name, Json, (err, json)=> {
+                      remote_callback_obj_2.run([], [err, json]);
+                      remote_callback_obj_2.unbindRemote();
+                    });
+                  },
+
+                  getEntityID: (remote_callback_obj_2)=> {
+                    syncRefer(remote_callback_obj_2);
+                    as.getEntityID((err, entityID)=>{
+                      remote_callback_obj_2.run([], [err, entityID]);
+                      remote_callback_obj_2.unbindRemote();
+                    });
+                  },
+
+                  on: (type, remote_callback_obj_2)=> {
+                    syncRefer(remote_callback_obj_2);
+                    as.getEntityID((err, entityID)=>{
+                      remote_callback_obj_2.run([], [err, entityID]);
+                    });
+                  }
+              })
+            });
+            remote_callback_obj.run([], [err, local_callback_obj.returnObj()]);
+            remote_callback_obj.unbindRemote();
+          }));
         },
       },
 
@@ -341,6 +381,9 @@ function ServiceAPI() {
       onRouterJSON: _coregateway.Router.addJSONSniffer,
       onRouterRawData: _coregateway.Router.addRAWSniffer,
     }
+
+    // generate API Tree
+    _api_tree = Utils.generateObjCallbacksTree(_api);
   }
 
   let _get_normal_api = (callback_with_api)=> {
@@ -353,17 +396,39 @@ function ServiceAPI() {
 
   this.createServiceAPI = (service_socket, manifest, callback) => {
     _get_normal_api((err, api) => {
-      api.Service.ServiceSocket = service_socket;
-      api.getMe = (callback)=>{
-        callback(false, {
-          Settings: manifest.settings,
-          Manifest: manifest,
-          FilesPath: _coregateway.Daemon.Settings.services_files_path+manifest.name+'/'
+      api.addAPI(['Service', 'ServiceSocket'], (LCBO)=> {
+        let local_callback_obj = new LCBO(service_socket, (syncRefer)=> {
+          return ({
+            def: (name, Json, remote_callback_obj_2)=> {
+              syncRefer(remote_callback_obj_2);
+
+            },
+
+            sdef: (remote_callback_obj_2)=> {
+              syncRefer(remote_callback_obj_2);
+
+            },
+
+            on: (type, remote_callback_obj_2)=> {
+              syncRefer(remote_callback_obj_2);
+              
+            }
+          })
+
         });
-      }
-      _block_super_user_api(api, (err, blocked_api)=>{
-        callback(false, blocked_api);
+        return local_callback_obj.returnObj();
       });
+      api.addAPI(['getMe'], (LCBO)=> {
+        return((remote_callback_obj)=> {
+          remote_callback_obj.run([], [false, {
+            Settings: manifest.settings,
+            Manifest: manifest,
+            FilesPath: _coregateway.Daemon.Settings.services_files_path+manifest.name+'/'
+          }])
+          remote_callback_obj.unbindRemote();
+        });
+      });
+      callback(false, api);
     });
   };
 
@@ -374,6 +439,7 @@ function ServiceAPI() {
       api.getImplementation = (callback)=>{
         callback(false, _coregateway.Implementation);
       };
+
       api.getMe = (callback)=>{
         callback(false, {
           Settings: manifest.settings,

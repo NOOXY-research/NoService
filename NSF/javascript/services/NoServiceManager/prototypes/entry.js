@@ -21,7 +21,7 @@ function start(Me, api) {
   settings = Me.getSettings;
 
   // Access another service on this daemon
-  let admin_daemon_asock = api.Service.ActivitySocket.createDefaultAdminDeamonSocket('Another Service', (err, activitysocket)=> {
+  api.Service.ActivitySocket.createDefaultAdminDeamonSocket('Another Service', (err, activitysocket)=> {
     // accessing other service
   });
 

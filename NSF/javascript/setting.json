@@ -36,11 +36,7 @@
   "SHA256_key": "FATFROG",
 
   "services": [
-    "NoServiceManager",
-    "NoNoti",
-    "NoUser",
-    "NoActivity",
-    "NoTalk"
+    "NoTester"
   ],
 
   "trusted_domains": [
@@ -50,11 +46,11 @@
     "localhost"
   ],
 
-  "shell_service": "NoShell",
+  "shell_service": null,
 
-  "shell_client_service": "NoShellc",
+  "shell_client_service": null,
 
-  "debug_service": "NoActivity",
+  "debug_service": null,
 
   "debug": true,
 

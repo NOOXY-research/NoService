@@ -1,71 +1,118 @@
+// NSF/services/youservice/entry.js
+// Description:
+// "youservice/entry.js" description.
+// Copyright 2018 NOOXY. All Rights Reserved.
+'use strict';
+
+let files_path;
+let settings;
+
+let log = (obj)=>{
+  console.log('NOOXY TESTER > ', obj);
+}
+// Your service entry point
 function start(Me, api) {
-  //
-  api.Utils.tagLog('TESTER', 'Listing Servers.');
-  api.Connection.getServers((err, servers) => {
-    api.Utils.tagLog('TESTER', servers);
-  });
-  // define a JSONfunction
-  api.Service.ServiceSocket.def('test', (Json)=>{
-    console.log(Json);
-    Json.c = 'c';
-    return Json;
+  // Get the service socket of your service
+  let ss = api.Service.ServiceSocket;
+  console.log(ss);
+  // BEWARE! To prevent callback error crash the system.
+  // If you call an callback function which is not API provided. Such as setTimeout(callback, timeout).
+  // You need to wrap the callback funciton by api.SafeCallback.
+  // E.g. setTimeout(api.SafeCallback(callback), timeout)
+  let safec = api.SafeCallback;
+  // Please save and manipulate your files in this directory
+  files_path = Me.FilesPath;
+  // Your settings in manifest file.
+  settings = Me.getSettings;
+
+  // Access another service on this daemon
+  api.Service.ActivitySocket.createDefaultAdminDeamonSocket('NoTester', (err, activitysocket)=> {
+    activitysocket.call('jfunc1', {d:'client'}, (err, json )=> {
+      log(json);
+    });
+    // accessing other service
   });
 
-  // console.log(api);
-  api.Service.ServiceSocket.onData = (entityID, data)=>{
-    api.Utils.tagLog('TESTER', 'ServiceSocket onData receive.');
-    api.Utils.tagLog('TESTER', 'Data:');
-    api.Utils.tagLog('TESTER', ''+data);
-    api.Service.Entity.getEntityMetaData(entityID, (err, meta) => {
-      api.Utils.tagLog('TESTER', 'Remote(Activity) meta data.');
-      api.Utils.tagLog('TESTER', meta);
-    });
-  };
-  // console.log(api);
-  api.Utils.tagLog('TESTER', 'Creating ActivitySocket.');
-  api.Service.ActivitySocket.createSocket('Local', 'LOCALIP', 'LOCALPORT', 'tester', (err, as) => {
-    if(err) {
-      api.Utils.tagLog('*ERR*', 'ActivitySocket failed.');
+  // JSONfunction is a function that can be defined, which others entities can call.
+  // It is a NOOXY Service Framework Standard
+  ss.def('jfunc1', (json, entityID, returnJSON)=>{
+    // Code here for JSONfunciton
+    // Return Value for JSONfunction call. Otherwise remote will not recieve funciton return value.
+    let json_be_returned = {
+      d: 'Hello! From service!'
     }
-    else {
-      api.Utils.tagLog('TESTER', 'ActivitySocket Created.');
-      as.sendData('data from activity socket1');
-      api.Utils.tagLog('TESTER', 'ActivitySocket sendData sent.');
-    }
+    // First parameter for error, next is JSON to be returned.
+    returnJSON(false, json_be_returned);
   });
-  api.Service.ActivitySocket.createSocket('Local', 'LOCALIP', 'LOCALPORT', 'tester', (err, as) => {
-    if(err) {
-      api.Utils.tagLog('*ERR*', 'ActivitySocket failed.');
+
+  // Safe define a JSONfunction.
+  ss.sdef('SafeJSONfunction', (json, entityID, returnJSON)=>{
+    // Code here for JSONfunciton
+    // Return Value for JSONfunction call. Otherwise remote will not recieve funciton return value.
+    let json_be_returned = {
+      d: 'Hello! NOOXY Service Framework!'
     }
-    else {
-      api.Utils.tagLog('TESTER', 'ActivitySocket Created.');
-      as.sendData('data from activity socket2');
-      api.Utils.tagLog('TESTER', 'ActivitySocket sendData sent.');
-    }
+    // First parameter for error, next is JSON to be returned.
+    returnJSON(false, json_be_returned);
+  },
+  // In case fail.
+  ()=>{
+    log('Auth Failed.');
   });
-  api.Service.ActivitySocket.createSocket('WebSocket', '0.0.0.0', '1268', 'tester', (err, as) => {
-    if(err) {
-      api.Utils.tagLog('*ERR*', 'ActivitySocket failed.');
-    }
-    else {
-      api.Utils.tagLog('TESTER', 'ActivitySocket Created.');
-      as.sendData('data from activity socket3');
-      api.Utils.tagLog('TESTER', 'ActivitySocket sendData sent.');
-    }
-    as.call('test', {a:'a', b:'b'}, (err, returnvalue)=> {
-      console.log(returnvalue);
+
+  // ServiceSocket.onData, in case client send data to this Service.
+  // You will need entityID to Authorize remote user. And identify remote.
+  ss.onData = (entityID, data) => {
+    // Get Username and process your work.
+    api.Service.Entity.getEntityOwner(entityID, (err, username)=>{
+      // To store your data and associated with userid INSEAD OF USERNAME!!!
+      // Since userid can be promised as a unique identifer!!!
+      let userid = null;
+      // Get userid from API
+      api.Authenticity.getUserID(username, (err, id) => {
+        userid = id;
+      });
+      // process you operation here
+      log('recieve a data');
+      log(data);
     });
-  });
-  api.Utils.tagLog('TESTER', 'Entities count in daemon. '+api.Service.Entity.returnCount());
-  setTimeout(()=> {
-    api.Service.Entity.getEntities((err, e)=>{
-      api.Utils.tagLog('TESTER', 'Entities list.');
-      api.Utils.tagLog('TESTER', e);
+  }
+  // Send data to client.
+  ss.sendData('A entity ID', 'My data to be transfer.');
+  // ServiceSocket.onConnect, in case on new connection.
+  ss.onConnect = (entityID, callback) => {
+    // Do something.
+    // report error;
+    callback(false);
+  }
+  // ServiceSocket.onClose, in case connection close.
+  ss.onClose = (entityID, callback) => {
+    // Get Username and process your work.
+    api.Service.Entity.getEntityOwner(entityID, (err, username)=>{
+      // To store your data and associated with userid INSEAD OF USERNAME!!!
+      // Since userid can be promised as a unique identifer!!!
+      let userid = null;
+      // Get userid from API
+      api.Authenticity.getUserID(username, (err, id) => {
+        userid = id;
+      });
+      // process you operation here
+      console.log('ServiceSocket closed');
+      // report error;
+      callback(false);
     });
-  }, 500);
-  api.Utils.tagLog('TESTER', 'Entities count in daemon. '+api.Service.Entity.returnCount());
+  }
 }
 
+// If the daemon stop, your service recieve close signal here.
+function close() {
+  log('Service Closed');
+  // Saving state of you service.
+  // Please save and manipulate your files in this directory
+}
+
+// Export your work for system here.
 module.exports = {
-  start: start
+  start: start,
+  close: close
 }

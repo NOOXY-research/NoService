@@ -15,19 +15,30 @@
 
 'use strict';
 
-const {fork} = require('_child_process');
+const {fork} = require('child_process');
 const Utils = require('./utilities');
 
 function WorkerDaemon() {
   let _worker_clients = [];
   let _close_worker_timeout = 3000;
-  let _clear_obj_garbage_timeout = 30000;
-  let _services_relaunch_cycle = 1000*60*60*24;
+  // let _services_relaunch_cycle = 1000*60*60*24;
   let _serviceapi_module;
 
   function WorkerClient(path) {
     let _serviceapi = null;
     let _child = null;
+    
+    process.on('exit', ()=> {
+      this.emitChildClose();
+    });
+
+    this.emitChildClose = ()=> {
+      _child.send({t:99});
+    }
+
+    this.emitRemoteUnbind = (id)=> {
+      _child.send({t:2, i: id});
+    }
 
     this.emitChildCallback = ([obj_id, path], args) => {
       let _data = {
@@ -62,7 +73,7 @@ function WorkerDaemon() {
 
     this.onMessage = (message)=>{
       if(message.t == 0) {
-        _child.send({t:0, p: path, a: Utils.generateObjCallbacksTree(_serviceapi)});
+        _child.send({t:0, p: path, a: _serviceapi.returnAPITree(), c: _close_worker_timeout});
       }
       else if(message.t == 1) {
         _serviceapi.emitAPIRq(message.p, message.a, message.o);
@@ -85,10 +96,12 @@ function WorkerDaemon() {
 
     this.importAPI = (api) => {
       _serviceapi = api;
+      _serviceapi.setRemoteCallbackEmitter(this.emitChildCallback);
+      _serviceapi.setRemoteUnbindEmitter(this.emitRemoteUnbind);
     };
 
     this.close = ()=> {
-
+      this.emitChildClose();
     };
   };
 

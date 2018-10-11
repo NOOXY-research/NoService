@@ -1,12 +1,44 @@
 {
   "name": "NoTester",
+
   "version": "0.0.0",
-  "displayname": "tester",
-  "description": "no description",
-  "Authors": ["NOOXY", "noowyee"],
+
+  "displayname": "NOOXY Tester",
+
+  "description": "To test NSF functions.",
+
+  "Authors": ["NOOXY", "noowyeee"],
+
   "implementation_api": false,
+
   "dependencies": {
-    "node_packages": {},
-    "services": {}
+
+    "node_packages" : {
+
+    },
+
+    "services" : {
+
+    }
+  },
+
+  "JSONfunciton_prototypes": {
+    "jfunc1": {
+      "displayname": "Tester JSONfunciton 1",
+      "description": "JSONfunciton description.",
+      "secure": false,
+      "protocol": {
+        "JSON_call": {
+          "p1": "Hello from activity!"
+        },
+        "JSON_return": {
+          "p1": "Hello from service!"
+        }
+      }
+    }
+  },
+
+  "settings": {
+    "setting1": "s111"
   }
 }
