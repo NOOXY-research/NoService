@@ -65,7 +65,7 @@ function start(Me, api) {
         userid = id;
       });
       // process you operation here
-      console.log('recieve a data');
+      console.log('recieved a data');
       console.log(data);
     });
   });

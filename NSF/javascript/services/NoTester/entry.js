@@ -46,6 +46,7 @@ function start(Me, api) {
       log('Received data from service.')
       log(data)
     });
+    activitysocket.sendData('A sent data from activity.');
     activitysocket.call('jfunc1', {d:'Hello! Jfunc call from client!'}, (err, json)=> {
       log(json);
       activitysocket.close();
@@ -81,8 +82,8 @@ function start(Me, api) {
         userid = id;
       });
       // process you operation here
-      console.log('recieve a data');
-      console.log(data);
+      log('Recieved a data from activity.');
+      log(data);
     });
   });
   // ServiceSocket.onConnect, in case on new connection.

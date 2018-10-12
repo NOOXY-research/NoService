@@ -119,7 +119,6 @@ function WorkerClient() {
     else if(message.t == 2) {
       delete _local_obj_callbacks_dict[message.i];
       console.log(Object.keys(_local_obj_callbacks_dict).length);
-
     }
     else if(message.t == 98) {
       Utils.tagLog('*ERR*', 'Service "'+_service_name+'" occured error on API call.');

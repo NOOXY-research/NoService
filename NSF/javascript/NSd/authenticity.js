@@ -158,7 +158,7 @@ let Authdb = function () {
       if(typeof(_cacheduser[user.username]) == 'undefined') {
           _cacheduser[user.username] = user;
       }
-      callback(err, _cacheduser[user.username]);
+      callback(false, _cacheduser[user.username]);
     });
   };
 

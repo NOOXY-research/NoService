@@ -495,8 +495,12 @@ function Service() {
     let _conn_profile = conn_profile;
     let _jfqueue = {};
     let _on_dict = {
-      data: ()=> {Utils.tagLog('*ERR*', 'ActivitySocket on "data" not implemented');},
-      close: ()=> {Utils.tagLog('*ERR*', 'ActivitySocket on "close" not implemented');}
+      data: ()=> {
+        if(_debug) Utils.tagLog('*WARN*', 'ActivitySocket on "data" not implemented')
+      },
+      close: ()=> {
+        if(_debug) Utils.tagLog('*WARN*', 'ActivitySocket on "close" not implemented')
+      }
     };
 
     // For waiting connection is absolutly established. We need to wrap operations and make it queued.

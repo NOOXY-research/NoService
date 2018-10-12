@@ -19,14 +19,19 @@ const {fork} = require('child_process');
 const Utils = require('./utilities');
 
 function WorkerDaemon() {
-  let _worker_clients = [];
+  let _worker_clients = {};
   let _close_worker_timeout = 3000;
   // let _services_relaunch_cycle = 1000*60*60*24;
   let _serviceapi_module;
 
+  this.getCBOCount = (callback)=> {
+
+  };
+
   function WorkerClient(path) {
     let _serviceapi = null;
     let _child = null;
+    _worker_clients[path] = this;
 
     process.on('exit', ()=> {
       this.emitChildClose();

@@ -94,9 +94,11 @@ function ServiceAPI() {
         let _runable = Utils.generateObjCallbacks(obj_id, obj_tree, ([obj_id, path], args)=>{
           let _arg_objs_trees = {};
           for(let i in args) {
-            if(args[i].isLCBO) {
-              _arg_objs_trees[i] = args[i].returnTree();
-              args[i] = null;
+            if(args[i]) {
+              if(args[i].isLCBO) {
+                _arg_objs_trees[i] = args[i].returnTree();
+                args[i] = null;
+              }
             }
           }
           _emitRemoteCallback([obj_id, path], args, _arg_objs_trees);
@@ -158,7 +160,7 @@ function ServiceAPI() {
       ActivitySocket: {
         createSocket: (method, targetip, targetport, service, owner, remote_callback_obj) => {
           _coregateway.Service.createActivitySocket(method, targetip, targetport, service, owner, (err, activitysocket)=> {
-            let activitysocket_LCBO = new LCBO(as, (syncRefer)=> {
+            let local_callback_obj = new LCBO(as, (syncRefer)=> {
               return ({
                   call: (name, Json, remote_callback_obj_2)=> {
                     syncRefer(remote_callback_obj_2);
@@ -181,10 +183,18 @@ function ServiceAPI() {
                     as.on(type, (err, data)=>{
                       remote_callback_obj_2.run([], [err, data]);
                     });
+                  },
+
+                  sendData: (data)=> {
+                    as.sendData(data);
+                  },
+
+                  close: ()=> {
+                    as.close();
                   }
               })
             });
-            remote_callback_obj.run([], [err, activitysocket_LCBO]);
+            remote_callback_obj.run([], [err, local_callback_obj]);
             remote_callback_obj.unbindRemote();
           });
         },
@@ -225,6 +235,10 @@ function ServiceAPI() {
                     });
                   },
 
+                  sendData: (data)=> {
+                    as.sendData(data);
+                  },
+
                   close: ()=> {
                     as.close();
                   }
@@ -253,24 +267,25 @@ function ServiceAPI() {
         getEntitiesMetaData: (callback) => {
           _coregateway.Entity.getEntitiesMeta(callback);
         },
-        getEntityMetaData: (entityID, callback) => {
-          callback(false, _coregateway.Entity.returnEntityMetaData(entityID));
+        getEntityMetaData: (entityID, remote_callback_obj) => {
+          remote_callback_obj.run([], [false, _coregateway.Entity.returnEntityMetaData(entityID)])
+          remote_callback_obj.unbindRemote();
         },
-        getCount: (callback) => {
-          callback(false, _coregateway.Entity.returnEntitycount());
+        getCount: (remote_callback_obj) => {
+          remote_callback_obj.run([], [false, _coregateway.Entity.returnEntitycount()])
+          remote_callback_obj.unbindRemote();
         },
         getEntities: (callback) => {
           _coregateway.Entity.getEntitiesMeta(callback);
         },
-        returnEntitiesID: (callback) => {
-          callback(false, _coregateway.Entity.returnEntitiesID());
+        getEntitiesID: (remote_callback_obj) => {
+          remote_callback_obj.run([], [false, _coregateway.Entity.returnEntitiesID()])
+          remote_callback_obj.unbindRemote();
         },
         getEntityConnProfile: (entityID, callback)=> {
             _coregateway.Entity.getEntityConnProfile(entityID, callback);
         },
         on: (type, callback)=> {
-          // type:
-          // EntityCreated
           _coregateway.Entity.on(type, callback);
         }
       },
@@ -327,32 +342,53 @@ function ServiceAPI() {
     };
 
     _api.Authenticity = {
-      createUser: (username, displayname, password, privilege, detail, firstname, lastname, callback) => {
-        _coregateway.Authenticity.createUser(username, displayname, password, privilege, detail, firstname, lastname, callback);
+      createUser: (username, displayname, password, privilege, detail, firstname, lastname, remote_callback_obj) => {
+        _coregateway.Authenticity.createUser(username, displayname, password, privilege, detail, firstname, lastname, (err)=> {
+          remote_callback_obj.run([], [err]);
+          remote_callback_obj.unbindRemote();
+        });
       },
 
-      deleteUser: (username, callback) => {
-        _coregateway.Authenticity.deleteUser(username, callback);
+      deleteUser: (username, remote_callback_obj) => {
+        _coregateway.Authenticity.deleteUser(username, (err)=> {
+          remote_callback_obj.run([], [err]);
+          remote_callback_obj.unbindRemote();
+        });
       },
 
-      updatePassword: (username, newpassword, callback) => {
-        _coregateway.Authenticity.updatePassword(username, newpassword, callback);
+      updatePassword: (username, newpassword, remote_callback_obj) => {
+        _coregateway.Authenticity.updatePassword(username, newpassword, (err)=> {
+          remote_callback_obj.run([], [err]);
+          remote_callback_obj.unbindRemote();
+        });
       },
 
-      updateToken: (username, callback) => {
-        _coregateway.Authenticity.updateToken(username, callback);
+      updateToken: (username, remote_callback_obj) => {
+        _coregateway.Authenticity.updateToken(username, (err)=> {
+          remote_callback_obj.run([], [err]);
+          remote_callback_obj.unbindRemote();
+        });
       },
 
-      updatePrivilege: (username, privilege, callback) => {
-        _coregateway.Authenticity.updatePrivilege(username, privilege, callback);
+      updatePrivilege: (username, privilege, remote_callback_obj) => {
+        _coregateway.Authenticity.updatePrivilege(username, privilege, (err)=> {
+          remote_callback_obj.run([], [err]);
+          remote_callback_obj.unbindRemote();
+        });
       },
 
-      updateName: (username, firstname, lastname, callback) => {
-        _coregateway.Authenticity.updateName(username, firstname, lastname, callback);
+      updateName: (username, firstname, lastname, remote_callback_obj) => {
+        _coregateway.Authenticity.updateName(username, firstname, lastname, (err)=> {
+          remote_callback_obj.run([], [err]);
+          remote_callback_obj.unbindRemote();
+        });
       },
 
-      getUserMeta: (username, callback) => {
-        _coregateway.Authenticity.getUserMeta(username, callback);
+      getUserMeta: (username, remote_callback_obj) => {
+        _coregateway.Authenticity.getUserMeta(username, (err, usermeta)=> {
+          remote_callback_obj.run([], [err, usermeta]);
+          remote_callback_obj.unbindRemote();
+        });
       },
 
       getUserID: (username, remote_callback_obj) => {
@@ -362,22 +398,22 @@ function ServiceAPI() {
         });
       },
 
-      getUsernamebyId: (userid, callback) => {
-        _coregateway.Authenticity.getUsernamebyId(userid, callback);
+      getUsernamebyId: (userid, remote_callback_obj) => {
+        _coregateway.Authenticity.getUsernamebyId(userid, (err, username)=> {
+          remote_callback_obj.run([], [err, username]);
+          remote_callback_obj.unbindRemote();
+        });
       },
 
-      getUserExistence: (username, callback)=>{
-        _coregateway.Authenticity.getUserExistence(username, callback);
+      getUserExistence: (username, remote_callback_obj)=>{
+        _coregateway.Authenticity.getUserExistence(username, (err, exisitence)=> {
+          remote_callback_obj.run([], [err, exisitence]);
+          remote_callback_obj.unbindRemote();
+        });
       }
     };
 
     _api.Connection = {
-      getServers: (callback) => {
-        _coregateway.Connection.getServers(callback);
-      },
-      getClients: (callback) => {
-        _coregateway.Connection.getClients(callback);
-      },
       addServer: (conn_method, ip, port) => {
         _coregateway.Connection.addServer(conn_method, ip, port);
       }
