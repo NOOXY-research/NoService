@@ -55,10 +55,36 @@ function WorkerDaemon() {
         _child.send({t:0, p: path, a: _serviceapi.returnAPITree(), c: _close_worker_timeout});
       }
       else if(message.t == 1) {
-        _serviceapi.emitAPIRq(message.p, message.a, message.o);
+        try {
+          _serviceapi.emitAPIRq(message.p, message.a, message.o);
+        }
+        catch (e) {
+          _child.send({
+            t:98,
+            d:{
+              api_path: message.p,
+              call_args: message.a,
+              args_obj_tree: message.o
+            },
+            e: e.stack
+          });
+        }
       }
       else if(message.t == 2) {
-        _serviceapi.emitCallbackRq(message.p, message.a, message.o);
+        try {
+          _serviceapi.emitCallbackRq(message.p, message.a, message.o);
+        }
+        catch (e) {
+          _child.send({
+            t:98,
+            d:{
+              obj_path: message.p,
+              call_args: message.a,
+              args_obj_tree: message.o
+            },
+            e: e.stack
+          });
+        }
       }
     };
 

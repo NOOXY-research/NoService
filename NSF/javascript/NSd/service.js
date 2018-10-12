@@ -383,6 +383,24 @@ function Service() {
 
     let _send_handler = null;
     let _mode = null;
+    let _on_dict = {
+      connect: (entityID, callback) => {
+        if(_debug)
+          Utils.tagLog('*WARN*', 'onConnect of service "'+service_name+'" not implemented');
+        callback(false);
+      },
+
+      data: (entityID, data) => {
+        if(_debug)
+          Utils.tagLog('*WARN*', 'onData of service "'+service_name+'" not implemented');
+      },
+
+      close: (entityID, callback) => {
+        if(_debug)
+          Utils.tagLog('*WARN*', 'onClose of service "'+service_name+'" not implemented');
+        callback(false);
+      }
+    }
 
     this.returnJSONfuncList = () => {
       return Object.keys(_jsonfunctions);
@@ -429,11 +447,6 @@ function Service() {
       });
     };
 
-    this.onData = (entityID, data) => {
-      if(_debug)
-        Utils.tagLog('*WARN*', 'onData of service "'+service_name+'" not implemented');
-    };
-
     this.onJFCall = (entityID, JFname, jsons, callback) => {
       try {
         _jsonfunctions[JFname].obj(JSON.parse(jsons==null?'{}':jsons), entityID, (err, returnVal)=>{
@@ -450,17 +463,21 @@ function Service() {
 
     };
 
-    this.onClose = (entityID, callback) => {
-      if(_debug)
-        Utils.tagLog('*WARN*', 'onClose of service "'+service_name+'" not implemented');
-      callback(false);
-    };
+    this.on = (type, callback)=> {
+      _on_dict[type] = callback;
+    }
 
-    this.onConnect = (entityID, callback) => {
-      if(_debug)
-        Utils.tagLog('*WARN*', 'onConnect of service "'+service_name+'" not implemented');
-      callback(false);
-    };
+    this.onConnect = (entityID, callback)=> {
+      _on_dict['connect'](entityID, callback);
+    }
+
+    this.onData = (entityID, data)=> {
+      _on_dict['data'](entityID, data);
+    }
+
+    this.onClose = (entityID, callback)=> {
+      _on_dict['close'](entityID, callback);
+    }
 
     this.returnServiceName = () => {
       return service_name;
@@ -478,8 +495,8 @@ function Service() {
     let _conn_profile = conn_profile;
     let _jfqueue = {};
     let _on_dict = {
-      data: ()=> {Utils.tagLog('*ERR*', 'onData not implemented');},
-      close: ()=> {Utils.tagLog('*ERR*', 'onClose not implemented');}
+      data: ()=> {Utils.tagLog('*ERR*', 'ActivitySocket on "data" not implemented');},
+      close: ()=> {Utils.tagLog('*ERR*', 'ActivitySocket on "close" not implemented');}
     };
 
     // For waiting connection is absolutly established. We need to wrap operations and make it queued.

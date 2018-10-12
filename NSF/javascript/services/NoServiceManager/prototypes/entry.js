@@ -54,7 +54,7 @@ function start(Me, api) {
 
   // ServiceSocket.onData, in case client send data to this Service.
   // You will need entityID to Authorize remote user. And identify remote.
-  ss.onData = (entityID, data) => {
+  ss.on('data', (entityID, data) => {
     // Get Username and process your work.
     api.Service.Entity.getEntityOwner(entityID, (err, username)=>{
       // To store your data and associated with userid INSEAD OF USERNAME!!!
@@ -68,17 +68,17 @@ function start(Me, api) {
       console.log('recieve a data');
       console.log(data);
     });
-  }
+  });
   // Send data to client.
   ss.sendData('A entity ID', 'My data to be transfer.');
   // ServiceSocket.onConnect, in case on new connection.
-  ss.onConnect = (entityID, callback) => {
+  ss.on('connect', (entityID, callback) => {
     // Do something.
     // report error;
     callback(false);
-  }
+  });
   // ServiceSocket.onClose, in case connection close.
-  ss.onClose = (entityID, callback) => {
+  ss.on('close', (entityID, callback) => {
     // Get Username and process your work.
     api.Service.Entity.getEntityOwner(entityID, (err, username)=>{
       // To store your data and associated with userid INSEAD OF USERNAME!!!
@@ -93,7 +93,7 @@ function start(Me, api) {
       // report error;
       callback(false);
     });
-  }
+  });
 }
 
 // If the daemon stop, your service recieve close signal here.

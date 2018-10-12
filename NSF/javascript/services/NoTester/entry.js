@@ -8,7 +8,7 @@ let files_path;
 let settings;
 
 let log = (obj)=>{
-  console.log('NOOXY TESTER > ', obj);
+  console.log('< NOOXY TESTER > ', obj);
 }
 // Your service entry point
 function start(Me, api) {
@@ -34,7 +34,7 @@ function start(Me, api) {
     // Code here for JSONfunciton
     // Return Value for JSONfunction call. Otherwise remote will not recieve funciton return value.
     let json_be_returned = {
-      d: 'Hello! From service!'
+      d: 'Hello! Jfunc return from service!'
     }
     // First parameter for error, next is JSON to be returned.
     returnJSON(false, json_be_returned);
@@ -42,7 +42,11 @@ function start(Me, api) {
 
   // Access another service on this daemon
   api.Service.ActivitySocket.createDefaultAdminDeamonSocket('NoTester', (err, activitysocket)=> {
-    activitysocket.call('jfunc1', {d:'Hello! From client!'}, (err, json)=> {
+    activitysocket.on('data', (err, data)=> {
+      log('Received data from service.')
+      log(data)
+    });
+    activitysocket.call('jfunc1', {d:'Hello! Jfunc call from client!'}, (err, json)=> {
       log(json);
       activitysocket.close();
     });
@@ -66,7 +70,7 @@ function start(Me, api) {
 
   // ServiceSocket.onData, in case client send data to this Service.
   // You will need entityID to Authorize remote user. And identify remote.
-  ss.onData = (entityID, data) => {
+  ss.on('data', (entityID, data) => {
     // Get Username and process your work.
     api.Service.Entity.getEntityOwner(entityID, (err, username)=>{
       // To store your data and associated with userid INSEAD OF USERNAME!!!
@@ -77,20 +81,21 @@ function start(Me, api) {
         userid = id;
       });
       // process you operation here
-      log('recieve a data');
-      log(data);
+      console.log('recieve a data');
+      console.log(data);
     });
-  }
-  // Send data to client.
-  ss.sendData('A entity ID', 'My data to be transfer.');
+  });
   // ServiceSocket.onConnect, in case on new connection.
-  ss.onConnect = (entityID, callback) => {
+  ss.on('connect', (entityID, callback) => {
+    log('Activty "'+entityID+'" connected.');
+    // Send data to client.
+    ss.sendData(entityID, 'A sent data from service.');
     // Do something.
     // report error;
     callback(false);
-  }
+  });
   // ServiceSocket.onClose, in case connection close.
-  ss.onClose = (entityID, callback) => {
+  ss.on('close', (entityID, callback) => {
     // Get Username and process your work.
     api.Service.Entity.getEntityOwner(entityID, (err, username)=>{
       // To store your data and associated with userid INSEAD OF USERNAME!!!
@@ -101,11 +106,11 @@ function start(Me, api) {
         userid = id;
       });
       // process you operation here
-      console.log('ServiceSocket closed');
+      log('ServiceSocket closed properly.');
       // report error;
       callback(false);
     });
-  }
+  });
 }
 
 // If the daemon stop, your service recieve close signal here.

@@ -22,6 +22,7 @@ function WorkerClient() {
   let _api;
   let _clear_obj_garbage_timeout = 3000;
   let _close_timeout = 1000;
+  let _service_name = 'NOOXY Service';
 
   let createLocalObjCallbacks = (obj)=> {
     let _Id = Utils.generateUniqueID();
@@ -49,6 +50,7 @@ function WorkerClient() {
       if(Utils.hasFunction(args[i])) {
         let _Id = Utils.generateUniqueID();
         _local_obj_callbacks_dict[_Id] = args[i];
+        console.log(Object.keys(_local_obj_callbacks_dict).length);
         _data.o[i] = [_Id, Utils.generateObjCallbacksTree(args[i])];
       }
     }
@@ -67,6 +69,8 @@ function WorkerClient() {
       if(Utils.hasFunction(args[i])) {
         let _Id = Utils.generateUniqueID();
         _local_obj_callbacks_dict[_Id] = args[i];
+        console.log(Object.keys(_local_obj_callbacks_dict).length);
+
         _data.o[i] = [_Id, Utils.generateObjCallbacksTree(args[i])];
       }
     }
@@ -82,6 +86,7 @@ function WorkerClient() {
     if(message.t == 0) {
       process.title = 'NSF_worker: '+message.p;
       _service_module = require(message.p);
+      _service_name = /.*\/([^\/]*)\/entry/g.exec(message.p)[1];
       _close_timeout = message.c;
       _api = Utils.generateObjCallbacks('API', message.a, callParentAPI);
       _api.getMe((err, Me)=>{
@@ -113,6 +118,14 @@ function WorkerClient() {
     }
     else if(message.t == 2) {
       delete _local_obj_callbacks_dict[message.i];
+      console.log(Object.keys(_local_obj_callbacks_dict).length);
+
+    }
+    else if(message.t == 98) {
+      Utils.tagLog('*ERR*', 'Service "'+_service_name+'" occured error on API call.');
+      console.log('Details: ');
+      console.log(message.d);
+      console.log(message.e);
     }
     else if(message.t == 99) {
       _service_module.close();

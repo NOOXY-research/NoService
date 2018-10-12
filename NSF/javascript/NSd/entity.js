@@ -82,7 +82,12 @@ function Entity() {
   };
 
   this.getEntityConnProfile = (entityID, callback) => {
-    _entities[entityID].getConnProfile(callback);
+    try {
+      _entities[entityID].getConnProfile(callback);
+    }
+    catch {
+      throw new Error('Entity not existed with this ID.');
+    }
   };
 
   this.returnEntitycount = () =>{

@@ -13,19 +13,6 @@ function ServiceAPI() {
   let _coregateway = null;
   let _clear_obj_garbage_timeout = 30000;
 
-  // prevent callback crash whole nooxy service framework system
-  let _safe_callback = (callback) => {
-    return (...args) => {
-      try {
-        callback.apply(null, args);
-      }
-      catch (err) {
-        Utils.tagLog('*ERR*', 'Service API occured error. Please restart daemon.');
-        console.log(err);
-      }
-    }
-  };
-
   // import core in order to bind realtime modules to api
   this.importCore = (coregateway) => {
     _coregateway = coregateway;
@@ -163,10 +150,8 @@ function ServiceAPI() {
       _api_tree = Utils.generateObjCallbacksTree(_api);
     }
 
-    _api.SafeCallback = _safe_callback;
-
     _api.getVariables = (callback)=> {
-      _safe_callback(callback(false, _coregateway.Variables));
+      callback(false, _coregateway.Variables);
     };
 
     _api.Service = {
@@ -193,8 +178,8 @@ function ServiceAPI() {
 
                   on: (type, remote_callback_obj_2)=> {
                     syncRefer(remote_callback_obj_2);
-                    as.getEntityID((err, entityID)=>{
-                      remote_callback_obj_2.run([], [err, entityID]);
+                    as.on(type, (err, data)=>{
+                      remote_callback_obj_2.run([], [err, data]);
                     });
                   }
               })
@@ -204,17 +189,17 @@ function ServiceAPI() {
           });
         },
         createDefaultDeamonSocket: (service, owner, callback) => {
-          _coregateway.Service.createDaemonActivitySocket(DAEMONTYPE, DAEMONIP, DAEMONPORT, service, owner, _safe_callback(callback));
+          _coregateway.Service.createDaemonActivitySocket(DAEMONTYPE, DAEMONIP, DAEMONPORT, service, owner, callback);
         },
         createDeamonSocket: (method, targetip, targetport, service, owner, callback) => {
-          _coregateway.Service.createDaemonActivitySocket(method, targetip, targetport, service, owner, _safe_callback(callback));
+          _coregateway.Service.createDaemonActivitySocket(method, targetip, targetport, service, owner, callback);
         },
         createAdminDeamonSocket: (method, targetip, targetport, service, callback) => {
-          _coregateway.Service.createAdminDaemonActivitySocket(method, targetip, targetport, service, _safe_callback(callback));
+          _coregateway.Service.createAdminDaemonActivitySocket(method, targetip, targetport, service, callback);
         },
 
         createDefaultAdminDeamonSocket: (service, remote_callback_obj) => {
-          _coregateway.Service.createAdminDaemonActivitySocket(DAEMONTYPE, DAEMONIP, DAEMONPORT, service, _safe_callback((err, as)=> {
+          _coregateway.Service.createAdminDaemonActivitySocket(DAEMONTYPE, DAEMONIP, DAEMONPORT, service, (err, as)=> {
             let local_callback_obj = new LCBO(as, (syncRefer)=> {
               return ({
                   call: (name, Json, remote_callback_obj_2)=> {
@@ -235,8 +220,8 @@ function ServiceAPI() {
 
                   on: (type, remote_callback_obj_2)=> {
                     syncRefer(remote_callback_obj_2);
-                    as.getEntityID((err, entityID)=>{
-                      remote_callback_obj_2.run([], [err, entityID]);
+                    as.on(type, (err, data)=>{
+                      remote_callback_obj_2.run([], [err, data]);
                     });
                   },
 
@@ -247,62 +232,63 @@ function ServiceAPI() {
             });
             remote_callback_obj.run([], [err, local_callback_obj]);
             remote_callback_obj.unbindRemote();
-          }));
+          });
         },
       },
 
       Entity: {
         getfliteredEntitiesMetaData: (key, value, callback) => {
-          _coregateway.Entity.getfliteredEntitiesMetaData(key, value, _safe_callback(callback));
+          _coregateway.Entity.getfliteredEntitiesMetaData(key, value, callback);
         },
         getfliteredEntitiesList: (query, callback) => {
           _coregateway.Entity.getfliteredEntitiesList(query, callback);
         },
         getEntityValue: (entityID, key, callback) => {
-          _safe_callback(callback(false, _coregateway.Entity.returnEntityValue(entityID, key)));
+          callback(false, _coregateway.Entity.returnEntityValue(entityID, key));
         },
-        getEntityOwner: (entityID, callback) => {
-          _safe_callback(callback(false, _coregateway.Entity.returnEntityOwner(entityID)));
+        getEntityOwner: (entityID, remote_callback_obj) => {
+          remote_callback_obj.run([], [false, _coregateway.Entity.returnEntityOwner(entityID)])
+          remote_callback_obj.unbindRemote();
         },
         getEntitiesMetaData: (callback) => {
-          _coregateway.Entity.getEntitiesMeta(_safe_callback(callback));
+          _coregateway.Entity.getEntitiesMeta(callback);
         },
         getEntityMetaData: (entityID, callback) => {
-          _safe_callback(callback(false, _coregateway.Entity.returnEntityMetaData(entityID)));
+          callback(false, _coregateway.Entity.returnEntityMetaData(entityID));
         },
         getCount: (callback) => {
-          _safe_callback(callback(false, _coregateway.Entity.returnEntitycount()));
+          callback(false, _coregateway.Entity.returnEntitycount());
         },
         getEntities: (callback) => {
-          _coregateway.Entity.getEntitiesMeta(_safe_callback(callback));
+          _coregateway.Entity.getEntitiesMeta(callback);
         },
         returnEntitiesID: (callback) => {
-          _safe_callback(callback(false, _coregateway.Entity.returnEntitiesID()));
+          callback(false, _coregateway.Entity.returnEntitiesID());
         },
         getEntityConnProfile: (entityID, callback)=> {
-            _coregateway.Entity.getEntityConnProfile(entityID, _safe_callback(callback));
+            _coregateway.Entity.getEntityConnProfile(entityID, callback);
         },
         on: (type, callback)=> {
           // type:
           // EntityCreated
-          _coregateway.Entity.on(type, _safe_callback(callback));
+          _coregateway.Entity.on(type, callback);
         }
       },
 
       getList: (callback) => {
-        _safe_callback(callback(false, _coregateway.Service.returnList()));
+        callback(false, _coregateway.Service.returnList());
       },
 
       getServiceManifest: (service_name, callback)=> {
-        _safe_callback(callback(false, _coregateway.Service.returnServiceManifest(service_name)));
+        callback(false, _coregateway.Service.returnServiceManifest(service_name));
       },
 
       getJSONfuncList: (service_name, callback)=> {
-        _safe_callback(callback(false, _coregateway.Service.returnJSONfuncList(service_name)));
+        callback(false, _coregateway.Service.returnJSONfuncList(service_name));
       },
 
       getJSONfuncDict: (service_name)=> {
-        _safe_callback(callback(false, _coregateway.Service.returnJSONfuncDict(service_name)));
+        callback(false, _coregateway.Service.returnJSONfuncDict(service_name));
       }
 
     };
@@ -310,22 +296,22 @@ function ServiceAPI() {
     _api.Authorization = {
       Authby: {
         Token: (entityID, callback) => {
-          _coregateway.Authorization.Authby.Token(entityID, _safe_callback(callback));
+          _coregateway.Authorization.Authby.Token(entityID, callback);
         },
         Password: (entityID, callback) => {
-          _coregateway.Authorization.Authby.Password(entityID, _safe_callback(callback));
+          _coregateway.Authorization.Authby.Password(entityID, callback);
         },
         Action: (entityID, action_meta_data, callback)=> {
 
         },
         isSuperUser: (entityID, callback) => {
-          _coregateway.Authorization.Authby.isSuperUser(entityID, _safe_callback(callback));
+          _coregateway.Authorization.Authby.isSuperUser(entityID, callback);
         },
         Domain: (entityID, callback) => {
-          _coregateway.Authorization.Authby.Domain(entityID, _safe_callback(callback));
+          _coregateway.Authorization.Authby.Domain(entityID, callback);
         },
         DaemonAuthKey: (entityID, callback) => {
-          _coregateway.Authorization.Authby.DaemonAuthKey(entityID, _safe_callback(callback));
+          _coregateway.Authorization.Authby.DaemonAuthKey(entityID, callback);
         }
       },
       importTrustDomains: (domains) => {
@@ -335,59 +321,62 @@ function ServiceAPI() {
 
     _api.Daemon = {
       getSettings: (callback)=>{
-        _safe_callback(callback(false, _coregateway.Daemon.Settings));
+        callback(false, _coregateway.Daemon.Settings);
       },
       close: ()=>{_coregateway.Daemon.close()}
     };
 
     _api.Authenticity = {
       createUser: (username, displayname, password, privilege, detail, firstname, lastname, callback) => {
-        _coregateway.Authenticity.createUser(username, displayname, password, privilege, detail, firstname, lastname, _safe_callback(callback));
+        _coregateway.Authenticity.createUser(username, displayname, password, privilege, detail, firstname, lastname, callback);
       },
 
       deleteUser: (username, callback) => {
-        _coregateway.Authenticity.deleteUser(username, _safe_callback(callback));
+        _coregateway.Authenticity.deleteUser(username, callback);
       },
 
       updatePassword: (username, newpassword, callback) => {
-        _coregateway.Authenticity.updatePassword(username, newpassword, _safe_callback(callback));
+        _coregateway.Authenticity.updatePassword(username, newpassword, callback);
       },
 
       updateToken: (username, callback) => {
-        _coregateway.Authenticity.updateToken(username, _safe_callback(callback));
+        _coregateway.Authenticity.updateToken(username, callback);
       },
 
       updatePrivilege: (username, privilege, callback) => {
-        _coregateway.Authenticity.updatePrivilege(username, privilege, _safe_callback(callback));
+        _coregateway.Authenticity.updatePrivilege(username, privilege, callback);
       },
 
       updateName: (username, firstname, lastname, callback) => {
-        _coregateway.Authenticity.updateName(username, firstname, lastname, _safe_callback(callback));
+        _coregateway.Authenticity.updateName(username, firstname, lastname, callback);
       },
 
       getUserMeta: (username, callback) => {
-        _coregateway.Authenticity.getUserMeta(username, _safe_callback(callback));
+        _coregateway.Authenticity.getUserMeta(username, callback);
       },
 
-      getUserID: (username, callback) => {
-        _coregateway.Authenticity.getUserID(username, _safe_callback(callback));
+      getUserID: (username, remote_callback_obj) => {
+        _coregateway.Authenticity.getUserID(username, (err, userid)=> {
+          remote_callback_obj.run([], [err, userid]);
+          remote_callback_obj.unbindRemote();
+        });
       },
 
       getUsernamebyId: (userid, callback) => {
-        _coregateway.Authenticity.getUsernamebyId(userid, _safe_callback(callback));
+        _coregateway.Authenticity.getUsernamebyId(userid, callback);
       },
 
       getUserExistence: (username, callback)=>{
-        _coregateway.Authenticity.getUserExistence(username, _safe_callback(callback));
+        _coregateway.Authenticity.getUserExistence(username, callback);
       }
     };
 
     _api.Connection = {
       getServers: (callback) => {
-        _coregateway.Connection.getServers(_safe_callback(callback));
+        _coregateway.Connection.getServers(callback);
       },
       getClients: (callback) => {
-        _coregateway.Connection.getClients(_safe_callback(callback));
+        _coregateway.Connection.getClients(callback);
       },
       addServer: (conn_method, ip, port) => {
         _coregateway.Connection.addServer(conn_method, ip, port);
@@ -396,13 +385,13 @@ function ServiceAPI() {
 
     _api.Crypto = {
       generateAESCBC256KeyByHash: (string1, string2, callback)=>{
-        _coregateway.NoCrypto.generateAESCBC256KeyByHash(string1, string2, _safe_callback(callback));
+        _coregateway.NoCrypto.generateAESCBC256KeyByHash(string1, string2, callback);
       },
       encryptString: (algo, key, toEncrypt, callback)=>{
-        _coregateway.NoCrypto.encryptString(algo, key, toEncrypt, _safe_callback(callback));
+        _coregateway.NoCrypto.encryptString(algo, key, toEncrypt, callback);
       },
       decryptString: (algo, key, toDecrypt, callback) =>{
-        _coregateway.NoCrypto.decryptString(algo, key, toDecrypt, _safe_callback(callback));
+        _coregateway.NoCrypto.decryptString(algo, key, toDecrypt, callback);
       }
     }
 
@@ -435,7 +424,7 @@ function ServiceAPI() {
                   returnJSON(err, json_be_returned);
                 });
               }, true);
-              remote_callback_obj.run([], [json, entityID, returnJSON_LCBO])
+              remote_callback_obj.run([], [json, entityID, returnJSON_LCBO]);
             });
           },
 
@@ -444,7 +433,25 @@ function ServiceAPI() {
           },
 
           on: (type, remote_callback_obj)=> {
+            if(type == 'data') {
+              service_socket.on('data', (entityID, data)=> {
+                remote_callback_obj.run([], [entityID, data]);
+              });
+            }
+            else {
+              service_socket.on(type, (entityID, callback)=> {
+                let callback_LCBO = new LCBO(callback, (callback_syncRefer)=> {
+                  return ((err)=>{
+                    callback(err);
+                  });
+                }, true);
+                remote_callback_obj.run([], [entityID, callback_LCBO]);
+              });
+            }
+          },
 
+          sendData: (entityID, data)=> {
+            service_socket.sendData(entityID, data);
           }
         })
       });
