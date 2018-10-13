@@ -99,7 +99,7 @@ function start(Me, api) {
               '  daemon [settings|stop]\n'+
               '\n'+
               '[service]\n'+
-              '  service [list|[manifest|create] {service name}]\n'+
+              '  service [list|[manifest|create|relaunch] {service name}]\n'+
               '  service [jfunclist|jfuncdict|jfuncshow] {target service}\n'+
               '  service jfunc {target service} {target username} {target jfunc} {JSON} ---Call a JSONfunction as target user.\n'+
               '  service entity [show {entityID}|list|count|showuser {username}]\n'+
@@ -193,6 +193,11 @@ function start(Me, api) {
                     });
                   }
                 });
+              },
+
+              relaunch: (t1, c1) => {
+                api.Service.relaunch(t1[0]);
+                c1(false, {r: "Emitted relaunch signal."});
               },
 
               list: (t1, c1) => {

@@ -541,8 +541,11 @@ function ServiceAPI() {
       getJSONfuncDict: (service_name, remote_callback_obj)=> {
         remote_callback_obj.run([], [false, _coregateway.Service.returnJSONfuncDict(service_name)]);
         remote_callback_obj.unbindRemote();
-      }
+      },
 
+      relaunch: (service_name)=> {
+        _coregateway.Service.relaunch(service_name);
+      }
     };
 
     _api.Authorization = {

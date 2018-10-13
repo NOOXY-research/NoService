@@ -28,9 +28,14 @@ function WorkerDaemon() {
 
   };
 
+  this.importCloseTimeout = (timeout)=> {
+    _close_worker_timeout = timeout;
+  }
+
   function WorkerClient(path) {
     let _serviceapi = null;
     let _child = null;
+    let _service_name =  /.*\/([^\/]*)\/entry/g.exec(path)[1];
     _worker_clients[path] = this;
 
     process.on('exit', ()=> {
@@ -94,14 +99,18 @@ function WorkerDaemon() {
     };
 
     this.launch = ()=> {
-      _child = fork(require.resolve('./worker.js'));
+      _child = fork(require.resolve('./worker.js'), {stdio: [process.stdin, process.stdout, process.stderr, 'ipc']});
       _child.on('message', message => {
         this.onMessage(message);
       });
     };
 
     this.relaunch = ()=> {
-
+      this.close()
+      Utils.tagLog('Daemon', 'Relaunching service "'+_service_name+'"');
+      setTimeout(()=>{
+        this.launch();
+      }, _close_worker_timeout+10);
     };
 
     this.importAPI = (api) => {
@@ -122,6 +131,10 @@ function WorkerDaemon() {
   this.importAPI = (serviceapi_module) => {
     _serviceapi_module = serviceapi_module;
   };
+
+  this.close = ()=> {
+
+  }
 }
 
 module.exports = WorkerDaemon;

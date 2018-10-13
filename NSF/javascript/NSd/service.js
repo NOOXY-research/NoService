@@ -21,13 +21,18 @@ function Service() {
   let _daemon_auth_key = null;
   let _ASockets = {};
   let _debug = false;
-  let _workerd = new WorkerDaemon();
+  let _workerd;
+
 
 
   let ActivitySocketDestroyTimeout = 1000;
 
   this.setDebug = (boolean) => {
     _debug = boolean;
+  };
+
+  this.importWorkerDaemon = (wd)=> {
+    _workerd = wd;
   };
 
   this.importDaemonAuthKey = (key) => {
@@ -608,6 +613,10 @@ function Service() {
     let _worker = null;
     let _service_manifest = null;
 
+    this.relaunch = ()=> {
+      _worker.relaunch();
+    }
+
     this.launch = (depended_service_dict, callback) => {
       let erreport = null;
       // check node packages dependencies
@@ -883,6 +892,10 @@ function Service() {
 
   this.returnJSONfuncDict = (service_name) => {
     return _local_services[service_name].returnJSONfuncDict();
+  }
+
+  this.relaunch = (service_name)=> {
+    _local_services[service_name].relaunch();
   }
 
   this.returnList = () => {
