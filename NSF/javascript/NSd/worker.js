@@ -50,7 +50,7 @@ function WorkerClient() {
       if(Utils.hasFunction(args[i])) {
         let _Id = Utils.generateUniqueID();
         _local_obj_callbacks_dict[_Id] = args[i];
-        console.log(Object.keys(_local_obj_callbacks_dict).length);
+        // console.log(Object.keys(_local_obj_callbacks_dict).length);
         _data.o[i] = [_Id, Utils.generateObjCallbacksTree(args[i])];
       }
     }
@@ -69,7 +69,7 @@ function WorkerClient() {
       if(Utils.hasFunction(args[i])) {
         let _Id = Utils.generateUniqueID();
         _local_obj_callbacks_dict[_Id] = args[i];
-        console.log(Object.keys(_local_obj_callbacks_dict).length);
+        // console.log(Object.keys(_local_obj_callbacks_dict).length);
 
         _data.o[i] = [_Id, Utils.generateObjCallbacksTree(args[i])];
       }
@@ -114,11 +114,19 @@ function WorkerClient() {
     }
     // function return
     else if(message.t == 1) {
-      Utils.callObjCallback(_local_obj_callbacks_dict[message.p[0]], message.p[1], message.a, message.o, this.emitParentCallback, Utils.generateObjCallbacks);
+      try {
+        Utils.callObjCallback(_local_obj_callbacks_dict[message.p[0]], message.p[1], message.a, message.o, this.emitParentCallback, Utils.generateObjCallbacks);
+      }
+      catch (e) {
+        Utils.tagLog('*ERR*', 'Callback error occured on service "'+_service_name+'".');
+        console.log('Details: ');
+        console.log(message);
+        console.log(e);
+      }
     }
     else if(message.t == 2) {
       delete _local_obj_callbacks_dict[message.i];
-      console.log(Object.keys(_local_obj_callbacks_dict).length);
+      // console.log(Object.keys(_local_obj_callbacks_dict).length);
     }
     else if(message.t == 98) {
       Utils.tagLog('*ERR*', 'Service "'+_service_name+'" occured error on API call.');
@@ -127,7 +135,8 @@ function WorkerClient() {
       console.log(message.e);
     }
     else if(message.t == 99) {
-      _service_module.close();
+      if(_service_module)
+        _service_module.close();
       setTimeout(()=> {process.exit()}, _close_timeout);
     }
   }

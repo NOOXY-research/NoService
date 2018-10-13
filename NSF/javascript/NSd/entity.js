@@ -8,7 +8,7 @@ let Utils = require('./utilities');
 
 function Entity() {
   let _seed = Utils.generateGUID();
-  let _callbacks = {};
+  let _on_callbacks = {};
   let _entities = {};
 
   function EntityJson(entityID, Json, conn_profile) {
@@ -45,18 +45,18 @@ function Entity() {
   }
 
   this.on = (type, callback) => {
-    if(_callbacks[type] == null) {
-      _callbacks[type] = [];
+    if(_on_callbacks[type] == null) {
+      _on_callbacks[type] = [];
     }
-    _callbacks[type].push(callback);
+    _on_callbacks[type].push(callback);
   };
 
   this.registerEntity = (entityJson, conn_profile, callback) => {
     let err = false;
     let entityID = Utils.generateUniqueID();
     _entities[entityID] = new EntityJson(entityID, entityJson, conn_profile);
-    for(let i in _callbacks['EntityCreated']) {
-      (_callbacks['EntityCreated'])[i](entityID, entityJson);
+    for(let i in _on_callbacks['EntityCreated']) {
+      (_on_callbacks['EntityCreated'])[i](entityID, entityJson);
     }
     callback(err, entityID);
   };
@@ -143,14 +143,14 @@ function Entity() {
   };
 
   this.deleteEntity = (entityID) => {
-    for(let i in _callbacks['EntityDeleted']) {
-      (_callbacks['EntityDeleted'])[i](entityID, _entities[entityID].returnMeta());
+    for(let i in _on_callbacks['EntityDeleted']) {
+      (_on_callbacks['EntityDeleted'])[i](entityID, _entities[entityID].returnMeta());
     }
     delete _entities[entityID];
   };
 
   this.close = () => {
-    _callbacks = {};
+    _on_callbacks = {};
     _entities = {};
   };
 }

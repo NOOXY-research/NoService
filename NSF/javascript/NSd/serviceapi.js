@@ -47,7 +47,7 @@ function ServiceAPI() {
     }, _clear_obj_garbage_timeout);
 
     // Local callback object
-    function LCBO(obj, obj_contructor, isOneTimeObj) {
+    function LCBO(obj, obj_contructor, isOneTimeObj, isNastyCallback) {
       let _RCBOs = {};
       let _id = Utils.generateUniqueID();
       _LCBOs[_id] = this;
@@ -57,12 +57,22 @@ function ServiceAPI() {
       }
 
       let _obj = obj;
-      let _callbacks = obj_contructor(_syncRefer);
+      let _callbacks;
+      if(obj_contructor)
+        _callbacks = obj_contructor(_syncRefer);
 
       this.isLCBO = true;
 
+      this.returnId = ()=> {return _id};
+
       this.isReferCanceled = ()=>{
-        return obj.worker_cancel_refer;
+        if(obj) {
+          return obj.worker_cancel_refer;
+        }
+        else {
+          return true;
+        }
+
       }
 
       this.destroy = ()=> {
@@ -73,17 +83,40 @@ function ServiceAPI() {
       };
 
       this.callCallback = (path, args, arg_objs_trees)=>{
-        Utils.callObjCallback(_callbacks, path, args, arg_objs_trees, null,
-        (remoteobjid, remoteobjtree)=>{
-          return(new RCBO(remoteobjid, remoteobjtree));
-        });
+        if(isNastyCallback) {
+          Utils.callObjCallback(obj, path, args, arg_objs_trees, ([r_obj_id, r_path], r_args)=> {
+            let _args_objs = {};
+            for(let i in r_args) {
+              if(Utils.hasFunction(r_args[i])) {
+                let _arg_LCBO = new LCBO(r_args[i], null, false, true);
+                _LCBOs[_arg_LCBO.returnId()] = _arg_LCBO;
+                r_args[i] = null;
+                // console.log(Object.keys(_local_obj_callbacks_dict).length);
+                _args_objs[i] = _arg_LCBO.returnTree();
+              }
+            }
+            _emitRemoteCallback([r_obj_id, r_path], r_args, _args_objs);
+          }, Utils.generateObjCallbacks);
+        }
+        else {
+          Utils.callObjCallback(_callbacks, path, args, arg_objs_trees, null,
+          (remoteobjid, remoteobjtree)=>{
+              return(new RCBO(remoteobjid, remoteobjtree));
+          });
+        }
         if(isOneTimeObj) {
           delete _LCBOs[_id]
         }
       }
 
       this.returnTree = ()=> {
-        return [_id, Utils.generateObjCallbacksTree(_callbacks)];
+        if(isNastyCallback) {
+          return [_id, Utils.generateObjCallbacksTree(obj)];
+        }
+        else {
+          return [_id, Utils.generateObjCallbacksTree(_callbacks)];
+        }
+
       }
     };
 
@@ -159,7 +192,7 @@ function ServiceAPI() {
     _api.Service = {
       ActivitySocket: {
         createSocket: (method, targetip, targetport, service, owner, remote_callback_obj) => {
-          _coregateway.Service.createActivitySocket(method, targetip, targetport, service, owner, (err, activitysocket)=> {
+          _coregateway.Service.createActivitySocket(method, targetip, targetport, service, owner, (err, as)=> {
             let local_callback_obj = new LCBO(as, (syncRefer)=> {
               return ({
                   call: (name, Json, remote_callback_obj_2)=> {
@@ -199,13 +232,124 @@ function ServiceAPI() {
           });
         },
         createDefaultDeamonSocket: (service, owner, callback) => {
-          _coregateway.Service.createDaemonActivitySocket(DAEMONTYPE, DAEMONIP, DAEMONPORT, service, owner, callback);
+          _coregateway.Service.createDaemonActivitySocket(DAEMONTYPE, DAEMONIP, DAEMONPORT, service, owner, (err, as)=> {
+            let local_callback_obj = new LCBO(as, (syncRefer)=> {
+              return ({
+                  call: (name, Json, remote_callback_obj_2)=> {
+                    syncRefer(remote_callback_obj_2);
+                    as.call(name, Json, (err, json)=> {
+                      remote_callback_obj_2.run([], [err, json]);
+                      remote_callback_obj_2.unbindRemote();
+                    });
+                  },
+
+                  getEntityID: (remote_callback_obj_2)=> {
+                    syncRefer(remote_callback_obj_2);
+                    as.getEntityID((err, entityID)=>{
+                      remote_callback_obj_2.run([], [err, entityID]);
+                      remote_callback_obj_2.unbindRemote();
+                    });
+                  },
+
+                  on: (type, remote_callback_obj_2)=> {
+                    syncRefer(remote_callback_obj_2);
+                    as.on(type, (err, data)=>{
+                      remote_callback_obj_2.run([], [err, data]);
+                    });
+                  },
+
+                  sendData: (data)=> {
+                    as.sendData(data);
+                  },
+
+                  close: ()=> {
+                    as.close();
+                  }
+              })
+            });
+            remote_callback_obj.run([], [err, local_callback_obj]);
+            remote_callback_obj.unbindRemote();
+          });
         },
         createDeamonSocket: (method, targetip, targetport, service, owner, callback) => {
-          _coregateway.Service.createDaemonActivitySocket(method, targetip, targetport, service, owner, callback);
+          _coregateway.Service.createDaemonActivitySocket(method, targetip, targetport, service, owner, (err, as)=> {
+            let local_callback_obj = new LCBO(as, (syncRefer)=> {
+              return ({
+                  call: (name, Json, remote_callback_obj_2)=> {
+                    syncRefer(remote_callback_obj_2);
+                    as.call(name, Json, (err, json)=> {
+                      remote_callback_obj_2.run([], [err, json]);
+                      remote_callback_obj_2.unbindRemote();
+                    });
+                  },
+
+                  getEntityID: (remote_callback_obj_2)=> {
+                    syncRefer(remote_callback_obj_2);
+                    as.getEntityID((err, entityID)=>{
+                      remote_callback_obj_2.run([], [err, entityID]);
+                      remote_callback_obj_2.unbindRemote();
+                    });
+                  },
+
+                  on: (type, remote_callback_obj_2)=> {
+                    syncRefer(remote_callback_obj_2);
+                    as.on(type, (err, data)=>{
+                      remote_callback_obj_2.run([], [err, data]);
+                    });
+                  },
+
+                  sendData: (data)=> {
+                    as.sendData(data);
+                  },
+
+                  close: ()=> {
+                    as.close();
+                  }
+              })
+            });
+            remote_callback_obj.run([], [err, local_callback_obj]);
+            remote_callback_obj.unbindRemote();
+          });
         },
         createAdminDeamonSocket: (method, targetip, targetport, service, callback) => {
-          _coregateway.Service.createAdminDaemonActivitySocket(method, targetip, targetport, service, callback);
+          _coregateway.Service.createAdminDaemonActivitySocket(method, targetip, targetport, service, (err, as)=> {
+            let local_callback_obj = new LCBO(as, (syncRefer)=> {
+              return ({
+                  call: (name, Json, remote_callback_obj_2)=> {
+                    syncRefer(remote_callback_obj_2);
+                    as.call(name, Json, (err, json)=> {
+                      remote_callback_obj_2.run([], [err, json]);
+                      remote_callback_obj_2.unbindRemote();
+                    });
+                  },
+
+                  getEntityID: (remote_callback_obj_2)=> {
+                    syncRefer(remote_callback_obj_2);
+                    as.getEntityID((err, entityID)=>{
+                      remote_callback_obj_2.run([], [err, entityID]);
+                      remote_callback_obj_2.unbindRemote();
+                    });
+                  },
+
+                  on: (type, remote_callback_obj_2)=> {
+                    syncRefer(remote_callback_obj_2);
+                    as.on(type, (err, data)=>{
+                      remote_callback_obj_2.run([], [err, data]);
+                    });
+                  },
+
+                  sendData: (data)=> {
+                    as.sendData(data);
+                  },
+
+                  close: ()=> {
+                    as.close();
+                  }
+              })
+            });
+            remote_callback_obj.run([], [err, local_callback_obj]);
+            remote_callback_obj.unbindRemote();
+          });
         },
 
         createDefaultAdminDeamonSocket: (service, remote_callback_obj) => {
@@ -251,21 +395,31 @@ function ServiceAPI() {
       },
 
       Entity: {
-        getfliteredEntitiesMetaData: (key, value, callback) => {
-          _coregateway.Entity.getfliteredEntitiesMetaData(key, value, callback);
+        getfliteredEntitiesMetaData: (key, value, remote_callback_obj) => {
+          _coregateway.Entity.getfliteredEntitiesMetaData(key, value, (err, metatdata)=> {
+            remote_callback_obj.run([], [err, metatdata])
+            remote_callback_obj.unbindRemote();
+          });
         },
-        getfliteredEntitiesList: (query, callback) => {
-          _coregateway.Entity.getfliteredEntitiesList(query, callback);
+        getfliteredEntitiesList: (query, remote_callback_obj) => {
+          _coregateway.Entity.getfliteredEntitiesList(query, (err, list)=> {
+            remote_callback_obj.run([], [err, list])
+            remote_callback_obj.unbindRemote();
+          });
         },
-        getEntityValue: (entityID, key, callback) => {
-          callback(false, _coregateway.Entity.returnEntityValue(entityID, key));
+        getEntityValue: (entityID, key, remote_callback_obj) => {
+          remote_callback_obj.run([], [false, _coregateway.Entity.returnEntityValue(entityID, key)])
+          remote_callback_obj.unbindRemote();
         },
         getEntityOwner: (entityID, remote_callback_obj) => {
           remote_callback_obj.run([], [false, _coregateway.Entity.returnEntityOwner(entityID)])
           remote_callback_obj.unbindRemote();
         },
-        getEntitiesMetaData: (callback) => {
-          _coregateway.Entity.getEntitiesMeta(callback);
+        getEntitiesMetaData: (remote_callback_obj) => {
+          _coregateway.Entity.getEntitiesMeta((err, metatdata)=> {
+            remote_callback_obj.run([], [err, metatdata])
+            remote_callback_obj.unbindRemote();
+          });
         },
         getEntityMetaData: (entityID, remote_callback_obj) => {
           remote_callback_obj.run([], [false, _coregateway.Entity.returnEntityMetaData(entityID)])
@@ -275,58 +429,156 @@ function ServiceAPI() {
           remote_callback_obj.run([], [false, _coregateway.Entity.returnEntitycount()])
           remote_callback_obj.unbindRemote();
         },
-        getEntities: (callback) => {
-          _coregateway.Entity.getEntitiesMeta(callback);
+        getEntities: (remote_callback_obj) => {
+          _coregateway.Entity.getEntitiesMeta((err, meta)=> {
+            remote_callback_obj.run([], [err, meta]);
+            remote_callback_obj.unbindRemote();
+          });
         },
         getEntitiesID: (remote_callback_obj) => {
-          remote_callback_obj.run([], [false, _coregateway.Entity.returnEntitiesID()])
+          remote_callback_obj.run([], [false, _coregateway.Entity.returnEntitiesID()]);
           remote_callback_obj.unbindRemote();
         },
-        getEntityConnProfile: (entityID, callback)=> {
-            _coregateway.Entity.getEntityConnProfile(entityID, callback);
+        getEntityConnProfile: (entityID, remote_callback_obj)=> {
+          _coregateway.Entity.getEntityConnProfile(entityID, (err, conn_profile)=> {
+            let local_callback_obj = new LCBO(conn_profile, (conn_profile_syncRefer)=> {
+              return ({
+                  getServerID: (remote_callback_obj_2)=> {
+                    conn_profile_syncRefer(remote_callback_obj_2);
+                    conn_profile.getServerID((err, serverid)=> {
+                      remote_callback_obj_2.run([], [err, serverid]);
+                      remote_callback_obj_2.unbindRemote();
+                    });
+                  },
+
+                  getHostIP: (remote_callback_obj_2)=> {
+                    conn_profile_syncRefer(remote_callback_obj_2);
+                    conn_profile.getHostIP((err, hostip)=> {
+                      remote_callback_obj_2.run([], [err, hostip]);
+                      remote_callback_obj_2.unbindRemote();
+                    });
+                  },
+
+                  getHostPort: (remote_callback_obj_2)=> {
+                    conn_profile_syncRefer(remote_callback_obj_2);
+                    conn_profile.getHostPort((err, hostport)=> {
+                      remote_callback_obj_2.run([], [err, hostport]);
+                      remote_callback_obj_2.unbindRemote();
+                    });
+                  },
+
+                  getClientIP: (remote_callback_obj_2)=> {
+                    conn_profile_syncRefer(remote_callback_obj_2);
+                    conn_profile.getClientIP((err, clientip)=> {
+                      remote_callback_obj_2.run([], [err, clientip]);
+                      remote_callback_obj_2.unbindRemote();
+                    });
+                  },
+
+                  getConnMethod: (remote_callback_obj_2)=> {
+                    conn_profile_syncRefer(remote_callback_obj_2);
+                    conn_profile.getConnMethod((err, connMethod)=> {
+                      remote_callback_obj_2.run([], [err, connMethod]);
+                      remote_callback_obj_2.unbindRemote();
+                    });
+                  },
+
+                  getRemotePosition: (remote_callback_obj_2)=> {
+                    conn_profile_syncRefer(remote_callback_obj_2);
+                    conn_profile.getRemotePosition((err, remotepos)=> {
+                      remote_callback_obj_2.run([], [err, remotepos]);
+                      remote_callback_obj_2.unbindRemote();
+                    });
+                  },
+
+                  setBundle: (key, value)=> {
+                    conn_profile.setBundle(key, value);
+                  },
+
+                  getBundle: (key, remote_callback_obj_2)=> {
+                    conn_profile_syncRefer(remote_callback_obj_2);
+                    conn_profile.getBundle(key, (err, bundle)=> {
+                      remote_callback_obj_2.run([], [err, bundle]);
+                      remote_callback_obj_2.unbindRemote();
+                    });
+                  },
+
+                  getGUID: (remote_callback_obj_2)=> {
+                    conn_profile_syncRefer(remote_callback_obj_2);
+                    conn_profile.getGUID((err, guid)=> {
+                      remote_callback_obj_2.run([], [err, guid]);
+                      remote_callback_obj_2.unbindRemote();
+                    });
+                  }
+              })
+            });
+            remote_callback_obj.run([], [err, local_callback_obj]);
+            remote_callback_obj.unbindRemote();
+          });
         },
-        on: (type, callback)=> {
-          _coregateway.Entity.on(type, callback);
+        on: (type, remote_callback_obj)=> {
+          _coregateway.Entity.on(type, (entityID, entityJson)=> {
+            remote_callback_obj.run([], [entityID, entityJson])
+          });
         }
       },
 
-      getList: (callback) => {
-        callback(false, _coregateway.Service.returnList());
+      getList: (remote_callback_obj) => {
+        remote_callback_obj.run([], [false, _coregateway.Service.returnList()]);
+        remote_callback_obj.unbindRemote();
       },
 
-      getServiceManifest: (service_name, callback)=> {
-        callback(false, _coregateway.Service.returnServiceManifest(service_name));
+      getServiceManifest: (service_name, remote_callback_obj)=> {
+        remote_callback_obj.run([], [false, _coregateway.Service.returnServiceManifest(service_name)]);
+        remote_callback_obj.unbindRemote();
       },
 
-      getJSONfuncList: (service_name, callback)=> {
-        callback(false, _coregateway.Service.returnJSONfuncList(service_name));
+      getJSONfuncList: (service_name, remote_callback_obj)=> {
+        remote_callback_obj.run([], [false, _coregateway.Service.returnJSONfuncList(service_name)]);
+        remote_callback_obj.unbindRemote();
       },
 
-      getJSONfuncDict: (service_name)=> {
-        callback(false, _coregateway.Service.returnJSONfuncDict(service_name));
+      getJSONfuncDict: (service_name, remote_callback_obj)=> {
+        remote_callback_obj.run([], [false, _coregateway.Service.returnJSONfuncDict(service_name)]);
+        remote_callback_obj.unbindRemote();
       }
 
     };
 
     _api.Authorization = {
       Authby: {
-        Token: (entityID, callback) => {
-          _coregateway.Authorization.Authby.Token(entityID, callback);
+        Token: (entityID, remote_callback_obj) => {
+          _coregateway.Authorization.Authby.Token(entityID, (err, pass)=> {
+            remote_callback_obj.run([], [err, pass]);
+            remote_callback_obj.unbindRemote();
+          });
         },
-        Password: (entityID, callback) => {
-          _coregateway.Authorization.Authby.Password(entityID, callback);
+        Password: (entityID, remote_callback_obj) => {
+          _coregateway.Authorization.Authby.Password(entityID, (err, pass)=> {
+            remote_callback_obj.run([], [err, pass]);
+            remote_callback_obj.unbindRemote();
+          });
         },
         Action: (entityID, action_meta_data, callback)=> {
 
         },
-        isSuperUser: (entityID, callback) => {
-          _coregateway.Authorization.Authby.isSuperUser(entityID, callback);
+        isSuperUser: (entityID, remote_callback_obj) => {
+          _coregateway.Authorization.Authby.isSuperUser(entityID, (err, pass)=> {
+            remote_callback_obj.run([], [err, pass]);
+            remote_callback_obj.unbindRemote();
+          });
         },
-        Domain: (entityID, callback) => {
-          _coregateway.Authorization.Authby.Domain(entityID, callback);
+        Domain: (entityID, remote_callback_obj) => {
+          _coregateway.Authorization.Authby.Domain(entityID, (err, pass)=> {
+            remote_callback_obj.run([], [err, pass]);
+            remote_callback_obj.unbindRemote();
+          });
         },
-        DaemonAuthKey: (entityID, callback) => {
-          _coregateway.Authorization.Authby.DaemonAuthKey(entityID, callback);
+        DaemonAuthKey: (entityID, remote_callback_obj) => {
+          _coregateway.Authorization.Authby.DaemonAuthKey(entityID, (err, pass)=> {
+            remote_callback_obj.run([], [err, pass]);
+            remote_callback_obj.unbindRemote();
+          });
         }
       },
       importTrustDomains: (domains) => {
@@ -335,9 +587,11 @@ function ServiceAPI() {
     };
 
     _api.Daemon = {
-      getSettings: (callback)=>{
-        callback(false, _coregateway.Daemon.Settings);
+      getSettings: (remote_callback_obj)=>{
+        remote_callback_obj.run([], [false, _coregateway.Daemon.Settings]);
+        remote_callback_obj.unbindRemote();
       },
+
       close: ()=>{_coregateway.Daemon.close()}
     };
 
@@ -420,21 +674,38 @@ function ServiceAPI() {
     };
 
     _api.Crypto = {
-      generateAESCBC256KeyByHash: (string1, string2, callback)=>{
-        _coregateway.NoCrypto.generateAESCBC256KeyByHash(string1, string2, callback);
+      generateAESCBC256KeyByHash: (string1, string2, remote_callback_obj)=>{
+        _coregateway.NoCrypto.generateAESCBC256KeyByHash(string1, string2, (err, key)=> {
+          remote_callback_obj.run([], [err, key]);
+          remote_callback_obj.unbindRemote();
+        });
       },
-      encryptString: (algo, key, toEncrypt, callback)=>{
-        _coregateway.NoCrypto.encryptString(algo, key, toEncrypt, callback);
+      encryptString: (algo, key, toEncrypt, remote_callback_obj)=>{
+        _coregateway.NoCrypto.encryptString(algo, key, toEncrypt, (err, enstr)=> {
+          remote_callback_obj.run([], [err, enstr]);
+          remote_callback_obj.unbindRemote();
+        });
       },
-      decryptString: (algo, key, toDecrypt, callback) =>{
-        _coregateway.NoCrypto.decryptString(algo, key, toDecrypt, callback);
+      decryptString: (algo, key, toDecrypt, remote_callback_obj) =>{
+        _coregateway.NoCrypto.decryptString(algo, key, toDecrypt, (err, destr)=> {
+          remote_callback_obj.run([], [err, destr]);
+          remote_callback_obj.unbindRemote();
+        });
       }
     }
 
     // for sniffing data
     _api.Sniffer = {
-      onRouterJSON: _coregateway.Router.addJSONSniffer,
-      onRouterRawData: _coregateway.Router.addRAWSniffer,
+      onRouterJSON: (remote_callback_obj)=> {
+        _coregateway.Router.addJSONSniffer((err, data)=> {
+          remote_callback_obj.run([], [err, data]);
+        });
+      },
+      onRouterRawData: (remote_callback_obj)=> {
+        _coregateway.Router.addRAWSniffer((err, data)=> {
+          remote_callback_obj.run([], [err, data]);
+        });
+      },
     }
 
     // generate API Tree
@@ -464,8 +735,23 @@ function ServiceAPI() {
             });
           },
 
-          sdef: (remote_callback_obj)=> {
-
+          sdef: (name, remote_callback_obj, remote_callback_obj_2)=> {
+            service_socket.sdef(name, (json, entityID, returnJSON)=> {
+              let returnJSON_LCBO = new LCBO(returnJSON, (returnJSON_syncRefer)=> {
+                return ((err, json_be_returned)=>{
+                  returnJSON(err, json_be_returned);
+                });
+              }, true);
+              remote_callback_obj.run([], [json, entityID, returnJSON_LCBO]);
+            },
+            (json, entityID, returnJSON)=> {
+              let returnJSON_LCBO = new LCBO(returnJSON, (returnJSON_syncRefer)=> {
+                return ((err, json_be_returned)=>{
+                  returnJSON(err, json_be_returned);
+                });
+              }, true);
+              remote_callback_obj_2.run([], [json, entityID, returnJSON_LCBO]);
+            });
           },
 
           on: (type, remote_callback_obj)=> {
@@ -507,19 +793,80 @@ function ServiceAPI() {
 
   this.createServiceAPIwithImplementaion = (service_socket, manifest, callback) => {
     _get_normal_api((err, api) => {
-      // console.log(api);
-      api.Service.ServiceSocket = service_socket;
-      api.getImplementation = (callback)=>{
-        callback(false, _coregateway.Implementation);
-      };
+      api.addAPI(['Service', 'ServiceSocket'], (LCBO)=> {
+        return ({
+          def: (name, remote_callback_obj)=> {
+            service_socket.def(name, (json, entityID, returnJSON)=> {
+              let returnJSON_LCBO = new LCBO(returnJSON, (returnJSON_syncRefer)=> {
+                return ((err, json_be_returned)=>{
+                  returnJSON(err, json_be_returned);
+                });
+              }, true);
+              remote_callback_obj.run([], [json, entityID, returnJSON_LCBO]);
+            });
+          },
 
-      api.getMe = (callback)=>{
-        callback(false, {
-          Settings: manifest.settings,
-          Manifest: manifest,
-          FilesPath: _coregateway.Daemon.Settings.services_files_path+manifest.name+'/'
+          sdef: (name, remote_callback_obj, remote_callback_obj_2)=> {
+            service_socket.sdef(name, (json, entityID, returnJSON)=> {
+              let returnJSON_LCBO = new LCBO(returnJSON, (returnJSON_syncRefer)=> {
+                return ((err, json_be_returned)=>{
+                  returnJSON(err, json_be_returned);
+                });
+              }, true);
+              remote_callback_obj.run([], [json, entityID, returnJSON_LCBO]);
+            },
+            (json, entityID, returnJSON)=> {
+              let returnJSON_LCBO = new LCBO(returnJSON, (returnJSON_syncRefer)=> {
+                return ((err, json_be_returned)=>{
+                  returnJSON(err, json_be_returned);
+                });
+              }, true);
+              remote_callback_obj_2.run([], [json, entityID, returnJSON_LCBO]);
+            });
+          },
+
+          on: (type, remote_callback_obj)=> {
+            if(type == 'data') {
+              service_socket.on('data', (entityID, data)=> {
+                remote_callback_obj.run([], [entityID, data]);
+              });
+            }
+            else {
+              service_socket.on(type, (entityID, callback)=> {
+                let callback_LCBO = new LCBO(callback, (callback_syncRefer)=> {
+                  return ((err)=>{
+                    callback(err);
+                  });
+                }, true);
+                remote_callback_obj.run([], [entityID, callback_LCBO]);
+              });
+            }
+          },
+
+          sendData: (entityID, data)=> {
+            service_socket.sendData(entityID, data);
+          }
+        })
+      });
+      api.addAPI(['getMe'], (LCBO)=> {
+        return((remote_callback_obj)=> {
+          remote_callback_obj.run([], [false, {
+            Settings: manifest.settings,
+            Manifest: manifest,
+            FilesPath: _coregateway.Daemon.Settings.services_files_path+manifest.name+'/'
+          }])
+          remote_callback_obj.unbindRemote();
         });
-      }
+      });
+
+      api.addAPI(['getImplementation'], (LCBO)=> {
+        return((remote_callback_obj)=> {
+          let Implementation_LCBO = new LCBO(_coregateway.Implementation, null, false, true);
+          remote_callback_obj.run([], [false, Implementation_LCBO]);
+          remote_callback_obj.unbindRemote();
+        });
+      });
+
       callback(false, api);
     });
   }

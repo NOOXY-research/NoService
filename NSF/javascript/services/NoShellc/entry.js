@@ -93,7 +93,7 @@ function start(Me, api) {
           data_sender(connprofile, 'AU', 'rs', _data);
         };
         if(_token == null) {
-          Implementation.getImplement('signin', (err, im)=>{
+          Implementation.getImplement('signin', (err, im)=> {
             im(connprofile, data, data_sender);
           });
         }

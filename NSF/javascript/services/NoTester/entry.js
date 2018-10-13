@@ -22,22 +22,25 @@ function start(Me, api) {
   // Please save and manipulate your files in this directory
   files_path = Me.FilesPath;
   // Your settings in manifest file.
-  settings = Me.getSettings;
+  settings = Me.Settings;
 
-
+  log(Me);
 
   // JSONfunction is a function that can be defined, which others entities can call.
   // It is a NOOXY Service Framework Standard
   log('ServiceSocket Test');
   ss.def('jfunc1', (json, entityID, returnJSON)=>{
-    log(json);
-    // Code here for JSONfunciton
-    // Return Value for JSONfunction call. Otherwise remote will not recieve funciton return value.
-    let json_be_returned = {
-      d: 'Hello! Jfunc return from service!'
-    }
-    // First parameter for error, next is JSON to be returned.
-    returnJSON(false, json_be_returned);
+    api.Authorization.Authby.Token(entityID, (err, pass)=>{
+      log('Auth status: '+pass)
+      log(json);
+      // Code here for JSONfunciton
+      // Return Value for JSONfunction call. Otherwise remote will not recieve funciton return value.
+      let json_be_returned = {
+        d: 'Hello! Jfunc return from service!'
+      }
+      // First parameter for error, next is JSON to be returned.
+      returnJSON(false, json_be_returned);
+    });
   });
 
   // Access another service on this daemon
