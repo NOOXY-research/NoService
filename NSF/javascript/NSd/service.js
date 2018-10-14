@@ -898,6 +898,16 @@ function Service() {
     _local_services[service_name].relaunch();
   }
 
+  // get Callback Obj count
+  this.getCBOCount = (callback)=> {
+    _workerd.getCBOCount(callback);
+  }
+
+  // get Callback Obj count
+  this.getWorkerMemoryUsage = (callback)=> {
+    _workerd.getMemoryUsage(callback);
+  }
+
   this.returnList = () => {
     return Object.keys(_local_services);
   };

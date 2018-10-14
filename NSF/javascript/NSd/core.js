@@ -245,6 +245,7 @@ function Core(settings) {
       _service.importDaemonAuthKey(settings.daemon_authorization_key);
       // setup WorkerDaemon
       _workerd.importCloseTimeout(settings.kill_daemon_timeout);
+      _workerd.importClearGarbageTimeout(settings.clear_garbage_timeout);
       //
 
       // setup api

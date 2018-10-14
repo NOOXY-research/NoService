@@ -8,6 +8,8 @@
 // 0 worker established {t, a: api tree, p: service module path, c: closetimeout}
 // 1 callback {t, p: [obj_id, callback_path], a: arguments, o:{arg_index, [obj_id, callback_tree]}}
 // 2 unbindobj {t, i: id};
+// 3 getLCBOcount {t, i}
+// 4 getMemoryUsage
 // 99 close
 'use strict';
 
@@ -88,6 +90,7 @@ function WorkerClient() {
       _service_module = require(message.p);
       _service_name = /.*\/([^\/]*)\/entry/g.exec(message.p)[1];
       _close_timeout = message.c;
+      _clear_obj_garbage_timeout = message.g;
       _api = Utils.generateObjCallbacks('API', message.a, callParentAPI);
       _api.getMe((err, Me)=>{
         // add api
@@ -127,6 +130,13 @@ function WorkerClient() {
     else if(message.t == 2) {
       delete _local_obj_callbacks_dict[message.i];
       // console.log(Object.keys(_local_obj_callbacks_dict).length);
+    }
+    else if(message.t == 3) {
+      process.send({t:3, i:message.i, c:Object.keys(_local_obj_callbacks_dict).length});
+    }
+    // memory
+    else if(message.t == 4) {
+      process.send({t:3, i:message.i, c: process.memoryUsage()});
     }
     else if(message.t == 98) {
       Utils.tagLog('*ERR*', 'Service "'+_service_name+'" occured error on API call.');

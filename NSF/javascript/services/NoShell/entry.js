@@ -99,7 +99,8 @@ function start(Me, api) {
               '  daemon [settings|stop]\n'+
               '\n'+
               '[service]\n'+
-              '  service [list|[manifest|create|relaunch] {service name}]\n'+
+              '  service [list|cbo|memuse]\n'+
+              '  service [manifest|create|relaunch] {service name}\n'+
               '  service [jfunclist|jfuncdict|jfuncshow] {target service}\n'+
               '  service jfunc {target service} {target username} {target jfunc} {JSON} ---Call a JSONfunction as target user.\n'+
               '  service entity [show {entityID}|list|count|showuser {username}]\n'+
@@ -156,7 +157,9 @@ function start(Me, api) {
                       },
 
                       count: (t2, c2)=> {
-                        c1(false, {r:JSON.stringify(api.Service.Entity.returnCount(), null, 2)});
+                        api.Service.Entity.getCount((err, count)=> {
+                          c1(false, {r:JSON.stringify(count, null, 2)});
+                        });
                       },
 
                       showuser: (t2, c2) => {
@@ -201,23 +204,45 @@ function start(Me, api) {
               },
 
               list: (t1, c1) => {
-                c1(false, {r:JSON.stringify(api.Service.returnList(), null, 2)});
+                api.Service.getList((err, list)=> {
+                  c1(false, {r:JSON.stringify(list, null, 2)});
+                });
+              },
+
+              cbo: (t1, c1) => {
+                api.Service.getCBOCount((err, count)=> {
+                  c1(false, {r:JSON.stringify(count, null, 2)});
+                });
+              },
+
+              memuse: (t1, c1) => {
+                api.Service.getWorkerMemoryUsage((err, usage)=> {
+                  c1(false, {r:JSON.stringify(usage, null, 2)});
+                });
               },
 
               manifest: (t1, c1) => {
-                c1(false, {r:JSON.stringify(api.Service.returnServiceManifest(t1[0]), null, 2)});
+                api.Service.getServiceManifest(t1[0], (err, m)=> {
+                  c1(false, {r:JSON.stringify(m, null, 2)});
+                })
               },
 
               jfunclist: (t1, c1) => {
-                c1(false, {r:JSON.stringify(api.Service.returnJSONfuncList(t1[0]), null, 2)});
+                api.Service.getJSONfuncList(t1[0],(err, list)=> {
+                  c1(false, {r:JSON.stringify(list, null, 2)});
+                });
               },
 
               jfuncdict: (t1, c1) => {
-                c1(false, {r:JSON.stringify(api.Service.returnJSONfuncDict(t1[0]), null, 2)});
+                api.Service.returnJSONfuncDict(t1[0], (err, dict)=> {
+                  c1(false, {r:JSON.stringify(dict, null, 2)});
+                });
               },
 
               jfuncshow: (t1, c1) => {
-                c1(false, {r:JSON.stringify(api.Service.returnJSONfuncDict(t1[0])[t1[1]], null, 2)});
+                api.Service.returnJSONfuncDict(t1[0], (err, dict)=> {
+                  c1(false, {r:JSON.stringify(dict[t1[1]], null, 2)});
+                });
               },
 
 

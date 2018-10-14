@@ -151,6 +151,10 @@ function ServiceAPI() {
       });
     }
 
+    this.returnLCBOCount = ()=> {
+      return Object.keys(_LCBOs).length;
+    };
+
     this.emitCallbackRq = ([id, path], args, argsobj)=> {
       let _LCBO = _LCBOs[id];
       _LCBO.callCallback(path, args, argsobj);
@@ -545,6 +549,22 @@ function ServiceAPI() {
 
       relaunch: (service_name)=> {
         _coregateway.Service.relaunch(service_name);
+      },
+
+      // CBO is designed for prevent memleak
+      getCBOCount: (remote_callback_obj)=> {
+        _coregateway.Service.getCBOCount((err, count)=> {
+          remote_callback_obj.run([], [err, count]);
+          remote_callback_obj.unbindRemote();
+        });
+      },
+
+      // CBO is designed for prevent memleak
+      getWorkerMemoryUsage: (remote_callback_obj)=> {
+        _coregateway.Service.getWorkerMemoryUsage((err, usage)=> {
+          remote_callback_obj.run([], [err, usage]);
+          remote_callback_obj.unbindRemote();
+        });
       }
     };
 
