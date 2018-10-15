@@ -332,7 +332,7 @@ function Router() {
     };
 
     _coregateway.Authenticity.emitRouter = this.emit;
-    _coregateway.Service.emitRouter = this.emit;
+    _coregateway.Service.setEmitRouter(this.emit);
     _coregateway.Implementation.emitRouter = (connprofile, data, data_sender)=>{
       _coregateway.Connection.getClients((er, clients)=>{
         connprofile.getGUID((er, id)=>{

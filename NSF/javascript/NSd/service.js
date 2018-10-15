@@ -22,7 +22,7 @@ function Service() {
   let _ASockets = {};
   let _debug = false;
   let _workerd;
-
+  let _emitRouter = () => {Utils.tagLog('*ERR*', 'emitRouter not implemented');};;
 
 
   let ActivitySocketDestroyTimeout = 1000;
@@ -48,19 +48,8 @@ function Service() {
   }
 
   this.importServicesList = (service_list) => {
-    // as callback
-    let _ascallback = (conn_profile, i, d) => {
-      let _data = {
-        "m": "AS",
-        "d": {
-          "i": i,
-          "d": d,
-        }
-      };
-      this.emitRouter(conn_profile, 'CA', _data);
-    }
     for(let i=0; i<service_list.length; i++) {
-      let _s = new ServiceObj(service_list[i], _ascallback);
+      let _s = new ServiceObj(service_list[i]);
       _s.setupPath(_local_services_path+service_list[i]);
       _s.setupFilesPath(_local_services_files_path+service_list[i]);
       _local_services[service_list[i]] = _s;
@@ -78,7 +67,7 @@ function Service() {
 
   this.spwanClient = () => {Utils.tagLog('*ERR*', 'spwanClient not implemented');};
 
-  this.emitRouter = () => {Utils.tagLog('*ERR*', 'emitRouter not implemented');};
+  this.setEmitRouter = (emitRouter) => {_emitRouter = emitRouter};
 
   this.onConnectionClose = (connprofile, callback) => {
 
@@ -93,9 +82,10 @@ function Service() {
         let loop = () => {
           let nowidx = i;
           let theservice = _local_services[_entity_module.returnEntityValue(_entitiesID[nowidx], 'service')];
-          theservice.sendSSClose(_entitiesID[nowidx], (err)=>{
-            _entity_module.deleteEntity(_entitiesID[nowidx]);
-          });
+          if(theservice)
+            theservice.emitSSClose(_entitiesID[nowidx], (err)=>{
+              _entity_module.deleteEntity(_entitiesID[nowidx]);
+            });
           if(i < _entitiesID.length-1) {
             i++;
             loop();
@@ -127,10 +117,18 @@ function Service() {
     if(data.d.i != null) {
       theservice = _local_services[_entity_module.returnEntityValue(data.d.i, 'service')];
     }
+
     let methods = {
+      // nooxy service protocol implementation of "Call Service: Close ServiceSocket"
+      CS: (connprofile, data, response_emit) => {
+        theservice.emitSSClose(data.i, (err)=> {
+          _entity_module.deleteEntity(data.i);
+        });
+      },
+
       // nooxy service protocol implementation of "Call Service: Vertify Entity"
       VE: (connprofile, data, response_emit) => {
-        theservice.sendSSConnection(data.i, (err)=> {
+        theservice.emitSSConnection(data.i, (err)=> {
           let _data = null;
           if(err) {
             _data = {
@@ -334,7 +332,7 @@ function Service() {
             }
           };
 
-          this.emitRouter(connprofile, 'CS', _data);
+          _emitRouter(connprofile, 'CS', _data);
         }
         else {
           delete  _ActivityRsCEcallbacks[data.d.t];
@@ -347,7 +345,7 @@ function Service() {
     methods[data.m](connprofile, data);
   };
 
-  // ClientSide implement
+  // Serverside implement
   this.ActivityRqRouter = (connprofile, data, response_emit) => {
 
     let methods = {
@@ -364,12 +362,25 @@ function Service() {
         };
         response_emit(connprofile, 'CA', 'rs', _data);
       },
+      // nooxy service protocol implementation of "Call Activity: Close ActivitySocket"
+      CS: () => {
+        _ASockets[data.d.i].close();
+        let _data = {
+          "m": "AS",
+          "d": {
+            // status
+            "i": data.d.i,
+            "s": "OK"
+          }
+        };
+        response_emit(connprofile, 'CA', 'rs', _data);
+      }
     }
     // call the callback.
     methods[data.m](connprofile, data.d, response_emit);
   }
 
-  // ClientSide
+  // ServerSide
   this.ActivityRsRouter = (connprofile, data) => {
 
     let methods = {
@@ -382,8 +393,29 @@ function Service() {
     methods[data.m](connprofile, data.d);
   };
 
-  function ServiceSocket(service_name, Datacallback, prototype) {
+  function ServiceSocket(service_name, prototype) {
     let _jsonfunctions = prototype==null?{}:prototype;
+    // as on data callback
+    let _emitasdata = (conn_profile, i, d) => {
+      let _data = {
+        "m": "AS",
+        "d": {
+          "i": i,
+          "d": d,
+        }
+      };
+      _emitRouter(conn_profile, 'CA', _data);
+    }
+
+    let _emitasclose = (conn_profile, i, d) => {
+      let _data = {
+        "m": "CS",
+        "d": {
+          "i": i
+        }
+      };
+      _emitRouter(conn_profile, 'CA', _data);
+    }
     // JSON Function
 
     let _send_handler = null;
@@ -436,7 +468,7 @@ function Service() {
 
     this.sendData = (entityID, data) => {
       _entity_module.getEntityConnProfile(entityID, (err, connprofile)=>{
-        Datacallback(connprofile, entityID, data);
+        _emitasdata(connprofile, entityID, data);
       });
     };
 
@@ -446,7 +478,7 @@ function Service() {
       _entity_module.getfliteredEntitiesList(query, (err, entitiesID)=>{
         for(let i in entitiesID) {
           _entity_module.getEntityConnProfile(entitiesID[i], (err, connprofile) => {
-            Datacallback(connprofile, entitiesID[i], data);
+            _emitasdata(connprofile, entitiesID[i], data);
           });
         }
       });
@@ -465,7 +497,13 @@ function Service() {
         }
         callback(err);
       }
+    };
 
+    this.close = (entityID)=> {
+      _emitasclose(connprofile, entityID);
+      this.onClose(entityID, (err)=>{
+        _entity_module.deleteEntity(entityID);
+      });
     };
 
     this.on = (type, callback)=> {
@@ -490,14 +528,48 @@ function Service() {
 
   };
 
-  function ActivitySocket(conn_profile, Datacallback, JFCallback) {
+  function ActivitySocket(conn_profile) {
+    // Service Socket callback
+    let _emitdata = (i, d) => {
+      let _data2 = {
+        "m": "SS",
+        "d": {
+          "i": i,
+          "d": d,
+        }
+      };
+      _emitRouter(conn_profile, 'CS', _data2);
+    }
+
+    // Service Socket callback
+    let _emitclose = (i) => {
+      let _data2 = {
+        "m": "CS",
+        "d": {
+          "i": i
+        }
+      };
+      _emitRouter(conn_profile, 'CS', _data2);
+    }
+
+    let _emitjfunc = (entity_id, name, tempid, Json)=> {
+      let _data2 = {
+        "m": "JF",
+        "d": {
+          "i": entity_id,
+          "n": name,
+          "j": JSON.stringify(Json),
+          "t": tempid
+        }
+      };
+      _emitRouter(conn_profile, 'CS', _data2);
+    }
+
     let _entity_id = null;
     let _launched = false;
 
     let wait_ops = [];
     let wait_launch_ops = [];
-
-    let _conn_profile = conn_profile;
     let _jfqueue = {};
     let _on_dict = {
       data: ()=> {
@@ -552,7 +624,7 @@ function Service() {
         _jfqueue[tempid] = (err, returnvalue) => {
           callback(err, returnvalue);
         };
-        JFCallback(conn_profile, _entity_id, name, tempid, Json);
+        _emitjfunc(_entity_id, name, tempid, Json);
       };
       exec(op);
     }
@@ -563,7 +635,7 @@ function Service() {
 
     this.sendData = (data) => {
       let op = ()=> {
-        Datacallback(conn_profile, _entity_id, data);
+        _emitdata(_entity_id, data);
       };
       exec(op);
     };
@@ -585,6 +657,7 @@ function Service() {
         let bundle = conn_profile.returnBundle('bundle_entities');
         for (let i=bundle.length-1; i>=0; i--) {
           if (bundle[i] === _entity_id) {
+            _emitclose(_entity_id);
             this.onClose();
             setTimeout(()=>{
               // tell worker abort referance
@@ -604,7 +677,7 @@ function Service() {
   };
 
   // object for managing service.
-  function ServiceObj(service_name, Datacallback) {
+  function ServiceObj(service_name) {
     let _entity_id = null;
     let _service_socket = null;
     let _service_path = null;
@@ -666,7 +739,7 @@ function Service() {
         _entity_id = entity_id;
       });
 
-      _service_socket = new ServiceSocket(_service_name, Datacallback, _service_manifest.JSONfunciton_prototypes); // _onJFCAll = on JSONfunction call
+      _service_socket = new ServiceSocket(_service_name, _service_manifest.JSONfunciton_prototypes); // _onJFCAll = on JSONfunction call
 
       // create the service for module.
       try {
@@ -716,11 +789,11 @@ function Service() {
       _service_files_path = path;
     };
 
-    this.sendSSConnection = (entityID, callback) => {
+    this.emitSSConnection = (entityID, callback) => {
       _service_socket.onConnect(entityID, callback);
     };
 
-    this.sendSSClose = (entityID, callback) => {
+    this.emitSSClose = (entityID, callback) => {
       _service_socket.onClose(entityID, callback);
     };
 
@@ -784,33 +857,6 @@ function Service() {
     _local_services_owner = username;
   };
 
-  // Service Socket callback
-  let _sscallback = (conn_profile, i, d) => {
-    let _data2 = {
-      "m": "SS",
-      "d": {
-        "i": i,
-        "d": d,
-      }
-    };
-
-    this.emitRouter(conn_profile, 'CS', _data2);
-  }
-  // jf callback
-
-  let _jscallback = (connprofile, entity_id, name, tempid, Json)=> {
-    let _data2 = {
-      "m": "JF",
-      "d": {
-        "i": entity_id,
-        "n": name,
-        "j": JSON.stringify(Json),
-        "t": tempid
-      }
-    };
-    this.emitRouter(connprofile, 'CS', _data2);
-  }
-
   // Service module create activity socket
   this.createActivitySocket = (method, targetip, targetport, service, owner, callback) => {
     let err = false;
@@ -826,7 +872,7 @@ function Service() {
     };
 
     this.spwanClient(method, targetip, targetport, (err, connprofile) => {
-      let _as = new ActivitySocket(connprofile, _sscallback ,  _jscallback);
+      let _as = new ActivitySocket(connprofile);
       _ActivityRsCEcallbacks[_data.d.t] = (connprofile, data) => {
         if(data.d.i != "FAIL") {
           _as.setEntityID(data.d.i);
@@ -839,7 +885,7 @@ function Service() {
         }
 
       }
-      this.emitRouter(connprofile, 'CS', _data);
+      _emitRouter(connprofile, 'CS', _data);
     });
   };
 
@@ -863,7 +909,7 @@ function Service() {
 
 
     this.spwanClient(method, targetip, targetport, (err, connprofile) => {
-      let _as = new ActivitySocket(connprofile, _sscallback ,  _jscallback);
+      let _as = new ActivitySocket(connprofile);
       _ActivityRsCEcallbacks[_data.d.t] = (connprofile, data) => {
 
         if(data.d.i != "FAIL") {
@@ -877,7 +923,7 @@ function Service() {
         }
 
       }
-      this.emitRouter(connprofile, 'CS', _data);
+      _emitRouter(connprofile, 'CS', _data);
     });
 
   };

@@ -868,6 +868,14 @@ function ServiceAPI() {
 
           sendData: (entityID, data)=> {
             service_socket.sendData(entityID, data);
+          },
+
+          close: (entityID)=> {
+            service_socket.close(entityID);
+          },
+
+          broadcastData: (data)=> {
+            service_socket.broadcastData(data);
           }
         })
       });
