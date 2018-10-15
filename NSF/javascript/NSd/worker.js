@@ -86,9 +86,9 @@ function WorkerClient() {
   this.onMessage = (message)=>{
     // init worker
     if(message.t == 0) {
-      process.title = 'NSF_worker: '+message.p;
       _service_module = require(message.p);
       _service_name = /.*\/([^\/]*)\/entry/g.exec(message.p)[1];
+      process.title = 'NSF_worker: '+_service_name;
       _close_timeout = message.c;
       _clear_obj_garbage_timeout = message.g;
       _api = Utils.generateObjCallbacks('API', message.a, callParentAPI);
