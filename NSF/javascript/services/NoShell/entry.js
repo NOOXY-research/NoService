@@ -96,7 +96,7 @@ function start(Me, api) {
           help: (t0, c0) =>{
             c0(false, {r:
               '[daemon]\n'+
-              '  daemon [settings|stop]\n'+
+              '  daemon [settings|stop|memuse]\n'+
               '\n'+
               '[service]\n'+
               '  service [list|cbo|memuse]\n'+
@@ -444,7 +444,7 @@ function start(Me, api) {
                 },
                 entitymeta: (t1, c1) => {
                   api.Service.Entity.getEntityMetaData(entityID, (err, r)=>{
-                    c1(false, {r: r});
+                    c1(false, {r: JSON.stringify(r, null, 2)});
                   });
                 },
                 usermeta: (t1, c1) => {
@@ -474,6 +474,9 @@ function start(Me, api) {
               _(t0, {
                 settings: (t1, c1) => {
                   c1(false, {r:JSON.stringify(settings, null, 2)});
+                },
+                memuse: (t1, c1) => {
+                  c1(false, {r:JSON.stringify(process.memoryUsage(), null, 2)});
                 },
                 stop: (t1, c1) => {
                   c1(false, {r: 'Stopping daemon...'});
