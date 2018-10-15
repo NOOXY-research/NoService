@@ -125,6 +125,10 @@ function WorkerDaemon() {
         }
       }
       else if(message.t == 3) {
+        _InfoRq[message.i](false, {daemon: _serviceapi.returnLCBOCount(), client: message.c})
+        delete _InfoRq[message.i];
+      }
+      else if(message.t == 4) {
         _InfoRq[message.i](false, message.c)
         delete _InfoRq[message.i];
       }
@@ -168,6 +172,7 @@ function WorkerDaemon() {
     };
 
     this.close = ()=> {
+      _serviceapi.reset();
       this.emitChildClose();
     };
   };

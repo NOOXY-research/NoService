@@ -83,9 +83,7 @@ function Service() {
           let nowidx = i;
           let theservice = _local_services[_entity_module.returnEntityValue(_entitiesID[nowidx], 'service')];
           if(theservice)
-            theservice.emitSSClose(_entitiesID[nowidx], (err)=>{
-              _entity_module.deleteEntity(_entitiesID[nowidx]);
-            });
+            theservice.emitSSClose(_entitiesID[nowidx]);
           if(i < _entitiesID.length-1) {
             i++;
             loop();
@@ -121,9 +119,7 @@ function Service() {
     let methods = {
       // nooxy service protocol implementation of "Call Service: Close ServiceSocket"
       CS: (connprofile, data, response_emit) => {
-        theservice.emitSSClose(data.i, (err)=> {
-          _entity_module.deleteEntity(data.i);
-        });
+        theservice.emitSSClose(data.i);
       },
 
       // nooxy service protocol implementation of "Call Service: Vertify Entity"
@@ -365,15 +361,6 @@ function Service() {
       // nooxy service protocol implementation of "Call Activity: Close ActivitySocket"
       CS: () => {
         _ASockets[data.d.i].close();
-        let _data = {
-          "m": "AS",
-          "d": {
-            // status
-            "i": data.d.i,
-            "s": "OK"
-          }
-        };
-        response_emit(connprofile, 'CA', 'rs', _data);
       }
     }
     // call the callback.
@@ -484,6 +471,22 @@ function Service() {
       });
     };
 
+    this.closeAll = (callback)=>{
+      // console.log('f');
+      let query = 'service='+service_name+',type=Activity';
+      let closed = false
+      _entity_module.getfliteredEntitiesList(query, (err, entitiesID)=>{
+        for(let i in entitiesID) {
+          this.close(entitiesID[i]);
+        }
+        callback(false);
+      });
+      setTimeout(()=>{
+        if(!closed)
+          callback(new Error("ServiceSocket closeAll reached timeout limited!"));
+      }, 1000);
+    }
+
     this.onJFCall = (entityID, JFname, jsons, callback) => {
       try {
         _jsonfunctions[JFname].obj(JSON.parse(jsons==null?'{}':jsons), entityID, (err, returnVal)=>{
@@ -500,9 +503,11 @@ function Service() {
     };
 
     this.close = (entityID)=> {
-      _emitasclose(connprofile, entityID);
-      this.onClose(entityID, (err)=>{
-        _entity_module.deleteEntity(entityID);
+      _entity_module.getEntityConnProfile(entityID, (err, connprofile)=>{
+        _emitasclose(connprofile, entityID);
+        this.onClose(entityID, (err)=>{
+          _entity_module.deleteEntity(entityID);
+        });
       });
     };
 
@@ -661,7 +666,8 @@ function Service() {
             this.onClose();
             setTimeout(()=>{
               // tell worker abort referance
-              _ASockets[_entity_id].worker_cancel_refer = true;
+              if(_ASockets[_entity_id])
+                _ASockets[_entity_id].worker_cancel_refer = true;
               delete _ASockets[_entity_id];
             }, ActivitySocketDestroyTimeout);
             bundle.splice(i, 1);
@@ -687,7 +693,9 @@ function Service() {
     let _service_manifest = null;
 
     this.relaunch = ()=> {
-      _worker.relaunch();
+      _service_socket.closeAll((err)=> {
+        _worker.relaunch();
+      });
     }
 
     this.launch = (depended_service_dict, callback) => {
@@ -793,8 +801,8 @@ function Service() {
       _service_socket.onConnect(entityID, callback);
     };
 
-    this.emitSSClose = (entityID, callback) => {
-      _service_socket.onClose(entityID, callback);
+    this.emitSSClose = (entityID) => {
+      _service_socket.close(entityID);
     };
 
     this.sendSSData = (entityID, data) => {
@@ -810,7 +818,9 @@ function Service() {
     };
 
     this.close = () => {
-      _worker.close();
+      _service_socket.closeAll(()=>{
+        _worker.close();
+      });
     };
   };
 

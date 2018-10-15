@@ -46,6 +46,9 @@ function ServiceAPI() {
 
     }, _clear_obj_garbage_timeout);
 
+    this.reset = ()=> {
+      _LCBOs = {};
+    };
     // Local callback object
     function LCBO(obj, obj_contructor, isOneTimeObj, isNastyCallback) {
       let _RCBOs = {};
@@ -612,6 +615,11 @@ function ServiceAPI() {
     _api.Daemon = {
       getSettings: (remote_callback_obj)=>{
         remote_callback_obj.run([], [false, _coregateway.Daemon.Settings]);
+        remote_callback_obj.unbindRemote();
+      },
+
+      getVariables: (remote_callback_obj)=>{
+        remote_callback_obj.run([], [false, _coregateway.Daemon.Variables]);
         remote_callback_obj.unbindRemote();
       },
 

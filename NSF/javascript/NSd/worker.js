@@ -136,7 +136,7 @@ function WorkerClient() {
     }
     // memory
     else if(message.t == 4) {
-      process.send({t:3, i:message.i, c: process.memoryUsage()});
+      process.send({t:4, i:message.i, c: process.memoryUsage()});
     }
     else if(message.t == 98) {
       Utils.tagLog('*ERR*', 'Service "'+_service_name+'" occured error on API call.');

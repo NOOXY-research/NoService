@@ -80,9 +80,7 @@ function start(Me, api) {
 
 // If the daemon stop, your service recieve close signal here.
 function close(api) {
-  // Saving state of you service.
-  // Please save and manipulate your files in this directory
-  let services_files_path = api.Me.FilesPath;
+  
 }
 
 // Export your work for system here.
