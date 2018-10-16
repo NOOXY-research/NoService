@@ -157,7 +157,8 @@ function WorkerClient() {
 }
 
 let w = new WorkerClient();
+// prevent exit
 process.on('SIGINT', () => {
-  console.log('Child SIGINT');
+
 });
 w.launch();

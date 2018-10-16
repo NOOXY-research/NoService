@@ -186,20 +186,21 @@ function Authorization() {
               this.emitRouter(connprofile, 'AU', data);
             };
 
-            let tk = connprofile.returnBundle('NSToken');
-            if(tk != null) {
-              _authe_module.TokenisValid(user, tk, (err, isValid) => {
-                if(isValid) {
-                  callback(false, true);
-                }
-                else {
-                  _authonline();
-                }
-              });
-            }
-            else {
-              _authonline();
-            }
+            connprofile.getBundle('NSToken', (err, tk)=>{
+              if(tk != null) {
+                _authe_module.TokenisValid(user, tk, (err, isValid) => {
+                  if(isValid) {
+                    callback(false, true);
+                  }
+                  else {
+                    _authonline();
+                  }
+                });
+              }
+              else {
+                _authonline();
+              }
+            });
           });
         });
       }

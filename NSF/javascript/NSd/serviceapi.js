@@ -47,16 +47,16 @@ function ServiceAPI() {
     }, _clear_obj_garbage_timeout);
 
     this.reset = ()=> {
-      _LCBOs = {};
+      _LCBOs = [];
     };
     // Local callback object
     function LCBO(obj, obj_contructor, isOneTimeObj, isNastyCallback) {
-      let _RCBOs = {};
+      let _RCBOs = [];
       let _id = Utils.generateUniqueID();
       _LCBOs[_id] = this;
 
-      let _syncRefer = ()=> {
-
+      let _syncRefer = (MyRCBO)=> {
+        _RCBOs.push(MyRCBO);
       }
 
       let _obj = obj;
@@ -82,33 +82,40 @@ function ServiceAPI() {
         delete _LCBOs[_id];
         for(let id in _RCBOs) {
           _RCBOs[id].unbindRemote();
+          delete _RCBOs[id];
         }
       };
 
       this.callCallback = (path, args, arg_objs_trees)=>{
-        if(isNastyCallback) {
-          Utils.callObjCallback(obj, path, args, arg_objs_trees, ([r_obj_id, r_path], r_args)=> {
-            let _args_objs = {};
-            for(let i in r_args) {
-              if(Utils.hasFunction(r_args[i])) {
-                let _arg_LCBO = new LCBO(r_args[i], null, false, true);
-                _LCBOs[_arg_LCBO.returnId()] = _arg_LCBO;
-                r_args[i] = null;
-                // console.log(Object.keys(_local_obj_callbacks_dict).length);
-                _args_objs[i] = _arg_LCBO.returnTree();
+        try {
+          if(isNastyCallback) {
+            Utils.callObjCallback(obj, path, args, arg_objs_trees, ([r_obj_id, r_path], r_args)=> {
+              let _args_objs = {};
+              for(let i in r_args) {
+                if(Utils.hasFunction(r_args[i])) {
+                  let _arg_LCBO = new LCBO(r_args[i], null, false, true);
+                  _LCBOs[_arg_LCBO.returnId()] = _arg_LCBO;
+                  r_args[i] = null;
+                  // console.log(Object.keys(_local_obj_callbacks_dict).length);
+                  _args_objs[i] = _arg_LCBO.returnTree();
+                }
               }
-            }
-            _emitRemoteCallback([r_obj_id, r_path], r_args, _args_objs);
-          }, Utils.generateObjCallbacks);
+              _emitRemoteCallback([r_obj_id, r_path], r_args, _args_objs);
+            }, Utils.generateObjCallbacks);
+          }
+          else {
+            Utils.callObjCallback(_callbacks, path, args, arg_objs_trees, null,
+            (remoteobjid, remoteobjtree)=>{
+                return(new RCBO(remoteobjid, remoteobjtree));
+            });
+          }
         }
-        else {
-          Utils.callObjCallback(_callbacks, path, args, arg_objs_trees, null,
-          (remoteobjid, remoteobjtree)=>{
-              return(new RCBO(remoteobjid, remoteobjtree));
-          });
+        catch(e) {
+          Utils.tagLog('*ERR*', 'LCBO occured error.');
+          console.log(e);
         }
         if(isOneTimeObj) {
-          delete _LCBOs[_id]
+          this.destroy();
         }
       }
 
@@ -125,6 +132,11 @@ function ServiceAPI() {
 
     // Remote callback object
     function RCBO(obj_id, obj_tree) {
+      // let _My_LCBOs = [];
+      //
+      // this.syncRefer = (MyLCBO)=> {
+      //   _My_LCBOs.push(MyLCBO);
+      // };
 
       this.run = (path, args)=> {
         let _runable = Utils.generateObjCallbacks(obj_id, obj_tree, ([obj_id, path], args)=>{
