@@ -146,7 +146,12 @@ function WorkerClient() {
     }
     else if(message.t == 99) {
       if(_service_module)
-        _service_module.close();
+        try{
+          _service_module.close();
+        }
+        catch(e) {
+          Utils.tagLog('*ERR*', 'Service "'+_service_name+'" occured error while closing.');
+        }
       setTimeout(()=> {process.exit()}, _close_timeout);
     }
   }

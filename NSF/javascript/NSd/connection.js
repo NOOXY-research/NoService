@@ -339,7 +339,8 @@ function Connection(options) {
     this.onClose = (connprofile) => {Utils.tagLog('*ERR*', 'onClose not implemented');};
 
     this.send = function(connprofile, data) {
-      _myclients[connprofile.returnGUID()].send(data);
+      let c = _myclients[connprofile.returnGUID()];
+      c.send(data);
     };
 
     this.broadcast = (data) => {

@@ -159,7 +159,7 @@ function WorkerDaemon() {
 
     this.relaunch = ()=> {
       this.close()
-      Utils.tagLog('Daemon', 'Relaunching service "'+_service_name+'"');
+      Utils.tagLog('Workerd', 'Relaunching service "'+_service_name+'"');
       setTimeout(()=>{
         this.launch();
       }, _close_worker_timeout+10);
