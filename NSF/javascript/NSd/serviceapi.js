@@ -172,7 +172,8 @@ function ServiceAPI() {
 
     this.emitCallbackRq = ([id, path], args, argsobj)=> {
       let _LCBO = _LCBOs[id];
-      _LCBO.callCallback(path, args, argsobj);
+      if(_LCBO)
+        _LCBO.callCallback(path, args, argsobj);
     }
 
     this.returnObj = ()=> {

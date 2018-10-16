@@ -30,6 +30,8 @@ function start(Me, api) {
   let _token = null;
   let _mutex = true;
   let commandread;
+  let _as;
+
   api.Daemon.getSettings((err, daemon_setting)=>{
     // setup up remote shell service by daemon default connciton
     let DEFAULT_SERVER = daemon_setting.default_server;
@@ -75,7 +77,12 @@ function start(Me, api) {
           }
           _username = _data.u;
           Implementation.emitRouter(connprofile, 'GT', _data);
-          commandread();
+          setTimeout(()=> {
+            _as.call('welcome', null, (err, msg) => {
+              console.log(msg);
+              commandread();
+            });
+          }, 300)
         });
 
       });
@@ -145,6 +152,7 @@ function start(Me, api) {
           _username = uname;
           let cmd = null;
           api.Service.ActivitySocket.createSocket(DAEMONTYPE, DAEMONIP, DAEMONPORT, 'NoShell', _username, (err, as) => {
+            _as = as;
             commandread = () => {
               rl.question('>>> ', (cmd)=> {
                 if (cmd == 'exit') //we need some base case, for recursion
@@ -157,14 +165,13 @@ function start(Me, api) {
             };
 
             console.log('connected.');
-            as.onData = (data) => {
+            as.on('data', (data) => {
               if(data.t == 'stream') {
                 console.log(data.d);
               }
-            }
+            });
             as.call('welcome', null, (err, msg) => {
               console.log(msg);
-
               commandread();
             });
           });

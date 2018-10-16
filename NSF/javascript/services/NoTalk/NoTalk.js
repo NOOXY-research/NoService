@@ -9,6 +9,69 @@ let sqlite3 = require('sqlite3');
 function NoTalkDB() {
   let _database = null;
 
+  function User(userid) {
+
+    this.loadbyUserIdsql = (userid, next) => {
+      // sql statement
+      let sql = 'SELECT UserId, Bio, ShowActive, LatestOnline, Joindate FROM User WHERE UserId = ?';
+
+      _database.get(sql, [userid], (err, row) => {
+        if(err || typeof(row) == 'undefined') {
+          this.UserId = userid;
+          this.exisitence = false;
+        }
+        else {
+          this.exisitence = true;
+          this.UserId = row.UserId;
+        }
+        next(false);
+      })
+
+    };
+
+    // write newest information of user to database.
+    this.updatesql = (callback) => {
+      let sql = null;
+      let err = null;
+      if(typeof(this.userid)=='undefined') {
+        callback(new Error('userid undefined.'));
+      }
+      else {
+        let datenow = Utils.DatetoSQL(new Date());
+        if(this.exisitence) {
+          sql = 'UPDATE User SET UserId=?, Bio=?, ShowActive=?, LatestOnline WHERE UserId=?';
+          _database.run(sql, [this.userid, this.rating, this.wincount, datenow, this.userid], (err) => {
+            if(err) {
+              callback(err);
+            }
+            else {
+              this.exisitence = true;
+              callback(false);
+            }
+          });
+        }
+        else {
+          sql = 'INSERT INTO users(userid, rating, wincount, modifydate) VALUES (?, ?, ?, ?);'
+          _database.run(sql, [this.userid, this.rating, this.wincount, datenow], (err) => {
+            if(err) {
+              callback(err);
+            }
+            else {
+              this.exisitence = true;
+              callback(false);
+            }
+          });
+        }
+      }
+    };
+
+    // delete the user from database.
+    this.delete = (callback) => {
+      _database.run('DELETE FROM users WHERE userid=?;', [this.userid], callback)
+      this.exisitence = false;
+    };
+  }
+
   this.createDatabase = (path) => {
     _database = new sqlite3.Database(path);
     // Main (Main)
