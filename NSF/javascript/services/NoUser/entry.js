@@ -76,7 +76,6 @@ function start(Me, api) {
         }
       });
     })
-
   });
 
   // JSONfunction is a function that can be defined, which others entities can call.

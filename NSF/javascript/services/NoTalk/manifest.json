@@ -98,6 +98,40 @@
       }
     },
 
+    "getUserMeta": {
+      "displayname": "Get user's meta.",
+      "description": "Recieve user's metadata from server.",
+      "secure": false,
+      "protocol": {
+        "JSON_call": {
+          "u": "user Id."
+        },
+        "JSON_return": {
+          "n": "username",
+          "b": "bio",
+          "l": "latestonline"
+        }
+      }
+    },
+
+    "getMyMeta": {
+      "displayname": "Get user's meta.",
+      "description": "Recieve user's metadata from server.",
+      "secure": false,
+      "protocol": {
+        "JSON_call": {
+          "u": "user Id."
+        },
+        "JSON_return": {
+          "n": "username",
+          "j": "joindate",
+          "b": "bio",
+          "a": "showactive",
+          "p": "clientpreference"
+        }
+      }
+    },
+
     "getChMeta": {
       "displayname": "Get channel's meta.",
       "description": "Recieve channel's metadata from server.",

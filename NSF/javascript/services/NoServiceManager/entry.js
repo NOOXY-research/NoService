@@ -9,6 +9,20 @@ function start(Me, api) {
   // Get the service socket of your service
   let ss = api.Service.ServiceSocket;
   let safec = api.SafeCallback;
+  let settings = Me.Settings;
+
+  setInterval(()=> {
+    if(settings.reach_memory_limit_relaunch) {
+      api.Service.getWorkerMemoryUsage((err, servicememuse)=> {
+        for(let service in servicememuse) {
+          if(servicememuse[service].rss > settings.max_memory_per_service_MB*1024*1024) {
+            console.log('Service "'+service+'" reached memoryUsage limit "'+servicememuse[service].rss/(1024*1024)+'/'+settings.max_memory_per_service_MB+'" MB.');
+            api.Service.relaunch(service);
+          }
+        }
+      });
+    }
+  }, settings.check_memory_interval_sec*1000);
 
   api.Daemon.getSettings((err, DaemonSettings)=> {
     ss.def('createService', (json, entityID, returnJSON)=>{

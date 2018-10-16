@@ -39,7 +39,8 @@
     "NoActivity",
     "NoTester",
     "NoServiceManager",
-    "NoUser"
+    "NoUser",
+    "NoTalk"
   ],
 
   "trusted_domains": [

@@ -99,7 +99,6 @@ let NoUserdb = function () {
 
   this.createDatabase = (path) => {
     _database = new sqlite3.Database(path);
-    let expiredate = Utils.DatetoSQL(Utils.addDays(new Date(), 7));
     _database.run('CREATE TABLE users(userid text, email VARCHAR(320), gender VARCHAR(1), phonenumber VARCHAR(50), birthday date, country VARCHAR(160), address text, aboutme text, modifydate datetime)');
   };
 

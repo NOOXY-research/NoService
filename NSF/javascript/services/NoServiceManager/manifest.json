@@ -38,5 +38,11 @@
         }
       }
     }
+  },
+
+  "settings": {
+    "check_memory_interval_sec": 300,
+    "max_memory_per_service_MB": 1024,
+    "reach_memory_limit_relaunch": true
   }
 }

@@ -21,66 +21,18 @@ function start(Me, api) {
   // Please save and manipulate your files in this directory
   let files_path = Me.FilesPath;
 
-  // Access another service on this daemon
-  let admin_daemon_asock = api.Service.ActivitySocket.createDefaultAdminDeamonSocket('Another Service', (err, activitysocket)=> {
-    // accessing other service
-  });
-
-  // JSONfunction is a function that can be defined, which others entities can call.
-  // It is a NOOXY Service Framework Standard
-  ss.def('JSONfunction', (json, entityID, returnJSON)=>{
-    // Code here for JSONfunciton
-    // Return Value for JSONfunction call. Otherwise remote will not recieve funciton return value.
-    let json_be_returned = {
-      d: 'Hello! NOOXY Service Framework!'
-    }
-    // First parameter for error, next is JSON to be returned.
-    returnJSON(false, json_be_returned);
-  });
-
-  // ServiceSocket.onData, in case client send data to this Service.
-  // You will need entityID to Authorize remote user. And identify remote.
-  ss.on('data', (entityID, data) => {
-    // Get Username and process your work.
-    let username = api.Service.Entity.returnEntityOwner(entityID);
-    // To store your data and associated with userid INSEAD OF USERNAME!!!
-    // Since userid can be promised as a unique identifer!!!
-    let userid = null;
-    // Get userid from API
-    api.Authenticity.getUserID(username, (err, id) => {
-      userid = id;
-    });
-    // process you operation here
-    console.log('recieve a data');
-    console.log(data);
-  });
-
-  // ServiceSocket.onClose, in case connection close.
-  ss.on('close', (entityID, callback) => {
-    // Get Username and process your work.
-    let username = api.Service.Entity.returnEntityOwner(entityID);
-    // To store your data and associated with userid INSEAD OF USERNAME!!!
-    // Since userid can be promised as a unique identifer!!!
-    let userid = null;
-    // Get userid from API
-    api.Authenticity.getUserID(username, (err, id) => {
-      userid = id;
-    });
-    // process you operation here
-    callback(false);
-  });
-
-  ss.on('connect', (entityID, callback) => {
-    // Do something.
-    // report error;
-    ss.sendData(entityID, 'A messege from service.');
-    callback(false);
-  });
+  // initialization
+  if (fs.existsSync(files_path+'NoTalk.sqlite3')) {
+    notalk.importDatabase(files_path+'NoTalk.sqlite3');
+  }
+  else {
+    notalk.createDatabase(files_path+'NoTalk.sqlite3');
+  }
 }
 
 // If the daemon stop, your service recieve close signal here.
 function close(api) {
-  
+
 }
 
 // Export your work for system here.
