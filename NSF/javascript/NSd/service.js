@@ -22,6 +22,7 @@ function Service() {
   let _ASockets = {};
   let _debug = false;
   let _workerd;
+  let _debug_serivce;
   let _emitRouter = () => {Utils.tagLog('*ERR*', 'emitRouter not implemented');};;
 
 
@@ -760,6 +761,7 @@ function Service() {
             Utils.tagLog('Service', 'Created service files folder at '+_service_files_path);
           }
         }
+        callback(erreport);
         if(_service_manifest.implementation_api == false) {
           _serviceapi_module.createServiceAPI(_service_socket, _service_manifest, (err, api) => {
             _worker.importAPI(api);
@@ -824,29 +826,48 @@ function Service() {
     };
   };
 
+  this.setDebugService = (name)=> {
+    _debug_serivce = name;
+  };
+
   // Service module launch
   this.launch = () => {
     let launched_service = [];
     let depended_service_dict = {};
-    for (let key in _local_services) {
-      let err = _local_services[key].launch(depended_service_dict);
-      if(err) {
-        Utils.tagLog('*ERR*', 'Error occured while launching service "'+key+'".');
-        Utils.tagLog('*ERR*', err.toString());
-      }
-      else {
-        launched_service.push(key);
-      }
+    // setup debug service
+    let err = _local_services[_debug_serivce].launch(depended_service_dict, (err)=> {});
+    if(err) {
+      Utils.tagLog('*ERR*', 'Error occured while launching service "'+_debug_serivce+'".');
+      Utils.tagLog('*ERR*', err.toString());
     }
-    // check dependencies
-    for (let service_name in depended_service_dict) {
-      for(let depended in depended_service_dict[service_name]) {
-        if(!launched_service.includes(depended)) {
-          Utils.tagLog('*ERR*', 'Service "'+service_name+'" depend on another service "'+depended+'". But it doesn\'t launched.');
-          process.exit();
+    else {
+      launched_service.push(_debug_serivce);
+    }
+    // then other
+    setTimeout(()=>{
+      for (let key in _local_services) {
+        if(key!= _debug_serivce) {
+          let err = _local_services[key].launch(depended_service_dict, (err)=> {});
+          if(err) {
+            Utils.tagLog('*ERR*', 'Error occured while launching service "'+key+'".');
+            Utils.tagLog('*ERR*', err.toString());
+          }
+          else {
+            launched_service.push(key);
+          }
         }
       }
-    }
+      // check dependencies
+      for (let service_name in depended_service_dict) {
+        for(let depended in depended_service_dict[service_name]) {
+          if(!launched_service.includes(depended)) {
+            Utils.tagLog('*ERR*', 'Service "'+service_name+'" depend on another service "'+depended+'". But it doesn\'t launched.');
+            process.exit();
+          }
+        }
+      }
+    }, 500);
+
   };
 
   // Service module Path

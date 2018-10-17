@@ -144,7 +144,7 @@ function start(Me, api) {
                 entity: (t1, c1) => {
                   api.Authorization.Authby.Token(entityID, (err, pass)=>{
                     if(pass) {
-                      r = _(t1, {
+                      _(t1, {
                         show: (t2, c2) => {
                           api.Service.Entity.getEntityMetaData(t2[0], (err, r)=>{
                             c2(false, {r:JSON.stringify(r, null, 2)});
@@ -556,7 +556,6 @@ function start(Me, api) {
       });
     });
   });
-
 };
 
 function close() {

@@ -222,18 +222,29 @@ function Core(settings) {
       // setup service
       _service.setDebug(settings.debug);
       _service.importWorkerDaemon(_workerd);
+      _service.setDebugService(settings.debug_service);
       _service.setupServicesPath(settings.services_path);
       _service.setupServicesFilesPath(settings.services_files_path);
       _service.importAuthorization(_authorization);
       // add shell related service to List.
-      if(settings.shell_service != null && settings.services.includes(settings.shell_service) == false) {
+      if(settings.shell_service != null) {
+        let index = settings.services.indexOf(settings.shell_service);
+        if(index>=0)
+          settings.services.splice(index, 1);
         settings.services.push(settings.shell_service);
       }
-      if(settings.shell_client_service != null && settings.services.includes(settings.shell_client_service) == false) {
+      if(settings.shell_client_service != null) {
+        let index = settings.services.indexOf(settings.shell_client_service);
+        if(index>=0)
+          settings.services.splice(index, 1);
         settings.services.push(settings.shell_client_service);
+
       }
       // add debug
-      if(settings.debug == true && settings.debug_service != null && settings.services.includes(settings.debug_service) == false) {
+      if(settings.debug_service != null ) {
+        let index = settings.services.indexOf(settings.debug_service);
+        if(index>=0)
+          settings.services.splice(index, 1);
         settings.services.unshift(settings.debug_service);
       }
       verbose('Daemon', 'Debug service enabled.');

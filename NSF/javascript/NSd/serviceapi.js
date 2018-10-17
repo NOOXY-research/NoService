@@ -455,7 +455,7 @@ function ServiceAPI() {
             remote_callback_obj.unbindRemote();
           });
         },
-        getEntitiesID: (remote_callback_obj) => {
+        getEntitiesId: (remote_callback_obj) => {
           remote_callback_obj.run([], [false, _coregateway.Entity.returnEntitiesID()]);
           remote_callback_obj.unbindRemote();
         },
