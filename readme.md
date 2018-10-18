@@ -1,6 +1,5 @@
-
-![](https://i.imgur.com/WmeY3ca.png)
 # NOOXY Service Framework
+![NOOXY Service Framework](https://i.imgur.com/WmeY3ca.png =600x)
 The project is still in alpha!
 
 ## Why we build NOOXY Service framework? And why you should give it a try?
@@ -125,17 +124,17 @@ Once the core of the NSF is started.
 The core of NSF will navigate the directories of “services” directory which is under the root of NSF files. And in that directory it will exist a file called “entry.js”. The figure below can help you understand the concept.
 ```
 ------|--(NSd(NOOXY Service deamon))-- ...
-|
-|--(services)--|--(services_A)--|--(entry.js)
-|              |                |--(manifest.json)
-|              |
-|              |--(services_B)--|--(entry.js)
-|              |                |--(manifest.json)
-|
-|--(service_files)-- ...
-|
-|--(launch.js)
-|--(settings.json)
+      |
+      |--(services)--|--(services_A)--|--(entry.js)
+      |              |                |--(manifest.json)
+      |              |
+      |              |--(services_B)--|--(entry.js)
+      |              |                |--(manifest.json)
+      |
+      |--(service_files)-- ...
+      |
+      |--(launch.js)
+      |--(settings.json)
 ```
 After the core finish navigating the directories under “services”. It will call the entry.js and call it’s function “start()” and pass API parameter in to start() function. Below show how the “entry.js” file might be.
 ``` javascript
@@ -148,29 +147,29 @@ let files_path;
 let settings;
 // Your service entry point
 function start(Me, api) {
-// Get the service socket of your service
-let ss = api.Service.ServiceSocket;
-// BEWARE! To prevent callback error crash the system.
-// If you call an callback function which is not API provided. Such as setTimeout(callback, timeout).
-// You need to wrap the callback funciton by api.SafeCallback.
-// E.g. setTimeout(api.SafeCallback(callback), timeout)
-let safec = api.SafeCallback;
-// Please save and manipulate your files in this directory
-files_path = Me.FilesPath;
-// Your settings in manifest file.
-settings = Me.Settings;
+    // Get the service socket of your service
+  let ss = api.Service.ServiceSocket;
+  // BEWARE! To prevent callback error crash the system.
+  // If you call an callback function which is not API provided. Such as setTimeout(callback, timeout).
+  // You need to wrap the callback funciton by api.SafeCallback.
+  // E.g. setTimeout(api.SafeCallback(callback), timeout)
+  let safec = api.SafeCallback;
+  // Please save and manipulate your files in this directory
+  files_path = Me.FilesPath;
+  // Your settings in manifest file.
+  settings = Me.Settings;
 }
 
 // If the daemon stop, your service recieve close signal here.
 function close() {
-// Saving state of you service.
-// Please save and manipulate your files in this directory
+  // Saving state of you service.
+  // Please save and manipulate your files in this directory
 }
 
 // Export your work for system here.
 module.exports = {
-start: start,
-close: close
+  start: start,
+  close: close
 }
 ```
 Beware that code in Service is ran as a superuser
@@ -195,26 +194,26 @@ In service
 ``` javascript
 // Your service's entry.js
 function start(Me, api) {
-// Get the service socket of your service
-let ss = api.Service.ServiceSocket;
-ss.onConnect = (entityID, callback) => {
-// Send msg on connected entity.
-ss.sendData(entityID, 'Hello world!');
-callback(false);
-}
-
+  // Get the service socket of your service
+  let ss = api.Service.ServiceSocket;
+  ss.onConnect = (entityID, callback) => {
+    // Send msg on connected entity.
+    ss.sendData(entityID, 'Hello world!');
+    callback(false);
+  }
+  
 }
 ```
 In client(browser)
 ``` javascript
 // In your browser
 let _NSc = new NSc();
-_NSc.connect('HostIP', 'HostPort');
-_NSc.createActivitySocket('MyService', (err, as)=>{
-as.onData = (data) => {
-console.log(data); // "Print Hello world!"
-}
-});
+  _NSc.connect('HostIP', 'HostPort');
+  _NSc.createActivitySocket('MyService', (err, as)=>{
+    as.onData = (data) => {
+      console.log(data); // "Print Hello world!"
+    }
+  });
 ```
 
 #### JSON function(recommended)
@@ -226,59 +225,59 @@ JSON function called by client
 ``` javascript
 // In your browser
 let _NSc = new NSc();
-_NSc.connect('HostIP', 'HostPort');
-_NSc.createActivitySocket('MyService', (err, as)=>{
-// 2nd parameter is for function input
-as.call('Hello', {d:'I am client.'}, (err, json)=>{
-if(err) {
-console.log(err);
-}
-else {
-console.log(json.d); // Print "Hello! NOOXY Service Framework!""
-}
-});
-
-as.call('HelloSecured', {d:'I am client.'}, (err, json)=>{
-if(err) {
-console.log(err);
-}
-else {
-console.log(json.d); 
-// Print "Hello! NOOXY Service Framework! Secured." If is admin.
-}
-});
-});
-
+  _NSc.connect('HostIP', 'HostPort');
+  _NSc.createActivitySocket('MyService', (err, as)=>{
+      // 2nd parameter is for function input
+      as.call('Hello', {d:'I am client.'}, (err, json)=>{
+        if(err) {
+          console.log(err);
+        }
+        else {
+          console.log(json.d); // Print "Hello! NOOXY Service Framework!""
+        }
+      });
+      
+      as.call('HelloSecured', {d:'I am client.'}, (err, json)=>{
+        if(err) {
+          console.log(err);
+        }
+        else {
+          console.log(json.d); 
+          // Print "Hello! NOOXY Service Framework! Secured." If is admin.
+        }
+      });
+  });
+  
 ```
 
 JSON function defined in service
 ``` javascript
 // Your service's entry.js
 function start(Me, api) {
-// Normally define a JSONfunction
-ss.def('Hello', (json, entityID, returnJSON)=>{
-console.log(json.d); // Print "I am client.".
-let json_be_returned = {
-d: 'Hello! NOOXY Service Framework!'
-}
+  // Normally define a JSONfunction
+  ss.def('Hello', (json, entityID, returnJSON)=>{
+    console.log(json.d); // Print "I am client.".
+    let json_be_returned = {
+      d: 'Hello! NOOXY Service Framework!'
+    }
+    
+    returnJSON(false, json_be_returned);
+  });
 
-returnJSON(false, json_be_returned);
-});
-
-// Safe define a JSONfunction. User should be admin.
-ss.sdef('HelloSecured', (json, entityID, returnJSON)=>{
-console.log(json.d); // Print "I am client.".
-let json_be_returned = {
-d: 'Hello! NOOXY Service Framework! Secured.'
-}
-// First parameter for error, next is JSON to be returned.
-returnJSON(false, json_be_returned);
-},
-// In case fail.
-()=>{
-console.log('Auth Failed.');
-});
-
+  // Safe define a JSONfunction. User should be admin.
+  ss.sdef('HelloSecured', (json, entityID, returnJSON)=>{
+    console.log(json.d); // Print "I am client.".
+    let json_be_returned = {
+      d: 'Hello! NOOXY Service Framework! Secured.'
+    }
+    // First parameter for error, next is JSON to be returned.
+    returnJSON(false, json_be_returned);
+  },
+  // In case fail.
+  ()=>{
+    console.log('Auth Failed.');
+  });
+  
 }
 ```
 In order to well defined your protocol. It's sugesst to defined your protocol in manifest.json file. (optional)
@@ -286,34 +285,34 @@ In order to well defined your protocol. It's sugesst to defined your protocol in
 in your manifest.json:
 ```JSON
 "JSONfunciton_prototypes": {
-"Hello": {
-"displayname": "Hello",
-"description": "Hello description.",
-"secure": false,
-"protocol": {
-"JSON_call": {
-"d": "data from client"
-},
-"JSON_return": {
-"d": "data from service"
-}
-}
-},
-
-"HelloSecured": {
-"displayname": "HelloSecured",
-"description": "HelloSecured description.",
-"secure": true,
-"protocol": {
-"JSON_call": {
-"d": "data from client"
-},
-"JSON_return": {
-"d": "data from service"
-}
-}
-}
-},
+    "Hello": {
+      "displayname": "Hello",
+      "description": "Hello description.",
+      "secure": false,
+      "protocol": {
+        "JSON_call": {
+          "d": "data from client"
+        },
+        "JSON_return": {
+          "d": "data from service"
+        }
+      }
+    },
+    
+    "HelloSecured": {
+      "displayname": "HelloSecured",
+      "description": "HelloSecured description.",
+      "secure": true,
+      "protocol": {
+        "JSON_call": {
+          "d": "data from client"
+        },
+        "JSON_return": {
+          "d": "data from service"
+        }
+      }
+    }
+  },
 ```
 ### Authorization API
 In case that the service that user acesses might be sensitive. You can call many kinds of api to protect your data.
@@ -322,115 +321,115 @@ For example:
 ``` javascript
 // Token can vertify that the userA is that true userA.
 api.Authorization.Authby.Token(entityID, (err, pass)=>{
-if(pass) {
-// what ever you want.
-}
-else {
-// failed.
-}
+  if(pass) {
+      // what ever you want.
+  }
+  else {
+      // failed.
+  }
 }
 ```
 
 ## APIs
 
 ### Safecallback
-api.SafeCallback(callback)
-
+  api.SafeCallback(callback)
+  
 ### ActivitySocket
-api.Service.ActivitySocket.createSocket(method, targetip, targetport, service, owner, callback)\
-api.Service.ActivitySocket.createDefaultDeamonSocket(service, owner, callback)\
-api.Service.ActivitySocket.createDeamonSocket(method, targetip, targetport, service, owner, callback)\
-api.Service.ActivitySocket.createAdminDeamonSocket(method, targetip, targetport, service, callback)
-api.Service.ActivitySocket.createDefaultAdminDeamonSocket(service, callback)
+  api.Service.ActivitySocket.createSocket(method, targetip, targetport, service, owner, callback)\
+  api.Service.ActivitySocket.createDefaultDeamonSocket(service, owner, callback)\
+  api.Service.ActivitySocket.createDeamonSocket(method, targetip, targetport, service, owner, callback)\
+  api.Service.ActivitySocket.createAdminDeamonSocket(method, targetip, targetport, service, callback)
+  api.Service.ActivitySocket.createDefaultAdminDeamonSocket(service, callback)
+  
+  ### Service
+  api.Service.Entity.getfliteredEntitiesMetaData: (key, value, callback)\
+  api.Service.Entity.getfliteredEntitiesList: (query, callback)\
+  api.Service.Entity.getEntityValue(entityID, key, callback)\
+  api.Service.Entity.getEntityOwner(entityID, key, callback)\
+  api.Service.Entity.getEntitiesMetaData(callback)\
+  api.Service.Entity.getEntityMetaData(entityID, callback)\
+  api.Service.Entity.getCount(callback)\
+  api.Service.Entity.getEntities(callback)\
+  api.Service.Entity.getEntitiesID(callback)\
+  api.Service.Entity.getEntityConnProfile(entityId, callback)\
+  api.Service.Entity.on(type, callback)\
+  api.Service.getList()\
+  api.Service.getServiceManifest(service_name)\
+  api.Service.getJSONfuncList(service_name)\
+  api.Service.getJSONfuncDict(service_name)\
+  api.Service.relaunch(service_name)\
+  api.getWorkerMemoryUsage(callback)
+  
+  ### Authorization
+  api.Authorization.Authby.Token: (entityID, callback)\
+  api.Authorization.Authby.Password(entityID, callback)\
+  api.Authorization.Authby.isSuperUser(entityID, callback)\
+  api.Authorization.Authby.Domain(entityID, callback)\
+  api.Authorization.Authby.DaemonAuthKey(entityID, callback)\
+  api.Authorization.importTrustDomains(domains)
+  
+  ### Daemon
+  api.Daemon.getSettings(callback)\
+  api.Daemon.getVariables(callback)
+  
+  ### Authenticity
+  api.Authenticity.createUser(username, displayname, password, privilege, detail, firstname, lastname, callback)\
+  api.Authenticity.deleteUser(username, callback)\
+  api.Authenticity.updatePassword(username, newpassword, callback)\
+  api.Authenticity.updateToken(username, callback)\
+  api.Authenticity.updatePrivilege(username, privilege, callback)\
+  api.Authenticity.updateName(username, privilege, callback)\
+  api.Authenticity.getUserMeta(username, callback)\
+  api.Authenticity.getUserID(username, callback)
+  
+  ### Connection
+  api.Connection.addServer(conn_method, ip, port)
+  
+  ### Crypto
+  api.Crypto.encryptString(algo, key, toEncrypt, callback)\
+  api.Crypto.decryptString(algo, key, toDecrypt, callback)
+ 
+  ### ServiceSocket 
+  api.Serivce.ServiceSocket.def(name, callback)\
+  api.Serivce.ServiceSocket.sdef(name, callback, failopearation)\
+  api.Serivce.ServiceSocket.sendData(entityID, data)\
+  api.Serivce.ServiceSocket.broadcastData(data)\
+  api.Serivce.ServiceSocket.on(type, callback)\
+  api.Serivce.ServiceSocket.close(entityId)
 
-### Service
-api.Service.Entity.getfliteredEntitiesMetaData: (key, value, callback)\
-api.Service.Entity.getfliteredEntitiesList: (query, callback)\
-api.Service.Entity.getEntityValue(entityID, key, callback)\
-api.Service.Entity.getEntityOwner(entityID, key, callback)\
-api.Service.Entity.getEntitiesMetaData(callback)\
-api.Service.Entity.getEntityMetaData(entityID, callback)\
-api.Service.Entity.getCount(callback)\
-api.Service.Entity.getEntities(callback)\
-api.Service.Entity.getEntitiesID(callback)\
-api.Service.Entity.getEntityConnProfile(entityId, callback)\
-api.Service.Entity.on(type, callback)\
-api.Service.getList()\
-api.Service.getServiceManifest(service_name)\
-api.Service.getJSONfuncList(service_name)\
-api.Service.getJSONfuncDict(service_name)\
-api.Service.relaunch(service_name)\
-api.getWorkerMemoryUsage(callback)
-
-### Authorization
-api.Authorization.Authby.Token: (entityID, callback)\
-api.Authorization.Authby.Password(entityID, callback)\
-api.Authorization.Authby.isSuperUser(entityID, callback)\
-api.Authorization.Authby.Domain(entityID, callback)\
-api.Authorization.Authby.DaemonAuthKey(entityID, callback)\
-api.Authorization.importTrustDomains(domains)
-
-### Daemon
-api.Daemon.getSettings(callback)\
-api.Daemon.getVariables(callback)
-
-### Authenticity
-api.Authenticity.createUser(username, displayname, password, privilege, detail, firstname, lastname, callback)\
-api.Authenticity.deleteUser(username, callback)\
-api.Authenticity.updatePassword(username, newpassword, callback)\
-api.Authenticity.updateToken(username, callback)\
-api.Authenticity.updatePrivilege(username, privilege, callback)\
-api.Authenticity.updateName(username, privilege, callback)\
-api.Authenticity.getUserMeta(username, callback)\
-api.Authenticity.getUserID(username, callback)
-
-### Connection
-api.Connection.addServer(conn_method, ip, port)
-
-### Crypto
-api.Crypto.encryptString(algo, key, toEncrypt, callback)\
-api.Crypto.decryptString(algo, key, toDecrypt, callback)
-
-### ServiceSocket 
-api.Serivce.ServiceSocket.def(name, callback)\
-api.Serivce.ServiceSocket.sdef(name, callback, failopearation)\
-api.Serivce.ServiceSocket.sendData(entityID, data)\
-api.Serivce.ServiceSocket.broadcastData(data)\
-api.Serivce.ServiceSocket.on(type, callback)\
-api.Serivce.ServiceSocket.close(entityId)
-
-### Me
-Me.Settings\
-Me.Manifest\
-Me.FilesPath
-
-### ActivitySocket Object
-ActivitySocket.call(name, Json, callback)\
-ActivitySocket.sendData(data)\
-ActivitySocket.returnEntityID()\
-ActivitySocket.on(type, callback)\
-ActivitySocket.close()
-
+  ### Me
+  Me.Settings\
+  Me.Manifest\
+  Me.FilesPath
+  
+  ### ActivitySocket Object
+  ActivitySocket.call(name, Json, callback)\
+  ActivitySocket.sendData(data)\
+  ActivitySocket.returnEntityID()\
+  ActivitySocket.on(type, callback)\
+  ActivitySocket.close()
+  
 ## NOOXY Service Protocol
 ### Basic
 1. NSP(NOOXY Service Protocol) is based on text, based on Json data structure.
 2. It’s communication style is like http. Existing a method, a request and a response.
 3. NSP is designed to be handle by core, not recommended to let service have direct access.
 4. Once a NSP package was sent. It contains 3 main parts. 
->     1. “method” for identify the type of operation
->     2. “session” for identify the stage of request or response.
->     3. “data” for the actual data that be transferred.
+> 	1. “method” for identify the type of operation
+> 	2. “session” for identify the stage of request or response.
+> 	3. “data” for the actual data that be transferred.
 5. There are following standard methods for NSP.
->     1. SP(Sercure protocol) for updrading to encrypted communication.
->     2. GT(Get token) for getting token.
->     3. AU(Authorization) for authorize user identity.
->     4. CS(Call Service) client call daemon.
->     5. CA(Call Activity) daemon call client.
+> 	1. SP(Sercure protocol) for updrading to encrypted communication.
+> 	2. GT(Get token) for getting token.
+> 	3. AU(Authorization) for authorize user identity.
+> 	4. CS(Call Service) client call daemon.
+> 	5. CA(Call Activity) daemon call client.
 6. In order to focus on data that be transferred We will abridge some terms.
->     1. “method” refer to “m”
->     2. “session” refer to “s”
->     3. “data” refer to “d”
->     
+> 	1. “method” refer to “m”
+> 	2. “session” refer to “s”
+> 	3. “data” refer to “d”
+> 	
 ### Detail
 #### SP(Sercure protocol)
 ```
@@ -438,25 +437,25 @@ ActivitySocket.close()
 RSA_Public = text
 Request(daemon):
 {
-m: “SP”,
-s: “rq”,
-d: {p: RSA_Public}
+       m: “SP”,
+       s: “rq”,
+       d: {p: RSA_Public}
 } 
 
 RSA_Public_encrypted = text
 Response(client):
 {
-m: “SP”,
-s: “rs”,
-d: RSA_Public_encrypted
+       m: “SP”,
+       s: “rs”,
+       d: RSA_Public_encrypted
 }
 
 decrypted "RSA_Public_encrypted" should be like:
 client_random_num = int, aes_key = text(base64, generated by hashing 
 pub_key+client_random_num with sha256 algo. And substring 32.)
 {
-r: client_random_num,
-a: aes_key
+        r: client_random_num,
+        a: aes_key
 }
 
 after updraded protocol, data will be transfer as:
