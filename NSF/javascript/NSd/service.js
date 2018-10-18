@@ -490,9 +490,14 @@ function Service() {
 
     this.onJFCall = (entityID, JFname, jsons, callback) => {
       try {
-        _jsonfunctions[JFname].obj(JSON.parse(jsons==null?'{}':jsons), entityID, (err, returnVal)=>{
-          callback(err, returnVal);
-        });
+        if(_jsonfunctions[JFname]) {
+          _jsonfunctions[JFname].obj(JSON.parse(jsons==null?'{}':jsons), entityID, (err, returnVal)=>{
+            callback(err, returnVal);
+          });
+        }
+        else {
+          throw new Error('JSONfunction '+JFname+' not exist');
+        }
       }
       catch (err) {
         if(_debug) {

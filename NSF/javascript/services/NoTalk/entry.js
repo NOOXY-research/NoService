@@ -28,6 +28,46 @@ function start(Me, api) {
   else {
     notalk.createDatabase(files_path+'NoTalk.sqlite3');
   }
+
+  ss.def('getMyMeta', (json, entityId, returnJSON)=> {
+    api.Authorization.Authby.Token(entityId, (err, valid)=> {
+      if(valid) {
+        api.Service.Entity.getEntityOwner(entityId, (err, r)=>{
+          api.Authenticity.getUserID(r, (err, id)=>{
+            notalk.getUserMeta(id, (err, meta)=> {
+              meta.n = r;
+              returnJSON(false, meta);
+            });
+          });
+        });
+      }
+      else {
+        returnJSON(false, {});
+      }
+    });
+  });
+
+  ss.def('updateMyMeta', (json, entityId, returnJSON)=> {
+    api.Authorization.Authby.Token(entityId, (err, valid)=> {
+      if(valid) {
+        api.Service.Entity.getEntityOwner(entityId, (err, r)=>{
+          api.Authenticity.getUserID(r, (err, id)=>{
+            notalk.updateUserMeta(id, json, (err)=> {
+              if(err) {
+                returnJSON(false, {s:err});
+              }
+              else {
+                returnJSON(false, {s:'OK'});
+              }
+            });
+          });
+        });
+      }
+      else {
+        returnJSON(false, {s: 'Auth failed'});
+      }
+    });
+  });
 }
 
 // If the daemon stop, your service recieve close signal here.

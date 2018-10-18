@@ -5,11 +5,12 @@
 
 
 let sqlite3 = require('sqlite3');
+let Utils = require('./utilities');
 
 function NoTalkDB() {
   let _database = null;
 
-  function User(userid) {
+  function User() {
 
     this.loadbyUserIdsql = (userid, next) => {
       // sql statement
@@ -23,6 +24,10 @@ function NoTalkDB() {
         else {
           this.exisitence = true;
           this.UserId = row.UserId;
+          this.Bio = row.Bio;
+          this.ShowActive = row.ShowActive;
+          this.LatestOnline = row.LatestOnline;
+          this.JoinDate = row.JoinDate;
         }
         next(false);
       })
@@ -33,14 +38,14 @@ function NoTalkDB() {
     this.updatesql = (callback) => {
       let sql = null;
       let err = null;
-      if(typeof(this.userid)=='undefined') {
+      if(typeof(this.UserId)=='undefined') {
         callback(new Error('userid undefined.'));
       }
       else {
         let datenow = Utils.DatetoSQL(new Date());
         if(this.exisitence) {
-          sql = 'UPDATE User SET UserId=?, Bio=?, ShowActive=?, LatestOnline WHERE UserId=?';
-          _database.run(sql, [this.userid, this.rating, this.wincount, datenow, this.userid], (err) => {
+          sql = 'UPDATE User SET Bio=?, ShowActive=?, LatestOnline=? WHERE UserId=?';
+          _database.run(sql, [this.Bio, this.ShowActive, this.LatestOnline, this.UserId], (err) => {
             if(err) {
               callback(err);
             }
@@ -51,8 +56,8 @@ function NoTalkDB() {
           });
         }
         else {
-          sql = 'INSERT INTO users(userid, rating, wincount, modifydate) VALUES (?, ?, ?, ?);'
-          _database.run(sql, [this.userid, this.rating, this.wincount, datenow], (err) => {
+          sql = 'INSERT INTO User(UserId, Bio, ShowActive, LatestOnline, JoinDate) VALUES (?, ?, ?, ?, ?);'
+          _database.run(sql, [this.UserId, this.Bio, this.ShowActive, this.LatestOnline, datenow], (err) => {
             if(err) {
               callback(err);
             }
@@ -67,7 +72,7 @@ function NoTalkDB() {
 
     // delete the user from database.
     this.delete = (callback) => {
-      _database.run('DELETE FROM users WHERE userid=?;', [this.userid], callback)
+      _database.run('DELETE FROM User WHERE UserId=?;', [this.UserId], callback)
       this.exisitence = false;
     };
   }
@@ -98,6 +103,13 @@ function NoTalkDB() {
     _database.close();
     _database = null;
   };
+
+  this.getUserbyId = (userid, callback) => {
+    let user = new User();
+    user.loadbyUserIdsql(userid, (err)=>{
+      callback(err, user);
+    });
+  };
 };
 
 function NoTalk() {
@@ -111,6 +123,28 @@ function NoTalk() {
   this.createDatabase = (path) => {
     _nouserdb.createDatabase(path);
   };
+
+  // get NoUserdb's meta data.
+  this.getUserMeta = (userid, callback)=> {
+    _nouserdb.getUserbyId(userid, (err, user) => {
+      let user_meta = {
+        i: user.UserId,
+        b: user.Bio,
+        a: user.ShowActive,
+        l: user.LatestOnline,
+        j: user.JoinDate
+      }
+      callback(false, user_meta);
+    });
+  }
+
+  // get NoUserdb's meta data.
+  this.updateUserMeta = (userid, meta, callback)=> {
+    _nouserdb.getUserbyId(userid, (err, user) => {
+      user.Bio = meta.b;
+      user.updatesql(callback);
+    });
+  }
 };
 
 module.exports = NoTalk;
