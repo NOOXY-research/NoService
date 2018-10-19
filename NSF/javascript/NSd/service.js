@@ -99,7 +99,7 @@ function Service() {
           _ASockets[_entitiesID[i]].onClose();
           setTimeout(()=>{
             // for worker abort referance
-            _ASockets[_entity_id].worker_cancel_refer = true;
+            _ASockets[_entitiesID[i]].worker_cancel_refer = true;
             delete _ASockets[_entitiesID[i]];
           }, ActivitySocketDestroyTimeout);
         }

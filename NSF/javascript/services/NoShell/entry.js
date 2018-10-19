@@ -235,39 +235,44 @@ function start(Me, api) {
                 },
 
                 jfuncdict: (t1, c1) => {
-                  api.Service.returnJSONfuncDict(t1[0], (err, dict)=> {
+                  api.Service.getJSONfuncDict(t1[0], (err, dict)=> {
                     c1(false, {r:JSON.stringify(dict, null, 2)});
                   });
                 },
 
                 jfuncshow: (t1, c1) => {
-                  api.Service.returnJSONfuncDict(t1[0], (err, dict)=> {
+                  api.Service.getJSONfuncDict(t1[0], (err, dict)=> {
                     c1(false, {r:JSON.stringify(dict[t1[1]], null, 2)});
                   });
                 },
 
 
                 jfunc: (t1, c1) => {
-                  api.Service.ActivitySocket.createDefaultDeamonSocket(t1[0], t1[1], (err, as)=> {
-                    let jfuncd = {};
-                    as.onData = (data) => {
-                      jfuncd['onData no.'+Object.keys(jfuncd).length] = data;
-                    }
-                    let json_string = "";
-                    for(let i=3; i<t1.length; i++) {
-                      json_string += ' '+t1[i];
-                    }
-                    try {
-                      as.call(t1[2], JSON.parse(json_string), (err, msg)=>{
-                        as.close();
-                        c1(false, {r:'jfunc onData: \n'+ JSON.stringify(jfuncd==null?'{}':jfuncd, null, 2)+'\njfunc returnValue: '+JSON.stringify(msg, null, 2)});
+                  if(t1[0].length && t1[1].length && t1[3].length) {
+                    api.Service.ActivitySocket.createDefaultDeamonSocket(t1[0], t1[1], (err, as)=> {
+                      let jfuncd = {};
+                      as.on('data', (data) => {
+                        jfuncd['onData no.'+Object.keys(jfuncd).length] = data;
                       });
-                    }
-                    catch(e) {
-                      c1(false, {r:'jfunc error.\n'+e.toString()});
-                      console.log(e);
-                    }
-                  });
+                      let json_string = "";
+                      for(let i=3; i<t1.length; i++) {
+                        json_string += ' '+t1[i];
+                      }
+                      try {
+                        as.call(t1[2], JSON.parse(json_string), (err, msg)=>{
+                          as.close();
+                          c1(false, {r:'jfunc onData: \n'+ JSON.stringify(jfuncd==null?'{}':jfuncd, null, 2)+'\njfunc returnValue: '+JSON.stringify(msg, null, 2)});
+                        });
+                      }
+                      catch(e) {
+                        c1(false, {r:'jfunc error.\n'+e.toString()});
+                        console.log(e);
+                      }
+                    });
+                  }
+                  else {
+                    c1(false, {r:'usage: jfunc {service} {jfunc} {json}'});
+                  }
                 }
 
               }, c0);

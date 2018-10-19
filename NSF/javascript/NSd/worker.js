@@ -147,10 +147,16 @@ function WorkerClient() {
     else if(message.t == 99) {
       if(_service_module)
         try{
-          _service_module.close();
+          if(_service_module.close) {
+            _service_module.close();
+          }
+          else {
+            throw new Error('The service have no "close" function.');
+          }
         }
         catch(e) {
           Utils.tagLog('*ERR*', 'Service "'+_service_name+'" occured error while closing.');
+          console.log(e);
         }
       setTimeout(()=> {process.exit()}, _close_timeout);
     }

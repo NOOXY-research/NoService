@@ -251,7 +251,7 @@ function ServiceAPI() {
             remote_callback_obj.unbindRemote();
           });
         },
-        createDefaultDeamonSocket: (service, owner, callback) => {
+        createDefaultDeamonSocket: (service, owner, remote_callback_obj) => {
           _coregateway.Service.createDaemonActivitySocket(DAEMONTYPE, DAEMONIP, DAEMONPORT, service, owner, (err, as)=> {
             let local_callback_obj = new LCBO(as, (syncRefer)=> {
               return ({
@@ -291,7 +291,7 @@ function ServiceAPI() {
             remote_callback_obj.unbindRemote();
           });
         },
-        createDeamonSocket: (method, targetip, targetport, service, owner, callback) => {
+        createDeamonSocket: (method, targetip, targetport, service, owner, remote_callback_obj) => {
           _coregateway.Service.createDaemonActivitySocket(method, targetip, targetport, service, owner, (err, as)=> {
             let local_callback_obj = new LCBO(as, (syncRefer)=> {
               return ({
@@ -331,7 +331,7 @@ function ServiceAPI() {
             remote_callback_obj.unbindRemote();
           });
         },
-        createAdminDeamonSocket: (method, targetip, targetport, service, callback) => {
+        createAdminDeamonSocket: (method, targetip, targetport, service, remote_callback_obj) => {
           _coregateway.Service.createAdminDaemonActivitySocket(method, targetip, targetport, service, (err, as)=> {
             let local_callback_obj = new LCBO(as, (syncRefer)=> {
               return ({
@@ -818,6 +818,10 @@ function ServiceAPI() {
 
           sendData: (entityID, data)=> {
             service_socket.sendData(entityID, data);
+          },
+
+          broadcastData: (data)=> {
+            service_socket.broadcastData(data);
           }
         })
       });
