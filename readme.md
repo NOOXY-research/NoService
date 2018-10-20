@@ -1,5 +1,5 @@
 # NOOXY Service Framework
-![NOOXY Service Framework](https://i.imgur.com/WmeY3ca.png =600x)
+![NOOXY Service Framework](https://i.imgur.com/WmeY3ca.png)
 The project is still in alpha!
 
 ## Why we build NOOXY Service framework? And why you should give it a try?
