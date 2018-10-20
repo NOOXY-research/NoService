@@ -115,7 +115,10 @@ function start(Me, api) {
       });
 
       Implementation.setImplement('AuthbyTokenFailed', (connprofile, data, data_sender) => {
-        Implementation.returnImplement('signin')(connprofile, data, data_sender);
+        Implementation.getImplement('signin', (err, im)=> {
+          im(connprofile, data, data_sender);
+        });
+
       });
 
       // setup NSF Auth implementation

@@ -4,9 +4,50 @@
 // Copyright 2018 NOOXY. All Rights Reserved.
 'use strict';
 
-let fs = require('fs');
+const fs = require('fs');
+const crypto = require('crypto');
 
+const UUID_pool = 31 * 128; // 36 chars minus 4 dashes and 1 four
+const UUID_template = "10000000-1000-4000-8000-100000000000";
 const BACKSPACE = String.fromCharCode(127);
+
+let generateGUID = ()=>{
+  let r = crypto.randomBytes(UUID_pool);
+  let j = 0;
+  let ch;
+  let chi;
+  let strs = [];
+  strs.length = UUID_template.length;
+  strs[8] = '-';
+  strs[13] = '-';
+  strs[18] = '-';
+  strs[23] = '-';
+
+  for (chi = 0; chi < UUID_template.length; chi++) {
+    ch = UUID_template[chi];
+    if ('-' === ch || '4' === ch) {
+      strs[chi] = ch;
+      continue;
+    }
+    j++;
+
+    if (j >= r.length) {
+      r = crypto.randomBytes(UUID_pool);
+      j = 0;
+    }
+
+    if ('8' === ch) {
+      strs[chi] = (8 + r[j] % 4).toString(16);
+      continue;
+    }
+
+    strs[chi] = (r[j] % 16).toString(16);
+  }
+
+  return strs.join('');
+}
+
+
 
 // for workers
 // generate fake Obj for remote calling back into local
@@ -227,10 +268,10 @@ let addDays = (date, days)=> {
   return dat;
 }
 
-let generateGUID = () => {
-  return s4() + s4() + '-' + s4() + '-' + s4() + '-' +s4() + '-' + s4() + s4() +
-   s4();
-}
+// let generateGUID = () => {
+//   return s4() + s4() + '-' + s4() + '-' + s4() + '-' +s4() + '-' + s4() + s4() +
+//    s4();
+// }
 
 let searchObject = (object, value)=> {
   for (let prop in object) {

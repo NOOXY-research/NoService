@@ -2,27 +2,161 @@
 // Description:
 // "utilities.js" provides general function to be widely used.
 // Copyright 2018 NOOXY. All Rights Reserved.
-var fs = require('fs');
+'use strict';
 
+const fs = require('fs');
+const crypto = require('crypto');
+
+const UUID_pool = 31 * 128; // 36 chars minus 4 dashes and 1 four
+const UUID_template = "10000000-1000-4000-8000-100000000000";
 const BACKSPACE = String.fromCharCode(127);
 
-function validateEmail(email) {
-    var re = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
-    return re.test(String(email).toLowerCase());
+let generateGUID = ()=>{
+  let r = crypto.randomBytes(UUID_pool);
+  let j = 0;
+  let ch;
+  let chi;
+  let strs = [];
+  strs.length = UUID_template.length;
+  strs[8] = '-';
+  strs[13] = '-';
+  strs[18] = '-';
+  strs[23] = '-';
+
+  for (chi = 0; chi < UUID_template.length; chi++) {
+    ch = UUID_template[chi];
+    if ('-' === ch || '4' === ch) {
+      strs[chi] = ch;
+      continue;
+    }
+    j++;
+
+    if (j >= r.length) {
+      r = crypto.randomBytes(UUID_pool);
+      j = 0;
+    }
+
+    if ('8' === ch) {
+      strs[chi] = (8 + r[j] % 4).toString(16);
+      continue;
+    }
+
+    strs[chi] = (r[j] % 16).toString(16);
+  }
+
+  return strs.join('');
 }
 
-function returnPassword(prompt) {
+
+
+// for workers
+// generate fake Obj for remote calling back into local
+const generateObjCallbacks = (id, obj_tree, callback) => {
+  if(Object.keys(obj_tree).length) {
+    let deeper = (sub_obj_tree, walked_path_list)=> {
+      if(typeof(sub_obj_tree) == 'object' && sub_obj_tree!=null) {
+        for(let key in sub_obj_tree) {
+          sub_obj_tree[key]=deeper(sub_obj_tree[key], walked_path_list.concat([key]));
+        }
+      }
+      else {
+        sub_obj_tree = (...args)=> {
+          callback([id, walked_path_list], args)
+        };
+      }
+      return sub_obj_tree;
+    }
+    return deeper(obj_tree, []);
+  }
+  else {
+    return (...args)=> {
+      callback([id, []], args)
+    };
+  }
+}
+// route remote call to local obj callback
+const callObjCallback = (Obj, Objpath, args, arg_objs_trees, obj_callback_policy, generate_obj_policy)=> {
+  let getTargetObj = (path, subobj)=> {
+    if(path.length) {
+      return getTargetObj(path.slice(1), subobj[path[0]]);
+    }
+    else {
+      return subobj;
+    }
+  }
+  for(let i in arg_objs_trees) {
+    args[parseInt(i)] = generate_obj_policy(arg_objs_trees[i][0], arg_objs_trees[i][1], obj_callback_policy);
+  }
+  let f = getTargetObj(Objpath, Obj);
+  f.apply(null, args);
+};
+// generate tree from local for remote
+const generateObjCallbacksTree = (obj_raw) => {
+  if(typeof(obj_raw)!='function') {
+    let deeper = (subobj)=> {
+      let obj_tree = {};
+      if(typeof(subobj) == 'object') {
+        for(let key in subobj) {
+          obj_tree[key] = deeper(subobj[key]);
+        }
+      }
+      else {
+        obj_tree = null;
+      }
+      return obj_tree;
+    }
+
+    return deeper(obj_raw)
+  }
+  else {
+    return {};
+  }
+}
+// has callback fucntion
+const hasFunction = (obj_raw) => {
+  if(typeof(obj_raw)=='object') {
+    let boo = false;
+    let deeper = (subobj)=> {
+      if(typeof(subobj) == 'object') {
+        for(let key in subobj) {
+          if(typeof(subobj[key]) == 'function') {
+            boo = true;
+            break;
+          }
+          else {
+            deeper(subobj[key]);
+          }
+        }
+      }
+    }
+    deeper(obj_raw);
+    return boo;
+  }
+  else if(typeof(obj_raw)=='function') {
+    return true;
+  }
+  else {
+    return false;
+  }
+}
+
+let validateEmail = (email)=> {
+    let re = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+    return re.test(String(email).toLowerCase());
+};
+
+let returnPassword = (prompt)=> {
     if (prompt) {
       process.stdout.write(prompt);
     }
 
-    var stdin = process.stdin;
+    let stdin = process.stdin;
     stdin.resume();
     stdin.setRawMode(true);
     stdin.resume();
     stdin.setEncoding('utf8');
 
-    var password = '';
+    let password = '';
     stdin.on('data', function (ch) {
         ch = ch.toString('utf8');
 
@@ -63,17 +197,17 @@ let isEnglish = (string) => {
 };
 
 // read a file and return a parsed JSON obj
-returnJSONfromFile = (filename) => {
+let returnJSONfromFile = (filename) => {
   return JSON.parse(fs.readFileSync(filename, 'utf8'));;
 };
 
 String.prototype.replaceAll = function(search, replacement) {
-    var target = this;
+    let target = this;
     return target.split(search).join(replacement);
 };
 
 // print the NSF LOGO
-printLOGO = (version, copyright) => {
+let printLOGO = (version, copyright) => {
   console.log('88b 88  dP\'Yb   dP\'Yb  Yb  dP Yb  dP  TM')
   console.log('88Yb88 dP   Yb dP   Yb  YbdP   YbdP  ')
   console.log('88 Y88 Yb   dP Yb   dP  dPYb    88   ')
@@ -81,18 +215,18 @@ printLOGO = (version, copyright) => {
   console.log('')
   console.log('')
   console.log('ver. '+version+'. '+copyright)
-  console.log('For more information or update -> www.nooxy.tk')
+  console.log('For more information or update -> www.nooxy.org')
   console.log('')
 };
 
 // print log with tag
-tagLog = (tag, logstring) => {
+let tagLog = (tag, logstring) => {
   if(typeof(logstring)!='string') {
     logstring = JSON.stringify(logstring, null, 2);
   }
   let _space = 10;
   tag = tag.substring(0, _space);
-  for(var i=0; i < _space-tag.length; i++) {
+  for(let i=0; i < _space-tag.length; i++) {
     if(i%2 != 1) {
       tag = tag + ' ';
     }
@@ -104,12 +238,12 @@ tagLog = (tag, logstring) => {
 };
 
 // generateGUID
-generateUniqueID = () => {
+let generateUniqueID = () => {
   return '_' + Math.random().toString(36).substr(2, 9);
 };
 
-hashString = (s) => {
-  var s = 0, i, chr;
+let hashString = (s) => {
+  let i, chr;
   if (s.length === 0) return hash;
   for (i = 0; i < s.length; i++) {
     chr   = s.charCodeAt(i);
@@ -119,27 +253,27 @@ hashString = (s) => {
   return hash;
 };
 
-removeHTML = function(str) {
+let removeHTML = function(str) {
   return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g,
     '&gt;').replace(/"/g, '&quot;');
 }
 
-function s4() {
+let s4 = () => {
   return Math.floor((1 + Math.random()) * 0x10000).toString(16).substring(1);
 }
 
-addDays = (date, days)=> {
-  var dat = date;
+let addDays = (date, days)=> {
+  let dat = date;
   dat.setDate(dat.getDate() + days);
   return dat;
 }
 
-generateGUID = () => {
-  return s4() + s4() + '-' + s4() + '-' + s4() + '-' +s4() + '-' + s4() + s4() +
-   s4();
-}
+// let generateGUID = () => {
+//   return s4() + s4() + '-' + s4() + '-' + s4() + '-' +s4() + '-' + s4() + s4() +
+//    s4();
+// }
 
-searchObject = (object, value)=> {
+let searchObject = (object, value)=> {
   for (let prop in object) {
     if (object.hasOwnProperty(prop)) {
       if (object[prop] === value) {
@@ -149,7 +283,7 @@ searchObject = (object, value)=> {
   }
 };
 
-SQLtoDate = (sqlDate) => {
+let SQLtoDate = (sqlDate) => {
   let sqlDateArr1 = sqlDate.split("-");
   let sYear = sqlDateArr1[0];
   let sMonth = (Number(sqlDateArr1[1]) - 1).toString();
@@ -165,13 +299,16 @@ SQLtoDate = (sqlDate) => {
   return new Date(sYear, sMonth, sDay, sHour, sMinute, sSecond);
 }
 
- DatetoSQL = (JsDate) => {
-  iso = JsDate.toISOString();
+ let DatetoSQL = (JsDate) => {
+  let iso = JsDate.toISOString();
   return iso.slice(0, 19).replace('T', ' ');
 }
 
 module.exports = {
-  validateEmail: validateEmail,
+  generateObjCallbacks: generateObjCallbacks,
+  callObjCallback: callObjCallback,
+  hasFunction: hasFunction,
+  generateObjCallbacksTree: generateObjCallbacksTree,
   isEnglish: isEnglish,
   returnPassword: returnPassword,
   returnJSONfromFile: returnJSONfromFile,
