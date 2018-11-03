@@ -25,7 +25,7 @@ function start(Me, api) {
   }, settings.check_memory_interval_sec*1000);
 
   api.Daemon.getSettings((err, DaemonSettings)=> {
-    ss.def('createService', (json, entityID, returnJSON)=>{
+    ss.sdef('createService', (json, entityID, returnJSON)=>{
       let service_name = json.name;
       let services_path = DaemonSettings.services_path;
       let services_files_path = DaemonSettings.services_files_path;
@@ -46,6 +46,7 @@ function start(Me, api) {
               fs.mkdirSync(services_files_path+service_name);
             }
             catch (err) {} // Skip
+            fs.createReadStream(prototype_path+'readme.md').pipe(fs.createWriteStream(services_path+service_name+'/readme.md'));
             fs.createReadStream(prototype_path+'entry.js').pipe(fs.createWriteStream(services_path+service_name+'/entry.js'));
             let manifest = JSON.parse(fs.readFileSync(prototype_path+'manifest.json', 'utf8'));
             manifest.name = service_name;
@@ -66,6 +67,18 @@ function start(Me, api) {
           }
         }
       });
+    });
+
+    ss.sdef('installService', (json, entityID, returnJSON)=> {
+      let method = json.m; // git
+      let source = json.s; // github gitlab
+      let repo =json.r;
+
+      if(method = 'git') {
+        if(source = 'github') {
+
+        }
+      }
     });
   });
 

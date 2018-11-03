@@ -4,3 +4,9 @@
 // Copyright 2018 NOOXY. All Rights Reserved.
 
 'use strict';
+
+function Database() {
+
+}
+
+module.exports = Database;
