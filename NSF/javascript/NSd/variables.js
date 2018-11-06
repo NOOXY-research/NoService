@@ -6,7 +6,11 @@ let Variables = {
     'username': 'admin',
     'displayname': 'NSF Superuser',
     'password': 'admin'
-  }
+  },
+  'dependencies': [
+    'ws',
+    'sqlite3'
+  ]
 }
 
 module.exports = Variables;

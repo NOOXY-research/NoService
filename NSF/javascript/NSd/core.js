@@ -6,7 +6,16 @@
 
 var fs = require('fs');
 
-
+// Checking dependencies
+let Vars = require('./variables');
+for(let pkg in Vars.dependencies) {
+  try {
+    require.resolve(Vars.dependencies[pkg]);
+  } catch (e) {
+    console.log('Please install package "'+Vars.dependencies[pkg]+'".');
+    process.exit();
+  }
+}
 
 let Connection = require('./connection');
 let Authorization = require('./authorization').Authorization;
@@ -21,7 +30,6 @@ let Log = null;
 let Utils = require('./utilities');
 let NoCrypto = require('./crypto').NoCrypto;
 let NSPS = require('./crypto').NSPS;
-let Vars = require('./variables');
 let WorkerDaemon = require('./workerd');
 
 function Core(settings) {
@@ -57,6 +65,7 @@ function Core(settings) {
   this.checkandlaunch = () => {
     // initialize environment
     verbose('Daemon', 'Checking environment...')
+
     if (this.isinitialized() == false) {
       this.initialize((err)=>{
         if(err) {
