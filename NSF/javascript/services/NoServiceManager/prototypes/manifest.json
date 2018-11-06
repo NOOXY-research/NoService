@@ -9,6 +9,8 @@
 
   "Authors": ["Author"],
 
+  "git_url": "https://github.com/NOOXY-Research/NOOXYService",
+
   "implementation_api": false,
 
   "dependencies": {

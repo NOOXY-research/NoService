@@ -29,7 +29,7 @@ let Authdb = function () {
         }
         else {
           this.exisitence = true;
-          this.username = row.username;
+          this.username = row.username.toLowerCase();
           this.userid = row.userid;
           this.displayname = row.displayname;
           this.pwdhash = row.pwdhash;
@@ -55,7 +55,7 @@ let Authdb = function () {
         }
         else {
           this.exisitence = true;
-          this.username = row.username;
+          this.username = row.username.toLowerCase();
           this.userid = row.userid;
           this.displayname = row.displayname;
           this.pwdhash = row.pwdhash;
@@ -190,7 +190,7 @@ function Authenticity() {
 
   this.getUserMeta = (username, callback) => {
     try {
-      _authdb.getUser(username, (err, user) => {
+      _authdb.getUser(username.toLowerCase(), (err, user) => {
         let user_meta = {
           firstname: user.firstname,
           lastname: user.lastname,
@@ -212,7 +212,7 @@ function Authenticity() {
 
   this.getUserID = (username, callback) => {
     try {
-      _authdb.getUser(username, (err, user) => {
+      _authdb.getUser(username.toLowerCase(), (err, user) => {
         let id = user.userid;
         callback(err, id);
       });
@@ -237,7 +237,7 @@ function Authenticity() {
   };
 
   this.getUserExistence = (username, callback) => {
-    authdb.getUser(username, (err, user)=>{
+    authdb.getUser(username.toLowerCase(), (err, user)=>{
       callback(false, user.exisitence);
     });
   };
@@ -245,7 +245,7 @@ function Authenticity() {
   this.createUser = (username, displayname, password, privilege, detail, firstname, lastname, callback) => {
     let pwdhash = null;
     username = username.toLowerCase();
-    _authdb.getUser(username, (err, user)=>{
+    _authdb.getUser(username.toLowerCase(), (err, user)=>{
       if(user.exisitence == true) {
         let err = new Error("User existed.");
         callback(err);
@@ -295,7 +295,7 @@ function Authenticity() {
 
   this.deleteUser = (username, callback) => {
     if(Vars.default_user.username != username) {
-      _authdb.getUser(username, (err, user) => {
+      _authdb.getUser(username.toLowerCase(), (err, user) => {
         user.delete();
         callback(false);
       });
@@ -307,7 +307,7 @@ function Authenticity() {
 
   this.updatePassword = (username, newpassword, callback) => {
     if(newpassword != null && newpassword.length >= 5) {
-      _authdb.getUser(username, (err, user)=>{
+      _authdb.getUser(username.toLowerCase(), (err, user)=>{
         user.pwdhash = crypto.createHmac('sha256', SHA256KEY).update(newpassword).digest('hex');
         user.updatesql((err)=>{
           if(err) {
@@ -326,7 +326,7 @@ function Authenticity() {
   };
 
   this.updatePrivilege = (username, privilege, callback) => {
-    _authdb.getUser(username, (err, user)=>{
+    _authdb.getUser(username.toLowerCase(), (err, user)=>{
       if(user.exisitence&&Number.isInteger(parseInt(privilege))) {
 
         user.privilege = parseInt(privilege);
@@ -349,7 +349,7 @@ function Authenticity() {
       callback(err);
     }
     else {
-      _authdb.getUser(username, (err, user)=>{
+      _authdb.getUser(username.toLowerCase(), (err, user)=>{
         user.firstname = firstname;
         user.lastname = lastname;
         user.updatesql(callback);
@@ -360,7 +360,7 @@ function Authenticity() {
   this.PasswordisValid = (username, password, callback) => {
     let isValid = false;
     try{
-      _authdb.getUser(username, (err, user) => {
+      _authdb.getUser(username.toLowerCase(), (err, user) => {
         let pwdhash = user.pwdhash;
         let pwdhashalpha = crypto.createHmac('sha256', SHA256KEY).update(password).digest('hex');
         if(pwdhash == pwdhashalpha) {
@@ -378,7 +378,7 @@ function Authenticity() {
     if(token != null && username!=null && token.length > 10) {
       let err = false;
       let isValid = false;
-      _authdb.getUser(username, (err, user) => {
+      _authdb.getUser(username.toLowerCase(), (err, user) => {
         let now = new Date();
         let expiredate = Utils.SQLtoDate(user.tokenexpire);
         if(now > expiredate|| token != user.token) {
@@ -396,7 +396,7 @@ function Authenticity() {
 
   this.updateToken = (username, callback) => {
     let _token=null;
-    _authdb.getUser(username, (err, user)=>{
+    _authdb.getUser(username.toLowerCase(), (err, user)=>{
       let expiredate = new Date();
       expiredate = Utils.addDays(expiredate, this.TokenExpirePeriod);
       user.token = Utils.generateGUID();
@@ -415,7 +415,7 @@ function Authenticity() {
   this.getUserToken = (username, password, callback) => {
     this.PasswordisValid(username, password, (err, valid) => {
       if(valid) {
-        _authdb.getUser(username, (err, user)=>{
+        _authdb.getUser(username.toLowerCase(), (err, user)=>{
           let now = new Date();
           let expiredate = Utils.SQLtoDate(user.tokenexpire);
           if(now > expiredate) {
@@ -436,7 +436,7 @@ function Authenticity() {
   };
 
   this.getUserprivilege = (username, callback) => {
-    _authdb.getUser(username, (err, user) => {
+    _authdb.getUser(username.toLowerCase(), (err, user) => {
       callback(false, user.privilege);
     });
   };
