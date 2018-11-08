@@ -1,6 +1,6 @@
 // NoUser.js
 // Description:
-// "NoUser.js" is a advanced user system for NSF.
+// "NoUser.js" is a advanced user system for NoService.
 // Copyright 2018 NOOXY. All Rights Reserved.
 
 

@@ -1,4 +1,4 @@
-// NSF/NSd/connection.js
+// NoService/NSd/connection.js
 // Description:
 // "connection.js" provide connection interface.
 // Copyright 2018 NOOXY. All Rights Reserved.

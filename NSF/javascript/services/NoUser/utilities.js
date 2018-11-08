@@ -1,4 +1,4 @@
-// NSF/NSd/utilities.js
+// NoService/NSd/utilities.js
 // Description:
 // "utilities.js" provides general function to be widely used.
 // Copyright 2018 NOOXY. All Rights Reserved.
@@ -72,7 +72,7 @@ String.prototype.replaceAll = function(search, replacement) {
     return target.split(search).join(replacement);
 };
 
-// print the NSF LOGO
+// print the NoService LOGO
 printLOGO = (version, copyright) => {
   console.log('88b 88  dP\'Yb   dP\'Yb  Yb  dP Yb  dP  TM')
   console.log('88Yb88 dP   Yb dP   Yb  YbdP   YbdP  ')

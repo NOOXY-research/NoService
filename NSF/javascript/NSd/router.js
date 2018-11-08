@@ -1,4 +1,4 @@
-// NSF/NSd/router.js
+// NoService/NSd/router.js
 // Description:
 // "router.js" provide routing functions. Highly associated with nooxy service protocol.
 // Copyright 2018 NOOXY. All Rights Reserved.

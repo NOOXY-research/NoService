@@ -1,4 +1,4 @@
-// NSF/NSd/services.js
+// NoService/NSd/services.js
 // Description:
 // "services.js" provide functions of services stuff.
 // Copyright 2018 NOOXY. All Rights Reserved.

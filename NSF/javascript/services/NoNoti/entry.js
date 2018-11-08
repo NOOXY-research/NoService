@@ -1,4 +1,4 @@
-// NSF/services/NoNoti/entry.js
+// NoService/services/NoNoti/entry.js
 // Description:
 // "NoNoti/entry.js" description.
 // Copyright 2018 NOOXY. All Rights Reserved.

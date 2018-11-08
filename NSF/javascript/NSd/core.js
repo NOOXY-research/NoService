@@ -1,4 +1,4 @@
-// NSF/NSd/core.js
+// NoService/NSd/core.js
 // Description:
 // "core.js" control main behavior of deamon.
 // Copyright 2018 NOOXY. All Rights Reserved.
@@ -332,7 +332,7 @@ function Core(settings) {
         callback(err);
       }
       else {
-        verbose('Daemon', 'NSF Superuser "'+Vars.default_user.username+'" with password "'+Vars.default_user.password+'" created. Please change password later for security.');
+        verbose('Daemon', 'NoService Superuser "'+Vars.default_user.username+'" with password "'+Vars.default_user.password+'" created. Please change password later for security.');
         fs.writeFile('./eula.txt', '', function(err) {
           if(err) {
             Utils.tagLog('*ERR*', 'Writing EULA error.');

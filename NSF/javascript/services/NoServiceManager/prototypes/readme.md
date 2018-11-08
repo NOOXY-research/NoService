@@ -1,7 +1,7 @@
 # ***NOOXY Service Documentation***
 
 # Install
-launch you NOOXY Service framework and type
+launch you NoService framework and type
 ```
 service install github YourRepos/ServiceName
 ```

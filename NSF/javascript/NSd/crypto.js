@@ -1,4 +1,4 @@
-// NSF/NSd/crypto.js
+// NoService/NSd/crypto.js
 // Description:
 // "crypto.js" provide wrapped crypto api for nooxy service framework.
 // Copyright 2018 NOOXY. All Rights Reserved.

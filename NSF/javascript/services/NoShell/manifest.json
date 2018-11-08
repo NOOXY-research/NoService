@@ -2,7 +2,7 @@
   "name": "NoShell",
   "version": "0.0.0",
   "displayname": "NoShell",
-  "description": "NOOXY Shell. Default NSF Shell Client implementation.",
+  "description": "NOOXY Shell. Default NoService Shell Client implementation.",
   "Authors": ["NOOXY", "noowyee"],
   "implementation_api": true,
   "dependencies": {

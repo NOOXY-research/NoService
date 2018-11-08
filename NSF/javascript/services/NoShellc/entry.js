@@ -1,6 +1,6 @@
-// NSF/services/NoShellc/entry.js
+// NoService/services/NoShellc/entry.js
 // Description:
-// "NoShellc/entry.js" is a NSF Shell Client.
+// "NoShellc/entry.js" is a NoService Shell Client.
 // Copyright 2018 NOOXY. All Rights Reserved.
 //
 // beware that this client's crypto uses daemon's implementation so it can only be used as local client instead of remote one.
@@ -67,7 +67,7 @@ function start(Me, api) {
       });
     }
     api.getImplementation((err, Implementation)=>{
-      // setup NSF Auth implementation
+      // setup NoService Auth implementation
       Implementation.setImplement('signin', (connprofile, data, data_sender)=>{
         console.log('Please signin your account.');
         _get_password((err, p)=>{
@@ -87,7 +87,7 @@ function start(Me, api) {
 
       });
 
-      // setup NSF Auth implementation
+      // setup NoService Auth implementation
       Implementation.setImplement('AuthbyToken', (connprofile, data, data_sender) => {
         let callback = (err, token)=>{
           let _data = {
@@ -121,7 +121,7 @@ function start(Me, api) {
 
       });
 
-      // setup NSF Auth implementation
+      // setup NoService Auth implementation
       Implementation.setImplement('AuthbyPassword', (connprofile, data, data_sender) => {
         let callback = (err, password)=>{
           let _data = {

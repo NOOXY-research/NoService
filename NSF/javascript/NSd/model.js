@@ -1,4 +1,4 @@
-// NSF/NSd/model.js
+// NoService/NSd/model.js
 // Description:
 // "model.js" provides ORM to manage objects and database.
 // Copyright 2018 NOOXY. All Rights Reserved.
@@ -8,23 +8,48 @@
 function Model() {
   let _db;
 
-  function Model() {
+  function ListModel() {
 
     this.update = () {
 
     };
+  };
 
-    this.sql = (sql) {
+  function ObjModel() {
+    this.create = () {
 
     }
+
+    this.update = () {
+
+    };
   };
 
-  this.Text = function() {
-    this.key = "";
+  function TextField() {
+    this.MAXLEN = 50
+    this.
   };
+
+  function IntField() {
+
+  };
+
+  function FloatField() {
+
+  };
+
+  // example:
+  // {
+  //    modeltype: "",
+  //    structure: {
+  //      username: Model.TEXT,
+  //      height: Model.INT
+  //    }
+  // }
+  //
 
   this.define = (obj_name, obj_structure, callback)=> {
-
+    let type = obj_structure.modeltype;
   };
 
   this.get = (obj_name, callback) => {

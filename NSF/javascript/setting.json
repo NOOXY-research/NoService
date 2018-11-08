@@ -1,5 +1,5 @@
 {
-  "daemon_name": "NSF_default",
+  "daemon_name": "NoService_default",
 
   "daemon_display_name": "NOOXY service",
 
@@ -90,13 +90,15 @@
   "heartbeat_cycle": 60000,
 
   "database": {
-    "dialect": "sqlite3",
+    "dialect": "mariadb",
 
-    "username": "",
+    "username": "root",
 
     "password": "",
 
-    "host": "0.0.0.0:1234",
+    "host": "0.0.0.0:3306",
+
+    "database": "NoService",
 
     "storage": "path/to/storage/onlysqlite"
   }

@@ -1,4 +1,4 @@
-// NSF/NSd/implementation.js
+// NoService/NSd/implementation.js
 // Description:
 // "implementation.js" provides manager to manage implemented functions which need to be
 // implemented by service owner itself.
@@ -108,7 +108,7 @@ function Implementation() {
   this.emitRouter = () => {Utils.tagLog('*ERR*', 'emitRouter not implemented');};
 
   this.sendRouterData = () => {Utils.tagLog('*ERR*', 'sendRouterData not implemented');};
-  
+
   this.importConnectionModule = (connection_module) => {
     _connection_module = connection_module;
   };

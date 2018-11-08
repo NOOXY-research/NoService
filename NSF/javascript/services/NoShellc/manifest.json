@@ -2,7 +2,7 @@
   "name": "NoShellc",
   "version": "0.0.0",
   "displayname": "NOOXY Shell Client",
-  "description": "Default NSF Local Shell Client implementation.",
+  "description": "Default NoService Local Shell Client implementation.",
   "Authors": ["NOOXY", "noowyee"],
   "implementation_api": true,
   "dependencies": {

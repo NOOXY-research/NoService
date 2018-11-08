@@ -1,4 +1,4 @@
-// NSF/NSd/authenticity.js
+// NoService/NSd/authenticity.js
 // Description:
 // "authenticity.js" provide users authenticity base on sqldatabase.
 // Copyright 2018 NOOXY. All Rights Reserved.

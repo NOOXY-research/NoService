@@ -1,4 +1,4 @@
-// NSF/services/NoServiceManager/entry.js
+// NoService/services/NoServiceManager/entry.js
 // Description:
 // "NoServiceManager/entry.js" .
 // Copyright 2018 NOOXY. All Rights Reserved.

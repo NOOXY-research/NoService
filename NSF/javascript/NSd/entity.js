@@ -1,4 +1,4 @@
-// NSF/NSd/entity.js
+// NoService/NSd/entity.js
 // Description:
 // "entity.js" provide identity system for Service, Activity..., the perspective is this daemon. Entity is part of service module.
 // Copyright 2018 NOOXY. All Rights Reserved.

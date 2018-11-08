@@ -15,7 +15,7 @@
   "JSONfunciton_prototypes": {
     "createUser": {
       "displayname": "Create a User.",
-      "description": "Create a NSF user. And create database for NoUser service.",
+      "description": "Create a NoService user. And create database for NoUser service.",
       "secure": false,
       "protocol": {
         "JSON_call": {
@@ -36,7 +36,7 @@
 
     "returnUserMeta": {
       "displayname": "Create a User.",
-      "description": "Create a NSF user. And create database for NoUser service.",
+      "description": "Create a NoService user. And create database for NoUser service.",
       "secure": false,
       "protocol": {
         "JSON_call": {
@@ -46,8 +46,8 @@
     },
 
     "updateUser": {
-      "displayname": "Create a User.",
-      "description": "Create a NSF user. And create database for NoUser service.",
+      "displayname": "Update a User.",
+      "description": "Update a NoService user.",
       "secure": false,
       "protocol": {
         "JSON_call": "A json datastructure for NoUser.",

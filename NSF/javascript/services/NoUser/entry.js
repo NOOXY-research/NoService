@@ -1,4 +1,4 @@
-// NSF/services/youservice/entry.js
+// NoService/services/youservice/entry.js
 // Description:
 // "youservice/entry.js" description.
 // Copyright 2018 NOOXY. All Rights Reserved.

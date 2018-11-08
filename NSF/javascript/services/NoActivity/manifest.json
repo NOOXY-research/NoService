@@ -2,7 +2,7 @@
   "name": "NoActivity",
   "version": "0.0.0",
   "displayname": "NOOXY Activity",
-  "description": "An realtime activity monitor and logger for NSF.",
+  "description": "An realtime activity monitor and logger for NoService.",
   "Authors": [
     "NOOXY",
     "noowyee"

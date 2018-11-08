@@ -1,4 +1,4 @@
-// NSF/NSd/worker.js
+// NoService/NSd/worker.js
 // Description:
 // "worker.js" is service worker client for NOOXY service framework.
 // Copyright 2018 NOOXY. All Rights Reserved.
@@ -15,7 +15,7 @@
 
 const fork = require('child_process').fork;
 const Utils = require('./utilities');
-process.title = 'NSF_worker';
+process.title = 'NoService_worker';
 
 
 function WorkerClient() {
@@ -88,7 +88,7 @@ function WorkerClient() {
     if(message.t == 0) {
       _service_module = require(message.p);
       _service_name = /.*\/([^\/]*)\/entry/g.exec(message.p)[1];
-      process.title = 'NSF_worker: '+_service_name;
+      process.title = 'NoService_worker: '+_service_name;
       _close_timeout = message.c;
       _clear_obj_garbage_timeout = message.g;
       _api = Utils.generateObjCallbacks('API', message.a, callParentAPI);

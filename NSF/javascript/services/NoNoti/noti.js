@@ -1,4 +1,4 @@
-// NSF/services/NoNoti/noti.js
+// NoService/services/NoNoti/noti.js
 // Description:
 // "NoNoti/noti.js" description.
 // Copyright 2018 NOOXY. All Rights Reserved.

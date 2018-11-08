@@ -1,4 +1,4 @@
-// NSF/NSd/api.js
+// NoService/NSd/api.js
 // Description:
 // "api.js" provide interface of interacting with core. This module is desgined
 // for multithreading.

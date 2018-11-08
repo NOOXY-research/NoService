@@ -1,6 +1,6 @@
-// NSF/services/NoShell/entry.js
+// NoService/services/NoShell/entry.js
 // Description:
-// "NoShell/entry.js" is a NSF Shell service.
+// "NoShell/entry.js" is a NoService Shell service.
 // Copyright 2018 NOOXY. All Rights Reserved.
 'use strict';
 
@@ -548,7 +548,7 @@ function start(Me, api) {
       ss.sdef('welcome', (json, entityID, returnJSON)=>{
         api.Service.Entity.getEntityMetaData(entityID, (err, emeta)=>{
           let msg = '\nHello. '+emeta.owner+'(as entity '+entityID+').\n  Welcome accessing NoShell service of Daemon "'+DaemonSettings.daemon_name+'".\n';
-          msg = msg + '  Daemon description: \n  ' + DaemonSettings.description+'\n'+'NSF Daemon Version: '+DaemonVars.version+'\n';
+          msg = msg + '  Daemon description: \n  ' + DaemonSettings.description+'\n'+'NoService Daemon Version: '+DaemonVars.version+'\n';
           returnJSON(false, msg);
         });
       },
