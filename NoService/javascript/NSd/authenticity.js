@@ -5,7 +5,7 @@
 'use strict';
 
 let crypto = require('crypto');
-let sqlite3 = require('sqlite3');
+let sqlite3 = null;
 let Utils = require('./utilities');
 let Vars = require('./variables');
 

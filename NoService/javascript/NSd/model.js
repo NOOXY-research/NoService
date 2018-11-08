@@ -10,24 +10,23 @@ function Model() {
 
   function ListModel() {
 
-    this.update = () {
+    this.update = ()=> {
 
     };
   };
 
   function ObjModel() {
-    this.create = () {
+    this.create = ()=> {
 
     }
 
-    this.update = () {
+    this.update = ()=> {
 
     };
   };
 
   function TextField() {
-    this.MAXLEN = 50
-    this.
+    this.MAXLEN = 50;
   };
 
   function IntField() {

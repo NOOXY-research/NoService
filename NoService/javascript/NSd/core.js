@@ -31,6 +31,9 @@ let Utils = require('./utilities');
 let NoCrypto = require('./crypto').NoCrypto;
 let NSPS = require('./crypto').NSPS;
 let WorkerDaemon = require('./workerd');
+let Database = require('./database');
+let Model = require('./model');
+
 
 function Core(settings) {
   let verbose = (tag, log) => {
@@ -48,18 +51,20 @@ function Core(settings) {
   settings.rsa_2048_pub_key = settings.rsa_2048_pub_key;
   settings.database_path = settings.database_path;
   // initialize variables
-  let _connection = null;
-  let _authorization = null;
-  let _authorizationhandler = null;
-  let _authenticity = null;
-  let _router = null;
-  let _service = null;
-  let _entity = null;
-  let _serviceAPI = null;
-  let _implementation = null;
-  let _nocrypto = null;
-  let _nsps = null;
+  let _connection;
+  let _authorization;
+  let _authorizationhandler;
+  let _authenticity;
+  let _router;
+  let _service;
+  let _entity;
+  let _serviceAPI;
+  let _implementation;
+  let _nocrypto;
+  let _nsps;
   let _workerd;
+  let _database;
+  let _model;
 
 
   this.checkandlaunch = () => {
@@ -119,6 +124,7 @@ function Core(settings) {
       _implementation = new Implementation();
       _nocrypto = new NoCrypto();
       _nsps = new NSPS();
+      _database = new Database();
       _workerd = new WorkerDaemon()
 
         //
@@ -317,35 +323,39 @@ function Core(settings) {
     verbose('Daemon', 'Initializing NSd...')
     verbose('Daemon', 'Creating eula...')
     let _auth = new Authenticity();
-    if (fs.existsSync(settings.database_path)) {
-      verbose('Daemon', 'Database already exist.')
-      _auth.importDatabase(settings.database_path);
-    }
-    else {
-      verbose('Daemon', 'Creating database...')
-      _auth.createDatabase(settings.database_path);
-    }
-    _auth.createUser(Vars.default_user.username, Vars.default_user.displayname, Vars.default_user.password, 0, null, 'The', 'Admin', (err)=> {
-      if(err) {
-        Utils.tagLog('*ERR*', 'Occur failure on creating database.');
-        console.log(err);
-        callback(err);
+    verbose('Daemon', 'Checking Database...');
+    let _dbcheck = new Database(settings.database);
+    _dbcheck.connect(()=> {
+      if (fs.existsSync(settings.database_path)) {
+        verbose('Daemon', 'Database already exist.')
+        _auth.importDatabase(settings.database_path);
       }
       else {
-        verbose('Daemon', 'NoService Superuser "'+Vars.default_user.username+'" with password "'+Vars.default_user.password+'" created. Please change password later for security.');
-        fs.writeFile('./eula.txt', '', function(err) {
-          if(err) {
-            Utils.tagLog('*ERR*', 'Writing EULA error.');
-            console.log(err);
-            callback(err);
-          }
-          else {
-            verbose('Daemon', 'NSd initilalized.');
-            callback(err);
-          }
-        });
-
+        verbose('Daemon', 'Creating database...')
+        _auth.createDatabase(settings.database_path);
       }
+      _auth.createUser(Vars.default_user.username, Vars.default_user.displayname, Vars.default_user.password, 0, null, 'The', 'Admin', (err)=> {
+        if(err) {
+          Utils.tagLog('*ERR*', 'Occur failure on creating database.');
+          console.log(err);
+          callback(err);
+        }
+        else {
+          verbose('Daemon', 'NoService Superuser "'+Vars.default_user.username+'" with password "'+Vars.default_user.password+'" created. Please change password later for security.');
+          fs.writeFile('./eula.txt', '', function(err) {
+            if(err) {
+              Utils.tagLog('*ERR*', 'Writing EULA error.');
+              console.log(err);
+              callback(err);
+            }
+            else {
+              verbose('Daemon', 'NSd initilalized.');
+              callback(err);
+            }
+          });
+
+        }
+      });
     });
   }
 }
