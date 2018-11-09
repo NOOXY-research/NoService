@@ -1,5 +1,5 @@
 # NoService
-![NoService Framework](https://i.imgur.com/WmeY3ca.png)
+![NoService Framework](https://i.imgur.com/B0w4YBM.png)
 The project is still in alpha!
 
 ## What is NoService?
