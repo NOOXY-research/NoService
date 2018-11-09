@@ -1,32 +1,37 @@
-# NOOXY Service Framework
+# NoService
 ![](https://i.imgur.com/B0w4YBM.png)
+
 The project is still in alpha!
 
-## Why we build NOOXY Service framework? And why you should give it a try?
+## What is NoService?
+NoService is a high level framework for services that provide you nodejs environment and eliminate service designer to care about low level part of your project.f Such as authorization, user system, database, protocol and so on. It also run multiple services intergrated and we also provide a manager and shell to manipulate all of them.
+
+## Why we build NoService? And why you should give it a try?
 
 ### All-in-one but async multithreaded
-NSF is supposed to be a all-in-one framework. But each service is managed by a worker which is seperated thread from core. And since multithread, a service's restart doesn't require restarting the whole framework and mantain connection while relauching. Which is a huge benefit in deploying on a production environment.
-
+NoService is supposed to be a all-in-one framework. But each service is managed by a worker which is seperated thread from core. And since multithread, a service's restart doesn't require restarting the whole framework and mantain connection while relauching. Which is a huge benefit in deploying on a production environment.
+### Serperating backend applications from physical differences
+NoService provide a layer that handle backend designer for connection, database and authenticity. Thus other designer project can basically install on your NoService.
 ### security
-NSF has built-in sercure protocol bulit by SHA-256, AES and RSA to sercure your data. It also has authorization API, provides you ability to authorize user to protect your data. Besides, you can block IPs and domains. The operations on daemon will not be executed until the client has the right response of authorization that emited from daemon side.
-### lightweight
-NSF is superlightweight both in client and daemon. But it has lots of feature. And it's features can be expanded by services.
+NoService has built-in sercure protocol bulit by SHA-256, AES and RSA to sercure your data. It also has authorization API, provides you ability to authorize user to protect your data. Besides, you can block IPs and domains. The operations on daemon will not be executed until the client has the right response of authorization that emited from daemon side.
+### lightweight + microcore
+NoService is superlightweight both in client and daemon. But it has lots of feature. And it's features can be expanded by services.
 ### communication between services
-The design of NSF sockets that we called service socket and activity socket. With the characteristic of those sockets, services can communicate each others. By this way each service don't need to sync data to promise the data is the newest.
+The design of NoService sockets that we called service socket and activity socket. With the characteristic of those sockets, services can communicate each others. By this way each service don't need to sync data to promise the data is the newest.
 ### realtime
-NSF is design for realtime purpose. And it's of course super realtime. Make it responsive for Iot.
+NoService is design for realtime purpose. And it's of course super responsive.
 ### deploying services
-NSF is built for service. From it's protocol to it's local structure. It also have user authorization system natively integrated with protocol and software. 
+NoService is built for service. From it's protocol to it's local structure. It also have user authorization system natively integrated with protocol and software. 
 ### for general conditions
-NSF is design for any kind of condition such as game, IoT, text contain. However, we have only implemented game([reversi](https://nooxy.org/noversi)), notification([NOOXY](https://nooxy.org)), shell([NoShell](https://www.nooxy.org/static/nsf/shell.html)). Nevertheless the development of NSF is still in progress. We can fix bugs and add features to comfirm other abilities.
+NoService is design for any kind of condition such as game, IoT, text contain. However, we have only implemented game([reversi](https://nooxy.org/noversi)), notification([NOOXY](https://nooxy.org)), shell([NoShell](https://www.nooxy.org/static/nsf/shell.html)). Nevertheless the development of NoService is still in progress. We can fix bugs and add features to comfirm other abilities.
 ### cross platform
-Now, NSF can run on browser(javascript) and desktop(javascript). It also supports TCP/IP, websocket connections. Other languages is still on the way.
+Now, NoService can run on browser(javascript) and desktop(javascript). It also supports TCP/IP, websocket connections. Other languages is still on the way.
 
 ### Socket-based+API control
-Socket base+API pattern makes the concept easy to understand. NSF wraps the native TCP/IP, websocket or even http polling mode in the future as transportation layer. Make you no need to consider about intergrating features with different connections. And with the advantage of NSF, in theory different activities(clients) can share same the socket in the same time. If the NSF Client is implemented well.
+Socket base+API pattern makes the concept easy to understand. NoService wraps the native TCP/IP, websocket or even http polling mode in the future as transportation layer. Make you no need to consider about intergrating features with different connections. And with the advantage of NoService, in theory different activities(clients) can share same the socket in the same time. If the NoService Client is implemented well.
 
 ### Bundled Services
-NSF provide bundled services such as NoShell which give you access of NSF. NoUser for user system. And so on.
+NoService provide bundled services such as NoShell which give you access of NoService. NoUser for user system. And so on.
 
 ## Target version
 * daemon: alpha 0.2.0
@@ -45,7 +50,7 @@ npm install ws sqlite3 --save
 ``` sh
 npm install express multer --save
 ```
-NOOXY Http Service provide you file upload, oauth and contain control intergrated with NSF. If you don't use NoContent service there is no need to install additional packages.
+NOOXY Http Service provide you file upload, oauth and contain control intergrated with NoService. If you don't use NoContent service there is no need to install additional packages.
 
 ## Document Overview
 1. Orientation
@@ -54,22 +59,22 @@ NOOXY Http Service provide you file upload, oauth and contain control intergrate
 4. clientside module
 5. Service, ServiceSocket and ServiceAPI
 6. Activities and ActivitySocket(Client socket) 
-7. NSP(NOOXY Service Protocol)
+7. NSP(NoService Protocol)
 8. Preinstalled Service
 9. Setting file
 
-## NSF's Orientation
+## NoService's Orientation
 1. Entities system(Services, Activities), each entities have it’s profile(with contain that showing attached user and user’s domain) for deciding should it be trusted. 
-2. User Orientation, User(in a daemon or a client) can create entities(activities, services). Entities and Users are both owned(registered) by NSd(NOOXY Service daemon) of particular domain.
+2. User Orientation, User(in a daemon or a client) can create entities(activities, services). Entities and Users are both owned(registered) by NSd(NoService daemon) of particular domain.
 3. Server(we call it “Services”) , client(we call it “Activities”) structure.
 4. Authorization API for Services. Services have responsibilities to protect their contains itself
 5. Module idea, “Everything based on service” concept.
 6. Lightweight. “Everything based on service” concept.
 7. Decentralized. Make it possible to parallelize task in future.
-8. NSP(NOOXY Service Protocol) is request response style protocol.
+8. NSP(NoService Protocol) is request response style protocol.
 
 ## Architecture
-![](https://i.imgur.com/FAu2uI5.jpg)
+![](https://i.imgur.com/dA1DNxH.png)
 
 
 ## Serverside module
@@ -89,7 +94,7 @@ Objective: To provide function(API) to take authoritative actions. Confirming th
 Objective: To interact with Authenticity database. Providing Users  caching, Creating User Obj, User identification.
 
 ### Crypto
-Objective: Providing AES, RSA, Hasing abilities for NSPS(NOOXY Service Protocol Secured).
+Objective: Providing AES, RSA, Hasing abilities for NSPS(NoService Protocol Secured).
 
 ### Service
 Objective: Loading and managing services, and routing the messages on internet. Also provide service socket, activity socket.
@@ -116,14 +121,14 @@ Objective: Loading and managing services, and routing the messages on internet. 
 Objective: To handle authoritative actions. Confirming the sensitive data or operation is secured.
 
 ### Crypto
-Objective: Providing AES, RSA, Hasing abilities for NSPS(NOOXY Service Protocol Secured).
+Objective: Providing AES, RSA, Hasing abilities for NSPS(NoService Protocol Secured).
 
 ## Service and Sockets
 ### Explaination of how service work
-Once the core of the NSF is started.
-The core of NSF will navigate the directories of “services” directory which is under the root of NSF files. And in that directory it will exist a file called “entry.js”. The figure below can help you understand the concept.
+Once the core of the NoService is started.
+The core of NoService will navigate the directories of “services” directory which is under the root of NoService files. And in that directory it will exist a file called “entry.js”. The figure below can help you understand the concept.
 ```
-------|--(NSd(NOOXY Service deamon))-- ...
+------|--(NSd(NoService deamon))-- ...
       |
       |--(services)--|--(services_A)--|--(entry.js)
       |              |                |--(manifest.json)
@@ -138,7 +143,7 @@ The core of NSF will navigate the directories of “services” directory which 
 ```
 After the core finish navigating the directories under “services”. It will call the entry.js and call it’s function “start()” and pass API parameter in to start() function. Below show how the “entry.js” file might be.
 ``` javascript
-// NSF/services/youservice/entry.js
+// NoService/services/youservice/entry.js
 // Description:
 // "youservice/entry.js" description.
 // Copyright 2018 NOOXY. All Rights Reserved.
@@ -175,7 +180,7 @@ module.exports = {
 Beware that code in Service is ran as a superuser
 
 ### Creating a service
-launch NSF
+launch NoService
 ``` sh
 node launch.js
 ```
@@ -233,7 +238,7 @@ let _NSc = new NSc();
           console.log(err);
         }
         else {
-          console.log(json.d); // Print "Hello! NOOXY Service Framework!""
+          console.log(json.d); // Print "Hello! NoService Framework!""
         }
       });
       
@@ -243,7 +248,7 @@ let _NSc = new NSc();
         }
         else {
           console.log(json.d); 
-          // Print "Hello! NOOXY Service Framework! Secured." If is admin.
+          // Print "Hello! NoService Framework! Secured." If is admin.
         }
       });
   });
@@ -258,7 +263,7 @@ function start(Me, api) {
   ss.def('Hello', (json, entityID, returnJSON)=>{
     console.log(json.d); // Print "I am client.".
     let json_be_returned = {
-      d: 'Hello! NOOXY Service Framework!'
+      d: 'Hello! NoService Framework!'
     }
     
     returnJSON(false, json_be_returned);
@@ -268,7 +273,7 @@ function start(Me, api) {
   ss.sdef('HelloSecured', (json, entityID, returnJSON)=>{
     console.log(json.d); // Print "I am client.".
     let json_be_returned = {
-      d: 'Hello! NOOXY Service Framework! Secured.'
+      d: 'Hello! NoService Framework! Secured.'
     }
     // First parameter for error, next is JSON to be returned.
     returnJSON(false, json_be_returned);
@@ -410,9 +415,9 @@ api.Authorization.Authby.Token(entityID, (err, pass)=>{
   ActivitySocket.on(type, callback)\
   ActivitySocket.close()
   
-## NOOXY Service Protocol
+## NoService Protocol
 ### Basic
-1. NSP(NOOXY Service Protocol) is based on text, based on Json data structure.
+1. NSP(NoService Protocol) is based on text, based on Json data structure.
 2. It’s communication style is like http. Existing a method, a request and a response.
 3. NSP is designed to be handle by core, not recommended to let service have direct access.
 4. Once a NSP package was sent. It contains 3 main parts. 
@@ -466,7 +471,7 @@ aes_iv(base64)+data_encrypted(base64)
 #### CS(Call Service)
 #### CA(Call Activity)
 
-## Preinstalled Service (NOOXY Services Bundle)
+## Preinstalled Service (NoServices Bundle)
 ### list
 1. NoShell
 2. NoServiceManager
