@@ -31,8 +31,8 @@ let Utils = require('./utilities');
 let NoCrypto = require('./crypto').NoCrypto;
 let NSPS = require('./crypto').NSPS;
 let WorkerDaemon = require('./workerd');
-let Database = require('./database');
-let Model = require('./model');
+let Database = require('./database/database');
+let Model = require('./database/model');
 
 
 function Core(settings) {

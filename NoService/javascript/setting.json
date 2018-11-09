@@ -94,7 +94,7 @@
 
     "username": "root",
 
-    "password": "",
+    "password": "dbpassword",
 
     "host": "127.0.0.1",
 
