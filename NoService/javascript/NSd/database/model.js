@@ -9,6 +9,10 @@ function Model() {
   let _db;
   let _model_dict = {};
 
+  let _load_models_dict = ()=> {
+
+  };
+
   function ListModel() {
 
     this.updateRow = ()=> {
@@ -59,6 +63,10 @@ function Model() {
   // }
   //
 
+  this.delete = (model_name, callback)=> {
+
+  };
+
   this.define = (model_name, obj_structure, callback)=> {
     let type = obj_structure.modeltype;
   };
@@ -72,22 +80,28 @@ function Model() {
   };
 
   this.importDatabase = (db, callback)=> {
-    let _db = db;
+    _db = db;
     _db.isTableExist('NSModels', (err, exist)=> {
       if(exist) {
-        callback(false);
+        _db.getRows('' , (error, rows)=> {
+          for(let index in rows) {
+            _model_dict[rows[index].name] = JSON.parse(rows[index].structure);
+          };
+          callback(false);
+        });
       }
       else {
         _db.createTable('NSModels', {
           name: {
-            type: 'text',
-            iskey: true
+            type: 'TEXT',
+            iskey: true,
+            notnull: true
           },
 
-          content: {
-            type: 'text'
+          structure: {
+            type: 'TEXT'
           }
-        }, ()=> {
+        }, (error)=> {
 
         });
       }
