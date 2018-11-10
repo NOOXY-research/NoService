@@ -44,48 +44,102 @@ function Mariadb(meta) {
   };
 
   this.deleteRows = (select_query, callback)=> {
-
+    
   };
 
   this.getRows = (table_name, select_query, callback)=> {
-    db.query('CREATE TABLE');
+    if(weird_chars.exec(table_name)||weird_chars.exec(select_query)) {
+      callback(new Error('Special characters are not allowed.'));
+    }
+    else {
+      db.query('SELECT * FROM '+table_name+' WHERE '+select_query, callback);
+    }
   };
 
   this.getAllRows = (table_name, callback)=> {
-
+    if(weird_chars.exec(table_name)) {
+      callback(new Error('Special characters "'+idx_id+'" are not allowed.'));
+    }
+    else {
+      db.query('SELECT * FROM '+table_name, callback);
+    }
   };
 
-  this.replaceRows = (table_name, select_query, callback)=> {
-
+  this.replaceRow = (table_name, row, select_query, callback)=> {
+    if(weird_chars.exec(table_name)) {
+      callback(new Error('Special characters "'+idx_id+'" are not allowed.'));
+    }
+    else {
+      let sql = 'UPDATE '+table_name+' SET ';
+      sql += row.join('=?, ')+'=? WHERE '+select_query;
+      db.query(sql, row, callback);
+    }
   };
 
   // appendRows and generate ordered new int index
-  this.appendRows = (table_name, rows_dict, idx_id, callback)=> {
-    if(idx_id) {
-      let max_idx;
-
+  this.appendRows = (table_name, rows_dict_list, idx_id, callback)=> {
+    if(weird_chars.exec(table_name)) {
+      callback(new Error('Special characters "'+idx_id+'" are not allowed.'));
     }
     else {
-      let sql = 'INSERT INTO '+table_name;
-      let fields_str = '';
-      let rows = [];
-
-      let fields_keys = Object.keys(rows_dict);
-
-      for(let idx in fields_keys) {
-        rows.push(rows_dict[fields_keys[idx]]);
-        if(idx == fields_keys.length-1) {
-          fields_str += fields_keys[idx];
+      if(idx_id) {
+        if(weird_chars.exec(idx_id)) {
+          callback(new Error('Special characters "'+idx_id+'" are not allowed.'));
         }
         else {
-          fields_str += fields_keys[idx] + ', ';
+          let left = rows_dict_list.length;
+          let call_callback = (err)=> {
+            left--;
+            if(left == 0 || err) {
+              callback(err);
+              left = -1;
+            }
+          };
+
+          for(let index in rows_dict_list) {
+            let row = rows_dict_list[index];
+            let sql = 'INSERT INTO '+table_name;
+            let fields_str = Object.keys(row).join(', ');
+            let q = '';
+            let values = [];
+
+            for(let field_name in row) {
+              values.push(row[field_name]);
+              q = q +'? ';
+            }
+            sql = sql+'('+fields_str+', '+idx_id+') VALUES ('+q+', SELECT MAX('+idx_id+')+1 from '+table_name+')';
+            _db.query(sql, values, call_callback);
+          }
         }
-      };
 
-      sql = sql+'('+fields_str+') VALUES ?';
+      }
+      else {
+        let left = rows_dict_list.length;
+        let call_callback = (err)=> {
+          left--;
+          if(left == 0 || err) {
+            callback(err);
+            left = -1;
+          }
+        };
 
-      _db.query(sql, [rows]);
+        for(let index in rows_dict_list) {
+          let row = rows_dict_list[index];
+          let sql = 'INSERT INTO '+table_name;
+          let fields_str = Object.keys(row).join(', ');
+          let q = '';
+          let values = [];
+
+          for(let field_name in row) {
+            values.push(row[field_name]);
+            q = q +'? ';
+          }
+          sql = sql+'('+fields_str+') VALUES ('+q+')';
+          _db.query(sql, values, call_callback);
+        }
+      }
     }
+
   };
 
   this.createTable = (table_name, structure, callback)=> {
