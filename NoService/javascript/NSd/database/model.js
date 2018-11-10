@@ -4,6 +4,8 @@
 // Copyright 2018 NOOXY. All Rights Reserved.
 
 'use strict';
+const MODEL_TABLE_NAME = 'NSModels';
+const MODEL_TABLE_PREFIX = 'NSModel_';
 
 function Model() {
   let _db;
@@ -14,41 +16,64 @@ function Model() {
   };
 
   function ListModel() {
+    this.shrinkIndex = ()=> {
 
-    this.updateRow = ()=> {
+    }
 
-    };
-
-    this.updateRows = ()=> {
-
-    };
-
-    this.deleteRows = ()=> {
+    this.replaceRow = ()=> {
 
     };
 
-    this.getRows = ()=> {
+    this.replaceRows = (rows, begin, end)=> {
+
+    };
+
+    this.deleteRows = (begin, end)=> {
+
+    };
+
+    this.appendRows = ()=> {
+
+    };
+
+    this.getLatestNRows = (n)=> {
+
+    };
+
+    this.getRows = (begin, end,)=> {
+
+    };
+
+    this.getLatestIndex = (begin, end,)=> {
 
     };
 
   };
 
   function ObjModel() {
+    this.get = (key, dict)=> {
+
+    };
+
     this.create = (key, dict)=> {
 
-    }
+    };
 
-    this.update = (key, dict)=> {
+    this.replace = (key, dict)=> {
 
     };
   };
 
   function PairModel() {
+    this.get = (keypair, dict)=> {
+
+    };
+
     this.create = (keypair, dict)=> {
 
-    }
+    };
 
-    this.update = (keypair, dict)=> {
+    this.replace = (keypair, dict)=> {
 
     };
   };
@@ -68,7 +93,14 @@ function Model() {
   };
 
   this.define = (model_name, obj_structure, callback)=> {
-    let type = obj_structure.modeltype;
+    if(_model_dict[model_name.toLowerCase()]) {
+      callback(new Error('Model exist.'));
+    }
+    else {
+      let model_type = obj_structure.model_type;
+      let do_times_tamp = obj_structure.do_times_tamp;
+      _db.createTable();
+    }
   };
 
   this.get = (model_name, callback) => {
@@ -81,9 +113,9 @@ function Model() {
 
   this.importDatabase = (db, callback)=> {
     _db = db;
-    _db.isTableExist('NSModels', (err, exist)=> {
+    _db.isTableExist(MODEL_TABLE_NAME, (err, exist)=> {
       if(exist) {
-        _db.getRows('' , (error, rows)=> {
+        _db.getRows(MODEL_TABLE_NAME', '' , (error, rows)=> {
           for(let index in rows) {
             _model_dict[rows[index].name] = JSON.parse(rows[index].structure);
           };
@@ -91,7 +123,7 @@ function Model() {
         });
       }
       else {
-        _db.createTable('NSModels', {
+        _db.createTable(MODEL_TABLE_NAME, {
           name: {
             type: 'TEXT',
             iskey: true,

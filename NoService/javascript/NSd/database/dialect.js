@@ -5,7 +5,7 @@
 
 'use strict';
 
-const weird_chars = /[-!$%^&*()_+|~=`{}\[\]:";'<>?,\/]/;
+const weird_chars = /[-!$%^&*()+|~=`{}\[\]:";'<>?,.\/]/;
 
 function PostgresSQL() {
 
@@ -43,20 +43,47 @@ function Mariadb(meta) {
 
   };
 
-  this.getRows = (select_query, callback)=> {
+  this.getRows = (table_name, select_query, callback)=> {
     db.query('CREATE TABLE');
   };
 
-  this.getAllRows = (select_query, callback)=> {
+  this.getAllRows = (table_name, callback)=> {
 
   };
 
-  this.replaceRows = (select_query, callback)=> {
+  this.replaceRows = (table_name, select_query, callback)=> {
 
   };
 
-  this.replaceRow = (select_query, callback)=> {
+  this.replaceRow = (table_name, select_query, callback)=> {
 
+  };
+
+  this.appendRows = (table_name, rows_dict, idx_id, callback)=> {
+    if(idx_id) {
+
+    }
+    else {
+      let sql = 'INSERT INTO '+table_name;
+      let fields_str = '';
+      let rows = [];
+
+      let fields = Object.keys(rows_dict);
+
+      for(let idx in fields) {
+        rows.push(rows_dict[fields[idx]]);
+        if(idx == fields.length-1) {
+          fields_str += fields[idx];
+        }
+        else {
+          fields_str += fields[idx] + ', ';
+        }
+      };
+
+      sql = sql+'('+fields_str+') VALUES ?';
+
+      _db.query(sql, [rows]);
+    }
   };
 
   this.createTable = (table_name, structure, callback)=> {
@@ -89,7 +116,7 @@ function Mariadb(meta) {
       if(keys.length) {
         sql = sql + 'PRIMARY KEY (';
         for(i in keys) {
-          if(i = keys.length-1) {
+          if(i == keys.length-1) {
             sql = sql + keys[i]+', ';
           }
           else {
@@ -115,5 +142,6 @@ function Mariadb(meta) {
 }
 
 module.exports = {
-  Mariadb: Mariadb
+  Mariadb: Mariadb,
+  MySQL: Mariadb
 };
