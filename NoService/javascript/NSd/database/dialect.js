@@ -7,6 +7,10 @@
 
 const weird_chars = /[-!$%^&*()+|~=`{}\[\]:";'<>?,.\/]/;
 
+function Sqlite3() {
+
+}
+
 function PostgresSQL() {
 
 }
@@ -55,12 +59,10 @@ function Mariadb(meta) {
 
   };
 
-  this.replaceRow = (table_name, select_query, callback)=> {
-
-  };
-
+  // appendRows and generate ordered new int index
   this.appendRows = (table_name, rows_dict, idx_id, callback)=> {
     if(idx_id) {
+      let max_idx;
 
     }
     else {
@@ -68,15 +70,15 @@ function Mariadb(meta) {
       let fields_str = '';
       let rows = [];
 
-      let fields = Object.keys(rows_dict);
+      let fields_keys = Object.keys(rows_dict);
 
-      for(let idx in fields) {
-        rows.push(rows_dict[fields[idx]]);
-        if(idx == fields.length-1) {
-          fields_str += fields[idx];
+      for(let idx in fields_keys) {
+        rows.push(rows_dict[fields_keys[idx]]);
+        if(idx == fields_keys.length-1) {
+          fields_str += fields_keys[idx];
         }
         else {
-          fields_str += fields[idx] + ', ';
+          fields_str += fields_keys[idx] + ', ';
         }
       };
 
@@ -94,17 +96,17 @@ function Mariadb(meta) {
     else {
       let keys = [];
       let sql = 'CREATE TABLE '+table_name;
-      let fields = '';
+      let fields_str = '';
 
       // Determine the field
       for(let field_name in structure) {
         if(weird_chars.exec(field_name)) {
           callback(new Error('Special characters "'+field_name+'" are not allowed.'));
-          fields = null;
+          fields_str = null;
           break;
         }
         else {
-          fields = fields + field_name +' '+structure[field_name].type;
+          fields_str = fields_str + field_name +' '+structure[field_name].type;
           if(structure[field_name].iskey) {
             keys.push(field_name);
           }
@@ -112,7 +114,7 @@ function Mariadb(meta) {
       }
 
       // setup PRIMARY keys
-      sql = sql + '(' + fields + ') ';
+      sql = sql + '(' + fields_str + ') ';
       if(keys.length) {
         sql = sql + 'PRIMARY KEY (';
         for(i in keys) {
@@ -125,7 +127,7 @@ function Mariadb(meta) {
         };
         sql = sql + ')';
       }
-      if(fields != null) {
+      if(fields_str != null) {
 
         _db.query(sql, callback);
       }
