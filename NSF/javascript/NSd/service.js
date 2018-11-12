@@ -1,4 +1,4 @@
-// NSF/NSd/services.js
+// NoService/NSd/services.js
 // Description:
 // "services.js" provide functions of services stuff.
 // Copyright 2018 NOOXY. All Rights Reserved.
@@ -732,6 +732,7 @@ function Service() {
         erreport = new Error('Service "'+_service_name+'" have wrong dependencies settings.');
         console.log(err);
       }
+
       depended_service_dict[_service_name] = _service_manifest.dependencies.services;
       _worker = _workerd.returnWorker(_service_path+'/entry');
       // load module from local service directory
@@ -764,6 +765,21 @@ function Service() {
           fs.mkdirSync(_service_files_path);
           if(_debug) {
             Utils.tagLog('Service', 'Created service files folder at '+_service_files_path);
+          }
+        }
+        if(!fs.existsSync(_service_files_path+'/settings.json')) {
+          if(_service_manifest.settings) {
+            fs.writeFileSync(_service_files_path+'/settings.json', JSON.stringify(_service_manifest.settings, null, 2));
+            Utils.tagLog('Service', 'Settings file not exist. Created service settings at "'+_service_files_path+'/settings.json"');
+          }
+        }
+        else {
+          try {
+            _service_manifest.settings = JSON.parse(fs.readFileSync(_service_files_path+'/settings.json', 'utf8'));
+          }
+          catch (err) {
+            Utils.tagLog('*ERR*', 'Settings file corrupted. FilesPath "'+_service_files_path+'/settings.json"');
+            throw err;
           }
         }
         callback(erreport);
