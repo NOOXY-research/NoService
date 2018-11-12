@@ -27,7 +27,7 @@ function start(Me, api) {
 
   // JSONfunction is a function that can be defined, which others entities can call.
   // It is a NOOXY Service Framework Standard
-  ss.def('JSONfunction', (json, entityID, returnJSON)=>{
+  ss.def('JSONfunction', (json, entityID, returnJSON)=> {
     // Code here for JSONfunciton
     // Return Value for JSONfunction call. Otherwise remote will not recieve funciton return value.
     let json_be_returned = {
@@ -38,7 +38,7 @@ function start(Me, api) {
   });
 
   // Safe define a JSONfunction.
-  ss.sdef('SafeJSONfunction', (json, entityID, returnJSON)=>{
+  ss.sdef('SafeJSONfunction', (json, entityID, returnJSON)=> {
     // Code here for JSONfunciton
     // Return Value for JSONfunction call. Otherwise remote will not recieve funciton return value.
     let json_be_returned = {
@@ -56,7 +56,7 @@ function start(Me, api) {
   // You will need entityID to Authorize remote user. And identify remote.
   ss.on('data', (entityID, data) => {
     // Get Username and process your work.
-    api.Service.Entity.getEntityOwner(entityID, (err, username)=>{
+    api.Service.Entity.getEntityOwner(entityID, (err, username)=> {
       // To store your data and associated with userid INSEAD OF USERNAME!!!
       // Since userid can be promised as a unique identifer!!!
       let userid = null;
@@ -80,7 +80,7 @@ function start(Me, api) {
   // ServiceSocket.onClose, in case connection close.
   ss.on('close', (entityID, callback) => {
     // Get Username and process your work.
-    api.Service.Entity.getEntityOwner(entityID, (err, username)=>{
+    api.Service.Entity.getEntityOwner(entityID, (err, username)=> {
       // To store your data and associated with userid INSEAD OF USERNAME!!!
       // Since userid can be promised as a unique identifer!!!
       let userid = null;

@@ -46,16 +46,28 @@ function Mariadb(meta) {
     });
   };
 
-  this.deleteRows = (select_query, callback)=> {
+  this.addFields = (table_name)=> {
 
   };
 
-  this.getRows = (table_name, select_query, callback)=> {
+  this.removeFields = (table_name)=> {
+
+  };
+
+  this.hasField = (table_name)=> {
+
+  };
+
+  this.deleteRows = (table_name, select_query, callback)=> {
+
+  };
+
+  this.getRows = (table_name, select_query, select_query_values, callback)=> {
     if(weird_chars.exec(table_name)||weird_chars.exec(select_query)) {
       callback(new Error('Special characters are not allowed.'));
     }
     else {
-      db.query('SELECT * FROM '+table_name+' WHERE '+select_query, callback);
+      db.query('SELECT * FROM '+table_name+' WHERE '+select_query, select_query_values, callback);
     }
   };
 
@@ -68,15 +80,23 @@ function Mariadb(meta) {
     }
   };
 
-  this.replaceRow = (table_name, row, select_query, callback)=> {
+  this.replaceRow = (table_name, row_dict, select_query, callback)=> {
     if(weird_chars.exec(table_name)) {
       callback(new Error('Special characters "'+idx_id+'" are not allowed.'));
     }
     else {
       let sql = 'UPDATE '+table_name+' SET ';
-      sql += row.join('=?, ')+'=? WHERE '+select_query;
-      db.query(sql, row, callback);
+      let values = [];
+      sql += Object.keys(row_dict).join('=?, ')+'=? WHERE '+select_query;
+      for(let field in row_dict) {
+        values.push(row_dict[field]);
+      }
+      db.query(sql, values, callback);
     }
+  };
+
+  this.addUniqueRow = (table_name, callback)=> {
+
   };
 
   // appendRows and generate ordered new int index

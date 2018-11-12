@@ -73,29 +73,31 @@ function Model() {
 
   };
 
-  function ObjModel(table_name, structure) {
-
+  function ObjModel(table_name, structure, do_timestamp) {
+    let key = ;
     // get an instense
-    this.get = (keyword, callback)=> {
+    this.get = (key_value, callback)=> {
+      _db.getRows(table_name, 'KEY = ?', [key_value], (err, results)=> {
+        callback(err, results[0]);
+      });
+    };
+
+    this.search = (keyword, callback)=> {
       let sql = '';
       sql = Objects.keys(structure).join(' LIKE '+keyword+' OR ');
       sql = sql + ' LIKE ' + keyword;
-      _db.getRows(table_name, sql, callback);
+      _db.getRows(table_name, sql, null, callback);
     };
 
-    this.search = ()=> {
-
+    this.create = (dict, callback)=> {
+      _db.addUniqueRow(table_name, dict, callback);
     };
 
-    this.create = (key, dict)=> {
-
+    this.replace = (dict, callback)=> {
+      _db.replaceRow(table_name, dict, callback);
     };
 
-    this.replace = (key, dict)=> {
-
-    };
-
-    this.addProperty = ()=> {
+    this.addProperties = ()=> {
 
     };
 
@@ -103,7 +105,7 @@ function Model() {
 
     };
 
-    this.removeProperty = ()=> {
+    this.removeProperties = ()=> {
 
     };
   };
@@ -162,16 +164,30 @@ function Model() {
 
   };
 
-  this.define = (model_name, obj_structure, callback)=> {
+  this.define = (model_name, model_structure, callback)=> {
     if(_models_dict[model_name.toLowerCase()]) {
       callback(new Error('Model exist.'));
     }
     else {
-      let model_type = obj_structure.model_type;
-      let do_times_tamp = obj_structure.do_times_tamp;
-      _db.createTable(, ()=> {
-        _models_dict[model_name] = 'bla';
-      });
+      let model_type = model_structure.model_type;
+      let do_times_tamp = model_structure.do_timestamp;
+      let structure = model_structure.structure;
+
+      if(model_type == 'Object') {
+        _db.createTable(, ()=> {
+          _models_dict[model_name] = 'bla';
+        });
+      }
+      else if (model_type == 'IndexedList') {
+
+      }
+      else if (model_type == 'Pair') {
+
+      }
+      else {
+        callback(new Error('Model type "'+modeltype+'" not supposed.'));
+      };
+
     }
   };
 
