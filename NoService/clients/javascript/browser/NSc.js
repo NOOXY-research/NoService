@@ -17,6 +17,12 @@ function NSc() {
     default_port: 1487
   };
 
+  let Vars = {
+    'version': 'aphla 0.2.2',
+    'NSP_version': 'aphla 0.2.0',
+    'copyright': 'copyright(c)2018 NOOXY inc.'
+  }
+
   this.setDebug = (boo)=>{
     settings.debug = boo;
   }
@@ -1240,17 +1246,6 @@ function NSc() {
       _rsa_pub = rsa_pub;
     };
   };
-
-  let Vars = {
-    'version': 'aphla 0.2.1',
-    'NSP_version': 'aphla 0.2.0',
-    'copyright': 'copyright(c)2018 NOOXY inc.',
-    'default_user': {
-      'username': 'admin',
-      'displayname': 'NSF Superuser',
-      'password': 'admin'
-    }
-  }
 
   let Core = function() {
     let verbose = (tag, log) => {

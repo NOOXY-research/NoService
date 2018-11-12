@@ -43,6 +43,13 @@
   "settings": {
     "check_memory_interval_sec": 300,
     "max_memory_per_service_MB": 2048,
-    "reach_memory_limit_relaunch": true
+    "reach_memory_limit_relaunch": true,
+    "upgrade_sources": {
+      "NoShell": "https://github.com/NOOXY-Research/NoShell",
+      "NoShellc": "https://github.com/NOOXY-Research/NoShellClient",
+      "NoUser": "https://github.com/NOOXY-Research/NoUser",
+      "NoActivity": "https://github.com/NOOXY-Research/NoActivity",
+      "NoServiceManager": "https://github.com/NOOXY-Research/NoServiceManager"
+    }
   }
 }
