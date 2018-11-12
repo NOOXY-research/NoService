@@ -44,12 +44,15 @@
     "check_memory_interval_sec": 300,
     "max_memory_per_service_MB": 2048,
     "reach_memory_limit_relaunch": true,
+    "git_sources": {
+      "github": "https://github.com/"
+    },
     "upgrade_sources": {
-      "NoShell": "https://github.com/NOOXY-Research/NoShell",
-      "NoShellc": "https://github.com/NOOXY-Research/NoShellClient",
-      "NoUser": "https://github.com/NOOXY-Research/NoUser",
-      "NoActivity": "https://github.com/NOOXY-Research/NoActivity",
-      "NoServiceManager": "https://github.com/NOOXY-Research/NoServiceManager"
+      "NoShell": ["github", "NOOXY-Research/NoShell"],
+      "NoShellc": ["github", "NOOXY-Research/NoShellClient"],
+      "NoUser": ["github", "NOOXY-Research/NoUser"],
+      "NoActivity": ["github", "NOOXY-Research/NoActivity"],
+      "NoServiceManager": ["github", "NOOXY-Research/NoServiceManager"]
     }
   }
 }
