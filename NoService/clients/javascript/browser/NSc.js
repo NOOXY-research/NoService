@@ -1,6 +1,6 @@
-// NSF/clients/javascript/NSc.js
+// NoService/clients/javascript/NSc.js
 // Description:
-// "NSc.js" is a NOOXY Service framework client.
+// "NSc.js" is a NoService framework client.
 // Copyright 2018 NOOXY. All Rights Reserved.
 'use strict';
 
