@@ -491,7 +491,7 @@ function Service() {
     this.onJFCall = (entityID, JFname, jsons, callback) => {
       try {
         if(_jsonfunctions[JFname]) {
-          _jsonfunctions[JFname].obj(JSON.parse(jsons==null?'{}':jsons), entityID, (err, returnVal)=>{
+          _jsonfunctions[JFname].obj(JSON.parse(jsons==null?'{}':jsons), entityID, (err, returnVal)=> {
             callback(err, returnVal);
           });
         }
@@ -768,7 +768,7 @@ function Service() {
           }
         }
         if(!fs.existsSync(_service_files_path+'/settings.json')) {
-          if(_service_manifest.settings) {
+          if(typeof(_service_manifest.settings) != 'undefined') {
             fs.writeFileSync(_service_files_path+'/settings.json', JSON.stringify(_service_manifest.settings, null, 2));
             Utils.tagLog('Service', 'Settings file not exist. Created service settings at "'+_service_files_path+'/settings.json"');
           }
@@ -798,7 +798,7 @@ function Service() {
 
       }
       catch(err) {
-        erreport = new Error('Service "'+_service_name+'" ended with failure.');
+        erreport = new Error('Launching service "'+_service_name+'" ended with failure.');
         console.log(err);
       }
       return erreport;
@@ -872,6 +872,7 @@ function Service() {
           if(err) {
             Utils.tagLog('*ERR*', 'Error occured while launching service "'+key+'".');
             Utils.tagLog('*ERR*', err.toString());
+            process.exit();
           }
           else {
             launched_service.push(key);
