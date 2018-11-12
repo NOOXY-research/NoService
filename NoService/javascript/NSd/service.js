@@ -768,8 +768,19 @@ function Service() {
           }
         }
         if(!fs.existsSync(_service_files_path+'/settings.json')) {
-          fs.writeFileSync(service_files_path+'/settings.json', JSON.stringify(manifest.settings, null, 2));
-          Utils.tagLog('Service', 'Settings file not exist. Created service settings at"'+_service_files_path+'settings.json"');
+          if(_service_manifest.settings) {
+            fs.writeFileSync(_service_files_path+'/settings.json', JSON.stringify(_service_manifest.settings, null, 2));
+            Utils.tagLog('Service', 'Settings file not exist. Created service settings at "'+_service_files_path+'/settings.json"');
+          }
+        }
+        else {
+          try {
+            _service_manifest.settings = JSON.parse(fs.readFileSync(_service_files_path+'/settings.json', 'utf8'));
+          }
+          catch (err) {
+            Utils.tagLog('*ERR*', 'Settings file corrupted. FilesPath "'+_service_files_path+'/settings.json"');
+            throw err;
+          }
         }
         callback(erreport);
         if(_service_manifest.implementation_api == false) {
