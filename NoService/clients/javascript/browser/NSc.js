@@ -10,7 +10,11 @@ function NSc() {
     verbose: true,
     debug: true,
     user: null,
-    secure: true
+    secure: true,
+    NSc_files_root: '/static/nsf',
+    connmethod: 'WebSocketSecure',
+    default_ip: 'localhost',
+    default_port: 1487
   };
 
   this.setDebug = (boo)=>{
@@ -1402,7 +1406,7 @@ function NSc() {
       });
       // setup NSF Auth implementation
       _implementation.setImplement('signin', (connprofile, data, data_sender)=>{
-        // top.location.replace('login.html?conn_method='+settings.connmethod+'&remote_ip='+settings.targetip+'&port='+settings.targetport+'&redirect='+top.window.location.href);
+        top.location.replace(settings.NSc_files_root+'/login.html?conn_method='+settings.connmethod+'&remote_ip='+settings.targetip+'&port='+settings.targetport+'&redirect='+top.window.location.href);
         // window.open('login.html?conn_method='+conn_method+'&remote_ip='+remote_ip+'&port='+port);
       });
 
@@ -1455,7 +1459,7 @@ function NSc() {
       // setup NSF Auth implementation
 
       _implementation.setImplement('AuthbyPassword', (connprofile, data, data_sender) => {
-        window.open('password.html?conn_method='+settings.connmethod+'&remote_ip='+settings.targetip+'&port='+settings.targetport+'&username='+settings.user+'&authtoken='+data.d.t+'&redirect='+window.location.href);
+        window.open(settings.NSc_files_root+'password.html?conn_method='+settings.connmethod+'&remote_ip='+settings.targetip+'&port='+settings.targetport+'&username='+settings.user+'&authtoken='+data.d.t+'&redirect='+window.location.href);
       });
 
         // create gateway
@@ -1533,14 +1537,23 @@ function NSc() {
     return settings.user;
   }
 
-  this.connect = (targetip, targetport) =>{
-    settings.connmethod = 'WebSocketSecure';
+  this.connect = (targetip, targetport, method) => {
+    if(targetip) {
+      settings.targetip = targetip;
+    }
+
+    if(targetport) {
+      settings.targetport = targetport;
+    }
+
     if(settings.debug) {
       settings.connmethod = 'WebSocket';
     }
 
-    settings.targetip = targetip;
-    settings.targetport = targetport;
+    if(method) {
+      settings.connmethod = method;
+    }
+
     settings.user = Utils.getCookie('NSUser');
     if(settings.user == "") {
       settings.user = null;

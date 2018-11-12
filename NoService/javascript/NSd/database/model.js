@@ -15,10 +15,15 @@ function Model() {
 
   };
 
-  function ListModel() {
+  function IndexedListModel() {
+    let table_name;
     this.shrinkIndex = ()=> {
 
-    }
+    };
+
+    this.search = ()=> {
+
+    };
 
     this.replaceRow = ()=> {
 
@@ -40,6 +45,10 @@ function Model() {
 
     };
 
+    this.getMaxIndex = ()=> {
+
+    };
+
     this.getRows = (begin, end,)=> {
 
     };
@@ -51,7 +60,13 @@ function Model() {
   };
 
   function ObjModel() {
+    let table_name;
+
     this.get = (key, dict)=> {
+
+    };
+
+    this.search = ()=> {
 
     };
 
@@ -65,7 +80,25 @@ function Model() {
   };
 
   function PairModel() {
+    let table_name;
+
+    this.search = ()=> {
+
+    };
+
     this.get = (keypair, dict)=> {
+
+    };
+
+    this.getbyBoth = ()=> {
+
+    };
+
+    this.getbyFirst = (keypair, dict)=> {
+
+    };
+
+    this.getbySecond = (keypair, dict)=> {
 
     };
 
