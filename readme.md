@@ -1,5 +1,5 @@
 # NoService
-![](https://i.imgur.com/B0w4YBM.png)
+![](https://i.imgur.com/EekNg8E.png)
 
 The project is still in alpha!
 
