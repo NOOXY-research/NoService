@@ -1,6 +1,7 @@
 // NoService/NSd/model.js
 // Description:
-// "model.js" provides ORM to manage objects and database.
+// "model.js" provides ORM to manage objects and database. Then you will no need
+// to keep retyping sql for table.
 // Copyright 2018 NOOXY. All Rights Reserved.
 
 'use strict';
@@ -15,12 +16,14 @@ function Model() {
 
   };
 
-  function IndexedListModel() {
-    let table_name;
-    let structure;
+  let _updata_model = (new_structure)=> {
 
-    this.search = (callback)=> {
+  }
 
+  function IndexedListModel(table_name, structure) {
+
+    this.search = (keyword, callback)=> {
+      _db.getRows(table_name, 'category LIKE '+keyword+'OR location LIKE '+keyword+'', );
     };
 
     this.replaceRows = (rows, begin, end, callback)=> {
@@ -70,12 +73,14 @@ function Model() {
 
   };
 
-  function ObjModel() {
-    let table_name;
+  function ObjModel(table_name, structure) {
 
     // get an instense
-    this.get = (key, callback)=> {
-
+    this.get = (keyword, callback)=> {
+      let sql = '';
+      sql = Objects.keys(structure).join(' LIKE '+keyword+' OR ');
+      sql = sql + ' LIKE ' + keyword;
+      _db.getRows(table_name, sql, callback);
     };
 
     this.search = ()=> {

@@ -1,6 +1,8 @@
 // NoService/NSd/database.js
-// Description: sql statements are supposed to stay only this file.
+// Description:
+// sql statements are supposed to stay only this file.
 // "database.js" provides interface to manage database stuff.
+// Here are functions for calling wrapped sql statement.
 // Copyright 2018 NOOXY. All Rights Reserved.
 
 'use strict';
@@ -32,7 +34,7 @@ function Database(meta) {
   };
 
   this.createTable = ()=> {
-    
+
   }
 
   this.close = (callback)=> {

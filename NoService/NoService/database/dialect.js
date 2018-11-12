@@ -1,10 +1,13 @@
 // NoService/NSd/database/dialect.js
-// Description: sql statements are supposed to stay only this file.
+// Description:
+// sql statements are supposed to stay only this file.
 // "database.js" provides interface to manage database stuff.
+// Here are functions for calling wrapped sql statement.
 // Copyright 2018 NOOXY. All Rights Reserved.
 
 'use strict';
 
+// Preventing SQL injection, Regex.
 const weird_chars = /[-!$%^&*()+|~=`{}\[\]:";'<>?,.\/]/;
 
 function Sqlite3() {
@@ -44,7 +47,7 @@ function Mariadb(meta) {
   };
 
   this.deleteRows = (select_query, callback)=> {
-    
+
   };
 
   this.getRows = (table_name, select_query, callback)=> {

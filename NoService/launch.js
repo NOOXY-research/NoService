@@ -1,9 +1,9 @@
-// NSF/launch.js
+// NoService/launch.js
 // Description:
 // "launch.js" launch NOOXY Service deamon.
 // Copyright 2018 NOOXY. All Rights Reserved.
 
-let Core = require('./NSd/core');
+let Core = require('./NoService/core');
 var Path = require("path");
 var fs = require('fs');
 
