@@ -2,7 +2,7 @@
 // Description:
 // sql statements are supposed to stay only this file.
 // "database.js" provides interface to manage database stuff.
-// Here are functions for calling wrapped sql statement.
+// Here are standardized functions for calling wrapped sql statement.
 // Copyright 2018 NOOXY. All Rights Reserved.
 
 'use strict';
@@ -46,28 +46,33 @@ function Mariadb(meta) {
     });
   };
 
-  this.addFields = (table_name)=> {
+  this.addFields = (table_name, callback)=> {
 
   };
 
-  this.removeFields = (table_name)=> {
+  this.removeFields = (table_name, callback)=> {
 
   };
 
-  this.hasField = (table_name)=> {
+  this.hasField = (table_name, callback)=> {
 
   };
 
-  this.deleteRows = (table_name, select_query, callback)=> {
+  this.removeRows = (table_name, select_query, callback)=> {
 
   };
 
-  this.getRows = (table_name, select_query, select_query_values, callback)=> {
+  this.getRows = (table_name, [select_query, select_query_values], callback)=> {
     if(weird_chars.exec(table_name)||weird_chars.exec(select_query)) {
       callback(new Error('Special characters are not allowed.'));
     }
     else {
-      db.query('SELECT * FROM '+table_name+' WHERE '+select_query, select_query_values, callback);
+      if(select_query_values) {
+        db.query('SELECT * FROM '+table_name+' WHERE '+select_query, select_query_values, callback);
+      }
+      else {
+        db.query('SELECT * FROM '+table_name+' WHERE '+select_query, callback);
+      }
     }
   };
 
@@ -80,7 +85,7 @@ function Mariadb(meta) {
     }
   };
 
-  this.replaceRow = (table_name, row_dict, select_query, callback)=> {
+  this.replaceRow = (table_name, row_dict, [select_query, select_query_values], callback)=> {
     if(weird_chars.exec(table_name)) {
       callback(new Error('Special characters "'+idx_id+'" are not allowed.'));
     }
@@ -205,7 +210,6 @@ function Mariadb(meta) {
         sql = sql + ')';
       }
       if(fields_str != null) {
-
         _db.query(sql, callback);
       }
     }
@@ -222,5 +226,7 @@ function Mariadb(meta) {
 
 module.exports = {
   Mariadb: Mariadb,
-  MySQL: Mariadb
+  MySQL: Mariadb,
+  Sqlite3: Sqlite3,
+  PostgresSQL: PostgresSQL
 };

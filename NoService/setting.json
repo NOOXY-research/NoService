@@ -31,8 +31,6 @@
 
   "services_files_path": "service_files/",
 
-  "database_path": "db.sqlite3",
-
   "SHA256_key": "FATFROG",
 
   "services": [

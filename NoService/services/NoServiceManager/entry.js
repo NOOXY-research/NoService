@@ -70,6 +70,20 @@ function start(Me, api) {
     });
 
     ss.sdef('installService', (json, entityID, returnJSON)=> {
+      api.Authorization.Authby.Password(entityID, (err, valid)=> {
+        let method = json.m; // git
+        let source = json.s; // github gitlab
+        let repo =json.r;
+
+        if(method = 'git') {
+          if(source = 'github') {
+
+          }
+        }
+      });
+    });
+
+    ss.sdef('upgradeService', (json, entityID, returnJSON)=> {
       let method = json.m; // git
       let source = json.s; // github gitlab
       let repo =json.r;

@@ -1,5 +1,5 @@
 # NoService
-![](https://i.imgur.com/EekNg8E.png)
+![](https://raw.githubusercontent.com/NOOXY-inc/Art-Collection/master/NoService/NoService.png)
 The project is still in alpha!
 
 ## What is NoService?
@@ -33,7 +33,7 @@ Socket base+API pattern makes the concept easy to understand. NoService wraps th
 NoService provide bundled services such as NoShell which give you access of NoService. NoUser for user system. And so on.
 
 ## Target version
-* daemon: alpha 0.2.0
+* daemon: alpha 0.3.0
 * protocol: NSP alpha
 
 ## Dependences
@@ -41,7 +41,15 @@ NoService provide bundled services such as NoShell which give you access of NoSe
 ### core
 node packages
 ``` sh
-npm install ws sqlite3 --save
+npm install ws --save
+```
+for sqlite3 database
+``` sh
+npm install sqlite3 --save
+```
+for MySQL database
+``` sh
+npm install mysql --save
 ```
 
 ### NOOXY services bundle
@@ -393,6 +401,19 @@ api.Authorization.Authby.Token(entityID, (err, pass)=>{
   ### Crypto
   api.Crypto.encryptString(algo, key, toEncrypt, callback)\
   api.Crypto.decryptString(algo, key, toDecrypt, callback)
+
+  ### Database
+
+  ### Database Model
+  api.Database.Model.define()\
+  api.Database.Model.get()\
+  api.Database.Model.remove()
+
+  #### Model(Object)
+
+  #### Model(Pair)
+
+  #### Model(IndexedList)
 
   ### ServiceSocket
   api.Serivce.ServiceSocket.def(name, callback)\

@@ -16,7 +16,7 @@ function Model() {
 
   };
 
-  let _updata_model = (new_structure)=> {
+  let _update_models_dict = (new_structure)=> {
 
   }
 
@@ -86,7 +86,7 @@ function Model() {
       let sql = '';
       sql = Objects.keys(structure).join(' LIKE '+keyword+' OR ');
       sql = sql + ' LIKE ' + keyword;
-      _db.getRows(table_name, sql, null, callback);
+      _db.getRows(table_name, [sql, null], callback);
     };
 
     this.create = (dict, callback)=> {
@@ -94,19 +94,19 @@ function Model() {
     };
 
     this.replace = (dict, callback)=> {
-      _db.replaceRow(table_name, dict, callback);
+      _db.replaceRow(table_name, dict, 'KEY =', callback);
     };
 
     this.addProperties = ()=> {
-
+      _db.addFields();
     };
 
     this.hasProperty = ()=> {
-
+      _db.hadField();
     };
 
     this.removeProperties = ()=> {
-
+      _db.removeFields();
     };
   };
 
@@ -150,9 +150,15 @@ function Model() {
     };
   };
 
+  this.remove = (model_name, callback)=> {
+
+  };
+
   // example:
   // {
-  //    modeltype: "",
+  //    modeltype: "Object",
+  //    do_timestamp: true,
+  //    model_key: 'username',
   //    structure: {
   //      username: 'text',
   //      height: 'int'
@@ -160,9 +166,18 @@ function Model() {
   // }
   //
 
-  this.remove = (model_name, callback)=> {
-
-  };
+  // example:
+  // {
+  //    modeltype: "Pair",
+  //    do_timestamp: false,
+  //    model_key: ['u1', 'u2'],
+  //    structure: {
+  //      u1: 'text',
+  //      u2: 'text',
+  //      content: 'text'
+  //    }
+  // }
+  //
 
   this.define = (model_name, model_structure, callback)=> {
     if(_models_dict[model_name.toLowerCase()]) {
@@ -174,7 +189,8 @@ function Model() {
       let structure = model_structure.structure;
 
       if(model_type == 'Object') {
-        _db.createTable(, ()=> {
+
+        _db.createTable(MODEL_TABLE_PREFIX+model_name, ()=> {
           _models_dict[model_name] = 'bla';
         });
       }
