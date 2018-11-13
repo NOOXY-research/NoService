@@ -5,13 +5,30 @@
 // Here are standardized functions for calling wrapped sql statement.
 // Copyright 2018 NOOXY. All Rights Reserved.
 
+// Functions to be implemented
+// connect
+// addFields
+// removeFields
+// hasField
+// removerRows
+// getRows
+// getAllRows
+// replaceRows
+// insertUniqueRow
+// appendRows
+// createTable
+// existTable
+// close
+
 'use strict';
 
 // Preventing SQL injection, Regex.
 const weird_chars = /[-!$%^&*()+|~=`{}\[\]:";'<>?,.\/]/;
 
-function Sqlite3() {
+function Sqlite3(meta) {
+  this.connect = ()=> {
 
+  };
 }
 
 function PostgresSQL() {
@@ -46,11 +63,11 @@ function Mariadb(meta) {
     });
   };
 
-  this.addFields = (table_name, callback)=> {
+  this.addFields = (table_name, structure, callback)=> {
 
   };
 
-  this.removeFields = (table_name, callback)=> {
+  this.removeFields = (table_name, field_list, callback)=> {
 
   };
 
@@ -100,7 +117,7 @@ function Mariadb(meta) {
     }
   };
 
-  this.addUniqueRow = (table_name, callback)=> {
+  this.insertUniqueRow = (table_name, callback)=> {
 
   };
 
@@ -215,7 +232,7 @@ function Mariadb(meta) {
     }
   };
 
-  this.isTableExist = (callback)=> {
+  this.existTable = (table_name, callback)=> {
 
   };
 

@@ -20,6 +20,7 @@ function Model() {
 
   }
 
+  // For something like messages or logs.
   function IndexedListModel(table_name, structure) {
 
     this.search = (keyword, callback)=> {
@@ -73,6 +74,7 @@ function Model() {
 
   };
 
+  // For storing objects that appear often
   function ObjModel(table_name, structure, do_timestamp) {
     let key = ;
     // get an instense
@@ -97,43 +99,86 @@ function Model() {
       _db.replaceRow(table_name, dict, 'KEY =', callback);
     };
 
-    this.addProperties = ()=> {
-      _db.addFields();
+    this.addProperties = (properties_dict, callback)=> {
+      for(let field in properties_dict) {
+        properties_dict[field] = {type: properties_dict[field]};
+      }
+      _db.addFields(table_name, properties_dict, callback);
     };
 
-    this.hasProperty = ()=> {
-      _db.hadField();
+    this.hasProperty = (property_name, callback)=> {
+      _db.hadField(table_name, property_name, callback);
     };
 
-    this.removeProperties = ()=> {
-      _db.removeFields();
+    this.removeProperties = (properties_list)=> {
+      _db.removeFields(table_name);
+    };
+
+    this.remove = ()=> {
+
     };
   };
 
+  // For something like relation or two keys objects.
   function PairModel() {
     let table_name;
-
-    this.search = (phrase, callback)=> {
-
-    };
-
-    this.getbyPair = (pair, callback)=> {
-
-    };
-
-    this.getbyFirst = (first, callback)=> {
-
-    };
-
-    this.getbySecond = (second, callback)=> {
-
-    };
 
     this.create = (keypair, dict, callback)=> {
 
     };
 
-    this.replace = (keypair, dict, callback)=> {
+    this.search = (phrase, callback)=> {
+
+    };
+
+    // return list
+    this.getbyPair = (pair, callback)=> {
+
+    };
+
+    // return list
+    this.getbyPairBoth = (both, callback)=> {
+      this.getbyFirst(both, ()=> {
+        this.getbySecond(both, ()=> {
+          
+        });
+      });
+    };
+
+    // return list
+    this.getbyFirst = (first, callback)=> {
+
+    };
+
+    // return list
+    this.getbySecond = (second, callback)=> {
+
+    };
+
+    // return list
+    this.replacebyPair = (pair, fields_dict_list, callback)=> {
+
+    };
+
+    // return list
+    this.replacebyFirst = (first, fields_dict_list, callback)=> {
+
+    };
+
+    // return list
+    this.replacebySecond = (second, fields_dict_list, callback)=> {
+
+    };
+
+    this.removebyPair = (pair, callback)=> {
+
+    };
+
+    this.removebyFirst = (first, callback)=> {
+
+    };
+
+    this.removebySecond = (second, callback)=> {
 
     };
 
@@ -150,13 +195,14 @@ function Model() {
     };
   };
 
+
   this.remove = (model_name, callback)=> {
 
   };
 
   // example:
   // {
-  //    modeltype: "Object",
+  //    model_type: "Object",
   //    do_timestamp: true,
   //    model_key: 'username',
   //    structure: {
@@ -168,7 +214,7 @@ function Model() {
 
   // example:
   // {
-  //    modeltype: "Pair",
+  //    model_type: "Pair",
   //    do_timestamp: false,
   //    model_key: ['u1', 'u2'],
   //    structure: {
@@ -190,9 +236,13 @@ function Model() {
 
       if(model_type == 'Object') {
 
+        if(do_timestamp) {
+
+        }
         _db.createTable(MODEL_TABLE_PREFIX+model_name, ()=> {
           _models_dict[model_name] = 'bla';
         });
+
       }
       else if (model_type == 'IndexedList') {
 
@@ -208,6 +258,10 @@ function Model() {
   };
 
   this.get = (model_name, callback) => {
+
+  };
+
+  this.exist = (model_name, callback)=> {
 
   };
 
