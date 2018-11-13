@@ -25,20 +25,28 @@ function Database(meta) {
     throw new Error('Database "'+meta.dialect+'" not supported. ');
   }
 
-  this.connect = (callback)=> {
-    _dialect.connect(callback);
+  this.connect = (...args)=> {
+    _dialect.connect.apply(null, args);;
   };
 
-  this.query = ()=> {
-    _dialect.query();
+  this.query = (...args)=> {
+    _dialect.query.apply(null, args);;
   };
 
-  this.createTable = ()=> {
-
+  this.createTable = (...args)=> {
+    _dialect.createTable.apply(null, args);;
   }
 
-  this.close = (callback)=> {
-    _dialect.close();
+  this.existTable = (...args)=> {
+    _dialect.existTable.apply(null, args);;
+  };
+
+  this.appendRows = (...args)=> {
+    _dialect.appendRows.apply(null, args);;
+  };
+
+  this.close = (...args)=> {
+    _dialect.close.apply(null, args);;
   };
 }
 

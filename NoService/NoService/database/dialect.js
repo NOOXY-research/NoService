@@ -56,7 +56,12 @@ function Mariadb(meta) {
             callback(error);
           }
           else {
-            callback(error);
+            _db.changeUser({database : meta.database}, (err)=> {
+              if (err) {
+                console.log(err);
+              };
+              callback(err);
+            });
           }
         });
       }
@@ -172,14 +177,14 @@ function Mariadb(meta) {
           let row = rows_dict_list[index];
           let sql = 'INSERT INTO '+table_name;
           let fields_str = Object.keys(row).join(', ');
-          let q = '';
+          let q = [];
           let values = [];
 
           for(let field_name in row) {
             values.push(row[field_name]);
-            q = q +'? ';
+            q.push('?');
           }
-          sql = sql+'('+fields_str+') VALUES ('+q+')';
+          sql = sql+'('+fields_str+') VALUES ('+q.join(', ')+')';
           _db.query(sql, values, call_callback);
         }
       }
@@ -188,24 +193,23 @@ function Mariadb(meta) {
   };
 
   this.createTable = (table_name, structure, callback)=> {
-
     if(weird_chars.exec(table_name)) {
       callback(new Error('Special characters of table name are not allowed.'));
     }
     else {
       let keys = [];
       let sql = 'CREATE TABLE '+table_name;
-      let fields_str = '';
+      let fields_str_list = [];
 
       // Determine the field
       for(let field_name in structure) {
         if(weird_chars.exec(field_name)) {
           callback(new Error('Special characters "'+field_name+'" are not allowed.'));
-          fields_str = null;
+          fields_str_list = null;
           break;
         }
         else {
-          fields_str = fields_str + field_name +' '+structure[field_name].type;
+          fields_str_list.push(field_name +' '+structure[field_name].type+(structure[field_name].notnull?' NOT NULL':''));
           if(structure[field_name].iskey) {
             keys.push(field_name);
           }
@@ -213,27 +217,22 @@ function Mariadb(meta) {
       }
 
       // setup PRIMARY keys
-      sql = sql + '(' + fields_str + ') ';
+      sql = sql + '(' + fields_str_list.join(', ') ;
       if(keys.length) {
-        sql = sql + 'PRIMARY KEY (';
-        for(i in keys) {
-          if(i == keys.length-1) {
-            sql = sql + keys[i]+', ';
-          }
-          else {
-            sql = sql + keys[i];
-          }
-        };
-        sql = sql + ')';
+        sql = sql + ', PRIMARY KEY ('+keys.join(', ')+')';
       }
-      if(fields_str != null) {
+      sql = sql + ') ';
+      console.log(sql);
+      if(fields_str_list != null) {
         _db.query(sql, callback);
       }
     }
   };
 
   this.existTable = (table_name, callback)=> {
-
+    _db.query('SHOW TABLES LIKE \''+table_name+'\';', (err, result)=> {
+      callback(err, result==null?false:(result[0]==null?false:true));
+    });
   };
 
   this.close = ()=> {

@@ -5,7 +5,6 @@
 'use strict';
 
 let crypto = require('crypto');
-let sqlite3 = null;
 let Utils = require('./utilities');
 let Vars = require('./variables');
 const AUTHE_USER_MODEL_NAME = 'NSUser';
@@ -20,7 +19,7 @@ function Authenticity() {
   // Declare parameters
   this.TokenExpirePeriod = 7 // Days
 
-  // import database from specified path
+  // import Module from specified path
   this.importModelModule = (model, callback) => {
     _model_module = model;
     _model_module.exist(AUTHE_USER_MODEL_NAME, (err, has_model)=> {
@@ -30,25 +29,25 @@ function Authenticity() {
           do_timestamp: true,
           model_key: ['username', 'userid'],
           structure: {
-            username : 'text',
-            firstname: 'text',
-            lastname: 'text',
-            exisitence : 'text',
-            userid : 'text',
-            displayname : 'text',
-            tokenexpire : 'datetime',
+            username : 'VARCHAR(255)',
+            firstname: 'VARCHAR(255)',
+            lastname: 'VARCHAR(255)',
+            userid : 'VARCHAR(255)',
+            displayname : 'VARCHAR(255)',
+            tokenexpire : 'VARCHAR(255)',
             privilege : 'integer',
-            detail : 'int'
+            detail : 'TEXT'
           }
         }, (err, user_model)=> {
           _user_model = user_model;
+          callback(err);
         });
       }
       else {
         _model_module.get(AUTHE_USER_MODEL_NAME, (err, user_model)=> {
           _user_model = user_model;
+          callback(false);
         });
-        callback(false);
       }
     });
   };
@@ -295,10 +294,5 @@ function Authenticity() {
     _model_module = null;
     _user_model = null;
   };
-  // // Authenticity Router
-  // this.GTRouter = () => {
-  //
-  // }
-
 };
 module.exports = Authenticity;

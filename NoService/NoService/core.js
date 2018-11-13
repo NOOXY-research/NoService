@@ -1,4 +1,4 @@
-// NoService/NSd/core.js
+// NoService/NoService/core.js
 // Description:
 // "core.js" control main behavior of deamon.
 // Copyright 2018 NOOXY. All Rights Reserved.
@@ -320,43 +320,60 @@ function Core(settings) {
   }
 
   this.initialize = (callback) => {
-    verbose('Daemon', 'Initializing NSd...')
-    verbose('Daemon', 'Creating eula...')
-    let _auth = new Authenticity();
-    verbose('Daemon', 'Checking Database...');
-    let _dbcheck = new Database(settings.database);
-    _dbcheck.connect(()=> {
-      if (fs.existsSync(settings.database_path)) {
-        verbose('Daemon', 'Database already exist.')
-        _auth.importDatabase(settings.database_path);
+    verbose('Daemon', 'Initializing NoService daemon...')
+    verbose('Daemon', 'Checking Database and Authenticity...');
+
+    let _init_db = new Database(settings.database);
+    let _init_auth = new Authenticity();
+    let _init_model = new Model();
+
+    // Connect to db
+    _init_db.connect((err)=> {
+      if(err) {
+        Utils.tagLog('*ERR*', 'Occur failure on connecting database.');
+        throw(err);
       }
-      else {
-        verbose('Daemon', 'Creating database...')
-        _auth.createDatabase(settings.database_path);
-      }
-      _auth.createUser(Vars.default_user.username, Vars.default_user.displayname, Vars.default_user.password, 0, null, 'The', 'Admin', (err)=> {
+      verbose('Daemon', 'Import DB...')
+      // Import connected db to model module
+      _init_model.importDatabase(_init_db, (err)=> {
         if(err) {
-          Utils.tagLog('*ERR*', 'Occur failure on creating database.');
-          console.log(err);
-          callback(err);
+          Utils.tagLog('*ERR*', 'Occur failure on importing database for model.');
+          throw(err);
         }
-        else {
-          verbose('Daemon', 'NoService Superuser "'+Vars.default_user.username+'" with password "'+Vars.default_user.password+'" created. Please change password later for security.');
-          fs.writeFile('./eula.txt', '', function(err) {
+        verbose('Daemon', 'Import Model...')
+        // Import set Model Module to authenticity.
+        _init_auth.importModelModule(_init_model, (err)=>{
+          if(err) {
+            Utils.tagLog('*ERR*', 'Occur failure on importing model for authenticity.');
+            throw(err);
+          }
+          verbose('Daemon', 'Init authenticity...')
+          _init_auth.createUser(Vars.default_user.username, Vars.default_user.displayname, Vars.default_user.password, 0, null, 'The', 'Admin', (err)=> {
             if(err) {
-              Utils.tagLog('*ERR*', 'Writing EULA error.');
+              Utils.tagLog('*ERR*', 'Occur failure on creating database.');
               console.log(err);
               callback(err);
             }
             else {
-              verbose('Daemon', 'NSd initilalized.');
-              callback(err);
+              verbose('Daemon', 'NoService Superuser "'+Vars.default_user.username+'" with password "'+Vars.default_user.password+'" created. Please change password later for security.');
+              verbose('Daemon', 'Creating eula...')
+              fs.writeFile('./eula.txt', '', function(err) {
+                if(err) {
+                  Utils.tagLog('*ERR*', 'Writing EULA error.');
+                  console.log(err);
+                  callback(err);
+                }
+                else {
+                  verbose('Daemon', 'NoService daemon initilalized.');
+                  callback(err);
+                }
+              });
             }
           });
-
-        }
+        });
       });
     });
+
   }
 }
 

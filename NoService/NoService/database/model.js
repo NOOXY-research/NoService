@@ -5,23 +5,14 @@
 // Copyright 2018 NOOXY. All Rights Reserved.
 
 'use strict';
-const MODEL_TABLE_NAME = 'NSModels';
-const MODEL_TABLE_PREFIX = 'NSModel_';
+const MODEL_TABLE_NAME = 'NoService_Models';
+const MODEL_TABLE_PREFIX = 'NoService_Model_';
 
 function Model() {
   let _db;
-  let _models_dict = {};
-
-  let _load_models_dict = ()=> {
-
-  };
-
-  let _update_models_dict = (new_structure)=> {
-
-  }
 
   // For something like messages or logs.
-  function IndexedListModel(table_name, structure) {
+  function IndexedListModel(table_name, model_key, structure, do_timestamp) {
 
     this.search = (keyword, callback)=> {
       _db.getRows(table_name, 'category LIKE '+keyword+'OR location LIKE '+keyword+'', );
@@ -75,8 +66,7 @@ function Model() {
   };
 
   // For storing objects that appear often
-  function ObjModel(table_name, structure, do_timestamp) {
-    let key = ;
+  function ObjModel(table_name, model_key, structure, do_timestamp) {
     // get an instense
     this.get = (key_value, callback)=> {
       _db.getRows(table_name, 'KEY = ?', [key_value], (err, results)=> {
@@ -120,7 +110,7 @@ function Model() {
   };
 
   // For something like relation or two keys objects.
-  function PairModel() {
+  function PairModel(table_name, model_key, structure, do_timestamp) {
     let table_name;
 
     this.create = (keypair, dict, callback)=> {
@@ -140,7 +130,7 @@ function Model() {
     this.getbyPairBoth = (both, callback)=> {
       this.getbyFirst(both, ()=> {
         this.getbySecond(both, ()=> {
-          
+
         });
       });
     };
@@ -226,35 +216,74 @@ function Model() {
   //
 
   this.define = (model_name, model_structure, callback)=> {
-    if(_models_dict[model_name.toLowerCase()]) {
-      callback(new Error('Model exist.'));
-    }
-    else {
-      let model_type = model_structure.model_type;
-      let do_times_tamp = model_structure.do_timestamp;
-      let structure = model_structure.structure;
-
-      if(model_type == 'Object') {
-
-        if(do_timestamp) {
-
-        }
-        _db.createTable(MODEL_TABLE_PREFIX+model_name, ()=> {
-          _models_dict[model_name] = 'bla';
-        });
-
-      }
-      else if (model_type == 'IndexedList') {
-
-      }
-      else if (model_type == 'Pair') {
-
+    let model_type = model_structure.model_type;
+    let do_timestamp = model_structure.do_timestamp;
+    let model_key = model_structure.model_key;
+    let structure = model_structure.structure;
+    _db.existTable(MODEL_TABLE_PREFIX+model_name, (err, exist)=> {
+      if(exist) {
+        callback(new Error('Model exist.'));
       }
       else {
-        callback(new Error('Model type "'+modeltype+'" not supposed.'));
-      };
+        if(model_type == 'Object') {
+          if(do_timestamp) {
 
-    }
+          }
+          _db.createTable(MODEL_TABLE_PREFIX+model_name, ()=> {
+            _models_dict[model_name] = 'bla';
+            _db.appendRows(MODEL_TABLE_NAME, {
+              name: MODEL_TABLE_PREFIX+model_name,
+              structure: JSON.stringify(model_structure)
+            }, null);
+          });
+        }
+        else if (model_type == 'IndexedList') {
+          if(do_timestamp) {
+
+          }
+          _db.createTable(MODEL_TABLE_PREFIX+model_name, {
+
+          }, ()=> {
+            _models_dict[model_name] = 'bla';
+            _db.appendRows(MODEL_TABLE_NAME, {
+              name: MODEL_TABLE_PREFIX+model_name,
+              structure: JSON.stringify(model_structure)
+            }, null);
+          });
+        }
+        else if (model_type == 'Pair') {
+          let field_structure = {};
+          if(do_timestamp) {
+            structure['createdate'] = 'DATETIME';
+            structure['modifydate'] = 'DATETIME';
+          }
+          for(let field in structure) {
+            field_structure[field] = {
+              type: structure[field]
+            };
+          }
+          field_structure[model_key[0]].iskey = true;
+          field_structure[model_key[0]].notnull = true;
+          field_structure[model_key[1]].iskey = true;
+          field_structure[model_key[1]].notnull = true;
+
+          _db.createTable(MODEL_TABLE_PREFIX+model_name, field_structure, (err)=> {
+            if(err) {
+              callback(err);
+            }
+            else {
+              _db.appendRows(MODEL_TABLE_NAME, [{
+                name: MODEL_TABLE_PREFIX+model_name,
+                structure: JSON.stringify(model_structure)
+              }], null ,callback);
+            }
+          });
+        }
+        else {
+          callback(new Error('Model type "'+modeltype+'" not supposed.'));
+        };
+      }
+    });
   };
 
   this.get = (model_name, callback) => {
@@ -262,24 +291,16 @@ function Model() {
   };
 
   this.exist = (model_name, callback)=> {
-
+    _db.existTable(MODEL_TABLE_PREFIX+model_name, callback);
   };
 
   this.importDatabase = (db, callback)=> {
     _db = db;
-    _db.isTableExist(MODEL_TABLE_NAME, (err, exist)=> {
-      if(exist) {
-        _db.getRows(MODEL_TABLE_NAME', '' , (error, rows)=> {
-          for(let index in rows) {
-            _models_dict[rows[index].name] = JSON.parse(rows[index].structure);
-          };
-          callback(false);
-        });
-      }
-      else {
+    _db.existTable(MODEL_TABLE_NAME, (err, exist)=> {
+      if(!exist) {
         _db.createTable(MODEL_TABLE_NAME, {
           name: {
-            type: 'TEXT',
+            type: 'VARCHAR(255)',
             iskey: true,
             notnull: true
           },
@@ -288,8 +309,11 @@ function Model() {
             type: 'TEXT'
           }
         }, (error)=> {
-
+          callback(error);
         });
+      }
+      else {
+        callback(err);
       }
     });
   };
