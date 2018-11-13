@@ -36,6 +36,8 @@ let Model = require('./database/model');
 
 
 function Core(settings) {
+  Utils.printLOGO(Vars.version, Vars.copyright);
+
   let verbose = (tag, log) => {
     if(settings.verbose||settings.debug) {
       Utils.tagLog(tag, log);
@@ -89,7 +91,6 @@ function Core(settings) {
 
   this.launch = () => {
     let launchwrap = ()=>{
-      Utils.printLOGO(Vars.version, Vars.copyright);
 
       process.title = settings.daemon_name;
 
@@ -124,7 +125,8 @@ function Core(settings) {
       _implementation = new Implementation();
       _nocrypto = new NoCrypto();
       _nsps = new NSPS();
-      _database = new Database();
+      _database = new Database(settings.database);
+      _model = new Model();
       _workerd = new WorkerDaemon()
 
         //
@@ -218,87 +220,109 @@ function Core(settings) {
       // setup implementation
       _implementation.importConnectionModule(_connection);
 
-      // setup authenticity
-      _authenticity.TokenExpirePeriod = settings.token_expire_period;
-      _authenticity.importDatabase(settings.database_path);
+      // connect to database
+      verbose('Daemon', 'Connecting to database.')
+      _database.connect((err)=> {
+        if(err) {
+          Utils.tagLog('*ERR*', 'Occur failure on connecting database.');
+          throw(err);
+        }
+        verbose('Daemon', 'Importing Database to Model...');
+        // Import connected db to model module
+        _model.importDatabase(_database, (err)=> {
+          if(err) {
+            Utils.tagLog('*ERR*', 'Occur failure on importing database for model.');
+            throw(err);
+          }
+          verbose('Daemon', 'Importing Model to Authenticity...')
 
-      // setup entity
-      // pass
+          // setup authenticity
+          _authenticity.TokenExpirePeriod = settings.token_expire_period;
+          _authenticity.importModelModule(_model, (err)=> {
+            if(err) {
+              Utils.tagLog('*ERR*', 'Occur failure on importing model for authenticity.');
+              throw(err);
+            }
+            // setup entity
+            // pass
 
-      // setup Authorization
-      _authorization.importAuthenticityModule(_authenticity);
-      _authorization.importEntityModule(_entity);
-      _authorization.importTrustedDomains(settings.trusted_domains);
-      _authorization.importDaemonAuthKey(settings.daemon_authorization_key);
+            // setup Authorization
+            _authorization.importAuthenticityModule(_authenticity);
+            _authorization.importEntityModule(_entity);
+            _authorization.importTrustedDomains(settings.trusted_domains);
+            _authorization.importDaemonAuthKey(settings.daemon_authorization_key);
 
-      // setup AuthorizationHandler
-      _authorizationhandler.importImplementationModule(_implementation);
+            // setup AuthorizationHandler
+            _authorizationhandler.importImplementationModule(_implementation);
 
-      // setup service
-      _service.setDebug(settings.debug);
-      _service.importWorkerDaemon(_workerd);
-      _service.setDebugService(settings.debug_service);
-      _service.setupServicesPath(settings.services_path);
-      _service.setupServicesFilesPath(settings.services_files_path);
-      _service.importAuthorization(_authorization);
-      // add shell related service to List.
-      if(settings.shell_service != null) {
-        let index = settings.services.indexOf(settings.shell_service);
-        if(index>=0)
-          settings.services.splice(index, 1);
-        settings.services.push(settings.shell_service);
-      }
-      if(settings.shell_client_service != null) {
-        let index = settings.services.indexOf(settings.shell_client_service);
-        if(index>=0)
-          settings.services.splice(index, 1);
-        settings.services.push(settings.shell_client_service);
+            // setup service
+            _service.setDebug(settings.debug);
+            _service.importWorkerDaemon(_workerd);
+            _service.setDebugService(settings.debug_service);
+            _service.setupServicesPath(settings.services_path);
+            _service.setupServicesFilesPath(settings.services_files_path);
+            _service.importAuthorization(_authorization);
+            // add shell related service to List.
+            if(settings.shell_service != null) {
+              let index = settings.services.indexOf(settings.shell_service);
+              if(index>=0)
+                settings.services.splice(index, 1);
+              settings.services.push(settings.shell_service);
+            }
+            if(settings.shell_client_service != null) {
+              let index = settings.services.indexOf(settings.shell_client_service);
+              if(index>=0)
+                settings.services.splice(index, 1);
+              settings.services.push(settings.shell_client_service);
 
-      }
-      // add debug
-      if(settings.debug_service != null ) {
-        let index = settings.services.indexOf(settings.debug_service);
-        if(index>=0)
-          settings.services.splice(index, 1);
-        settings.services.unshift(settings.debug_service);
-      }
-      verbose('Daemon', 'Debug service enabled.');
+            }
+            // add debug
+            if(settings.debug_service != null ) {
+              let index = settings.services.indexOf(settings.debug_service);
+              if(index>=0)
+                settings.services.splice(index, 1);
+              settings.services.unshift(settings.debug_service);
+            }
+            verbose('Daemon', 'Debug service enabled.');
 
-      _service.importServicesList(settings.services);
-      _service.importEntity(_entity);
-      _service.importAPI(_serviceAPI);
-      _service.importOwner(settings.local_services_owner);
-      _service.importDaemonAuthKey(settings.daemon_authorization_key);
-      // setup WorkerDaemon
-      _workerd.importCloseTimeout(settings.kill_daemon_timeout);
-      _workerd.importClearGarbageTimeout(settings.clear_garbage_timeout);
-      //
+            _service.importServicesList(settings.services);
+            _service.importEntity(_entity);
+            _service.importAPI(_serviceAPI);
+            _service.importOwner(settings.local_services_owner);
+            _service.importDaemonAuthKey(settings.daemon_authorization_key);
+            // setup WorkerDaemon
+            _workerd.importCloseTimeout(settings.kill_daemon_timeout);
+            _workerd.importClearGarbageTimeout(settings.clear_garbage_timeout);
+            //
 
-      // setup api
-      _serviceAPI.importCore(coregateway);
+            // setup api
+            _serviceAPI.importCore(coregateway);
 
-      verbose('Daemon', 'Setting up variables done.');
+            verbose('Daemon', 'Setting up variables done.');
 
-      // launch services
-      verbose('Daemon', 'Launching services...');
-      _service.launch();
-      verbose('Daemon', 'Launching services done.');
-      //
-      verbose('Daemon', 'NOOXY Service Framework successfully started.');
-      if(settings.shell_service == null) {
-        verbose('Shell', 'Shell Service not implemented.');
-      }
+            // launch services
+            verbose('Daemon', 'Launching services...');
+            _service.launch();
+            verbose('Daemon', 'Launching services done.');
+            //
+            verbose('Daemon', 'NOOXY Service Framework successfully started.');
+            if(settings.shell_service == null) {
+              verbose('Shell', 'Shell Service not implemented.');
+            }
 
-      if(settings.shell_client_service == null) {
-        verbose('Shellc', 'Local Shell not implemented.');
-      }
+            if(settings.shell_client_service == null) {
+              verbose('Shellc', 'Local Shell not implemented.');
+            }
+
+          });
+        });
+      });
     };
     launchwrap();
   }
 
   this.isinitialized = () => {
-    if (fs.existsSync('eula.txt')&&fs.existsSync(settings.database_path)) {
-
+    if (fs.existsSync('eula.txt')) {
       if(settings.sercure == false) {
         return true;
       }
@@ -333,21 +357,21 @@ function Core(settings) {
         Utils.tagLog('*ERR*', 'Occur failure on connecting database.');
         throw(err);
       }
-      verbose('Daemon', 'Import DB...')
+      verbose('Daemon', 'Importing Database...')
       // Import connected db to model module
       _init_model.importDatabase(_init_db, (err)=> {
         if(err) {
           Utils.tagLog('*ERR*', 'Occur failure on importing database for model.');
           throw(err);
         }
-        verbose('Daemon', 'Import Model...')
+        verbose('Daemon', 'Importing Model...')
         // Import set Model Module to authenticity.
         _init_auth.importModelModule(_init_model, (err)=>{
           if(err) {
             Utils.tagLog('*ERR*', 'Occur failure on importing model for authenticity.');
             throw(err);
           }
-          verbose('Daemon', 'Init authenticity...')
+          verbose('Daemon', 'Initializing authenticity...')
           _init_auth.createUser(Vars.default_user.username, Vars.default_user.displayname, Vars.default_user.password, 0, null, 'The', 'Admin', (err)=> {
             if(err) {
               Utils.tagLog('*ERR*', 'Occur failure on creating database.');
@@ -357,7 +381,7 @@ function Core(settings) {
             else {
               verbose('Daemon', 'NoService Superuser "'+Vars.default_user.username+'" with password "'+Vars.default_user.password+'" created. Please change password later for security.');
               verbose('Daemon', 'Creating eula...')
-              fs.writeFile('./eula.txt', '', function(err) {
+              fs.writeFile('./eula.txt', '', (err)=> {
                 if(err) {
                   Utils.tagLog('*ERR*', 'Writing EULA error.');
                   console.log(err);

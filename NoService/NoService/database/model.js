@@ -111,10 +111,9 @@ function Model() {
 
   // For something like relation or two keys objects.
   function PairModel(table_name, model_key, structure, do_timestamp) {
-    let table_name;
 
-    this.create = (keypair, dict, callback)=> {
-
+    this.create = (dict, callback)=> {
+      _db.appendRows(MODEL_TABLE_PREFIX+table_name, [dict], null, callback);
     };
 
     this.search = (phrase, callback)=> {
@@ -137,7 +136,9 @@ function Model() {
 
     // return list
     this.getbyFirst = (first, callback)=> {
-
+      _db.getRows(MODEL_TABLE_PREFIX+table_name, model_key[0]+'= ?', [first], (err, results)=> {
+        callback(err, results);
+      });
     };
 
     // return list
@@ -226,30 +227,9 @@ function Model() {
       }
       else {
         if(model_type == 'Object') {
-          if(do_timestamp) {
 
-          }
-          _db.createTable(MODEL_TABLE_PREFIX+model_name, ()=> {
-            _models_dict[model_name] = 'bla';
-            _db.appendRows(MODEL_TABLE_NAME, {
-              name: MODEL_TABLE_PREFIX+model_name,
-              structure: JSON.stringify(model_structure)
-            }, null);
-          });
         }
         else if (model_type == 'IndexedList') {
-          if(do_timestamp) {
-
-          }
-          _db.createTable(MODEL_TABLE_PREFIX+model_name, {
-
-          }, ()=> {
-            _models_dict[model_name] = 'bla';
-            _db.appendRows(MODEL_TABLE_NAME, {
-              name: MODEL_TABLE_PREFIX+model_name,
-              structure: JSON.stringify(model_structure)
-            }, null);
-          });
         }
         else if (model_type == 'Pair') {
           let field_structure = {};
@@ -272,10 +252,17 @@ function Model() {
               callback(err);
             }
             else {
-              _db.appendRows(MODEL_TABLE_NAME, [{
-                name: MODEL_TABLE_PREFIX+model_name,
+              _db.replaceRows(MODEL_TABLE_NAME, [{
+                name: model_name,
                 structure: JSON.stringify(model_structure)
-              }], null ,callback);
+              }], (err)=> {
+                if(err) {
+                  callback(err);
+                }
+                else {
+                  callback(err, new PairModel(model_name, model_key, structure, do_timestamp));
+                }
+              });
             }
           });
         }
@@ -287,7 +274,21 @@ function Model() {
   };
 
   this.get = (model_name, callback) => {
+    _db.getRows(MODEL_TABLE_NAME, 'name = ?', [model_name], (err, results)=> {
+      let model_structure = JSON.parse(results[0].structure);
+      let model_type = model_structure.model_type;
+      let do_timestamp = model_structure.do_timestamp;
+      let model_key = model_structure.model_key;
+      let structure = model_structure.structure;
+      if(model_type == 'Object') {
 
+      }
+      else if (model_type == 'IndexedList') {
+      }
+      else if (model_type == 'Pair') {
+        callback(err, new PairModel(model_name, model_key, structure, do_timestamp));
+      }
+    });
   };
 
   this.exist = (model_name, callback)=> {
@@ -317,7 +318,6 @@ function Model() {
       }
     });
   };
-
 
 }
 

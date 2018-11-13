@@ -36,7 +36,9 @@ function Authenticity() {
             displayname : 'VARCHAR(255)',
             tokenexpire : 'VARCHAR(255)',
             privilege : 'integer',
-            detail : 'TEXT'
+            detail : 'TEXT',
+            pwdhash: 'TEXT',
+            token: 'VARCHAR(255)'
           }
         }, (err, user_model)=> {
           _user_model = user_model;
@@ -102,7 +104,8 @@ function Authenticity() {
   this.createUser = (username, displayname, password, privilege, detail, firstname, lastname, callback) => {
     let pwdhash = null;
     username = username.toLowerCase();
-    _user_model.getbyFirst(username, (err, [user_meta])=> {
+    _user_model.getbyFirst(username, (err, list)=> {
+      let user_meta = list[0];
       if(user_meta) {
         let err = new Error("User existed.");
         callback(err);
@@ -132,19 +135,20 @@ function Authenticity() {
         callback(err);
       }
       else {
-          let expiredate = new Date();
-          expiredate = Utils.addDays(expiredate, this.TokenExpirePeriod);
-          _user_model.create([username, Utils.generateGUID()], {
-            username: username,
-            displayname: displayname,
-            pwdhash: crypto.createHmac('sha256', SHA256KEY).update(password).digest('hex'),
-            token: Utils.generateGUID(),
-            tokenexpire: Utils.DatetoSQL(expiredate),
-            privilege: privilege,
-            detail: detail,
-            firstname: firstname,
-            lastname: lastname
-          }, callback);
+        let expiredate = new Date();
+        expiredate = Utils.addDays(expiredate, this.TokenExpirePeriod);
+        _user_model.create({
+          userid: Utils.generateGUID(),
+          username: username,
+          displayname: displayname,
+          pwdhash: crypto.createHmac('sha256', SHA256KEY).update(password).digest('hex'),
+          token: Utils.generateGUID(),
+          tokenexpire: Utils.DatetoSQL(expiredate),
+          privilege: privilege,
+          detail: detail,
+          firstname: firstname,
+          lastname: lastname
+        }, callback);
       }
     });
   };
@@ -264,7 +268,7 @@ function Authenticity() {
   this.getUserToken = (username, password, callback) => {
     this.PasswordisValid(username, password, (err, valid) => {
       if(valid) {
-        _user_model.getbyFirst(username.toLowerCase(), (err, user_meta)=>{
+        _user_model.getbyFirst(username.toLowerCase(), (err, [user_meta])=>{
           let now = new Date();
           let expiredate = Utils.SQLtoDate(user_meta.tokenexpire);
           if(now > expiredate) {
@@ -284,8 +288,8 @@ function Authenticity() {
 
   };
 
-  this.getUserprivilege = (username, callback) => {
-    _user_model.getUser(username.toLowerCase(), (err, user_meta) => {
+  this.getUserPrivilege = (username, callback) => {
+    _user_model.getbyFirst(username.toLowerCase(), (err, [user_meta]) => {
       callback(false, user_meta.privilege);
     });
   };

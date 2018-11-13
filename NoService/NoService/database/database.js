@@ -33,6 +33,10 @@ function Database(meta) {
     _dialect.query.apply(null, args);;
   };
 
+  this.getRows = (...args)=> {
+    _dialect.getRows.apply(null, args);
+  }
+
   this.createTable = (...args)=> {
     _dialect.createTable.apply(null, args);;
   }
@@ -43,6 +47,10 @@ function Database(meta) {
 
   this.appendRows = (...args)=> {
     _dialect.appendRows.apply(null, args);;
+  };
+
+  this.replaceRows = (...args)=> {
+    _dialect.replaceRows.apply(null, args);;
   };
 
   this.close = (...args)=> {

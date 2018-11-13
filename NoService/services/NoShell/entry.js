@@ -105,6 +105,8 @@ function start(Me, api) {
                 '  service [jfunclist|jfuncdict|jfuncshow] {target service}\n'+
                 '  service jfunc {target service} {target username} {target jfunc} {JSON} ---Call a JSONfunction as target user.\n'+
                 '  service entity [show {entityID}|list|count|showuser {username}]\n'+
+                ' *[not yet, will be avalible 0.4.x] service install {repos/repo} {gitsource} \n'+
+                ' *[not yet, will be avalible 0.4.x] service upgrade {servicename}\n'+
                 '\n'+
                 '[activity]\n'+
                 '  activity [listuser|showuser {username}]\n'+

@@ -220,7 +220,7 @@ function Authorization() {
     isSuperUser : (entityID, callback) =>{
       _checkhaveusername(entityID, callback, ()=>{
         let _owner = _entity_module.returnEntityOwner(entityID);
-        _authe_module.getUserprivilege(_owner, (err, level) => {
+        _authe_module.getUserPrivilege(_owner, (err, level) => {
           if(level == 0) {
             // isSuperUser
             callback(false, true);

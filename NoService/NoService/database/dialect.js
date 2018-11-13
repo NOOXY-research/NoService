@@ -18,6 +18,7 @@
 // appendRows
 // createTable
 // existTable
+// createreplace
 // close
 
 'use strict';
@@ -26,8 +27,9 @@
 const weird_chars = /[-!$%^&*()+|~=`{}\[\]:";'<>?,.\/]/;
 
 function Sqlite3(meta) {
+  let _db;
   this.connect = ()=> {
-
+    _db = new require('sqlite3').Database(meta.storage);
   };
 }
 
@@ -84,16 +86,16 @@ function Mariadb(meta) {
 
   };
 
-  this.getRows = (table_name, [select_query, select_query_values], callback)=> {
-    if(weird_chars.exec(table_name)||weird_chars.exec(select_query)) {
+  this.getRows = (table_name, select_query, select_query_values, callback)=> {
+    if(weird_chars.exec(table_name)) {
       callback(new Error('Special characters are not allowed.'));
     }
     else {
       if(select_query_values) {
-        db.query('SELECT * FROM '+table_name+' WHERE '+select_query, select_query_values, callback);
+        _db.query('SELECT * FROM '+table_name+' WHERE '+select_query, select_query_values, callback);
       }
       else {
-        db.query('SELECT * FROM '+table_name+' WHERE '+select_query, callback);
+        _db.query('SELECT * FROM '+table_name+' WHERE '+select_query, callback);
       }
     }
   };
@@ -107,22 +109,27 @@ function Mariadb(meta) {
     }
   };
 
-  this.replaceRow = (table_name, row_dict, [select_query, select_query_values], callback)=> {
+  this.replaceRows = (table_name, rows_dict_list, callback)=> {
     if(weird_chars.exec(table_name)) {
-      callback(new Error('Special characters "'+idx_id+'" are not allowed.'));
+      callback(new Error('Special characters "'+table_name+'" are not allowed.'));
     }
     else {
-      let sql = 'UPDATE '+table_name+' SET ';
-      let values = [];
-      sql += Object.keys(row_dict).join('=?, ')+'=? WHERE '+select_query;
-      for(let field in row_dict) {
-        values.push(row_dict[field]);
-      }
-      db.query(sql, values, callback);
+      for(let i in rows_dict_list) {
+        let row_dict = rows_dict_list[i];
+        let sql = 'REPLACE INTO  '+table_name+'('+Object.keys(row_dict).join(', ')+') ';
+        let values = [];
+        let q = [];
+        for(let field in row_dict) {
+          values.push(row_dict[field]);
+          q.push('?');
+        }
+        sql += 'VALUES ('+q.join(', ')+');'
+        _db.query(sql, values, callback);
+      };
     }
   };
 
-  this.insertUniqueRow = (table_name, callback)=> {
+  this.insertUniqueRow = (table_name, row_dict, [select_query, select_query_values], callback)=> {
 
   };
 
@@ -222,7 +229,6 @@ function Mariadb(meta) {
         sql = sql + ', PRIMARY KEY ('+keys.join(', ')+')';
       }
       sql = sql + ') ';
-      console.log(sql);
       if(fields_str_list != null) {
         _db.query(sql, callback);
       }
