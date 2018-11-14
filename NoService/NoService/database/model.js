@@ -7,6 +7,7 @@
 'use strict';
 const MODEL_TABLE_NAME = 'NoService_Models';
 const MODEL_TABLE_PREFIX = 'NoService_Model_';
+const Utils = require('../utilities');
 
 function Model() {
   let _db;
@@ -116,8 +117,10 @@ function Model() {
   // For something like relation or two keys objects.
   function PairModel(table_name, model_key, structure, do_timestamp) {
 
-    this.create = (dict, callback)=> {
-      _db.appendRows(MODEL_TABLE_PREFIX+table_name, [dict], null, callback);
+    this.create = (properties_dict, callback)=> {
+      properties_dict['createdate'] = Utils.DatetoSQL(new Date());
+      properties_dict['modifydate'] = Utils.DatetoSQL(new Date());
+      _db.appendRows(MODEL_TABLE_PREFIX+table_name, [properties_dict], null, callback);
     };
 
     this.search = (phrase, callback)=> {
@@ -154,6 +157,7 @@ function Model() {
 
     // return list
     this.replace = (properties_dict, callback)=> {
+      properties_dict['modifydate'] = Utils.DatetoSQL(new Date());
       if(properties_dict[model_key[0]]||properties_dict[model_key[1]]) {
         _db.replaceRows(MODEL_TABLE_PREFIX+table_name, [properties_dict], callback);
       }
@@ -164,7 +168,7 @@ function Model() {
 
     //
     this.update = ()=> {
-
+      properties_dict['modifydate'] = Utils.DatetoSQL(new Date());
     };
 
     this.removebyPair = (pair, callback)=> {

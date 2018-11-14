@@ -25,27 +25,31 @@ function NSPS() {
     if(resume) {
       try{
         _crypto_module.decryptString('RSA2048', _rsa_priv, data, (err, decrypted) => {
-          let json = null;
-          try {
-            json = JSON.parse(decrypted);
-
-            let host_rsa_pub = _rsa_pub;
-            let client_random_num = json.r;
-            _crypto_module.generateAESCBC256KeyByHash(host_rsa_pub, client_random_num, (err, aes_key) => {
-              if(aes_key == json.a) {
-                connprofile.setBundle('aes_256_cbc_key', aes_key);
-                connprofile.setBundle('NSPS', true);
-                connprofile.setBundle('NSPSremote', true);
-                resume(err, true);
-              }
-              else {
-                resume(err, false);
-              }
-
-            });
+          if(err) {
+            resume(err);
           }
-          catch (err) {
-            resume(true, false);
+          else {
+            let json = null;
+            try {
+              json = JSON.parse(decrypted);
+              let host_rsa_pub = _rsa_pub;
+              let client_random_num = json.r;
+              _crypto_module.generateAESCBC256KeyByHash(host_rsa_pub, client_random_num, (err, aes_key) => {
+                if(aes_key == json.a) {
+                  connprofile.setBundle('aes_256_cbc_key', aes_key);
+                  connprofile.setBundle('NSPS', true);
+                  connprofile.setBundle('NSPSremote', true);
+                  resume(err, true);
+                }
+                else {
+                  resume(err, false);
+                }
+
+              });
+            }
+            catch (err) {
+              resume(err, false);
+            }
           }
         });
       }

@@ -282,6 +282,9 @@ function Router() {
               else {
                 connprofile.closeConnetion();
               }
+              if(err) {
+                console.log(err);
+              }
             });
           }
           else if(connprofile.returnBundle('NSPS') != true) {

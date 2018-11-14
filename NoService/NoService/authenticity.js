@@ -30,15 +30,15 @@ function Authenticity() {
           model_key: ['username', 'userid'],
           structure: {
             username : 'VARCHAR(255)',
-            firstname: 'VARCHAR(255)',
-            lastname: 'VARCHAR(255)',
             userid : 'VARCHAR(255)',
             displayname : 'VARCHAR(255)',
+            pwdhash: 'TEXT',
+            token: 'VARCHAR(255)',
             tokenexpire : 'VARCHAR(255)',
             privilege : 'integer',
             detail : 'TEXT',
-            pwdhash: 'TEXT',
-            token: 'VARCHAR(255)'
+            firstname: 'VARCHAR(255)',
+            lastname: 'VARCHAR(255)'
           }
         }, (err, user_model)=> {
           _user_model = user_model;
@@ -290,7 +290,12 @@ function Authenticity() {
 
   this.getUserPrivilege = (username, callback) => {
     _user_model.getbyFirst(username.toLowerCase(), (err, [user_meta]) => {
-      callback(false, user_meta.privilege);
+      if(user_meta) {
+        callback(err, user_meta.privilege);
+      }
+      else {
+        callback(new Error('User not exist.'));
+      }
     });
   };
 
