@@ -126,14 +126,14 @@ function Model() {
 
     // return list
     this.getbyPair = (pair, callback)=> {
-      _db.getRows(MODEL_TABLE_PREFIX+table_name, model_key[0]+'= ? OR'+model_key[1]+'= ?', pair, (err, results)=> {
+      _db.getRows(MODEL_TABLE_PREFIX+table_name, model_key[0]+'= ? AND '+model_key[1]+'= ?', pair, (err, results)=> {
         callback(err, results);
       });
     };
 
     // return list
-    this.getbyPairBoth = (both, callback)=> {
-      _db.getRows(MODEL_TABLE_PREFIX+table_name, model_key[0]+'= ? OR'+model_key[1]+'= ?', [both, both], (err, results)=> {
+    this.getbyBoth = (both, callback)=> {
+      _db.getRows(MODEL_TABLE_PREFIX+table_name, model_key[0]+'= ? OR '+model_key[1]+'= ?', [both, both], (err, results)=> {
         callback(err, results);
       });
     };
@@ -162,20 +162,25 @@ function Model() {
       }
     };
 
+    //
+    this.update = ()=> {
+
+    };
+
     this.removebyPair = (pair, callback)=> {
-      _db.deleteRows(MODEL_TABLE_PREFIX+table_name, model_key[1]+'= ?', [second], (err, results)=> {
-        callback(err, results);
-      });
+      _db.deleteRows(MODEL_TABLE_PREFIX+table_name, model_key[0]+'= ? AND '+model_key[1]+'= ?', pair, callback);
+    };
+
+    this.removebyBoth = (both, callback)=> {
+      _db.deleteRows(MODEL_TABLE_PREFIX+table_name, model_key[0]+'= ? OR '+model_key[1]+'= ?', [both, both], callback);
     };
 
     this.removebyFirst = (first, callback)=> {
-
+      _db.deleteRows(MODEL_TABLE_PREFIX+table_name, model_key[0]+'= ?', [first], callback);
     };
 
     this.removebySecond = (second, callback)=> {
-      _db.deleteRows(MODEL_TABLE_PREFIX+table_name, model_key[1]+'= ?', [second], (err, results)=> {
-        callback(err, results);
-      });
+      _db.deleteRows(MODEL_TABLE_PREFIX+table_name, model_key[1]+'= ?', [second], callback);
     };
 
     this.addProperty = (name, type, callback)=> {
@@ -195,7 +200,16 @@ function Model() {
 
 
   this.remove = (model_name, callback)=> {
-    
+    _db.dropTable(MODEL_TABLE_PREFIX+model_name, (err)=> {
+      if(err) {
+        callback(err);
+      }
+      else {
+        _db.deleteRows(MODEL_TABLE_NAME, 'name=?', [model_name], (err)=> {
+          callback(err);
+        });
+      }
+    });
   };
 
   // example:

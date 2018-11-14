@@ -13,7 +13,7 @@ function Database(meta) {
   let _dialect;
 
   if(meta.dialect == "sqlite3") {
-
+    _dialect = new Dialect.Sqlite3(meta);
   }
   else if(meta.dialect == "mysql") {
 
@@ -46,6 +46,10 @@ function Database(meta) {
   };
 
   this.getRows = (...args)=> {
+    _dialect.getRows.apply(null, args);;
+  };
+
+  this.deleteRows = (...args)=> {
     _dialect.getRows.apply(null, args);;
   };
 

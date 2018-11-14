@@ -139,7 +139,7 @@ function ServiceAPI() {
       // };
 
       this.run = (path, args)=> {
-        let _runable = Utils.generateObjCallbacks(obj_id, obj_tree, ([obj_id, path], args)=>{
+        let _runable = Utils.generateObjCallbacks(obj_id, obj_tree, ([obj_id, path], args)=> {
           let _arg_objs_trees = {};
           for(let i in args) {
             if(args[i]) {
@@ -147,10 +147,15 @@ function ServiceAPI() {
                 _arg_objs_trees[i] = args[i].returnTree();
                 args[i] = null;
               }
+              else if (args[i] instanceof Error) {
+                args[i] = args[i].toString();
+              }
             }
           }
+
           _emitRemoteCallback([obj_id, path], args, _arg_objs_trees);
         });
+
         _runable.apply(null, args);
       };
 

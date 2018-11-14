@@ -15,7 +15,7 @@
 // getAllRows
 // replaceRows
 // appendRows
-// removeTable
+// dropTable
 // createTable
 // existTable
 // createreplaceRow
@@ -29,9 +29,233 @@ const weird_chars = /[-!$%^&*()+|~=`{}\[\]:";'<>?,.\/]/;
 
 function Sqlite3(meta) {
   let _db;
-  this.connect = ()=> {
-    _db = new require('sqlite3').Database(meta.storage);
+  this.connect = (callback)=> {
+    _db = new (require('sqlite3').Database)(meta.storage);
+    callback(false);
   };
+
+  this.createFields = (table_name, structure, callback)=> {
+    for(let field_name in structure) {
+      let sql = 'ALTER TABLE '+table_name+' ADD '+field_name +' '+structure[field_name].type+(structure[field_name].notnull?' NOT NULL':'');
+      _db.all(sql, (err)=> {
+        if(err) {
+          callback(err);
+        }
+        else {
+          if(structure[field_name].iskey) {
+            _db.all('ALTER TABLE '+table_name+' ADD PRIMARY KEY ('+field_name+')', callback);
+          }
+          else {
+            callback(err);
+          }
+        }
+      });
+    }
+  };
+
+  this.removeFields = (table_name, field_list, callback)=> {
+
+  };
+
+  this.existField = (table_name, field_name, callback)=> {
+    if(weird_chars.exec(table_name)||weird_chars.exec(field_name)) {
+      callback(new Error('Special characters of table name are not allowed.'));
+    }
+    else {
+      let sql = 'SELECT * FROM information_schema.COLUMNS WHERE TABLE_SCHEMA = \''+meta.database+'\' AND TABLE_NAME = \''+table_name+'\' AND COLUMN_NAME = \''+field_name+'\'';
+      _db.all(sql, (err, results)=> {
+        if(result.length) {
+          callback(err, true);
+        }
+        else {
+          callback(err, false);
+        }
+      });
+    }
+  };
+
+  this.deleteRows = (table_name, select_query, select_query_values, callback)=> {
+    if(weird_chars.exec(table_name)) {
+      callback(new Error('Special characters are not allowed.'));
+    }
+    else {
+      if(select_query_values) {
+        _db.all('DELETE FROM '+table_name+' WHERE '+select_query, select_query_values, callback);
+      }
+      else {
+        _db.all('DELETE FROM '+table_name+' WHERE '+select_query, callback);
+      }
+    }
+  };
+
+  this.getRows = (table_name, select_query, select_query_values, callback)=> {
+    if(weird_chars.exec(table_name)) {
+      callback(new Error('Special characters are not allowed.'));
+    }
+    else {
+      if(select_query_values) {
+        _db.all('SELECT * FROM '+table_name+' WHERE '+select_query, select_query_values, callback);
+      }
+      else {
+        _db.all('SELECT * FROM '+table_name+' WHERE '+select_query, callback);
+      }
+    }
+  };
+
+  this.getAllRows = (table_name, callback)=> {
+    if(weird_chars.exec(table_name)) {
+      callback(new Error('Special characters "'+idx_id+'" are not allowed.'));
+    }
+    else {
+      db.all('SELECT * FROM '+table_name, callback);
+    }
+  };
+
+  this.updateRows = ()=> {
+
+  };
+
+  this.replaceRows = (table_name, rows_dict_list, callback)=> {
+    if(weird_chars.exec(table_name)) {
+      callback(new Error('Special characters "'+table_name+'" are not allowed.'));
+    }
+    else {
+      for(let i in rows_dict_list) {
+        let row_dict = rows_dict_list[i];
+        let sql = 'REPLACE INTO  '+table_name+'('+Object.keys(row_dict).join(', ')+') ';
+        let values = [];
+        let q = [];
+        for(let field in row_dict) {
+          values.push(row_dict[field]);
+          q.push('?');
+        }
+        sql += 'VALUES ('+q.join(', ')+');'
+        _db.all(sql, values, callback);
+      };
+    }
+  };
+
+  this.insertUniqueRow = (table_name, row_dict, [select_query, select_query_values], callback)=> {
+
+  };
+
+  // appendRows and generate ordered new int index
+  this.appendRows = (table_name, rows_dict_list, idx_id, callback)=> {
+    if(weird_chars.exec(table_name)) {
+      callback(new Error('Special characters "'+idx_id+'" are not allowed.'));
+    }
+    else {
+      if(idx_id) {
+        if(weird_chars.exec(idx_id)) {
+          callback(new Error('Special characters "'+idx_id+'" are not allowed.'));
+        }
+        else {
+          let left = rows_dict_list.length;
+          let call_callback = (err)=> {
+            left--;
+            if(left == 0 || err) {
+              callback(err);
+              left = -1;
+            }
+          };
+
+          for(let index in rows_dict_list) {
+            let row = rows_dict_list[index];
+            let sql = 'INSERT INTO '+table_name;
+            let fields_str = Object.keys(row).join(', ');
+            let q = '';
+            let values = [];
+
+            for(let field_name in row) {
+              values.push(row[field_name]);
+              q = q +'? ';
+            }
+            sql = sql+'('+fields_str+', '+idx_id+') VALUES ('+q+', SELECT MAX('+idx_id+')+1 from '+table_name+')';
+            _db.all(sql, values, call_callback);
+          }
+        }
+
+      }
+      else {
+        let left = rows_dict_list.length;
+        let call_callback = (err)=> {
+          left--;
+          if(left == 0 || err) {
+            callback(err);
+            left = -1;
+          }
+        };
+
+        for(let index in rows_dict_list) {
+          let row = rows_dict_list[index];
+          let sql = 'INSERT INTO '+table_name;
+          let fields_str = Object.keys(row).join(', ');
+          let q = [];
+          let values = [];
+
+          for(let field_name in row) {
+            values.push(row[field_name]);
+            q.push('?');
+          }
+          sql = sql+'('+fields_str+') VALUES ('+q.join(', ')+')';
+          _db.all(sql, values, call_callback);
+        }
+      }
+    }
+
+  };
+
+  this.createTable = (table_name, structure, callback)=> {
+    if(weird_chars.exec(table_name)) {
+      callback(new Error('Special characters of table name are not allowed.'));
+    }
+    else {
+      let keys = [];
+      let sql = 'CREATE TABLE '+table_name;
+      let fields_str_list = [];
+
+      // Determine the field
+      for(let field_name in structure) {
+        if(weird_chars.exec(field_name)) {
+          callback(new Error('Special characters "'+field_name+'" are not allowed.'));
+          fields_str_list = null;
+          break;
+        }
+        else {
+          fields_str_list.push(field_name +' '+structure[field_name].type+(structure[field_name].notnull?' NOT NULL':''));
+          if(structure[field_name].iskey) {
+            keys.push(field_name);
+          }
+        }
+      }
+
+      // setup PRIMARY keys
+      sql = sql + '(' + fields_str_list.join(', ') ;
+      if(keys.length) {
+        sql = sql + ', PRIMARY KEY ('+keys.join(', ')+')';
+      }
+      sql = sql + ') ';
+      if(fields_str_list != null) {
+        _db.all(sql, callback);
+      }
+    }
+  };
+
+  this.existTable = (table_name, callback)=> {
+    _db.all('SELECT name FROM sqlite_master WHERE type=\'table\' AND name=\''+table_name+'\';', (err, result)=> {
+      callback(err, result==null?false:(result[0]==null?false:true));
+    });
+  };
+
+  this.dropTable = (table_name, callback)=> {
+    _db.all('DROP TABLE '+table_name+';', (err, result)=> {
+      callback(err);
+    });
+  };
+
+  this.close = ()=> {
+    _db.end();
+  }
 }
 
 function PostgresSQL() {
@@ -112,7 +336,17 @@ function Mariadb(meta) {
   };
 
   this.deleteRows = (table_name, select_query, select_query_values, callback)=> {
-
+    if(weird_chars.exec(table_name)) {
+      callback(new Error('Special characters are not allowed.'));
+    }
+    else {
+      if(select_query_values) {
+        _db.query('DELETE FROM '+table_name+' WHERE '+select_query, select_query_values, callback);
+      }
+      else {
+        _db.query('DELETE FROM '+table_name+' WHERE '+select_query, callback);
+      }
+    }
   };
 
   this.getRows = (table_name, select_query, select_query_values, callback)=> {
@@ -136,6 +370,10 @@ function Mariadb(meta) {
     else {
       db.query('SELECT * FROM '+table_name, callback);
     }
+  };
+
+  this.updateRows = ()=> {
+
   };
 
   this.replaceRows = (table_name, rows_dict_list, callback)=> {
@@ -270,7 +508,7 @@ function Mariadb(meta) {
     });
   };
 
-  this.removeTable = (table_name, callback)=> {
+  this.dropTable = (table_name, callback)=> {
     _db.query('DROP TABLE '+table_name+';', (err, result)=> {
       callback(err);
     });
