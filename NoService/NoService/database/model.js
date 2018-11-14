@@ -22,7 +22,7 @@ function Model() {
 
     };
 
-    this.removeRows = (begin, end, callback)=> {
+    this.deleteRows = (begin, end, callback)=> {
 
     };
 
@@ -47,6 +47,10 @@ function Model() {
 
     };
 
+    this.getAllRows = (callback)=> {
+
+    };
+
     this.getLatestIndex = (begin, end,)=> {
 
     };
@@ -55,7 +59,7 @@ function Model() {
 
     };
 
-    this.hasField = ()=> {
+    this.existField = ()=> {
 
     };
 
@@ -96,7 +100,7 @@ function Model() {
       _db.addFields(table_name, properties_dict, callback);
     };
 
-    this.hasProperty = (property_name, callback)=> {
+    this.existProperty = (property_name, callback)=> {
       _db.hadField(table_name, property_name, callback);
     };
 
@@ -122,15 +126,15 @@ function Model() {
 
     // return list
     this.getbyPair = (pair, callback)=> {
-
+      _db.getRows(MODEL_TABLE_PREFIX+table_name, model_key[0]+'= ? OR'+model_key[1]+'= ?', pair, (err, results)=> {
+        callback(err, results);
+      });
     };
 
     // return list
     this.getbyPairBoth = (both, callback)=> {
-      this.getbyFirst(both, ()=> {
-        this.getbySecond(both, ()=> {
-
-        });
+      _db.getRows(MODEL_TABLE_PREFIX+table_name, model_key[0]+'= ? OR'+model_key[1]+'= ?', [both, both], (err, results)=> {
+        callback(err, results);
       });
     };
 
@@ -143,26 +147,25 @@ function Model() {
 
     // return list
     this.getbySecond = (second, callback)=> {
-
+      _db.getRows(MODEL_TABLE_PREFIX+table_name, model_key[1]+'= ?', [second], (err, results)=> {
+        callback(err, results);
+      });
     };
 
     // return list
-    this.replacebyPair = (pair, fields_dict_list, callback)=> {
-
-    };
-
-    // return list
-    this.replacebyFirst = (first, fields_dict_list, callback)=> {
-
-    };
-
-    // return list
-    this.replacebySecond = (second, fields_dict_list, callback)=> {
-
+    this.replace = (properties_dict, callback)=> {
+      if(properties_dict[model_key[0]]||properties_dict[model_key[1]]) {
+        _db.replaceRows(MODEL_TABLE_PREFIX+table_name, [properties_dict], callback);
+      }
+      else {
+        callback(new Error('Either property "'+model_key[0]+'" or "'+model_key[1]+'" should be specified.'));
+      }
     };
 
     this.removebyPair = (pair, callback)=> {
-
+      _db.deleteRows(MODEL_TABLE_PREFIX+table_name, model_key[1]+'= ?', [second], (err, results)=> {
+        callback(err, results);
+      });
     };
 
     this.removebyFirst = (first, callback)=> {
@@ -170,25 +173,29 @@ function Model() {
     };
 
     this.removebySecond = (second, callback)=> {
-
+      _db.deleteRows(MODEL_TABLE_PREFIX+table_name, model_key[1]+'= ?', [second], (err, results)=> {
+        callback(err, results);
+      });
     };
 
     this.addProperty = (name, type, callback)=> {
-
+      let structure = {};
+      structure[name] = type;
+      _db.createFields(MODEL_TABLE_PREFIX+table_name, structure, callback);
     };
 
-    this.hasProperty = (name, callback)=> {
-
+    this.existProperty = (name, callback)=> {
+      _db.existField(MODEL_TABLE_PREFIX+table_name, name, callback);
     };
 
-    this.removeProperty = ()=> {
-
+    this.removeProperty = (name, callback)=> {
+      _db.createFields(MODEL_TABLE_PREFIX+table_name, [name], callback);
     };
   };
 
 
   this.remove = (model_name, callback)=> {
-
+    
   };
 
   // example:

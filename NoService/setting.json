@@ -98,7 +98,7 @@
 
     "database": "NoService",
 
-    "storage": "path/to/storage/onlysqlite"
+    "storage": "db.sqlite3"
   }
 
 }

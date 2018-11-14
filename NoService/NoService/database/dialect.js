@@ -7,18 +7,19 @@
 
 // Functions to be implemented
 // connect
-// addFields
+// createFields
 // removeFields
-// hasField
-// removerRows
+// existField
+// deleteRows
 // getRows
 // getAllRows
 // replaceRows
-// insertUniqueRow
 // appendRows
+// removeTable
 // createTable
 // existTable
-// createreplace
+// createreplaceRow
+// searchRows
 // close
 
 'use strict';
@@ -70,19 +71,47 @@ function Mariadb(meta) {
     });
   };
 
-  this.addFields = (table_name, structure, callback)=> {
-
+  this.createFields = (table_name, structure, callback)=> {
+    for(let field_name in structure) {
+      let sql = 'ALTER TABLE '+table_name+' ADD '+field_name +' '+structure[field_name].type+(structure[field_name].notnull?' NOT NULL':'');
+      _db.query(sql, (err)=> {
+        if(err) {
+          callback(err);
+        }
+        else {
+          if(structure[field_name].iskey) {
+            _db.query('ALTER TABLE '+table_name+' ADD PRIMARY KEY ('+field_name+')', callback);
+          }
+          else {
+            callback(err);
+          }
+        }
+      });
+    }
   };
 
   this.removeFields = (table_name, field_list, callback)=> {
 
   };
 
-  this.hasField = (table_name, callback)=> {
-
+  this.existField = (table_name, field_name, callback)=> {
+    if(weird_chars.exec(table_name)||weird_chars.exec(field_name)) {
+      callback(new Error('Special characters of table name are not allowed.'));
+    }
+    else {
+      let sql = 'SELECT * FROM information_schema.COLUMNS WHERE TABLE_SCHEMA = \''+meta.database+'\' AND TABLE_NAME = \''+table_name+'\' AND COLUMN_NAME = \''+field_name+'\'';
+      _db.query(sql, (err, results)=> {
+        if(result.length) {
+          callback(err, true);
+        }
+        else {
+          callback(err, false);
+        }
+      });
+    }
   };
 
-  this.removeRows = (table_name, select_query, callback)=> {
+  this.deleteRows = (table_name, select_query, select_query_values, callback)=> {
 
   };
 
@@ -238,6 +267,12 @@ function Mariadb(meta) {
   this.existTable = (table_name, callback)=> {
     _db.query('SHOW TABLES LIKE \''+table_name+'\';', (err, result)=> {
       callback(err, result==null?false:(result[0]==null?false:true));
+    });
+  };
+
+  this.removeTable = (table_name, callback)=> {
+    _db.query('DROP TABLE '+table_name+';', (err, result)=> {
+      callback(err);
     });
   };
 
