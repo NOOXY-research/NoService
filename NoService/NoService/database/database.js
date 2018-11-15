@@ -7,7 +7,7 @@
 
 'use strict';
 
-let Dialect = require('./dialect');
+const Dialect = require('./dialect');
 
 function Database(meta) {
   let _dialect;

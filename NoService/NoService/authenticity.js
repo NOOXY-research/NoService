@@ -4,9 +4,9 @@
 // Copyright 2018 NOOXY. All Rights Reserved.
 'use strict';
 
-let crypto = require('crypto');
-let Utils = require('./utilities');
-let Vars = require('./variables');
+const crypto = require('crypto');
+const Utils = require('./utilities');
+const Vars = require('./variables');
 const AUTHE_USER_MODEL_NAME = Vars.AUTHE_USER_MODEL_NAME;
 
 // the authenticity module

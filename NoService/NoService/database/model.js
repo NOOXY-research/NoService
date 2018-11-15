@@ -7,7 +7,7 @@
 'use strict';
 
 const Utils = require('../utilities');
-let Vars = require('../variables');
+const Vars = require('../variables');
 const MODEL_TABLE_NAME = Vars.MODEL_TABLE_NAME;
 const MODEL_TABLE_PREFIX = Vars.MODEL_TABLE_PREFIX;
 

@@ -4,7 +4,7 @@
 // Copyright 2018 NOOXY. All Rights Reserved.
 'use strict';
 
-var fs = require('fs');
+const fs = require('fs');
 
 // Checking dependencies
 let Vars = require('./variables');
