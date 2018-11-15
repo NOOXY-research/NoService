@@ -4,9 +4,9 @@
 // Copyright 2018 NOOXY. All Rights Reserved.
 'use strict';
 
-let fs = require('fs');
-let Utils = require('./utilities');
-let WorkerDaemon = require('./workerd');
+const fs = require('fs');
+const Utils = require('./utilities');
+const WorkerDaemon = require('./workerd');
 
 function Service() {
   // need add service event system

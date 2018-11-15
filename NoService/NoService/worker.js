@@ -15,6 +15,7 @@
 
 const fork = require('child_process').fork;
 const Utils = require('./utilities');
+// For injecting database to api
 const Database = require('./database/database');
 const Model = require('./database/model');
 process.title = 'NoService_worker';
@@ -88,7 +89,6 @@ function WorkerClient() {
   this.onMessage = (message)=>{
     // init worker
     if(message.t == 0) {
-      _service_module = require(message.p);
       _service_name = /.*\/([^\/]*)\/entry/g.exec(message.p)[1];
       process.title = 'NoService_worker: '+_service_name;
       _close_timeout = message.c;
@@ -127,7 +127,8 @@ function WorkerClient() {
               _api.Database.Model = _model;
               _api.Database.Database = _db;
               try {
-                _service_module.start(Me, _api);
+                _service_module = new (require(message.p))(Me, _api);
+                _service_module.start();
               }
               catch(e) {
                 console.log(e);

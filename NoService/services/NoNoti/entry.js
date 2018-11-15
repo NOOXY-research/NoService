@@ -1,132 +1,107 @@
-// NoService/services/NoNoti/entry.js
+// NoService/services/youservice/entry.js
 // Description:
-// "NoNoti/entry.js" description.
+// "youservice/entry.js" description.
 // Copyright 2018 NOOXY. All Rights Reserved.
+'use strict';
 
-let Notification = require('./noti');
-let Notisys = new Notification();
-
-// service entry point
-function start(Me, api) {
+function Service(Me, api) {
+  // Your service entry point
+  // Get the service socket of your service
   let ss = api.Service.ServiceSocket;
+  // BEWARE! To prevent callback error crash the system.
+  // If you call an callback function which is not API provided. Such as setTimeout(callback, timeout).
+  // You need to wrap the callback funciton by api.SafeCallback.
+  // E.g. setTimeout(api.SafeCallback(callback), timeout)
   let safec = api.SafeCallback;
+  // Please save and manipulate your files in this directory
   let files_path = Me.FilesPath;
-  Notisys.importDatabase(files_path+'test.sqlite3');
-  let _online_users = {};
+  // Your settings in manifest file.
+  let settings = Me.Settings;
 
-  // Access another service on this daemon
-  // let admin_daemon_asock = api.Service.ActivitySocket.createDefaultAdminDeamonSocket('Another Service', (err, activitysocket)=> {
-  //   // accessing other service
-  // });
+  // Here is where your service start
+  this.start = ()=> {
+    // Access another service on this daemon
+    api.Service.ActivitySocket.createDefaultAdminDeamonSocket('Another Service', (err, activitysocket)=> {
+      // accessing other service
+    });
 
-  Notisys.onNotis = (userid , Notis) => {
-    let entitiesID = _online_users[userid];
-    for(let i in entitiesID) {
-      ss.sendData(entitiesID[i], {
-        n: Notis
-      });
-    }
-  }
-
-  // for server
-  ss.def('broadcast', (json, entityID, returnJSON)=>{
-    let json_be_returned = {}
-    returnJSON(false, json_be_returned);
-  });
-
-  // for server
-  ss.def('createChannel', (json, entityID, returnJSON)=>{
-    console.log(json);
-    console.log(typeof(json));
-    Notisys.createChannel(json.name, json.description, (err, channelid)=>{
+    // JSONfunction is a function that can be defined, which others entities can call.
+    // It is a NOOXY Service Framework Standard
+    ss.def('JSONfunction', (json, entityID, returnJSON)=> {
+      // Code here for JSONfunciton
+      // Return Value for JSONfunction call. Otherwise remote will not recieve funciton return value.
       let json_be_returned = {
-        i: channelid
+        d: 'Hello! NOOXY Service Framework!'
       }
-      returnJSON(err, json_be_returned);
+      // First parameter for error, next is JSON to be returned.
+      returnJSON(false, json_be_returned);
     });
-  });
 
-  // for server
-  ss.def('sendUser', (json, entityID, returnJSON)=>{
-    Notisys.sendInstantNotitoUser(json.userid, json.notis);
-    let json_be_returned = {}
-    returnJSON(false, json_be_returned);
-  });
-
-  // for server
-  ss.def('removeUserQnotis', (json, entityID, returnJSON)=>{
-    Notisys.sendInstantNotitoUser(json.userid, json.notis);
-    let json_be_returned = {}
-    returnJSON(false, json_be_returned);
-  });
-
-  // for server
-  ss.def('broadcastChannel', (json, entityID, returnJSON)=>{
-    let type = json.type;
-
-    let json_be_returned = {}
-    returnJSON(false, json_be_returned);
-  });
-
-  ss.onConnect = (entityID, callback) => {
-    // Get Username and process your work.
-    let username = api.Service.Entity.returnEntityOwner(entityID);
-    api.Authenticity.getUserID(username, (err, id) => {
-      let list = _online_users[id];
-      if(list != null) {
-        list = list.concat([entityID]);
+    // Safe define a JSONfunction.
+    ss.sdef('SafeJSONfunction', (json, entityID, returnJSON)=> {
+      // Code here for JSONfunciton
+      // Return Value for JSONfunction call. Otherwise remote will not recieve funciton return value.
+      let json_be_returned = {
+        d: 'Hello! NOOXY Service Framework!'
       }
-      else {
-        list = [entityID];
-      }
-      _online_users[id] = list;
-      Notisys.addOnlineUser(id);
+      // First parameter for error, next is JSON to be returned.
+      returnJSON(false, json_be_returned);
+    },
+    // In case fail.
+    ()=>{
+      console.log('Auth Failed.');
     });
-    callback(false);
-  };
 
-  ss.onClose = (entityID, callback) => {
-    // Get Username and process your work.
-    let username = api.Service.Entity.returnEntityOwner(entityID);
-    console.log(entityID);
-    api.Authenticity.getUserID(username, (err, id) => {
-
-      let list = _online_users[id];
-      if(list.length > 1) {
-        let index = list.indexOf(entityID);
-        if (index > -1) {
-          list.splice(entityID, 1);
-        }
-      }
-      else {
-        list = null;
-        Notisys.deleteOnlineUser(id);
-      }
-      _online_users[id] = list;
+    // ServiceSocket.onData, in case client send data to this Service.
+    // You will need entityID to Authorize remote user. And identify remote.
+    ss.on('data', (entityID, data) => {
+      // Get Username and process your work.
+      api.Service.Entity.getEntityOwner(entityID, (err, username)=> {
+        // To store your data and associated with userid INSEAD OF USERNAME!!!
+        // Since userid can be promised as a unique identifer!!!
+        let userid = null;
+        // Get userid from API
+        api.Authenticity.getUserID(username, (err, id) => {
+          userid = id;
+        });
+        // process you operation here
+        console.log('recieved a data');
+        console.log(data);
+      });
     });
-    callback(false);
+    // Send data to client.
+    ss.sendData('A entity ID', 'My data to be transfer.');
+    // ServiceSocket.onConnect, in case on new connection.
+    ss.on('connect', (entityID, callback) => {
+      // Do something.
+      // report error;
+      callback(false);
+    });
+    // ServiceSocket.onClose, in case connection close.
+    ss.on('close', (entityID, callback) => {
+      // Get Username and process your work.
+      api.Service.Entity.getEntityOwner(entityID, (err, username)=> {
+        // To store your data and associated with userid INSEAD OF USERNAME!!!
+        // Since userid can be promised as a unique identifer!!!
+        let userid = null;
+        // Get userid from API
+        api.Authenticity.getUserID(username, (err, id) => {
+          userid = id;
+        });
+        // process you operation here
+        console.log('ServiceSocket closed');
+        // report error;
+        callback(false);
+      });
+    });
   }
 
-  // ServiceSocket.onData, in case client send data to this Service.
-  // You will need entityID to Authorize remote user. And identify remote.
-  ss.onData = (entityID, data) => {
-    // Get Username and process your work.
-    let username = api.Service.Entity.returnEntityOwner(entityID);
-    // process you operation here
-    console.log('recieve a data');
-    console.log(data);
+  // If the daemon stop, your service recieve close signal here.
+  this.close = ()=> {
+    // Saving state of you service.
+    // Please save and manipulate your files in this directory
   }
-
-
-}
-
-// If the daemon stop, your service recieve close signal here.
-function close(api) {
-  // Saving state of you service.
 }
 
 // Export your work for system here.
-module.exports = {
-  start: start,
-  close: close
-}
+module.exports = Service;

@@ -4,7 +4,7 @@
 // Copyright 2018 NOOXY. All Rights Reserved.
 'use strict';
 
-let Utils = require('./utilities');
+const Utils = require('./utilities');
 const WebSocket = require('ws');
 const Net = require('net');
 const Https = require('https');
