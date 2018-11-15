@@ -6,10 +6,11 @@
 // NOOXY Service WorkerDaemon protocol
 // message.t
 // 0 worker established {t, a: api tree, p: service module path, c: closetimeout}
-// 1 callback {t, p: [obj_id, callback_path], a: arguments, o:{arg_index, [obj_id, callback_tree]}}
-// 2 unbindobj {t, i: id};
-// 3 getLCBOcount {t, i}
-// 4 getMemoryUsage
+// 1 launch
+// 2 callback {t, p: [obj_id, callback_path], a: arguments, o:{arg_index, [obj_id, callback_tree]}}
+// 3 unbindobj {t, i: id};
+// 4 getLCBOcount {t, i}
+// 5 getMemoryUsage
 // 99 close
 'use strict';
 
@@ -46,7 +47,7 @@ function WorkerClient() {
 
   const callParentAPI = ([id, APIpath], args) => {
     let _data = {
-      t: 1,
+      t: 2,
       p: APIpath,
       a: args,
       o: {}
@@ -64,7 +65,7 @@ function WorkerClient() {
 
   this.emitParentCallback = ([obj_id, path], args) => {
     let _data = {
-      t: 2,
+      t: 3,
       p: [obj_id, path],
       a: args,
       o: {}
@@ -120,7 +121,8 @@ function WorkerClient() {
             _model.importDatabase(_db, (err)=> {
               if(err) {
                 Utils.tagLog('*ERR*', 'Occur failure on importing database for model.  At service worker of "'+_service_name+'".');
-                throw(err);
+                console.log(err);
+                process.exit();
               }
               // inject Database API
               _api.Database = {};
@@ -128,18 +130,22 @@ function WorkerClient() {
               _api.Database.Database = _db;
               try {
                 _service_module = new (require(message.p))(Me, _api);
-                _service_module.start();
+                process.send({t:1});
               }
               catch(e) {
                 console.log(e);
+                process.send({t:99});
               }
             });
           });
         });
       });
     }
+    else if (message.t == 1) {
+      _service_module.start();
+    }
     // function return
-    else if(message.t == 1) {
+    else if(message.t == 2) {
       try {
         Utils.callObjCallback(_local_obj_callbacks_dict[message.p[0]], message.p[1], message.a, message.o, this.emitParentCallback, Utils.generateObjCallbacks);
       }
@@ -150,16 +156,16 @@ function WorkerClient() {
         console.log(e);
       }
     }
-    else if(message.t == 2) {
+    else if(message.t == 3) {
       delete _local_obj_callbacks_dict[message.i];
       // console.log(Object.keys(_local_obj_callbacks_dict).length);
     }
-    else if(message.t == 3) {
-      process.send({t:3, i:message.i, c:Object.keys(_local_obj_callbacks_dict).length});
+    else if(message.t == 4) {
+      process.send({t:4, i:message.i, c:Object.keys(_local_obj_callbacks_dict).length});
     }
     // memory
-    else if(message.t == 4) {
-      process.send({t:4, i:message.i, c: process.memoryUsage()});
+    else if(message.t == 5) {
+      process.send({t:5, i:message.i, c: process.memoryUsage()});
     }
     else if(message.t == 98) {
       Utils.tagLog('*ERR*', 'Service "'+_service_name+'" occured error on API call.');
@@ -185,7 +191,7 @@ function WorkerClient() {
     }
   }
 
-  this.launch = ()=>{
+  this.established = ()=>{
     process.send({t:0});
   }
 }
@@ -195,4 +201,4 @@ let w = new WorkerClient();
 process.on('SIGINT', () => {
 
 });
-w.launch();
+w.established();

@@ -704,17 +704,20 @@ function Service() {
       });
     }
 
-    this.launch = (depended_service_dict, callback) => {
-      let erreport = null;
-      // check node packages dependencies
+    this.launch = ()=> {
+      _worker.launch();
+    };
 
+    this.init = (depended_service_dict, callback) => {
+      let erreport = null;
+      // check node packages dependenc
       try{
         _service_manifest = Utils.returnJSONfromFile(_service_path+'/manifest.json');
       }
       catch(err) {
         erreport = new Error('Service "'+_service_name+'" load manifest.json with failure.');
-        console.log(err);
-        return erreport;
+        callback(erreport);
+        return err;
       };
       // check node packages dependencies
       try {
@@ -724,13 +727,15 @@ function Service() {
           }
           catch (err) {
             erreport = new Error('Service "'+_service_name+'" require node package "'+package_name+'".');
-            console.log(err);
+            callback(erreport);
+            return err;
           }
         }
       }
       catch (err) {
         erreport = new Error('Service "'+_service_name+'" have wrong dependencies settings.');
-        console.log(err);
+        callback(erreport);
+        return err;
       }
 
       depended_service_dict[_service_name] = _service_manifest.dependencies.services;
@@ -760,6 +765,8 @@ function Service() {
       try {
         if(_service_manifest.name != _service_name) {
           erreport = new Error('Service name in manifest must fit with name "'+_service_name+'". Please check manifest file.\n');
+          callback(erreport);
+          return err;
         }
         else if(!fs.existsSync(_service_files_path)) {
           fs.mkdirSync(_service_files_path);
@@ -779,29 +786,28 @@ function Service() {
           }
           catch (err) {
             Utils.tagLog('*ERR*', 'Settings file corrupted. FilesPath "'+_service_files_path+'/settings.json"');
-            throw err;
+            callback(err);
           }
         }
-        callback(erreport);
         if(_service_manifest.implementation_api == false) {
           _serviceapi_module.createServiceAPI(_service_socket, _service_manifest, (err, api) => {
             _worker.importAPI(api);
-            _worker.launch();
+            _worker.init(callback);
           });
         }
         else {
           _serviceapi_module.createServiceAPIwithImplementaion(_service_socket, _service_manifest, (err, api) => {
             _worker.importAPI(api);
-            _worker.launch();
+            _worker.init(callback);
           });
         }
 
       }
       catch(err) {
         erreport = new Error('Launching service "'+_service_name+'" ended with failure.');
-        console.log(err);
+        callback(erreport);
+        return err;
       }
-      return erreport;
     };
 
     this.returnJSONfuncList = () => {
@@ -853,38 +859,56 @@ function Service() {
 
   // Service module launch
   this.launch = () => {
-    let launched_service = [];
+    let inited_service = [];
     let depended_service_dict = {};
     // setup debug service
-    let err = _local_services[_debug_serivce].launch(depended_service_dict, (err)=> {});
+    let err = _local_services[_debug_serivce].init(depended_service_dict, (err)=> {});
     if(err) {
-      Utils.tagLog('*ERR*', 'Error occured while launching service "'+_debug_serivce+'".');
+      Utils.tagLog('*ERR*', 'Error occured while initializing service "'+_debug_serivce+'".');
       Utils.tagLog('*ERR*', err.toString());
     }
     else {
-      launched_service.push(_debug_serivce);
+      inited_service.push(_debug_serivce);
     }
-    // then other
-    setTimeout(()=>{
-      for (let key in _local_services) {
-        if(key!= _debug_serivce) {
-          let err = _local_services[key].launch(depended_service_dict, (err)=> {});
-          if(err) {
-            Utils.tagLog('*ERR*', 'Error occured while launching service "'+key+'".');
-            Utils.tagLog('*ERR*', err.toString());
-            process.exit();
-          }
-          else {
-            launched_service.push(key);
-          }
-        }
-      }
+
+    let launch_all = ()=> {
       // check dependencies
       for (let service_name in depended_service_dict) {
         for(let depended in depended_service_dict[service_name]) {
-          if(!launched_service.includes(depended)) {
-            Utils.tagLog('*ERR*', 'Service "'+service_name+'" depend on another service "'+depended+'". But it doesn\'t launched.');
+          if(!inited_service.includes(depended)) {
+            Utils.tagLog('*ERR*', 'Service "'+service_name+'" depend on another service "'+depended+'". But it doesn\'t initialized.');
             process.exit();
+          }
+        }
+      }
+      for (let key in _local_services) {
+        _local_services[key].launch();
+      }
+    }
+    // then other
+    setTimeout(()=>{
+      let left = Object.keys(_local_services).length;
+      for (let key in _local_services) {
+        if(key!= _debug_serivce) {
+          _local_services[key].init(depended_service_dict, (err)=> {
+            if(err) {
+              Utils.tagLog('*ERR*', 'Error occured while initializing service "'+key+'".');
+              Utils.tagLog('*ERR*', err.toString());
+              process.exit();
+            }
+            else {
+              inited_service.push(key);
+            }
+            left--;
+            if(!left) {
+              launch_all();
+            }
+          });
+        }
+        else {
+          left--;
+          if(!left) {
+            launch_all();
           }
         }
       }

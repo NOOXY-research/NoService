@@ -69,6 +69,10 @@ function Database(meta) {
     _dialect.createTable.apply(null, args);;
   };
 
+  this.dropTable = (...args)=> {
+    _dialect.dropTable.apply(null, args);;
+  };
+
   this.existTable = (...args)=> {
     _dialect.existTable.apply(null, args);;
   };

@@ -7,11 +7,13 @@
 // NOOXY Service WorkerClient protocol
 // message.t
 // 0 worker established {t}
-// 1 api call {t, p, a: arguments, o:{arg_index, [obj_id, callback_tree]}}
-// 2 accessobj {t, p, a: arguments, o:{arg_index, [obj_id, callback_tree]}}
-// 3 returnLCBOcount
-// 4 returnMemoryUsage
+// 1 successfully init
+// 2 api call {t, p, a: arguments, o:{arg_index, [obj_id, callback_tree]}}
+// 3 accessobj {t, p, a: arguments, o:{arg_index, [obj_id, callback_tree]}}
+// 4 returnLCBOcount
+// 5 returnMemoryUsage
 
+// 99 launch error
 // memory leak on ActivitySocket!!!
 
 'use strict';
@@ -68,6 +70,8 @@ function WorkerDaemon() {
     let _child = null;
     let _service_name =  /.*\/([^\/]*)\/entry/g.exec(path)[1];
     let _InfoRq = {};
+    let _init_callback;
+
     _worker_clients[_service_name] = this;
 
     process.on('exit', ()=> {
@@ -77,13 +81,13 @@ function WorkerDaemon() {
     this.getCBOCount = (callback)=> {
       let _rqid = Utils.generateUniqueID();
       _InfoRq[_rqid] = callback;
-      _child.send({t: 3, i: _rqid});
+      _child.send({t: 4, i: _rqid});
     };
 
     this.getMemoryUsage = (callback)=> {
       let _rqid = Utils.generateUniqueID();
       _InfoRq[_rqid] = callback;
-      _child.send({t: 4, i: _rqid});
+      _child.send({t: 5, i: _rqid});
     }
 
     this.emitChildClose = ()=> {
@@ -91,24 +95,34 @@ function WorkerDaemon() {
     }
 
     this.emitRemoteUnbind = (id)=> {
-      _child.send({t:2, i: id});
+      _child.send({t:3, i: id});
     }
 
     this.emitChildCallback = ([obj_id, path], args, argsobj) => {
       let _data = {
-        t: 1,
+        t: 2,
         p: [obj_id, path],
         a: args,
         o: argsobj
       }
-      _child.send(_data);
+
+      try {
+        _child.send(_data);
+      }
+      catch(err) {
+        Utils.tagLog('*ERR*' , 'Occured error on "'+service_name+'".');
+        console.log(err);
+      }
     }
 
     this.onMessage = (message)=>{
       if(message.t == 0) {
         _child.send({t:0, p: path, a: _serviceapi.returnAPITree(), c: _close_worker_timeout, g: _clear_obj_garbage_timeout});
       }
-      else if(message.t == 1) {
+      else if(message.t == 1){
+        _init_callback(false);
+      }
+      else if(message.t == 2) {
         try {
           _serviceapi.emitAPIRq(message.p, message.a, message.o);
         }
@@ -124,15 +138,15 @@ function WorkerDaemon() {
           });
         }
       }
-      else if(message.t == 3) {
+      else if(message.t == 4) {
         _InfoRq[message.i](false, {daemon: _serviceapi.returnLCBOCount(), client: message.c})
         delete _InfoRq[message.i];
       }
-      else if(message.t == 4) {
+      else if(message.t == 5) {
         _InfoRq[message.i](false, message.c)
         delete _InfoRq[message.i];
       }
-      else if(message.t == 2) {
+      else if(message.t == 3) {
         try {
           _serviceapi.emitCallbackRq(message.p, message.a, message.o);
         }
@@ -148,9 +162,17 @@ function WorkerDaemon() {
           });
         }
       }
+      else if(message.t == 99){
+        _init_callback(new Error('Initializing error'));
+      }
     };
 
     this.launch = ()=> {
+      _child.send({t:1});
+    };
+
+    this.init = (init_callback)=> {
+      _init_callback = init_callback;
       _child = fork(require.resolve('./worker.js'), {stdio: [process.stdin, process.stdout, process.stderr, 'ipc']});
       _child.on('message', message => {
         this.onMessage(message);

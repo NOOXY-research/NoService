@@ -105,8 +105,13 @@ function Model() {
     this.modeltype = 'Object';
     // get an instense
     this.get = (key_value, callback)=> {
-      _db.getRows(table_name, 'KEY = ?', [key_value], (err, results)=> {
-        callback(err, results[0]);
+      _db.getRows(MODEL_TABLE_PREFIX+table_name, 'KEY = ?', [key_value], (err, results)=> {
+        if(results) {
+          callback(err, results[0]);
+        }
+        else {
+          callback(err);
+        }
       });
     };
 
@@ -412,7 +417,10 @@ function Model() {
   this.importDatabase = (db, callback)=> {
     _db = db;
     _db.existTable(MODEL_TABLE_NAME, (err, exist)=> {
-      if(!exist) {
+      if(err) {
+        callback(err);
+      }
+      else if(!exist) {
         _db.createTable(MODEL_TABLE_NAME, {
           name: {
             type: 'VARCHAR(255)',

@@ -116,11 +116,60 @@ function Service(Me, api) {
       });
     });
 
+    // Test User Model
     api.Database.Model.get('NSUser', (err, model)=>{
       model.getbyFirst('admin', (err, meta)=> {
         log('Checking model...');
         log(meta);
       });
+    });
+
+    // Test Object Model
+    log('Object Model Test.');
+    api.Database.Model.define('ObjectTest', {
+      model_type: "Object",
+      do_timestamp: true,
+      model_key: "key",
+      structure: {
+        key: 'INTEGER',
+        property1: 'TEXT',
+        property2: 'INTERGER'
+      }
+    }, (err, model)=>{
+      if(err) {
+        log(err)
+      }
+      else {
+        log('Object Model Create.');
+        model.create({
+          key: 0,
+          property1: 'HAHA',
+          property2: 0
+        }, (err)=> {
+          if(err) {
+            log(err)
+          }
+          else {
+            log('Object Model Get.');
+            model.get(0, (err, instance)=> {
+              if(err) {
+                log(err)
+              }
+              else {
+                log(instance);
+                api.Database.Model.remove('ObjectTest', (err)=>{
+                  if(err) {
+                    log(err);
+                  }
+                  else {
+                    log('Object Model PASS.');
+                  }
+                });
+              }
+            });
+          }
+        });
+      }
     });
   }
 
