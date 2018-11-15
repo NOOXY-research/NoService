@@ -32,8 +32,10 @@ Socket base+API pattern makes the concept easy to understand. NoService wraps th
 ### Bundled Services
 NoService provide bundled services such as NoShell which give you access of NoService. NoUser for user system. And so on.
 
+### Intergrated ORM
+
 ## Target version
-* daemon: alpha 0.3.0
+* daemon: alpha 0.3.1
 * protocol: NSP alpha
 
 ## Dependences
@@ -154,35 +156,24 @@ After the core finish navigating the directories under “services”. It will c
 // Description:
 // "youservice/entry.js" description.
 // Copyright 2018 NOOXY. All Rights Reserved.
+'use strict';
 
-let files_path;
-let settings;
-// Your service entry point
-function start(Me, api) {
-    // Get the service socket of your service
-  let ss = api.Service.ServiceSocket;
-  // BEWARE! To prevent callback error crash the system.
-  // If you call an callback function which is not API provided. Such as setTimeout(callback, timeout).
-  // You need to wrap the callback funciton by api.SafeCallback.
-  // E.g. setTimeout(api.SafeCallback(callback), timeout)
-  let safec = api.SafeCallback;
-  // Please save and manipulate your files in this directory
-  files_path = Me.FilesPath;
-  // Your settings in manifest file.
-  settings = Me.Settings;
+function Service(Me, api) {
+
+  // Here is where your service start
+  this.start = ()=> {
+    // where your service start.
+    // do your jobs here
+  }
+
+  // If the daemon stop, your service recieve close signal here.
+  this.close = ()=> {
+    // Saving state of you service.
+    // Please save and manipulate your files in this directory
+  }
 }
-
-// If the daemon stop, your service recieve close signal here.
-function close() {
-  // Saving state of you service.
-  // Please save and manipulate your files in this directory
-}
-
 // Export your work for system here.
-module.exports = {
-  start: start,
-  close: close
-}
+module.exports = Service;
 ```
 Beware that code in Service is ran as a superuser
 
@@ -205,7 +196,7 @@ Here is an example of sending data from service to client, client to service can
 In service
 ``` javascript
 // Your service's entry.js
-function start(Me, api) {
+this.start = ()=> {
   // Get the service socket of your service
   let ss = api.Service.ServiceSocket;
   ss.onConnect = (entityID, callback) => {
@@ -213,7 +204,6 @@ function start(Me, api) {
     ss.sendData(entityID, 'Hello world!');
     callback(false);
   }
-
 }
 ```
 In client(browser)
@@ -265,7 +255,7 @@ let _NSc = new NSc();
 JSON function defined in service
 ``` javascript
 // Your service's entry.js
-function start(Me, api) {
+this.start = ()=> {
   // Normally define a JSONfunction
   ss.def('Hello', (json, entityID, returnJSON)=>{
     console.log(json.d); // Print "I am client.".
@@ -403,11 +393,39 @@ api.Authorization.Authby.Token(entityID, (err, pass)=>{
   api.Crypto.decryptString(algo, key, toDecrypt, callback)
 
   ### Database
+  api.Database.Databse
 
   ### Database Model
-  api.Database.Model.define()\
-  api.Database.Model.get()\
-  api.Database.Model.remove()
+  api.Database.Model.define(model_name, model_structure, callback)\
+  api.Database.Model.get(model_name, callback)\
+  api.Database.Model.exist(model_name, callback)\
+  api.Database.Model.remove(model_name, callback)
+  ```
+  model_structure
+  ObjectModel example:
+  {
+     model_type: "Object",
+     do_timestamp: true,
+     model_key: 'username',
+     structure: {
+       username: 'text',
+       height: 'int'
+     }
+  }
+
+
+  PairModel example:
+  {
+     model_type: "Pair",
+     do_timestamp: false,
+     model_key: ['u1', 'u2'],
+     structure: {
+       u1: 'text',
+       u2: 'text',
+       content: 'text'
+     }
+  }
+  ```
 
   #### Model(Object)
 
@@ -450,7 +468,6 @@ api.Authorization.Authby.Token(entityID, (err, pass)=>{
 > 	3. AU(Authorization) for authorize user identity.
 > 	4. CS(Call Service) client call daemon.
 > 	5. CA(Call Activity) daemon call client.
-> 	6. SI(SignIn) signin request from daemon.
 6. In order to focus on data that be transferred We will abridge some terms.
 > 	1. “method” refer to “m”
 > 	2. “session” refer to “s”
