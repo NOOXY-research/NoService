@@ -126,7 +126,19 @@ function WorkerClient() {
               }
               // inject Database API
               _api.Database = {};
-              _api.Database.Model = _model;
+              _api.Database.Model = {};
+              _api.Database.Model.remove = (model_name, callback)=>{
+                _model.remove(_service_name+'_'+model_name, callback);
+              };
+              _api.Database.Model.exist = (model_name, callback)=>{
+                _model.exist(_service_name+'_'+model_name, callback);
+              };
+              _api.Database.Model.get= (model_name, callback)=>{
+                _model.get(_service_name+'_'+model_name, callback);
+              };
+              _api.Database.Model.define= (model_name, model_structure, callback)=>{
+                _model.define(_service_name+'_'+model_name, model_structure, callback);
+              };
               _api.Database.Database = _db;
               try {
                 _service_module = new (require(message.p))(Me, _api);

@@ -134,7 +134,7 @@ function Model() {
       if(do_timestamp) {
         properties_dict['modifydate'] = Utils.DatetoSQL(new Date());
       }
-      _db.replaceRow(MODEL_TABLE_PREFIX+table_name,  [properties_dict], callback);
+      _db.replaceRows(MODEL_TABLE_PREFIX+table_name,  [properties_dict], callback);
     };
 
     // {property: data_type}
@@ -223,6 +223,12 @@ function Model() {
     this.update = ()=> {
       if(do_timestamp) {
         properties_dict['modifydate'] = Utils.DatetoSQL(new Date());
+      }
+      if(properties_dict[model_key[0]]||properties_dict[model_key[1]]) {
+        _db.updateRows(MODEL_TABLE_PREFIX+table_name, model_key[0]+'=?', callback);
+      }
+      else {
+        callback(new Error('Either property "'+model_key[0]+'" or "'+model_key[1]+'" should be specified.'));
       }
     };
 
@@ -393,19 +399,24 @@ function Model() {
 
   this.get = (model_name, callback) => {
     _db.getRows(MODEL_TABLE_NAME, 'name = ?', [model_name], (err, results)=> {
-      let model_structure = JSON.parse(results[0].structure);
-      let model_type = model_structure.model_type;
-      let do_timestamp = model_structure.do_timestamp;
-      let model_key = model_structure.model_key;
-      let structure = model_structure.structure;
-      if(model_type == 'Object') {
-        callback(err, new ObjModel(model_name, model_key, structure, do_timestamp));
+      if(results.length) {
+        let model_structure = JSON.parse(results[0].structure);
+        let model_type = model_structure.model_type;
+        let do_timestamp = model_structure.do_timestamp;
+        let model_key = model_structure.model_key;
+        let structure = model_structure.structure;
+        if(model_type == 'Object') {
+          callback(err, new ObjModel(model_name, model_key, structure, do_timestamp));
+        }
+        else if (model_type == 'IndexedList') {
+          callback(err, new IndexedListModel(model_name, model_key, structure, do_timestamp));
+        }
+        else if (model_type == 'Pair') {
+          callback(err, new PairModel(model_name, model_key, structure, do_timestamp));
+        }
       }
-      else if (model_type == 'IndexedList') {
-        callback(err, new IndexedListModel(model_name, model_key, structure, do_timestamp));
-      }
-      else if (model_type == 'Pair') {
-        callback(err, new PairModel(model_name, model_key, structure, do_timestamp));
+      else {
+        callback(new Error('Model note exist!'));
       }
     });
   };

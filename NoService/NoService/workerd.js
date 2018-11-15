@@ -95,7 +95,12 @@ function WorkerDaemon() {
     }
 
     this.emitRemoteUnbind = (id)=> {
-      _child.send({t:3, i: id});
+      _child.send({t:3, i: id}, (err)=> {
+        if (err) {
+          Utils.tagLog('*ERR*' , 'Occured error on sending data to child "'+_service_name+'".');
+          console.log(err);
+        }
+      });
     }
 
     this.emitChildCallback = ([obj_id, path], args, argsobj) => {
@@ -107,10 +112,15 @@ function WorkerDaemon() {
       }
 
       try {
-        _child.send(_data);
+        _child.send(_data, (err)=> {
+          if (err) {
+            Utils.tagLog('*ERR*' , 'Occured error on sending data to child "'+_service_name+'".');
+            console.log(err);
+          }
+        });
       }
       catch(err) {
-        Utils.tagLog('*ERR*' , 'Occured error on "'+service_name+'".');
+        Utils.tagLog('*ERR*' , 'Occured error on "'+_service_name+'".');
         console.log(err);
       }
     }

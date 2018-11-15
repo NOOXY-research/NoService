@@ -116,14 +116,6 @@ function Service(Me, api) {
       });
     });
 
-    // Test User Model
-    api.Database.Model.get('NSUser', (err, model)=>{
-      model.getbyFirst('admin', (err, meta)=> {
-        log('Checking model...');
-        log(meta);
-      });
-    });
-
     // Test Object Model
     log('Object Model Test.');
     api.Database.Model.define('ObjectTest', {
@@ -157,12 +149,27 @@ function Service(Me, api) {
               }
               else {
                 log(instance);
-                api.Database.Model.remove('ObjectTest', (err)=>{
+                log('Object Model Get.');
+                model.replace({
+                  key: 0,
+                  property1: 'HAHARPLACE',
+                  property2: 0
+                }, (err)=> {
                   if(err) {
-                    log(err);
+                    log(err)
                   }
                   else {
-                    log('Object Model PASS.');
+                    model.get(0, (err, instance)=> {
+                      log(instance);
+                      api.Database.Model.remove('ObjectTest', (err)=>{
+                        if(err) {
+                          log(err);
+                        }
+                        else {
+                          log('Object Model PASS.');
+                        }
+                      });
+                    });
                   }
                 });
               }
