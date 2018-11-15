@@ -348,8 +348,9 @@ function Core(settings) {
     verbose('Daemon', 'Checking Database and Authenticity...');
 
     let _init_db = new Database(settings.database);
-    let _init_auth = new Authenticity();
     let _init_model = new Model();
+    let _init_auth = new Authenticity();
+
 
     // Connect to db
     _init_db.connect((err)=> {

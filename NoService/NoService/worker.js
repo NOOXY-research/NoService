@@ -15,6 +15,8 @@
 
 const fork = require('child_process').fork;
 const Utils = require('./utilities');
+const Database = require('./database/database');
+const Model = require('./database/model');
 process.title = 'NoService_worker';
 
 
@@ -106,13 +108,33 @@ function WorkerClient() {
           }
         };
         _api.Utils = Utils;
-        try {
-          _service_module.start(Me, _api);
-        }
-        catch(e) {
-          console.log(e);
-        }
-
+        // setting up database
+        _api.Daemon.getSettings((err, daemon_setting)=>{
+          let _db = new Database(daemon_setting.database);
+          let _model = new Model();
+          _db.connect((err)=> {
+            if(err) {
+              Utils.tagLog('*ERR*', 'Occur failure on connecting database. At service worker of "'+_service_name+'".');
+              throw(err);
+            }
+            _model.importDatabase(_db, (err)=> {
+              if(err) {
+                Utils.tagLog('*ERR*', 'Occur failure on importing database for model.  At service worker of "'+_service_name+'".');
+                throw(err);
+              }
+              // inject Database API
+              _api.Database = {};
+              _api.Database.Model = _model;
+              _api.Database.Database = _db;
+              try {
+                _service_module.start(Me, _api);
+              }
+              catch(e) {
+                console.log(e);
+              }
+            });
+          });
+        });
       });
     }
     // function return

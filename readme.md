@@ -450,6 +450,7 @@ api.Authorization.Authby.Token(entityID, (err, pass)=>{
 > 	3. AU(Authorization) for authorize user identity.
 > 	4. CS(Call Service) client call daemon.
 > 	5. CA(Call Activity) daemon call client.
+> 	6. SI(SignIn) signin request from daemon.
 6. In order to focus on data that be transferred We will abridge some terms.
 > 	1. “method” refer to “m”
 > 	2. “session” refer to “s”

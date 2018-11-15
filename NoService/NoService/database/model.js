@@ -5,15 +5,35 @@
 // Copyright 2018 NOOXY. All Rights Reserved.
 
 'use strict';
-const MODEL_TABLE_NAME = 'NoService_Models';
-const MODEL_TABLE_PREFIX = 'NoService_Model_';
+
 const Utils = require('../utilities');
+let Vars = require('../variables');
+const MODEL_TABLE_NAME = Vars.MODEL_TABLE_NAME;
+const MODEL_TABLE_PREFIX = Vars.MODEL_TABLE_PREFIX;
 
 function Model() {
   let _db;
 
-  // For something like messages or logs.
-  function IndexedListModel(table_name, model_key, structure, do_timestamp) {
+  // For something like different and huge amount of groups of messages or logs need ordered index.
+  function GroupIndexedListModel(table_name, model_key, structure, do_timestamp) {
+    this.modeltype = 'GroupIndexedList';
+
+    this.appendRows = (group_name, rows, callback)=> {
+
+    };
+
+    this.replaceRows = (group_name, rows, begin, end, callback)=> {
+
+    };
+
+    this.deleteRows = (group_name, begin, end, callback)=> {
+    };
+  };
+
+  // For something like messages or logs need ordered index.
+  function IndexedListModel(table_name, structure, do_timestamp) {
+
+    this.modeltype = 'IndexedList';
 
     this.search = (keyword, callback)=> {
       _db.getRows(table_name, 'category LIKE '+keyword+'OR location LIKE '+keyword+'', );
@@ -28,50 +48,61 @@ function Model() {
     };
 
     this.appendRows = (rows, callback)=> {
-      if(Array.isArray(rows[0])) {
+      let list = [];
+      let data = Utils.DatetoSQL(new Date());
 
-      }
-      else {
+      for(let i in rows) {
+        if(do_timestamp) {
 
+        }
+        if(Array.isArray(rows[0])) {
+
+        }
+        else {
+
+        }
       }
+
+      _db.appendRows(MODEL_TABLE_PREFIX+table_name, [properties_dict], null, callback);
     };
 
     this.getLatestNRows = (n, callback)=> {
-
-    };
-
-    this.getMaxIndex = (callback)=> {
-
+      _db.getRows();
     };
 
     this.getRows = (begin, end,)=> {
-
+      _db.getRows();
     };
 
     this.getAllRows = (callback)=> {
-
+      _db.getRows();
     };
 
     this.getLatestIndex = (begin, end,)=> {
-
+      _db.getRows(MODEL_TABLE_PREFIX+table_name);
     };
 
-    this.addField = ()=> {
-
+    this.addFields = (fields_dict, callback)=> {
+      for(let field in fields_dict) {
+        fields_dict[field] = {type: fields_dict[field]};
+      }
+      _db.addFields(MODEL_TABLE_PREFIX+table_name, fields_dict, callback);
     };
 
-    this.existField = ()=> {
-
+    this.existField = (field_name, callback)=> {
+      _db.existField(MODEL_TABLE_PREFIX+table_name, field_name, callback);
     };
 
-    this.removeField = ()=> {
-
+    this.removeFields = (fields_dict, callback)=> {
+      _db.removeFields(MODEL_TABLE_PREFIX+table_name, fields_dict, callback);
     };
 
   };
 
   // For storing objects that appear often
   function ObjModel(table_name, model_key, structure, do_timestamp) {
+
+    this.modeltype = 'Object';
     // get an instense
     this.get = (key_value, callback)=> {
       _db.getRows(table_name, 'KEY = ?', [key_value], (err, results)=> {
@@ -83,48 +114,63 @@ function Model() {
       let sql = '';
       sql = Objects.keys(structure).join(' LIKE '+keyword+' OR ');
       sql = sql + ' LIKE ' + keyword;
-      _db.getRows(table_name, [sql, null], callback);
+      _db.getRows(MODEL_TABLE_PREFIX+table_name, [sql, null], callback);
     };
 
-    this.create = (dict, callback)=> {
-      _db.addUniqueRow(table_name, dict, callback);
+    this.create = (properties_dict, callback)=> {
+      if(do_timestamp) {
+        properties_dict['createdate'] = Utils.DatetoSQL(new Date());
+        properties_dict['modifydate'] = Utils.DatetoSQL(new Date());
+      }
+      _db.appendRows(MODEL_TABLE_PREFIX+table_name, [properties_dict], null, callback);
     };
 
-    this.replace = (dict, callback)=> {
-      _db.replaceRow(table_name, dict, 'KEY =', callback);
+    this.replace = (properties_dict, callback)=> {
+      if(do_timestamp) {
+        properties_dict['modifydate'] = Utils.DatetoSQL(new Date());
+      }
+      _db.replaceRow(MODEL_TABLE_PREFIX+table_name,  [properties_dict], callback);
     };
 
+    // {property: data_type}
     this.addProperties = (properties_dict, callback)=> {
       for(let field in properties_dict) {
         properties_dict[field] = {type: properties_dict[field]};
       }
-      _db.addFields(table_name, properties_dict, callback);
+      _db.addFields(MODEL_TABLE_PREFIX+table_name, properties_dict, callback);
     };
 
     this.existProperty = (property_name, callback)=> {
-      _db.hadField(table_name, property_name, callback);
+      _db.existField(MODEL_TABLE_PREFIX+table_name, property_name, callback);
     };
 
-    this.removeProperties = (properties_list)=> {
-      _db.removeFields(table_name);
+    this.removeProperties = (properties_list, callback)=> {
+      db.removeFields(MODEL_TABLE_PREFIX+table_name, properties_list, callback);
     };
 
-    this.remove = ()=> {
-
+    this.remove = (key, callback)=> {
+      _db.deleteRows(MODEL_TABLE_PREFIX+table_name, model_key+'= ?', [key], callback);
     };
   };
 
   // For something like relation or two keys objects.
   function PairModel(table_name, model_key, structure, do_timestamp) {
 
+    this.modeltype = 'Pair';
+
     this.create = (properties_dict, callback)=> {
-      properties_dict['createdate'] = Utils.DatetoSQL(new Date());
-      properties_dict['modifydate'] = Utils.DatetoSQL(new Date());
+      if(do_timestamp) {
+        properties_dict['createdate'] = Utils.DatetoSQL(new Date());
+        properties_dict['modifydate'] = Utils.DatetoSQL(new Date());
+      }
       _db.appendRows(MODEL_TABLE_PREFIX+table_name, [properties_dict], null, callback);
     };
 
     this.search = (phrase, callback)=> {
-
+      let sql = '';
+      sql = Objects.keys(structure).join(' LIKE '+keyword+' OR ');
+      sql = sql + ' LIKE ' + keyword;
+      _db.getRows(MODEL_TABLE_PREFIX+table_name, [sql, null], callback);
     };
 
     // return list
@@ -157,7 +203,9 @@ function Model() {
 
     // return list
     this.replace = (properties_dict, callback)=> {
-      properties_dict['modifydate'] = Utils.DatetoSQL(new Date());
+      if(do_timestamp) {
+        properties_dict['modifydate'] = Utils.DatetoSQL(new Date());
+      }
       if(properties_dict[model_key[0]]||properties_dict[model_key[1]]) {
         _db.replaceRows(MODEL_TABLE_PREFIX+table_name, [properties_dict], callback);
       }
@@ -168,7 +216,9 @@ function Model() {
 
     //
     this.update = ()=> {
-      properties_dict['modifydate'] = Utils.DatetoSQL(new Date());
+      if(do_timestamp) {
+        properties_dict['modifydate'] = Utils.DatetoSQL(new Date());
+      }
     };
 
     this.removebyPair = (pair, callback)=> {
@@ -187,18 +237,19 @@ function Model() {
       _db.deleteRows(MODEL_TABLE_PREFIX+table_name, model_key[1]+'= ?', [second], callback);
     };
 
-    this.addProperty = (name, type, callback)=> {
-      let structure = {};
-      structure[name] = type;
-      _db.createFields(MODEL_TABLE_PREFIX+table_name, structure, callback);
+    this.addProperties = (properties_dict, callback)=> {
+      for(let field in properties_dict) {
+        properties_dict[field] = {type: properties_dict[field]};
+      }
+      _db.addFields(MODEL_TABLE_PREFIX+table_name, properties_dict, callback);
     };
 
-    this.existProperty = (name, callback)=> {
-      _db.existField(MODEL_TABLE_PREFIX+table_name, name, callback);
+    this.existProperty = (property_name, callback)=> {
+      _db.existField(MODEL_TABLE_PREFIX+table_name, property_name, callback);
     };
 
-    this.removeProperty = (name, callback)=> {
-      _db.createFields(MODEL_TABLE_PREFIX+table_name, [name], callback);
+    this.removeProperty = (properties_list, callback)=> {
+      _db.removeFields(MODEL_TABLE_PREFIX+table_name, properties_list, callback);
     };
   };
 
@@ -252,21 +303,58 @@ function Model() {
       }
       else {
         if(model_type == 'Object') {
-
-        }
-        else if (model_type == 'IndexedList') {
-        }
-        else if (model_type == 'Pair') {
           let field_structure = {};
+
           if(do_timestamp) {
             structure['createdate'] = 'DATETIME';
             structure['modifydate'] = 'DATETIME';
           }
+
           for(let field in structure) {
             field_structure[field] = {
               type: structure[field]
             };
           }
+
+          field_structure[model_key].iskey = true;
+          field_structure[model_key].notnull = true;
+
+          _db.createTable(MODEL_TABLE_PREFIX+model_name, field_structure, (err)=> {
+            if(err) {
+              callback(err);
+            }
+            else {
+              _db.replaceRows(MODEL_TABLE_NAME, [{
+                name: model_name,
+                structure: JSON.stringify(model_structure)
+              }], (err)=> {
+                if(err) {
+                  callback(err);
+                }
+                else {
+                  callback(err, new ObjModel(model_name, model_key, structure, do_timestamp));
+                }
+              });
+            }
+          });
+        }
+        else if (model_type == 'IndexedList') {
+
+        }
+        else if (model_type == 'Pair') {
+          let field_structure = {};
+
+          if(do_timestamp) {
+            structure['createdate'] = 'DATETIME';
+            structure['modifydate'] = 'DATETIME';
+          }
+
+          for(let field in structure) {
+            field_structure[field] = {
+              type: structure[field]
+            };
+          }
+
           field_structure[model_key[0]].iskey = true;
           field_structure[model_key[0]].notnull = true;
           field_structure[model_key[1]].iskey = true;
@@ -306,9 +394,10 @@ function Model() {
       let model_key = model_structure.model_key;
       let structure = model_structure.structure;
       if(model_type == 'Object') {
-
+        callback(err, new ObjModel(model_name, model_key, structure, do_timestamp));
       }
       else if (model_type == 'IndexedList') {
+        callback(err, new IndexedListModel(model_name, model_key, structure, do_timestamp));
       }
       else if (model_type == 'Pair') {
         callback(err, new PairModel(model_name, model_key, structure, do_timestamp));

@@ -115,6 +115,13 @@ function start(Me, api) {
       callback(false);
     });
   });
+
+  api.Database.Model.get('NSUser', (err, model)=>{
+    model.getbyFirst('admin', (err, meta)=> {
+      log('Checking model...');
+      log(meta);
+    });
+  });
 }
 
 // If the daemon stop, your service recieve close signal here.

@@ -77,6 +77,10 @@ function Database(meta) {
     _dialect.createreplaceRow.apply(null, args);;
   };
 
+  this.query = (...args)=> {
+    _dialect.query.apply(null, args);;
+  };
+
   this.close = (...args)=> {
     _dialect.close.apply(null, args);;
   };

@@ -253,6 +253,10 @@ function Sqlite3(meta) {
     });
   };
 
+  this.query = (...args)=> {
+    _db.all.apply(null, args);
+  }
+
   this.close = ()=> {
     _db.end();
   }
@@ -396,12 +400,11 @@ function Mariadb(meta) {
     }
   };
 
-  this.insertUniqueRow = (table_name, row_dict, [select_query, select_query_values], callback)=> {
-
-  };
-
   // appendRows and generate ordered new int index
-  this.appendRows = (table_name, rows_dict_list, idx_id, callback)=> {
+  this.appendRows = (table_name, rows_dict_list, idx_options, callback)=> {
+    let idx_id = idx_options[0];
+    let where_idx_id_sql = idx_options[1];
+
     if(weird_chars.exec(table_name)) {
       callback(new Error('Special characters "'+idx_id+'" are not allowed.'));
     }
@@ -424,14 +427,14 @@ function Mariadb(meta) {
             let row = rows_dict_list[index];
             let sql = 'INSERT INTO '+table_name;
             let fields_str = Object.keys(row).join(', ');
-            let q = '';
+            let q = [];
             let values = [];
 
             for(let field_name in row) {
               values.push(row[field_name]);
-              q = q +'? ';
+              q.push('?');
             }
-            sql = sql+'('+fields_str+', '+idx_id+') VALUES ('+q+', SELECT MAX('+idx_id+')+1 from '+table_name+')';
+            sql = sql+'('+fields_str+', '+idx_id+') VALUES ('+q.join(', ')+', SELECT MAX('+idx_id+')+1 FROM '+table_name+')';
             _db.query(sql, values, call_callback);
           }
         }
@@ -513,6 +516,10 @@ function Mariadb(meta) {
       callback(err);
     });
   };
+
+  this.query = (...args)=> {
+    _db.query.apply(null, args);
+  }
 
   this.close = ()=> {
     _db.end();

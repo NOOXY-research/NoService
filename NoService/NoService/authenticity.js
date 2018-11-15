@@ -7,7 +7,7 @@
 let crypto = require('crypto');
 let Utils = require('./utilities');
 let Vars = require('./variables');
-const AUTHE_USER_MODEL_NAME = 'NSUser';
+const AUTHE_USER_MODEL_NAME = Vars.AUTHE_USER_MODEL_NAME;
 
 // the authenticity module
 function Authenticity() {
