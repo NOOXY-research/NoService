@@ -1,4 +1,4 @@
-// NoService/NSd/implementation.js
+// NoService/NoService/implementation.js
 // Description:
 // "implementation.js" provides manager to manage implemented functions which need to be
 // implemented by service owner itself.

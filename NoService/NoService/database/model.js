@@ -1,4 +1,4 @@
-// NoService/NSd/model.js
+// NoService/NoService/database/model.js
 // Description:
 // "model.js" provides ORM to manage objects and database. Then you will no need
 // to keep retyping sql for table.

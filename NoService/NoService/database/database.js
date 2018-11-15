@@ -1,4 +1,4 @@
-// NoService/NSd/database.js
+// NoService/NoService/database/database.js
 // Description:
 // sql statements are supposed to stay only this file.
 // "database.js" provides interface to manage database stuff.

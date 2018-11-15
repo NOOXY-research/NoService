@@ -1,4 +1,4 @@
-// NoService/NSd/utilities.js
+// NoService/NoService/utilities.js
 // Description:
 // "utilities.js" provides general function to be widely used.
 // Copyright 2018 NOOXY. All Rights Reserved.

@@ -1,4 +1,4 @@
-// NoService/NSd/api.js
+// NoService/NoService/api.js
 // Description:
 // "api.js" provide interface of interacting with core. This module is desgined
 // for multithreading.
