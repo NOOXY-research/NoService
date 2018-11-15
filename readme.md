@@ -196,7 +196,7 @@ Here is an example of sending data from service to client, client to service can
 In service
 ``` javascript
 // Your service's entry.js
-function start(Me, api) {
+this.start = ()=> {
   // Get the service socket of your service
   let ss = api.Service.ServiceSocket;
   ss.onConnect = (entityID, callback) => {
@@ -204,7 +204,6 @@ function start(Me, api) {
     ss.sendData(entityID, 'Hello world!');
     callback(false);
   }
-
 }
 ```
 In client(browser)
