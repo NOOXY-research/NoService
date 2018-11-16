@@ -1,9 +1,13 @@
 # NoService
 ![](https://raw.githubusercontent.com/NOOXY-inc/Art-Collection/master/NoService/NoService.png)
 The project is still in alpha!
-
+## Installation and Deploy
+``` sh
+npm install noservice -save
+npx create-noservice .
+```
 ## What is NoService?
-NoService is a high level framework for services that provide you nodejs environment and eliminate service designer to care about low level part of your project. Such as connection, authorization, user system, database, protocol and so on. It also run multiple services intergrated and we also provide a manager and shell to manipulate all of them.
+NoService is a high level framework for services that provide you nodejs environment and eliminate service designer to care about low level part of your project.f Such as authorization, user system, database, protocol and so on. It also run multiple services intergrated and we also provide a manager and shell to manipulate all of them.
 
 ## Why we build NoService? And why you should give it a try?
 
