@@ -125,7 +125,6 @@ function Service(Me, api) {
         });
 
         Implementation.setImplement('onToken', (err, token)=>{
-          console.log(token);
           wait_auth = false;
           _token = token;
         });
