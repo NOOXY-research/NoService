@@ -6,8 +6,12 @@
   "directories": {
     "doc": "docs"
   },
+  "bin": {
+    "create-noservice": "./NoService/NoService/npm_scripts/deploy.sh"
+  },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "noservicedeploy": "./NoService/NoService/npm_scripts/deploy.sh"
   },
   "repository": {
     "type": "git",

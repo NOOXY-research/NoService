@@ -193,12 +193,17 @@ function Core(settings) {
       }
 
       // setup NOOXY Service protocol secure
-      _nsps.importRSA2048KeyPair(fs.readFileSync(settings.rsa_2048_priv_key, 'utf8'), fs.readFileSync(settings.rsa_2048_pub_key, 'utf8'));
-      _nsps.importCryptoModule(_nocrypto);
-      _nsps.importOperationTimeout(settings.operations_timeout);
-      // setup router
-      _router.importCore(coregateway);
+      try {
+        _nsps.importRSA2048KeyPair(fs.readFileSync(settings.rsa_2048_priv_key, 'utf8'), fs.readFileSync(settings.rsa_2048_pub_key, 'utf8'));
+        _nsps.importCryptoModule(_nocrypto);
+        _nsps.importOperationTimeout(settings.operations_timeout);
+        // setup router
+        _router.importCore(coregateway);
+      }
+      catch(e) {
 
+      }
+      
       // setup connection
       _connection.setDebug(settings.debug);
       if(settings.ssl_priv_key!=null && settings.ssl_cert!=null) {
