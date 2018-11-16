@@ -79,9 +79,9 @@
 
   "rsa_2048_priv_key": "private_key.pem",
 
-  "ssl_priv_key": "ssl.key",
+  "ssl_priv_key": null,
 
-  "ssl_cert": "ssl.crt",
+  "ssl_cert": null,
 
   "kill_daemon_timeout": 3000,
 
