@@ -42,7 +42,6 @@
 
   "services": [
     "NoActivity",
-    "NoTester",
     "NoServiceManager",
     "NoUser",
     "NoTalk"
@@ -54,7 +53,7 @@
 
   "debug_service": "NoActivity",
 
-  "debug": true,
+  "debug": false,
 
   "debug_config": {
   	"show_json": true,
