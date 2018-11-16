@@ -33,19 +33,19 @@
 
   "SHA256_key": "FATFROG",
 
+  "trusted_domains": [
+    "www.nooxy.org",
+    "127.0.0.1",
+    "0.0.0.0",
+    "localhost"
+  ],
+
   "services": [
     "NoActivity",
     "NoTester",
     "NoServiceManager",
     "NoUser",
     "NoTalk"
-  ],
-
-  "trusted_domains": [
-    "www.nooxy.org",
-    "127.0.0.1",
-    "0.0.0.0",
-    "localhost"
   ],
 
   "shell_service": "NoShell",

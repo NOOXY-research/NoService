@@ -39,7 +39,7 @@ if [ "$yesno" = "y" ]; then
   openssl rsa -in private.pem -out private.pem -outform PEM
 fi
 
-echo "Package\"ws\", \"sqlite3\" are required."
+echo "Package \"ws\", \"sqlite3\" are required."
 echo "Note that \"sqlite3\" can be switched to other databases."
 echo "Install dependencies?(y/n)"
 

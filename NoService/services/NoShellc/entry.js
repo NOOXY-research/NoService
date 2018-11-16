@@ -43,6 +43,7 @@ function Service(Me, api) {
     let _token = null;
     let _mutex = true;
     let commandread;
+    let wait_auth;
     let _as;
 
     api.Daemon.getSettings((err, daemon_setting)=>{
@@ -95,7 +96,7 @@ function Service(Me, api) {
                 console.log(msg);
                 commandread();
               });
-            }, 300)
+            }, 100)
           });
 
         });
@@ -124,10 +125,13 @@ function Service(Me, api) {
         });
 
         Implementation.setImplement('onToken', (err, token)=>{
+          console.log(token);
+          wait_auth = false;
           _token = token;
         });
 
         Implementation.setImplement('AuthbyTokenFailed', (connprofile, data, data_sender) => {
+          wait_auth = true;
           Implementation.getImplement('signin', (err, im)=> {
             im(connprofile, data, data_sender);
           });
@@ -175,7 +179,8 @@ function Service(Me, api) {
                     return rl.close(); //closing RL and returning from function.
                   as.call('sendC', {c: cmd}, (err, json)=>{
                     console.log(json.r);
-                    commandread(); //Calling this function again to ask new question
+                    if(!wait_auth)
+                      commandread(); //Calling this function again to ask new question
                   });
                 });
               };
