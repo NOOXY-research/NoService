@@ -137,16 +137,16 @@ function WorkerClient() {
 
                 _api.Database.Model = {};
                 _api.Database.Model.remove = (model_name, callback)=>{
-                  _model.remove(_service_name+'_'+model_name, callback);
+                  _model.remove(_service_name+'_'+model_name, _api.SafeCallback(callback));
                 };
                 _api.Database.Model.exist = (model_name, callback)=>{
-                  _model.exist(_service_name+'_'+model_name, callback);
+                  _model.exist(_service_name+'_'+model_name, _api.SafeCallback(callback));
                 };
                 _api.Database.Model.get= (model_name, callback)=>{
-                  _model.get(_service_name+'_'+model_name, callback);
+                  _model.get(_service_name+'_'+model_name, _api.SafeCallback(callback));
                 };
                 _api.Database.Model.define= (model_name, model_structure, callback)=>{
-                  _model.define(_service_name+'_'+model_name, model_structure, callback);
+                  _model.define(_service_name+'_'+model_name, model_structure, _api.SafeCallback(callback));
                 };
 
                 try {

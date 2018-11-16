@@ -4,6 +4,7 @@
   "description": "NOOXY Service Framework",
   "private": true,
   "dependencies": {
+    "sqlite3": "^4.0.4",
     "ws": "^4.1.0"
   }
 }

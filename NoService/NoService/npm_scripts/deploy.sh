@@ -6,6 +6,13 @@ INSTALL_DIR="$(pwd)"
 if [[ $1 = *[!\ ]* ]]; then
   INSTALL_DIR=$1
 fi
+echo "Fetch newest update from github?(y)"
+read update
+if [ "$update" = "y" ]; then
+  rm -rf ${DIR}
+  mkdir ${DIR}
+  git clone https://github.com/NOOXY-research/NoService ${DIR}
+fi
 
 echo "Deploying NoService..."
 echo "Install directory: $INSTALL_DIR"
