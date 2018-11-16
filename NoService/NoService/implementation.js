@@ -5,7 +5,7 @@
 // Copyright 2018 NOOXY. All Rights Reserved.
 'use strict';
 
-let Utils = require('./utilities');
+const Utils = require('./library').Utilities;
 
 function Implementation() {
   let _support_secure = false;

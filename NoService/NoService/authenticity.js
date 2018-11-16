@@ -5,9 +5,9 @@
 'use strict';
 
 const crypto = require('crypto');
-const Utils = require('./utilities');
-const Vars = require('./variables');
-const AUTHE_USER_MODEL_NAME = Vars.AUTHE_USER_MODEL_NAME;
+const Utils = require('./library').Utilities;
+const Constants = require('./constants');
+const AUTHE_USER_MODEL_NAME = Constants.AUTHE_USER_MODEL_NAME;
 
 // the authenticity module
 function Authenticity() {
@@ -154,7 +154,7 @@ function Authenticity() {
   };
 
   this.deleteUser = (username, callback) => {
-    if(Vars.default_user.username != username) {
+    if(Constants.default_user.username != username) {
       _user_model.removebyFirst(username.toLowerCase(), (err) => {
         callback(err);
       });

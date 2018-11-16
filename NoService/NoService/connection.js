@@ -4,7 +4,7 @@
 // Copyright 2018 NOOXY. All Rights Reserved.
 'use strict';
 
-const Utils = require('./utilities');
+const Utils = require('./library').Utilities;
 const WebSocket = require('ws');
 const Net = require('net');
 const Https = require('https');
@@ -17,7 +17,7 @@ function Connection(options) {
   let _servers = {};
   let _clients = {};
   let _have_local_server = false;
-  let _virtnet = null;
+  let _virtutalnet = null;
   let _blocked_ip = [];
   let _tcp_ip_chunk_token = '}{"""}<>';
   let ssl_priv_key = null;
@@ -219,7 +219,7 @@ function Connection(options) {
     };
   }
 
-  _virtnet = new Virtualnet();
+  _virtutalnet = new Virtualnet();
 
   // a wrapped WebSocket server for nooxy service framework
   function WSServer(id) {
@@ -586,7 +586,7 @@ function Connection(options) {
   };
 
   function LocalClient(virtnet) {
-    let _virtnet = virtnet;
+    let _virtutalnet = virtnet;
     // virtnet client
     let _vnetc = null;
     let _vs = null
@@ -650,7 +650,7 @@ function Connection(options) {
     else if(conn_method == 'local'||conn_method =='Local') {
       if(_have_local_server == false) {
         let _serverID = "LOCAL";
-        let locs = new LocalServer(_serverID, _virtnet);
+        let locs = new LocalServer(_serverID, _virtutalnet);
         _servers[_serverID] = locs;
         locs.start('LOCALIP', 'LOCALPORT');
         locs.onData = this.onData;
@@ -703,7 +703,7 @@ function Connection(options) {
 
     if(conn_method == 'ws'||conn_method =='WebSocket') {
       let serverID = "WebSocket";
-      let wsc = new WSClient(_virtnet);
+      let wsc = new WSClient(_virtutalnet);
       wsc.onData = onData_wrapped;
       wsc.onClose = this.onClose;
       wsc.connect(remoteip, port, callback);
@@ -711,7 +711,7 @@ function Connection(options) {
 
     else if(conn_method == 'wss'||conn_method =='WebSocketSecure') {
       let serverID = "WebSocket";
-      let wsc = new WSSClient(_virtnet);
+      let wsc = new WSSClient(_virtutalnet);
       wsc.onData = onData_wrapped;
       wsc.onClose = this.onClose;
       wsc.connect(remoteip, port, callback);
@@ -723,7 +723,7 @@ function Connection(options) {
       }
       else {
         let serverID = "LOCAL";
-        let locc = new LocalClient(_virtnet);
+        let locc = new LocalClient(_virtutalnet);
         locc.onData = onData_wrapped;
         locc.onClose = this.onClose;
         locc.connect('LOCALIP', 'LOCALPORT', callback);
@@ -732,7 +732,7 @@ function Connection(options) {
 
     else if(conn_method == 'TCP/IP'||conn_method =='TCP') {
       let serverID = "TCP/IP";
-      let netc = new TCPIPClient(_virtnet);
+      let netc = new TCPIPClient(_virtutalnet);
       netc.onData = onData_wrapped;
       netc.onClose = this.onClose;
       netc.connect(remoteip, port, callback);

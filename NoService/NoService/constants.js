@@ -1,4 +1,4 @@
-let Variables = {
+let Constant = {
   'version': 'aphla-0.3.3',
   'NSP_version': 'aphla 0.2.0',
   'copyright': 'copyright(c)2018 NOOXY inc.',
@@ -12,7 +12,8 @@ let Variables = {
   ],
   'AUTHE_USER_MODEL_NAME': 'NSUser',
   'MODEL_TABLE_NAME': 'NoService_Models',
-  'MODEL_TABLE_PREFIX': 'NoService_Model_'
+  'MODEL_TABLE_PREFIX': 'NoService_Model_',
+  'MODEL_INDEXKEY': 'Index'
 }
 
-module.exports = Variables;
+module.exports = Constant;

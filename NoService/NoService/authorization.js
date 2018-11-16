@@ -4,7 +4,7 @@
 // Copyright 2018 NOOXY. All Rights Reserved.
 'use strict';
 
-const Utils = require('./utilities');
+const Utils = require('./library').Utilities;
 
 // Handling responses to authorization requests.
 function AuthorizationHandler() {

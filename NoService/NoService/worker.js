@@ -15,7 +15,7 @@
 'use strict';
 
 const fork = require('child_process').fork;
-const Utils = require('./utilities');
+const Utils = require('./library').Utilities;
 // For injecting database to api
 const Database = require('./database/database');
 const Model = require('./database/model');
@@ -111,47 +111,65 @@ function WorkerClient() {
         _api.Utils = Utils;
         // setting up database
         _api.Daemon.getSettings((err, daemon_setting)=>{
-          let _db = new Database(daemon_setting.database);
-          let _model = new Model();
-          _db.connect((err)=> {
-            if(err) {
-              Utils.tagLog('*ERR*', 'Occur failure on connecting database. At service worker of "'+_service_name+'".');
-              throw(err);
-            }
-            _model.importDatabase(_db, (err)=> {
+          // inject Library API
+          if(Me.Manifest.LibraryAPI)
+            _api.Library = require('./library');
+
+          // inject Database API
+          if(Me.Manifest.DatabaseAPI) {
+            let _db = new Database(daemon_setting.database);
+            let _model = new Model();
+
+            _api.Database = {};
+            _api.Database.Database = _db;
+
+            _db.connect((err)=> {
               if(err) {
-                Utils.tagLog('*ERR*', 'Occur failure on importing database for model.  At service worker of "'+_service_name+'".');
-                console.log(err);
-                process.exit();
+                Utils.tagLog('*ERR*', 'Occur failure on connecting database. At service worker of "'+_service_name+'".');
+                throw(err);
               }
-              // inject Library API
-              _api.Library = require('./library');
-              // inject Database API
-              _api.Database = {};
-              _api.Database.Model = {};
-              _api.Database.Model.remove = (model_name, callback)=>{
-                _model.remove(_service_name+'_'+model_name, callback);
-              };
-              _api.Database.Model.exist = (model_name, callback)=>{
-                _model.exist(_service_name+'_'+model_name, callback);
-              };
-              _api.Database.Model.get= (model_name, callback)=>{
-                _model.get(_service_name+'_'+model_name, callback);
-              };
-              _api.Database.Model.define= (model_name, model_structure, callback)=>{
-                _model.define(_service_name+'_'+model_name, model_structure, callback);
-              };
-              _api.Database.Database = _db;
-              try {
-                _service_module = new (require(message.p))(Me, _api);
-                process.send({t:1});
-              }
-              catch(e) {
-                console.log(e);
-                process.send({t:99});
-              }
+              _model.importDatabase(_db, (err)=> {
+                if(err) {
+                  Utils.tagLog('*ERR*', 'Occur failure on importing database for model.  At service worker of "'+_service_name+'".');
+                  console.log(err);
+                  process.exit();
+                }
+
+                _api.Database.Model = {};
+                _api.Database.Model.remove = (model_name, callback)=>{
+                  _model.remove(_service_name+'_'+model_name, callback);
+                };
+                _api.Database.Model.exist = (model_name, callback)=>{
+                  _model.exist(_service_name+'_'+model_name, callback);
+                };
+                _api.Database.Model.get= (model_name, callback)=>{
+                  _model.get(_service_name+'_'+model_name, callback);
+                };
+                _api.Database.Model.define= (model_name, model_structure, callback)=>{
+                  _model.define(_service_name+'_'+model_name, model_structure, callback);
+                };
+
+                try {
+                  _service_module = new (require(message.p))(Me, _api);
+                  process.send({t:1});
+                }
+                catch(e) {
+                  console.log(e);
+                  process.send({t:99});
+                }
+              });
             });
-          });
+          }
+          else {
+            try {
+              _service_module = new (require(message.p))(Me, _api);
+              process.send({t:1});
+            }
+            catch(e) {
+              console.log(e);
+              process.send({t:99});
+            }
+          }
         });
       });
     }

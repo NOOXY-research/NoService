@@ -6,10 +6,11 @@
 
 'use strict';
 
-const Utils = require('../utilities');
-const Vars = require('../variables');
-const MODEL_TABLE_NAME = Vars.MODEL_TABLE_NAME;
-const MODEL_TABLE_PREFIX = Vars.MODEL_TABLE_PREFIX;
+const Utils = require('../library').Utilities;
+const Constants = require('../constants');
+const MODEL_TABLE_NAME = Constants.MODEL_TABLE_NAME;
+const MODEL_TABLE_PREFIX = Constants.MODEL_TABLE_PREFIX;
+const MODEL_INDEXKEY = Constants.MODEL_INDEXKEY;
 
 function Model() {
   let _db;
@@ -32,11 +33,13 @@ function Model() {
 
   // For something like messages or logs need ordered index.
   function IndexedListModel(table_name, structure, do_timestamp) {
-
     this.modeltype = 'IndexedList';
 
     this.search = (keyword, callback)=> {
-      _db.getRows(table_name, 'category LIKE '+keyword+'OR location LIKE '+keyword+'', );
+      let sql = '';
+      sql = Objects.keys(structure).join(' LIKE '+keyword+' OR ');
+      sql = sql + ' LIKE ' + keyword;
+      _db.getRows(MODEL_TABLE_PREFIX+table_name, [sql, null], callback);
     };
 
     this.replaceRows = (rows, begin, end, callback)=> {
@@ -67,19 +70,29 @@ function Model() {
     };
 
     this.getLatestNRows = (n, callback)=> {
-      _db.getRows();
+      _db.getRows(MODEL_TABLE_PREFIX+table_name, MODEL_INDEXKEY+' >= ((SELECT max('+MODEL_INDEXKEY+') FROM '+MODEL_TABLE_PREFIX+table_name+') - ?)', [n], callback);
     };
 
-    this.getRows = (begin, end,)=> {
-      _db.getRows();
+    this.getRowsFromTo = (begin, end, callback)=> {
+      _db.getRows(MODEL_TABLE_PREFIX+table_name, MODEL_INDEXKEY+' >= ? AND '+ MODEL_INDEXKEY+' <= ?', [begin, end], callback);
     };
 
     this.getAllRows = (callback)=> {
-      _db.getRows();
+      _db.getAllRows(MODEL_TABLE_PREFIX+table_name, callback);
     };
 
-    this.getLatestIndex = (begin, end,)=> {
-      _db.getRows(MODEL_TABLE_PREFIX+table_name);
+    this.getLatestIndex = (callback)=> {
+      _db.getRows(MODEL_TABLE_PREFIX+table_name, MODEL_INDEXKEY+' = (SELECT max('+MODEL_INDEXKEY+') FROM '+MODEL_TABLE_PREFIX+table_name+')', (err, results)=> {
+        if(err) {
+          callback(err);
+        }
+        else if(results.length) {
+          callback(err, (results[0])[MODEL_INDEXKEY]);
+        }
+        else {
+          callback(err);
+        }
+      });
     };
 
     this.addFields = (fields_dict, callback)=> {
@@ -96,7 +109,6 @@ function Model() {
     this.removeFields = (fields_dict, callback)=> {
       _db.removeFields(MODEL_TABLE_PREFIX+table_name, fields_dict, callback);
     };
-
   };
 
   // For storing objects that appear often

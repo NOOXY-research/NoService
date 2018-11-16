@@ -13,6 +13,10 @@
 
   "implementation_api": false,
 
+  "LibraryAPI": true,
+
+  "DatabaseAPI": true,
+
   "dependencies": {
 
     "node_packages" : {

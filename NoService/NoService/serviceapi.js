@@ -7,7 +7,7 @@
 
 'use strict';
 
-const Utils = require('./utilities');
+const Utils = require('./library').Utilities;
 
 function ServiceAPI() {
   let _coregateway = null;

@@ -7,36 +7,36 @@
 const fs = require('fs');
 
 // Checking dependencies
-let Vars = require('./variables');
-for(let pkg in Vars.dependencies) {
+let Constants = require('./constants');
+for(let pkg in Constants.dependencies) {
   try {
-    require.resolve(Vars.dependencies[pkg]);
+    require.resolve(Constants.dependencies[pkg]);
   } catch (e) {
-    console.log('Please install package "'+Vars.dependencies[pkg]+'".');
+    console.log('Please install package "'+Constants.dependencies[pkg]+'".');
     process.exit();
   }
 }
 
-let Connection = require('./connection');
-let Authorization = require('./authorization').Authorization;
-let AuthorizationHandler = require('./authorization').AuthorizationHandler;
-let Authenticity = require('./authenticity');
-let Router = require('./router');
-let Service = require('./service');
-let Entity = require('./entity');
-let ServiceAPI = require('./serviceapi');
-let Implementation = require('./implementation');
-let Log = null;
-let Utils = require('./utilities');
-let NoCrypto = require('./crypto').NoCrypto;
-let NSPS = require('./crypto').NSPS;
-let WorkerDaemon = require('./workerd');
-let Database = require('./database/database');
-let Model = require('./database/model');
+const Connection = require('./connection');
+const Authorization = require('./authorization').Authorization;
+const AuthorizationHandler = require('./authorization').AuthorizationHandler;
+const Authenticity = require('./authenticity');
+const Router = require('./router');
+const Service = require('./service');
+const Entity = require('./entity');
+const ServiceAPI = require('./serviceapi');
+const Implementation = require('./implementation');
+const Log = null;
+const Utils = require('./library').Utilities;
+const NoCrypto = require('./crypto').NoCrypto;
+const NSPS = require('./crypto').NSPS;
+const WorkerDaemon = require('./workerd');
+const Database = require('./database/database');
+const Model = require('./database/model');
 
 
 function Core(settings) {
-  Utils.printLOGO(Vars.version, Vars.copyright);
+  Utils.printLOGO(Constants.version, Constants.copyright);
 
   let verbose = (tag, log) => {
     if(settings.verbose||settings.debug) {
@@ -151,7 +151,7 @@ function Core(settings) {
           restart: ()=> {
             _daemon.close();
           },
-          Variables: Vars
+          Variables: Constants
         }
         process.on('SIGINT', () => {
           verbose('Daemon', 'Caught interrupt signal.');
@@ -174,7 +174,7 @@ function Core(settings) {
             NoCrypto: _nocrypto,
             NSPS: _nsps,
             Daemon: _daemon,
-            Variables: Vars
+            Variables: Constants
           };
         verbose('Daemon', 'Creating coregateway done.')
       // trust myself
@@ -373,14 +373,14 @@ function Core(settings) {
             throw(err);
           }
           verbose('Daemon', 'Initializing authenticity...')
-          _init_auth.createUser(Vars.default_user.username, Vars.default_user.displayname, Vars.default_user.password, 0, null, 'The', 'Admin', (err)=> {
+          _init_auth.createUser(Constants.default_user.username, Constants.default_user.displayname, Constants.default_user.password, 0, null, 'The', 'Admin', (err)=> {
             if(err) {
               Utils.tagLog('*ERR*', 'Occur failure on creating database.');
               console.log(err);
               callback(err);
             }
             else {
-              verbose('Daemon', 'NoService Superuser "'+Vars.default_user.username+'" with password "'+Vars.default_user.password+'" created. Please change password later for security.');
+              verbose('Daemon', 'NoService Superuser "'+Constants.default_user.username+'" with password "'+Constants.default_user.password+'" created. Please change password later for security.');
               verbose('Daemon', 'Creating eula...')
               fs.writeFile('./eula.txt', '', (err)=> {
                 if(err) {
