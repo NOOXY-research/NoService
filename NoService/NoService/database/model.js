@@ -228,16 +228,22 @@ function Model() {
       }
       else {
         callback(new Error('Either property "'+model_key[0]+'" or "'+model_key[1]+'" should be specified.'));
-      }
+      };
     };
 
     //
-    this.update = ()=> {
+    this.update = (properties_dict, callback)=> {
       if(do_timestamp) {
         properties_dict['modifydate'] = Utils.DatetoSQL(new Date());
       }
-      if(properties_dict[model_key[0]]||properties_dict[model_key[1]]) {
-        _db.updateRows(MODEL_TABLE_PREFIX+table_name, model_key[0]+'=?', callback);
+      if(properties_dict[model_key[0]]&&properties_dict[model_key[1]]) {
+        _db.updateRows(MODEL_TABLE_PREFIX+table_name, model_key[0]+'=? AND '+model_key[1]+'=?', [properties_dict[model_key[0]], properties_dict[model_key[1]]], properties_dict, callback);
+      }
+      else if(properties_dict[model_key[0]]){
+        _db.updateRows(MODEL_TABLE_PREFIX+table_name, model_key[0]+'=?', [properties_dict[model_key[0]]], properties_dict, callback);
+      }
+      else if(properties_dict[model_key[1]]) {
+        _db.updateRows(MODEL_TABLE_PREFIX+table_name, model_key[1]+'=?', [properties_dict[model_key[1]]], properties_dict, callback);
       }
       else {
         callback(new Error('Either property "'+model_key[0]+'" or "'+model_key[1]+'" should be specified.'));

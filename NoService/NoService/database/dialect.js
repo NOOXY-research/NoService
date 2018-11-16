@@ -14,6 +14,7 @@
 // getRows
 // getAllRows
 // replaceRows
+// updateRows
 // appendRows
 // dropTable
 // createTable
@@ -111,8 +112,19 @@ function Sqlite3(meta) {
     }
   };
 
-  this.updateRows = ()=> {
-
+  this.updateRows = (table_name, select_query, select_query_values, row_dict_list, callback)=> {
+    if(weird_chars.exec(table_name)) {
+      callback(new Error('Special characters "'+table_name+'" are not allowed.'));
+    }
+    else {
+      let sql = 'UPDATE '+table_name+' SET '+Object.keys(row_dict_list).join('=?, ')+'=? WHERE '+select_query;
+      let values = [];
+      for(let field in row_dict_list) {
+        values.push(row_dict_list[field]);
+      }
+      values = values.concat(select_query_values);
+      _db.all(sql, values, callback);
+    }
   };
 
   this.replaceRows = (table_name, rows_dict_list, callback)=> {
@@ -132,7 +144,7 @@ function Sqlite3(meta) {
         sql += 'VALUES ('+q.join(', ')+');'
         _db.all(sql, values, callback);
       };
-    }
+    };
   };
 
   this.insertUniqueRow = (table_name, row_dict, [select_query, select_query_values], callback)=> {
@@ -376,8 +388,19 @@ function Mariadb(meta) {
     }
   };
 
-  this.updateRows = ()=> {
-
+  this.updateRows = (table_name, select_query, select_query_values, rows_dict_list, callback)=> {
+    if(weird_chars.exec(table_name)) {
+      callback(new Error('Special characters "'+table_name+'" are not allowed.'));
+    }
+    else {
+      let sql = 'UPDATE '+table_name+' SET '+Object.keys(row_dict_list).join('=?, ')+'=? WHERE '+select_query;
+      let values = [];
+      for(let field in row_dict_list) {
+        values.push(row_dict_list[field]);
+      }
+      values = values.concat(select_query_values);
+      _db.all(sql, values, callback);
+    }
   };
 
   this.replaceRows = (table_name, rows_dict_list, callback)=> {

@@ -30,3 +30,20 @@ echo "You might need to generate RSA 2048 key if you enable sercure protocol."
 echo "> openssl genrsa -des3 -out private.pem 2048"
 echo "> openssl rsa -in private.pem -outform PEM -pubout -out public.pem"
 echo "> openssl rsa -in private.pem -out private.pem -outform PEM"
+echo "Help You Setup?(y/n)"
+read yesno
+
+if [ "$yesno" = "y" ]; then
+  openssl genrsa -des3 -out private.pem 2048
+  openssl rsa -in private.pem -outform PEM -pubout -out public.pem
+  openssl rsa -in private.pem -out private.pem -outform PEM
+fi
+
+echo "Package\"ws\", \"sqlite3\" are required."
+echo "Note that \"sqlite3\" can be switched to other databases."
+echo "Install dependencies?(y/n)"
+
+read yesno2
+if [ "$yesno2" = "y" ]; then
+  npm install ws sqlite3 -save
+fi

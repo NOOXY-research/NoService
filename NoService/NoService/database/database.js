@@ -59,7 +59,11 @@ function Database(meta) {
 
   this.replaceRows = (...args)=> {
     _dialect.replaceRows.apply(null, args);
-  }
+  };
+
+  this.updateRows = (...args)=> {
+    _dialect.updateRows.apply(null, args);
+  };
 
   this.appendRows = (...args)=> {
     _dialect.appendRows.apply(null, args);;

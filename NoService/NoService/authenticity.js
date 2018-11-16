@@ -166,7 +166,8 @@ function Authenticity() {
 
   this.updatePassword = (username, newpassword, callback) => {
     if(newpassword != null && newpassword.length >= 5) {
-      _user_model.replacebyFirst(username.toLowerCase(), {
+      _user_model.update({
+        username: username.toLowerCase(),
         pwdhash: crypto.createHmac('sha256', SHA256KEY).update(newpassword).digest('hex')
       },
       (err)=> {
@@ -186,7 +187,8 @@ function Authenticity() {
 
   this.updatePrivilege = (username, privilege, callback) => {
     if(Number.isInteger(parseInt(privilege))) {
-      _user_model.replacebyFirst(username.toLowerCase(), {
+      _user_model.update({
+        username: username.toLowerCase(),
         privilege: parseInt(privilege)
       },
       (err)=> {
@@ -209,7 +211,8 @@ function Authenticity() {
       callback(err);
     }
     else {
-      _user_model.replacebyFirst(username.toLowerCase(), {
+      _user_model.update({
+        username: username.toLowerCase(),
         firstname: firstname,
         lastname: lastname
       }, callback);
@@ -252,10 +255,11 @@ function Authenticity() {
     let token = Utils.generateGUID();
     let expiredate = new Date();
     expiredate = Utils.addDays(expiredate, this.TokenExpirePeriod);
-    _user_model.replacebyFirst(username.toLowerCase(), {
+    _user_model.update({
+      username: username.toLowerCase(),
       token: token,
       tokenexpire: Utils.DatetoSQL(expiredate)
-    }, ()=> {
+    }, (err)=> {
       if(!err) {
         callback(err, token);
       }
