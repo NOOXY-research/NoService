@@ -1,0 +1,29 @@
+{
+  "name": "noservice",
+  "version": "0.0.0",
+  "description": "NOOXY Service Framework. NoService is a high level framework for services that provide you nodejs environment and eliminate service designer to care about low level part of your project. Such as connection, authorization, user system, database, protocol and so on. It also run multiple services intergrated and we also provide a manager and shell to manipulate all of them.",
+  "main": "NoService/index.js",
+  "directories": {
+    "doc": "docs"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/NOOXY-research/NoService.git"
+  },
+  "keywords": [
+    "Service",
+    "NoService",
+    "NOOXY",
+    "Authenticity",
+    "Database"
+  ],
+  "author": "noowyee magneticchen NOOXY",
+  "license": "Apache-2.0",
+  "bugs": {
+    "url": "https://github.com/NOOXY-research/NoService/issues"
+  },
+  "homepage": "https://github.com/NOOXY-research/NoService#readme"
+}

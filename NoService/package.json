@@ -1,11 +1,9 @@
 {
-  "name": "NSF",
+  "name": "NoService",
   "version": "0.0.0",
   "description": "NOOXY Service Framework",
   "private": true,
   "dependencies": {
-    "mysql": "^2.16.0",
-    "sqlite3": "^4.0.1",
     "ws": "^4.1.0"
   }
 }
