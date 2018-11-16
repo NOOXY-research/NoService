@@ -347,7 +347,6 @@ function Router() {
     _coregateway.Authorization.emitRouter = this.emit;
     _coregateway.NSPS.emitRouter = this.emit;
     _coregateway.Service.spwanClient = _coregateway.Connection.createClient;
-
   };
 
   this.close = () => {

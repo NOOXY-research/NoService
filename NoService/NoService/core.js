@@ -76,10 +76,13 @@ function Core(settings) {
     if (this.isinitialized() == false) {
       this.initialize((err)=>{
         if(err) {
+          verbose('*ERR*', 'Error occured during initializing.');
+          console.log(err);
           process.exit();
         }
         else {
-          this.launch();
+          verbose('OKAY', 'Initialized. Please restart!');
+          process.exit();
         }
       });
     }
@@ -203,7 +206,7 @@ function Core(settings) {
       catch(e) {
 
       }
-      
+
       // setup connection
       _connection.setDebug(settings.debug);
       if(settings.ssl_priv_key!=null && settings.ssl_cert!=null) {
@@ -339,6 +342,11 @@ function Core(settings) {
         Utils.tagLog('*ERR*', 'Your settings:');
         Utils.tagLog('*ERR*', 'PrivateKey: '+settings.rsa_2048_priv_key);
         Utils.tagLog('*ERR*', 'PublicKey: '+settings.rsa_2048_pub_key);
+        Utils.tagLog('*ERR*', '-');
+        Utils.tagLog('*ERR*', 'You can generate it in UNIX system by openssl.');
+        Utils.tagLog('*ERR*', '$ openssl genrsa -des3 -out private.pem 2048');
+        Utils.tagLog('*ERR*', '$ openssl rsa -in private.pem -outform PEM -pubout -out public.pem');
+        Utils.tagLog('*ERR*', '$ openssl rsa -in private.pem -out private.pem -outform PEM');
         process.exit()
         return false;
       }
