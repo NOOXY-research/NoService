@@ -34,6 +34,7 @@ function Model() {
   // For something like messages or logs need ordered index.
   function IndexedListModel(table_name, structure, do_timestamp) {
     this.modeltype = 'IndexedList';
+    let model_key = 'Index';
 
     this.search = (keyword, callback)=> {
       let sql = '';
@@ -42,7 +43,11 @@ function Model() {
       _db.getRows(MODEL_TABLE_PREFIX+table_name, [sql, null], callback);
     };
 
-    this.replaceRows = (rows, begin, end, callback)=> {
+    this.replaceRows = (rows, callback)=> {
+
+    };
+
+    this.updateRows = (rows, callback)=> {
 
     };
 
@@ -169,7 +174,6 @@ function Model() {
           this.create(properties_dict, callback);
         }
       });
-
     };
 
     // {property: data_type}

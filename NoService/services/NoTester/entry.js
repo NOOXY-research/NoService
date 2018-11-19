@@ -178,6 +178,86 @@ function Service(Me, api) {
         });
       }
     });
+
+
+    // Test IndexedList Model
+    log('IndexedList Model Test.');
+    api.Database.Model.define('IndexedListTest', {
+      model_type: "IndexedList",
+      do_timestamp: true,
+      structure: {
+        property1: 'TEXT',
+        property2: 'INTERGER'
+      }
+    }, (err, model)=>{
+      if(err) {
+        log(err)
+      }
+      else {
+        log('IndexedList Model Append Test.');
+        model.appendRows([
+          {
+            property1: 'A',
+            property2: 0
+          },
+          {
+            property1: 'B',
+            property2: 1
+          },
+          {
+            property1: 'C',
+            property2: 2
+          },
+          {
+            property1: 'D',
+            property2: 3
+          }
+        ], (err)=> {
+          if(err) {
+            log(err)
+          }
+          else {
+            log('IndexedList Model Get Test.');
+            model.getAllRows((err, instance)=> {
+              if(err) {
+                log(err)
+              }
+              else {
+                log(instance);
+                log('IndexedList Model Replace Test.');
+                model.updateRows([
+                  {
+                    Index: 1,
+                    property1: 'Br'
+                  },
+                  {
+                    Index: 2,
+                    property1: 'Cr'
+                  }
+                ], (err)=> {
+                  if(err) {
+                    log(err)
+                  }
+                  else {
+                    model.get(0, (err, instance)=> {
+                      log(instance);
+                      api.Database.Model.remove('IndexedListTest', (err)=>{
+                        if(err) {
+                          log(err);
+                        }
+                        else {
+                          log('IndexedList Model PASS.');
+                        }
+                      });
+                    });
+                  }
+                });
+              }
+            });
+          }
+        });
+      }
+    });
   }
 
   // If the daemon stop, your service recieve close signal here.
