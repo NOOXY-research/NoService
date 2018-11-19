@@ -112,15 +112,15 @@ function Sqlite3(meta) {
     }
   };
 
-  this.updateRows = (table_name, select_query, select_query_values, row_dict_list, callback)=> {
+  this.updateRows = (table_name, select_query, select_query_values, row_dict, callback)=> {
     if(weird_chars.exec(table_name)) {
       callback(new Error('Special characters "'+table_name+'" are not allowed.'));
     }
     else {
-      let sql = 'UPDATE '+table_name+' SET '+Object.keys(row_dict_list).join('=?, ')+'=? WHERE '+select_query;
+      let sql = 'UPDATE '+table_name+' SET '+(Object.keys(row_dict)).join('=?, ')+'=? WHERE '+select_query;
       let values = [];
-      for(let field in row_dict_list) {
-        values.push(row_dict_list[field]);
+      for(let field in row_dict) {
+        values.push(row_dict[field]);
       }
       values = values.concat(select_query_values);
       _db.all(sql, values, callback);
@@ -388,15 +388,15 @@ function Mariadb(meta) {
     }
   };
 
-  this.updateRows = (table_name, select_query, select_query_values, rows_dict_list, callback)=> {
+  this.updateRows = (table_name, select_query, select_query_values, row_dict, callback)=> {
     if(weird_chars.exec(table_name)) {
       callback(new Error('Special characters "'+table_name+'" are not allowed.'));
     }
     else {
-      let sql = 'UPDATE '+table_name+' SET '+Object.keys(row_dict_list).join('=?, ')+'=? WHERE '+select_query;
+      let sql = 'UPDATE '+table_name+' SET '+(Object.keys(row_dict)).join('=?, ')+'=? WHERE '+select_query;
       let values = [];
-      for(let field in row_dict_list) {
-        values.push(row_dict_list[field]);
+      for(let field in row_dict) {
+        values.push(row_dict[field]);
       }
       values = values.concat(select_query_values);
       _db.all(sql, values, callback);

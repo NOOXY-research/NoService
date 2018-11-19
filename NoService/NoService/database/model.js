@@ -117,7 +117,7 @@ function Model() {
     this.modeltype = 'Object';
     // get an instense
     this.get = (key_value, callback)=> {
-      _db.getRows(MODEL_TABLE_PREFIX+table_name, 'KEY = ?', [key_value], (err, results)=> {
+      _db.getRows(MODEL_TABLE_PREFIX+table_name, model_key+'= ?', [key_value], (err, results)=> {
         if(results) {
           callback(err, results[0]);
         }
@@ -147,6 +147,29 @@ function Model() {
         properties_dict['modifydate'] = Utils.DatetoSQL(new Date());
       }
       _db.replaceRows(MODEL_TABLE_PREFIX+table_name,  [properties_dict], callback);
+    };
+
+    this.update = (properties_dict, callback)=> {
+      this.get(properties_dict[model_key], (err, meta)=> {
+        if(err) {
+          callback(err);
+        }
+        else if(meta) {
+          if(do_timestamp) {
+            properties_dict['modifydate'] = Utils.DatetoSQL(new Date());
+          }
+          if(properties_dict[model_key]) {
+            _db.updateRows(MODEL_TABLE_PREFIX+table_name, model_key+'=?', [properties_dict[model_key]], properties_dict, callback);
+          }
+          else {
+            callback(new Error('Key "'+model_key+'" is required.'));
+          }
+        }
+        else {
+          this.create(properties_dict, callback);
+        }
+      });
+
     };
 
     // {property: data_type}
@@ -470,6 +493,9 @@ function Model() {
     });
   };
 
+  this.close = ()=> {
+    _db = null;
+  };
 }
 
 module.exports = Model;

@@ -1,6 +1,6 @@
 {
   "name": "NoShellc",
-  "version": "0.0.0",
+  "version": "0.0.1",
   "displayname": "NOOXY Shell Client",
   "description": "Default NoService Local Shell Client implementation.",
   "Authors": ["NOOXY", "noowyee"],
@@ -11,5 +11,11 @@
     "services" : {
       "NoShell": "0.0.0"
     }
+  },
+  "settings": {
+    "remote_daemon": false,
+    "daemon_connection_type": "WebSocketSecure",
+    "daemon_ip": "nooxy.org",
+    "daemon_port": 1487
   }
 }

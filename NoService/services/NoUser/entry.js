@@ -21,20 +21,17 @@ function Service(Me, api) {
   // Your settings in manifest file.
   let settings = Me.Settings;
 
+  let country_list = Me.Settings.country_list;
   let nouser = new NoUser();
+
+  nouser.importModel(api.Database.Model, (err)=> {
+  });
+  nouser.importUtils(api.Utils);
+  nouser.importCountries(country_list);
+
+
   // Your service entry point
   this.start = ()=> {
-
-    let country_list = Me.Settings.country_list;
-
-    if (fs.existsSync(files_path+'NoUser.sqlite3')) {
-      nouser.importDatabase(files_path+'NoUser.sqlite3');
-    }
-    else {
-      nouser.createDatabase(files_path+'NoUser.sqlite3');
-    }
-
-    nouser.importCountries(country_list);
     // JSONfunction is a function that can be defined, which others entities can call.
     // It is a NOOXY Service Framework Standard
     ss.def('createUser', (json, entityID, returnJSON)=>{
@@ -148,66 +145,12 @@ function Service(Me, api) {
 
     });
 
-    // Safe define a JSONfunction.
-    ss.sdef('SafeJSONfunction', (json, entityID, returnJSON)=>{
-    //   // Code here for JSONfunciton
-    //   // Return Value for JSONfunction call. Otherwise remote will not recieve funciton return value.
-    //   let json_be_returned = {
-    //     d: 'Hello! NOOXY Service Framework!'
-    //   }
-    //   // First parameter for error, next is JSON to be returned.
-    //   returnJSON(false, json_be_returned);
-    // },
-    // // In case fail.
-    // ()=>{
-    //   console.log('Auth Failed.');
-    });
-
-    // ServiceSocket.onData, in case client send data to this Service.
-    // You will need entityID to Authorize remote user. And identify remote.
-    ss.onData = (entityID, data) => {
-      // // Get Username and process your work.
-      // let username = api.Service.Entity.returnEntityOwner(entityID);
-      // // To store your data and associated with userid INSEAD OF USERNAME!!!
-      // // Since userid can be promised as a unique identifer!!!
-      // let userid = null;
-      // // Get userid from API
-      // api.Authenticity.getUserID(username, (err, id) => {
-      //   userid = id;
-      // });
-      // // process you operation here
-      // console.log('recieve a data');
-      // console.log(data);
-    }
-    // ServiceSocket.onConnect, in case on new connection.
-    ss.onConnect = (entityID, callback) => {
-      // Do something.
-      // report error;
-      callback(false);
-    }
-    // ServiceSocket.onClose, in case connection close.
-    ss.onClose = (entityID, callback) => {
-      // // Get Username and process your work.
-      // let username = api.Service.Entity.returnEntityOwner(entityID);
-      // // To store your data and associated with userid INSEAD OF USERNAME!!!
-      // // Since userid can be promised as a unique identifer!!!
-      // let userid = null;
-      // // Get userid from API
-      // api.Authenticity.getUserID(username, (err, id) => {
-      //   userid = id;
-      // });
-      // // process you operation here
-      // console.log('ServiceSocket closed');
-      // // report error;
-      callback(false);
-    }
+    ss.on('close', (entityID, callback) => {callback(false)});
   }
 
   // If the daemon stop, your service recieve close signal here.
   this.close = ()=> {
     nouser.close();
-    // Saving state of you service.
-    // Please save and manipulate your files in this directory
   }
 }
 

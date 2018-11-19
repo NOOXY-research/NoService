@@ -23,33 +23,38 @@ function Authenticity() {
   this.importModelModule = (model, callback) => {
     _model_module = model;
     _model_module.exist(AUTHE_USER_MODEL_NAME, (err, has_model)=> {
-      if(!has_model) {
-        _model_module.define(AUTHE_USER_MODEL_NAME, {
-          model_type: "Pair",
-          do_timestamp: true,
-          model_key: ['username', 'userid'],
-          structure: {
-            username : 'VARCHAR(255)',
-            userid : 'VARCHAR(255)',
-            displayname : 'VARCHAR(255)',
-            pwdhash: 'TEXT',
-            token: 'VARCHAR(255)',
-            tokenexpire : 'VARCHAR(255)',
-            privilege : 'integer',
-            detail : 'TEXT',
-            firstname: 'VARCHAR(255)',
-            lastname: 'VARCHAR(255)'
-          }
-        }, (err, user_model)=> {
-          _user_model = user_model;
-          callback(err);
-        });
+      if(err) {
+        callback(err);
       }
       else {
-        _model_module.get(AUTHE_USER_MODEL_NAME, (err, user_model)=> {
-          _user_model = user_model;
-          callback(false);
-        });
+        if(!has_model) {
+          _model_module.define(AUTHE_USER_MODEL_NAME, {
+            model_type: "Pair",
+            do_timestamp: true,
+            model_key: ['username', 'userid'],
+            structure: {
+              username : 'VARCHAR(255)',
+              userid : 'VARCHAR(255)',
+              displayname : 'VARCHAR(255)',
+              pwdhash: 'TEXT',
+              token: 'VARCHAR(255)',
+              tokenexpire : 'VARCHAR(255)',
+              privilege : 'integer',
+              detail : 'TEXT',
+              firstname: 'VARCHAR(255)',
+              lastname: 'VARCHAR(255)'
+            }
+          }, (err, user_model)=> {
+            _user_model = user_model;
+            callback(err);
+          });
+        }
+        else {
+          _model_module.get(AUTHE_USER_MODEL_NAME, (err, user_model)=> {
+            _user_model = user_model;
+            callback(false);
+          });
+        }
       }
     });
   };

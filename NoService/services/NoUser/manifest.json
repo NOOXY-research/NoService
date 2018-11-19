@@ -7,11 +7,18 @@
     "NOOXY",
     "noowyee"
   ],
+
+  "LibraryAPI": true,
+
+  "DatabaseAPI": true,
+
   "implementation_api": false,
+
   "dependencies": {
     "node_packages": {},
     "services": {}
   },
+  
   "JSONfunciton_prototypes": {
     "createUser": {
       "displayname": "Create a User.",

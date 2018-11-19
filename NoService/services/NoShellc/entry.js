@@ -53,6 +53,13 @@ function Service(Me, api) {
       let DAEMONIP = daemon_setting.connection_servers[DEFAULT_SERVER].ip;
       let DAEMONPORT =daemon_setting.connection_servers[DEFAULT_SERVER].port;
 
+      // overwrite settings
+      if(settings.remote_daemon) {
+        DAEMONTYPE = settings.daemon_connection_type;
+        DAEMONIP = settings.daemon_ip;
+        DAEMONPORT = settings.daemon_port;
+      }
+
       // get username and password from terminal input
       let _get_username_and_password = (callback) => {
         let u = null;
@@ -166,36 +173,44 @@ function Service(Me, api) {
           //     console.log('Auth failed.');
           //   }
           //   _token = token;
-          rl.question('Login as: ', (uname)=> {
-            console.log('');
-            _username = uname;
-            let cmd = null;
-            api.Service.ActivitySocket.createSocket(DAEMONTYPE, DAEMONIP, DAEMONPORT, 'NoShell', _username, (err, as) => {
-              _as = as;
-              commandread = () => {
-                rl.question('>>> ', (cmd)=> {
-                  if (cmd == 'exit') //we need some base case, for recursion
-                    return rl.close(); //closing RL and returning from function.
-                  as.call('sendC', {c: cmd}, (err, json)=>{
-                    console.log(json.r);
-                    if(!wait_auth)
-                      commandread(); //Calling this function again to ask new question
+          let _new_session = ()=> {
+            rl.question('Login as: ', (uname)=> {
+              console.log('You are now "'+uname+'". Type "exit" to end this session.');
+              _username = uname;
+              api.Service.ActivitySocket.createSocket(DAEMONTYPE, DAEMONIP, DAEMONPORT, 'NoShell', _username, (err, as) => {
+                _as = as;
+                commandread = () => {
+                  rl.question('>>> ', (cmd)=> {
+                    if (cmd == 'exit') {
+                      _username = null;
+                      _token = null;
+                      _as = null;
+                      _new_session();
+                      return 0; //closing RL and returning from function.
+                    }
+                    as.call('sendC', {c: cmd}, (err, json)=>{
+                      console.log(json.r);
+                      if(!wait_auth)
+                        commandread(); //Calling this function again to ask new question
+                    });
                   });
-                });
-              };
+                };
 
-              console.log('connected.');
-              as.on('data', (data) => {
-                if(data.t == 'stream') {
-                  console.log(data.d);
-                }
-              });
-              as.call('welcome', null, (err, msg) => {
-                console.log(msg);
-                commandread();
+                console.log('connected.');
+                as.on('data', (data) => {
+                  if(data.t == 'stream') {
+                    console.log(data.d);
+                  }
+                });
+                as.call('welcome', null, (err, msg) => {
+                  console.log(msg);
+                  commandread();
+                });
               });
             });
-          });
+          };
+
+          _new_session();
       });
 
       }, daemon_setting.shell_client_service_delay);

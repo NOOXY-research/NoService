@@ -3,133 +3,54 @@
 // "NoUser.js" is a advanced user system for NoService.
 // Copyright 2018 NOOXY. All Rights Reserved.
 
+let Utils;
+'use strict';
 
-let sqlite3 = require('sqlite3');
-let Utils = require('./utilities');
+const USER_MODEL_NAME = 'User';
+// the nouser module
+function NoUser() {
+  let _model_module;
+  let _user_model;
+  let countries;
 
-// database obj for accessing database of authenticity.
-let NoUserdb = function () {
-  let _database = null;
-  let _cacheduser = {};
-
-  this.MaxCacheSize = 1000; //Users
-
-  function User(userid) {
-
-    this.loadbyUserIdsql = (userid, next) => {
-
-      // sql statement
-      let sql = 'SELECT userid, email, gender, phonenumber, birthday, country, address, aboutme FROM users WHERE userid = ?';
-
-      _database.get(sql, [userid], (err, row) => {
-        if(err || typeof(row) == 'undefined') {
-          this.userid = userid;
-          this.exisitence = false;
-        }
-        else {
-          this.exisitence = true;
-          this.userid = row.userid;
-          this.email = row.email;
-          this.gender = row.gender;
-          this.phonenumber = row.phonenumber;
-          this.birthday = row.birthday;
-          this.country = row.country;
-          this.address = row.address;
-          this.aboutme = row.aboutme;
-        }
-        next(false);
-      })
-
-    };
-
-    // write newest information of user to database.
-    this.updatesql = (callback) => {
-      let sql = null;
-      let err = null;
-      if(typeof(this.userid)=='undefined') {
-        callback(new Error('userid undefined.'));
+  // import database from specified path
+  this.importModel = (model, callback)=> {
+    _model_module = model;
+    model.exist(USER_MODEL_NAME, (err, has_model)=> {
+      if(err) {
+        callback(err);
+      }
+      else if(!has_model) {
+        model.define(USER_MODEL_NAME, {
+          model_type: "Object",
+          do_timestamp: true,
+          model_key: "userid",
+          structure: {
+            userid: 'VARCHAR(255)',
+            email: 'VARCHAR(320)',
+            gender: 'VARCHAR(1)',
+            address: 'TEXT',
+            phonenumber: 'VARCHAR(50)',
+            birthday: 'DATE',
+            country: 'VARCHAR(160)',
+            aboutme: 'TEXT'
+          }
+        }, (err, user_model)=> {
+          _user_model = user_model;
+          callback(err);
+        });
       }
       else {
-        let datenow = Utils.DatetoSQL(new Date());
-        if(this.exisitence) {
-          sql = 'UPDATE users SET userid=?, email=?, gender=?, phonenumber=?, birthday=?, country=?, address=?, aboutme=?, modifydate=? WHERE userid=?';
-          _database.run(sql, [this.userid, this.email, this.gender, this.phonenumber, this.birthday, this.country, this.address, this.aboutme, datenow, this.userid], (err) => {
-            if(err) {
-              callback(err);
-            }
-            else {
-              this.exisitence = true;
-              callback(false);
-            }
-          });
-        }
-        else {
-          sql = 'INSERT INTO users(userid, email, gender, phonenumber, birthday, country, address, aboutme, modifydate) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?);'
-          _database.run(sql, [this.userid, this.email, this.gender, this.phonenumber, this.birthday, this.country, this.address, this.aboutme, datenow], (err) => {
-            if(err) {
-              callback(err);
-            }
-            else {
-              this.exisitence = true;
-              callback(false);
-            }
-          });
-        }
+        model.get(USER_MODEL_NAME, (err, user_model)=> {
+          _user_model = user_model;
+          callback(false);
+        });
       }
-    };
-
-    // delete the user from database.
-    this.delete = (callback) => {
-      _database.run('DELETE FROM users WHERE userid=?;', [this.userid], callback)
-      this.exisitence = false;
-      this.userid = null;
-      this.email = null;
-      this.gender = null;
-      this.phonenumber = null;
-      this.birthday = null;
-      this.country = null;
-      this.address = null;
-      this.aboutme = null;
-    };
-  }
-
-  this.importDatabase = (path) => {
-    _database = new sqlite3.Database(path);
-  };
-
-  this.createDatabase = (path) => {
-    _database = new sqlite3.Database(path);
-    _database.run('CREATE TABLE users(userid text, email VARCHAR(320), gender VARCHAR(1), phonenumber VARCHAR(50), birthday date, country VARCHAR(160), address text, aboutme text, modifydate datetime)');
-  };
-
-  this.getUserbyId = (userid, callback) => {
-    let user = new User();
-    user.loadbyUserIdsql(userid, (err)=>{
-      if(typeof(_cacheduser[user.userid]) == 'undefined') {
-          _cacheduser[userid] = user;
-      }
-      callback(err, _cacheduser[userid]);
     });
   };
 
-  this.close = ()=>{
-    _cacheduser = null;
-    _database.close();
-    _database = null;
-  };
-}
-
-// the nouser module
-function NoUser() {
-
-  const _nouserdb = new NoUserdb();
-  let countries;
-  // Declare parameters
-  this.TokenExpirePeriod = 7 // Days
-
-  // import database from specified path
-  this.importDatabase = (path) => {
-    _nouserdb.importDatabase(path);
+  this.importUtils = (utils)=> {
+    Utils = utils;
   };
 
   // import countries by list
@@ -137,32 +58,33 @@ function NoUser() {
     countries = list;
   };
 
-  // create a new database for nouser.
-  this.createDatabase = (path) => {
-    _nouserdb.createDatabase(path);
-  };
-
   this.getUserMeta = (userid, callback) => {
-    _nouserdb.getUserbyId(userid, (err, user) => {
-      let user_meta = {
-        userid: user.userid,
-        email: user.email,
-        gender : user.gender,
-        phonenumber : user.phonenumber,
-        birthday : user.birthday,
-        country : user.country,
-        address : user.address,
-        aboutme : user.aboutme
-      }
-      try {
-        user_meta.gender = user_meta.gender.replace('M', 'male');
-        user_meta.gender = user_meta.gender.replace('F', 'female');
-        user_meta.gender = user_meta.gender.replace('O', 'other');
-      }
-      catch(e) {
+    _user_model.get(userid, (err, user) => {
+      if(user) {
+        let user_meta = {
+          userid: user.userid,
+          email: user.email,
+          gender : user.gender,
+          phonenumber : user.phonenumber,
+          birthday : user.birthday,
+          country : user.country,
+          address : user.address,
+          aboutme : user.aboutme
+        }
+        try {
+          user_meta.gender = user_meta.gender.replace('M', 'male');
+          user_meta.gender = user_meta.gender.replace('F', 'female');
+          user_meta.gender = user_meta.gender.replace('O', 'other');
+        }
+        catch(e) {
 
+        }
+        callback(false, user_meta);
       }
-      callback(false, user_meta);
+      else {
+        callback(false, null);
+      }
+
     });
   };
 
@@ -194,18 +116,16 @@ function NoUser() {
         callback(err);
       }
       else {
-        _nouserdb.getUserbyId(userid, (err, user)=>{
-          let expiredate = new Date();
-          expiredate = Utils.addDays(expiredate, this.TokenExpirePeriod);
-          user.email = jsondata.email;
-          user.gender = jsondata.gender;
-          user.phonenumber = jsondata.phonenumber;
-          user.birthday = jsondata.birthday;
-          user.country = jsondata.country;
-          user.address = jsondata.address;
-          user.aboutme = jsondata.aboutme;
-          user.updatesql(callback);
-        });
+        _user_model.update({
+          userid: userid,
+          email:  jsondata.email,
+          gender: jsondata.gender,
+          phonenumber: jsondata.phonenumber,
+          birthday: jsondata.birthday,
+          country: jsondata.country,
+          address: jsondata.address,
+          aboutme: jsondata.aboutme
+        }, callback);
       }
     }
     catch (e) {
@@ -214,14 +134,11 @@ function NoUser() {
   };
 
   this.deleteUser = (userid, callback) => {
-      _nouserdb.getUserbyId(userid, (err, user) => {
-        user.delete();
-        callback(false);
-      });
+    _user_model.remove(userid, callback);
   };
 
   this.close = () => {
-    _nouserdb.close();
+    _model_module.close();
   };
 
 };

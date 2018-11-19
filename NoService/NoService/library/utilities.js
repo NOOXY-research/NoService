@@ -11,6 +11,7 @@ const UUID_pool = 31 * 128; // 36 chars minus 4 dashes and 1 four
 const UUID_template = "10000000-1000-4000-8000-100000000000";
 const BACKSPACE = String.fromCharCode(127);
 
+
 let generateGUID = ()=>{
   let r = crypto.randomBytes(UUID_pool);
   let j = 0;
@@ -305,6 +306,7 @@ let SQLtoDate = (sqlDate) => {
 }
 
 module.exports = {
+  validateEmail: validateEmail,
   generateObjCallbacks: generateObjCallbacks,
   callObjCallback: callObjCallback,
   hasFunction: hasFunction,
