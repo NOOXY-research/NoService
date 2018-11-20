@@ -7,4 +7,36 @@
 
 module.exports.MatchRoom = function() {
 
+  this.setMaxParticipate = ()=> {
+
+  };
+
+  this.setTimeout = ()=> {
+
+  };
+
+  this.setTimeoutAction = ()=> {
+
+  };
+
+  this.joinParticipate = (id) => {
+
+  };
+
+  this.quitParticipate = (id) => {
+
+  };
+
+  this.modifyMatch = (id, content, callback)=> {
+
+  };
+
+  this.onMatchChange = ()=> {
+
+  };
+
+};
+
+module.exports.GroupMatchRoom = function() {
+
 };
