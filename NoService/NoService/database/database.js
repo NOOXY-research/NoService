@@ -66,7 +66,11 @@ function Database(meta) {
   };
 
   this.appendRows = (...args)=> {
-    _dialect.appendRows.apply(null, args);;
+    _dialect.appendRows.apply(null, args);
+  };
+
+  this.appendRowsandGroupAutoIncrease = (...args)=> {
+    _dialect.appendRowsandGroupAutoIncrease.apply(null, args);
   };
 
   this.createTable = (...args)=> {

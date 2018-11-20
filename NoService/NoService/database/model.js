@@ -117,7 +117,7 @@ function Model() {
           (rows[i])[model_group_key] = group_name;
         }
       }
-      _db.appendRows(MODEL_TABLE_PREFIX+table_name, rows, callback);
+      _db.appendRowsandGroupAutoIncrease(MODEL_TABLE_PREFIX+table_name, [model_key, model_group_key], rows, callback);
     };
 
     this.getLatestNRows = (group_name, n, callback)=> {
@@ -542,7 +542,7 @@ function Model() {
           field_structure[model_key].iskey = true;
           field_structure[model_key].notnull = true;
 
-          _db.createTable(MODEL_TABLE_PREFIX+model_name, field_structure, (err)=> {
+          _db.createTable(MODEL_TABLE_PREFIX+model_name, false, field_structure, (err)=> {
             if(err) {
               callback(err);
             }
@@ -582,7 +582,7 @@ function Model() {
           field_structure[MODEL_INDEXKEY].notnull = true;
           field_structure[MODEL_INDEXKEY].autoincrease = true;
 
-          _db.createTable(MODEL_TABLE_PREFIX+model_name, field_structure, (err)=> {
+          _db.createTable(MODEL_TABLE_PREFIX+model_name, true, field_structure, (err)=> {
             if(err) {
               callback(err);
             }
@@ -626,7 +626,7 @@ function Model() {
           field_structure[MODEL_INDEXKEY].notnull = true;
           field_structure[MODEL_INDEXKEY].autoincrease = true;
 
-          _db.createTable(MODEL_TABLE_PREFIX+model_name, field_structure, (err)=> {
+          _db.createTable(MODEL_TABLE_PREFIX+model_name, true, field_structure, (err)=> {
             if(err) {
               callback(err);
             }
@@ -664,7 +664,7 @@ function Model() {
           field_structure[model_key[1]].iskey = true;
           field_structure[model_key[1]].notnull = true;
 
-          _db.createTable(MODEL_TABLE_PREFIX+model_name, field_structure, (err)=> {
+          _db.createTable(MODEL_TABLE_PREFIX+model_name, false, field_structure, (err)=> {
             if(err) {
               callback(err);
             }
@@ -728,7 +728,7 @@ function Model() {
         callback(err);
       }
       else if(!exist) {
-        _db.createTable(MODEL_TABLE_NAME, {
+        _db.createTable(MODEL_TABLE_NAME, false,{
           name: {
             type: 'VARCHAR(255)',
             iskey: true,

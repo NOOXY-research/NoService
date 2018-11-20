@@ -16,6 +16,7 @@
 // replaceRows
 // updateRows
 // appendRows // needed to be ordered
+// appendRowsandGroupAutoIncrease // needed to be ordered
 // dropTable
 // createTable
 // existTable
@@ -156,10 +157,6 @@ function Sqlite3(meta) {
     };
   };
 
-  this.insertUniqueRow = (table_name, row_dict, [select_query, select_query_values], callback)=> {
-
-  };
-
   // appendRows and generate ordered new int index
   this.appendRows = (table_name, rows_dict_list, callback)=> {
     if(weird_chars.exec(table_name)) {
@@ -194,10 +191,46 @@ function Sqlite3(meta) {
       };
       op();
     }
-
   };
 
-  this.createTable = (table_name, structure, callback)=> {
+  this.appendRowsandGroupAutoIncrease = (table_name, [index_field, group_field], rows_dict_list, callback)=> {
+    if(weird_chars.exec(table_name)) {
+      callback(new Error('Special characters "'+idx_id+'" are not allowed.'));
+    }
+    else {
+      let left = rows_dict_list.length;
+      let op;
+      let call_callback = (err)=> {
+        left--;
+        if((left == 0 || err)&&(left >= 0)) {
+          callback(err);
+          left = -1;
+        }
+        else if (left >= 0) {
+          op();
+        }
+      };
+      op = ()=> {
+        let row = rows_dict_list[rows_dict_list.length - left];
+        let sql = 'INSERT INTO '+table_name;
+        let fields_str = Object.keys(row).join(', ');
+        let q = [];
+        let values = [];
+
+        for(let field_name in row) {
+          values.push(row[field_name]);
+          q.push('?');
+        }
+        sql = sql+'('+fields_str+', '+index_field+') VALUES ('+q.join(', ')+', (SELECT COALESCE(MAX( '+index_field+' ), 0) FROM '+table_name+' WHERE '+group_field+'=?)+1)';
+        values.push(row[group_field]);
+        console.log(sql);
+        _db.all(sql, values, call_callback);
+      };
+      op();
+    }
+  };
+
+  this.createTable = (table_name, autoincrease, structure, callback)=> {
     if(weird_chars.exec(table_name)) {
       callback(new Error('Special characters of table name are not allowed.'));
     }
@@ -439,7 +472,11 @@ function Mariadb(meta) {
     }
   };
 
-  this.createTable = (table_name, structure, callback)=> {
+  this.appendRowsandGroupAutoIncrease = (table_name, unused, rows_dict_list, callback)=> {
+    this.appendRows(table_name, rows_dict_list, callback);
+  };
+
+  this.createTable = (table_name, autoincrease, structure, callback)=> {
     if(weird_chars.exec(table_name)) {
       callback(new Error('Special characters of table name are not allowed.'));
     }
@@ -468,7 +505,10 @@ function Mariadb(meta) {
       if(keys.length) {
         sql = sql + ', PRIMARY KEY ('+keys.join(', ')+')';
       }
-      sql = sql + ')  ENGINE=MyISAM';
+      sql = sql + ')';
+      if(autoincrease) {
+        sql+='  ENGINE=MyISAM;';
+      }
       if(fields_str_list != null) {
         _db.query(sql, callback);
       }
