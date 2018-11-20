@@ -223,7 +223,6 @@ function Sqlite3(meta) {
         }
         sql = sql+'('+fields_str+', '+index_field+') VALUES ('+q.join(', ')+', (SELECT COALESCE(MAX( '+index_field+' ), 0) FROM '+table_name+' WHERE '+group_field+'=?)+1)';
         values.push(row[group_field]);
-        console.log(sql);
         _db.all(sql, values, call_callback);
       };
       op();
