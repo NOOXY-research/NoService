@@ -42,7 +42,6 @@
 
   "services": [
     "NoActivity",
-    "NoTester",
     "NoServiceManager",
     "NoUser",
     "NoTalk"
