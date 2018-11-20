@@ -121,11 +121,11 @@ function Service(Me, api) {
     api.Database.Model.define('ObjectTest', {
       model_type: "Object",
       do_timestamp: true,
-      model_key: "key",
+      model_key: "objkey",
       structure: {
-        key: 'INTEGER',
+        objkey: 'INTEGER',
         property1: 'TEXT',
-        property2: 'INTERGER'
+        property2: 'INTEGER'
       }
     }, (err, model)=>{
       if(err) {
@@ -134,7 +134,7 @@ function Service(Me, api) {
       else {
         log('Object Model Create.');
         model.create({
-          key: 0,
+          objkey: 0,
           property1: 'HAHA',
           property2: 0
         }, (err)=> {
@@ -151,7 +151,7 @@ function Service(Me, api) {
                 log(instance);
                 log('Object Model Get.');
                 model.replace({
-                  key: 0,
+                  objkey: 0,
                   property1: 'HAHARPLACE',
                   property2: 0
                 }, (err)=> {
@@ -187,7 +187,7 @@ function Service(Me, api) {
       do_timestamp: true,
       structure: {
         property1: 'TEXT',
-        property2: 'INTERGER'
+        property2: 'INTEGER'
       }
     }, (err, model)=>{
       if(err) {
@@ -227,19 +227,19 @@ function Service(Me, api) {
                 log('IndexedList Model Replace Test.');
                 model.updateRows([
                   {
-                    Index: 1,
+                    Idx: 1,
                     property1: 'Br'
                   },
                   {
-                    Index: 2,
+                    Idx: 2,
                     property1: 'Cr'
                   }
                 ], (err)=> {
                   if(err) {
-                    log(err)
+                    log(err);
                   }
                   else {
-                    model.get(0, (err, instance)=> {
+                    model.get(1, (err, instance)=> {
                       log(instance);
                       api.Database.Model.remove('IndexedListTest', (err)=>{
                         if(err) {

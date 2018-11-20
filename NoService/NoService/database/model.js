@@ -34,7 +34,7 @@ function Model() {
   // For something like messages or logs need ordered index.
   function IndexedListModel(table_name, structure, do_timestamp) {
     this.modeltype = 'IndexedList';
-    let model_key = 'Index';
+    let model_key = MODEL_INDEXKEY;
 
     this.search = (keyword, callback)=> {
       let sql = '';
@@ -43,12 +43,53 @@ function Model() {
       _db.getRows(MODEL_TABLE_PREFIX+table_name, [sql, null], callback);
     };
 
-    this.replaceRows = (rows, callback)=> {
+    // get an instense
+    this.get = (key_value, callback)=> {
+      _db.getRows(MODEL_TABLE_PREFIX+table_name, model_key+'= ?', [key_value], (err, results)=> {
+        if(results) {
+          callback(err, results[0]);
+        }
+        else {
+          callback(err);
+        }
+      });
+    };
 
+    this.replaceRows = (rows, callback)=> {
+      if(do_timestamp) {
+        let datenow = Utils.DatetoSQL(new Date());
+        for(let i in rows) {
+          (rows[i])['modifydate'] = datenow;
+        }
+      }
+      _db.replaceRows(MODEL_TABLE_PREFIX+table_name, rows, callback);
     };
 
     this.updateRows = (rows, callback)=> {
-
+      let datenow;
+      let left = rows.length;
+      let call_callback = (err)=> {
+          left--;
+          if((left == 0 || err)&&(left >= 0)) {
+            callback(err);
+            left = -1;
+          }
+      };
+      if(do_timestamp) {
+        datenow = Utils.DatetoSQL(new Date());
+      }
+      for(let i in rows) {
+        let properties_dict = rows[i];
+        if(properties_dict[model_key]) {
+          if(do_timestamp) {
+            properties_dict['modifydate'] = datenow;
+          }
+          _db.updateRows(MODEL_TABLE_PREFIX+table_name, model_key+'=?', [properties_dict[model_key]], properties_dict, call_callback);
+        }
+        else {
+          call_callback(new Error('Key "'+model_key+'" is required.'));
+        }
+      };
     };
 
     this.deleteRows = (begin, end, callback)=> {
@@ -56,22 +97,18 @@ function Model() {
     };
 
     this.appendRows = (rows, callback)=> {
-      let list = [];
-      let data = Utils.DatetoSQL(new Date());
-
-      for(let i in rows) {
-        if(do_timestamp) {
-
-        }
-        if(Array.isArray(rows[0])) {
-
-        }
-        else {
-
+      // _db.getRows(MODEL_TABLE_PREFIX+table_name, 'MAX('+model_key+')', [], (err, results)=> {
+      //
+      // });
+      if(do_timestamp) {
+        let datenow = Utils.DatetoSQL(new Date());
+        for(let i in rows) {
+          rows[i].createdate = datenow;
+          rows[i].modifydate = datenow;
         }
       }
 
-      _db.appendRows(MODEL_TABLE_PREFIX+table_name, [properties_dict], null, callback);
+      _db.appendRows(MODEL_TABLE_PREFIX+table_name, rows, callback);
     };
 
     this.getLatestNRows = (n, callback)=> {
@@ -144,7 +181,7 @@ function Model() {
         properties_dict['createdate'] = Utils.DatetoSQL(new Date());
         properties_dict['modifydate'] = Utils.DatetoSQL(new Date());
       }
-      _db.appendRows(MODEL_TABLE_PREFIX+table_name, [properties_dict], null, callback);
+      _db.appendRows(MODEL_TABLE_PREFIX+table_name, [properties_dict], callback);
     };
 
     this.replace = (properties_dict, callback)=> {
@@ -207,7 +244,7 @@ function Model() {
         properties_dict['createdate'] = Utils.DatetoSQL(new Date());
         properties_dict['modifydate'] = Utils.DatetoSQL(new Date());
       }
-      _db.appendRows(MODEL_TABLE_PREFIX+table_name, [properties_dict], null, callback);
+      _db.appendRows(MODEL_TABLE_PREFIX+table_name, [properties_dict], callback);
     };
 
     this.search = (phrase, callback)=> {
@@ -355,7 +392,7 @@ function Model() {
     let structure = model_structure.structure;
     _db.existTable(MODEL_TABLE_PREFIX+model_name, (err, exist)=> {
       if(exist) {
-        callback(new Error('Model exist.'));
+        callback(new Error('Model "'+model_name+'" exist.'));
       }
       else {
         if(model_type == 'Object') {
@@ -395,7 +432,44 @@ function Model() {
           });
         }
         else if (model_type == 'IndexedList') {
+          let field_structure = {};
+          let a = {};
+          a[MODEL_INDEXKEY] = 'INTEGER';
 
+          structure = Object.assign({}, a, structure);
+          if(do_timestamp) {
+            structure['createdate'] = 'DATETIME';
+            structure['modifydate'] = 'DATETIME';
+          }
+
+          for(let field in structure) {
+            field_structure[field] = {
+              type: structure[field]
+            };
+          }
+
+          field_structure[MODEL_INDEXKEY].iskey = true;
+          field_structure[MODEL_INDEXKEY].notnull = true;
+          field_structure[MODEL_INDEXKEY].autoincrease = true;
+
+          _db.createTable(MODEL_TABLE_PREFIX+model_name, field_structure, (err)=> {
+            if(err) {
+              callback(err);
+            }
+            else {
+              _db.replaceRows(MODEL_TABLE_NAME, [{
+                name: model_name,
+                structure: JSON.stringify(model_structure)
+              }], (err)=> {
+                if(err) {
+                  callback(err);
+                }
+                else {
+                  callback(err, new IndexedListModel(model_name, structure, do_timestamp));
+                }
+              });
+            }
+          });
         }
         else if (model_type == 'Pair') {
           let field_structure = {};

@@ -1,6 +1,6 @@
 {
   "name": "NoUser",
-  "version": "0.0.0",
+  "version": "0.0.1",
   "displayname": "NOOXY User",
   "description": "A advanced User System for NOOXY Service Framework.",
   "Authors": [
@@ -18,7 +18,7 @@
     "node_packages": {},
     "services": {}
   },
-  
+
   "JSONfunciton_prototypes": {
     "createUser": {
       "displayname": "Create a User.",
