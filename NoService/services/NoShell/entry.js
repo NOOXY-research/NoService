@@ -137,6 +137,7 @@ function Service(Me, api) {
                   '  user create {username} {displayname} {password} {comfirm} {detail} {firstname} {lastname} ---Create a NOOXY user.\n'+
                   '  user chpasswd {username} {password}  ---Change a user\'s password.\n'+
                   '  user meta {username}  ---Get a user\'s detail.\n'+
+                  '\n'+
                   '[database]\n'+
                   '  db query "{your query}"\n'+
                   '  db model list ---List all model on this daemon.\n'+

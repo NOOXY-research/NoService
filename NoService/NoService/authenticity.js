@@ -63,7 +63,12 @@ function Authenticity() {
   this.getUserMeta = (username, callback) => {
     try {
       _user_model.getbyFirst(username.toLowerCase(), (err, [user_meta]) => {
-        callback(false, user_meta);
+        if(user_meta) {
+          callback(false, user_meta);
+        }
+        else {
+          callback(new Error('User not exist.'));
+        }
       });
     }
     catch(e) {
@@ -74,7 +79,12 @@ function Authenticity() {
   this.getUserID = (username, callback) => {
     try {
       _user_model.getbyFirst(username.toLowerCase(), (err, [user_meta]) => {
-        callback(err, user_meta.userid);
+        if(user_meta) {
+          callback(err, user_meta.userid);
+        }
+        else {
+          callback(new Error('User not exist.'));
+        }
       });
     }
     catch(e) {
@@ -86,13 +96,17 @@ function Authenticity() {
   this.getUsernamebyId = (userid, callback) => {
     try {
       _user_model.getbySecond(userid, (err, [user_meta]) => {
-        callback(false,  user_meta.username);
+        if(user_meta) {
+          callback(false,  user_meta.username);
+        }
+        else {
+          callback(new Error('User not exist.'));
+        }
       });
     }
     catch(e) {
       callback(e);
     }
-
   };
 
   this.getUserExistence = (username, callback) => {
@@ -227,12 +241,17 @@ function Authenticity() {
   this.PasswordisValid = (username, password, callback) => {
     let isValid = false;
     _user_model.getbyFirst(username.toLowerCase(), (err, [user_meta])=> {
-      let pwdhash = user_meta.pwdhash;
-      let pwdhashalpha = crypto.createHmac('sha256', SHA256KEY).update(password).digest('hex');
-      if(pwdhash == pwdhashalpha) {
-        isValid = true;
+      if(user_meta) {
+        let pwdhash = user_meta.pwdhash;
+        let pwdhashalpha = crypto.createHmac('sha256', SHA256KEY).update(password).digest('hex');
+        if(pwdhash == pwdhashalpha) {
+          isValid = true;
+        }
+        callback(false, isValid);
       }
-      callback(false, isValid);
+      else {
+        callback(new Error('User not exist.'));
+      }
     });
   };
 
@@ -241,13 +260,18 @@ function Authenticity() {
       let err = false;
       let isValid = false;
       _user_model.getbyFirst(username.toLowerCase(), (err, [user_meta])=> {
-        let now = new Date();
-        let expiredate = Utils.SQLtoDate(user_meta.tokenexpire);
-        if(now > expiredate|| token != user_meta.token) {
-          callback(err, false);
+        if(user_meta) {
+          let now = new Date();
+          let expiredate = Utils.SQLtoDate(user_meta.tokenexpire);
+          if(now > expiredate|| token != user_meta.token) {
+            callback(err, false);
+          }
+          else {
+            callback(err, true);
+          }
         }
         else {
-          callback(err, true);
+          callback(new Error('User not exist.'));
         }
       });
     }
@@ -278,15 +302,20 @@ function Authenticity() {
     this.PasswordisValid(username, password, (err, valid) => {
       if(valid) {
         _user_model.getbyFirst(username.toLowerCase(), (err, [user_meta])=>{
-          let now = new Date();
-          let expiredate = Utils.SQLtoDate(user_meta.tokenexpire);
-          if(now > expiredate) {
-            this.updateToken(username, (err, token) => {
-              callback(err, token);
-            });
+          if(user_meta) {
+            let now = new Date();
+            let expiredate = Utils.SQLtoDate(user_meta.tokenexpire);
+            if(now > expiredate) {
+              this.updateToken(username, (err, token) => {
+                callback(err, token);
+              });
+            }
+            else {
+              callback(false, user_meta.token);
+            }
           }
           else {
-            callback(false, user_meta.token);
+            callback(new Error('User not exist.'));
           }
         });
       }

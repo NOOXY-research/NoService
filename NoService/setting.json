@@ -9,17 +9,17 @@
     {
       "type": "WebSocketSecure",
       "ip": "0.0.0.0",
-      "port": 1877
+      "port": 43581
     },
     {
       "type": "WebSocket",
       "ip": "0.0.0.0",
-      "port": 1487
+      "port": 43582
     },
     {
       "type": "TCP/IP",
       "ip": "0.0.0.0",
-      "port": 2212
+      "port": 43583
     }
   ],
 
