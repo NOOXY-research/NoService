@@ -458,29 +458,29 @@ api.Authorization.Authby.Token(entityID, (err, pass)=>{
   }
   ```
   #### Model(Pair)
-  model.create(properties_dict, callback)
-  model.getbyPair(pair, callback)
-  model.getbyBoth(both, callback)
-  model.getbyFirst(first, callback)
-  model.getbySecond(second, callback)
-  model.replace(properties_dict, callback)
-  model.update(properties_dict, callback)
-  model.removebyPair(pair, callback)
-  model.removebyBoth(both, callback)
-  model.removebyFirst(first, callback)
-  model.removebySecond(second, callback)
-  model.addProperties(properties_dict, callback)
-  model.existProperty(property_name, callback)
+  model.create(properties_dict, callback)\
+  model.getbyPair(pair, callback)\
+  model.getbyBoth(both, callback)\
+  model.getbyFirst(first, callback)\
+  model.getbySecond(second, callback)\
+  model.replace(properties_dict, callback)\
+  model.update(properties_dict, callback)\
+  model.removebyPair(pair, callback)\
+  model.removebyBoth(both, callback)\
+  model.removebyFirst(first, callback)\
+  model.removebySecond(second, callback)\
+  model.addProperties(properties_dict, callback)\
+  model.existProperty(property_name, callback)\
   model.removeProperty(properties_list, callback)
 
   #### Model(Object)
-  model.get(key_value, callback)
-  model.create(properties_dict, callback)
-  model.replace(properties_dict, callback)
-  model.remove(key, callback)
-  model.update(properties_dict, callback)
-  model.addProperties(properties_dict, callback)
-  model.existProperty(property_name, callback)
+  model.get(key_value, callback)\
+  model.create(properties_dict, callback)\
+  model.replace(properties_dict, callback)\
+  model.remove(key, callback)\
+  model.update(properties_dict, callback)\
+  model.addProperties(properties_dict, callback)\
+  model.existProperty(property_name, callback)\
   model.removeProperties(properties_list, callback)
   
 
