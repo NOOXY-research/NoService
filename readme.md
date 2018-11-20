@@ -335,6 +335,48 @@ api.Authorization.Authby.Token(entityID, (err, pass)=>{
   }
 }
 ```
+### Model API
+In case that the service that user acesses might be sensitive. You can call many kinds of api to protect your data.
+
+For example:
+``` javascript
+//
+api.Database.Model.define('IndexedListTest', {
+      model_type: "IndexedList",
+      do_timestamp: true,
+      structure: {
+        property1: 'TEXT',
+        property2: 'INTEGER'
+      }
+    }, (err, model)=>{
+
+    if(err) {
+        log(err)
+      }
+      else {
+        log('IndexedList Model Append.');
+        model.appendRows([
+          {
+            property1: 'A',
+            property2: 0
+          },
+          {
+            property1: 'B',
+            property2: 1
+          },
+          {
+            property1: 'C',
+            property2: 2
+          },
+          {
+            property1: 'D',
+            property2: 3
+          }
+        ], (err)=> {
+            // whatever
+        });
+});
+```
 
 ## APIs
 
