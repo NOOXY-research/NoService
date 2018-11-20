@@ -11,23 +11,154 @@ const Constants = require('../constants');
 const MODEL_TABLE_NAME = Constants.MODEL_TABLE_NAME;
 const MODEL_TABLE_PREFIX = Constants.MODEL_TABLE_PREFIX;
 const MODEL_INDEXKEY = Constants.MODEL_INDEXKEY;
+const MODEL_GROUPKEY = Constants.MODEL_GROUPKEY;
 
 function Model() {
   let _db;
 
   // For something like different and huge amount of groups of messages or logs need ordered index.
-  function GroupIndexedListModel(table_name, model_key, structure, do_timestamp) {
+  function GroupIndexedListModel(table_name, structure, do_timestamp) {
     this.modeltype = 'GroupIndexedList';
+    let model_key = MODEL_INDEXKEY;
+    let model_group_key = MODEL_GROUPKEY;
 
-    this.appendRows = (group_name, rows, callback)=> {
-
+    this.search = (group_name, keyword, callback)=> {
+      let sql = '';
+      sql = Objects.keys(structure).join(' LIKE '+keyword+' OR ');
+      sql = sql + ' LIKE ' + keyword;
+      _db.getRows(MODEL_TABLE_PREFIX+table_name, [sql, null], callback);
     };
 
-    this.replaceRows = (group_name, rows, begin, end, callback)=> {
+    this.existGroup = (group_name, callback)=> {
+      _db.getRows(MODEL_TABLE_PREFIX+table_name, model_group_key+'=?', [group_name], (err, results)=> {
+        if(results) {
+          callback(err, results[0]?true: false);
+        }
+        else {
+          callback(err, false);
+        }
+      });
+    };
 
+    // get an instense
+    this.get = (group_name, key_value, callback)=> {
+      _db.getRows(MODEL_TABLE_PREFIX+table_name, model_group_key+'=? AND'+model_key+'= ?', [group_name, key_value], (err, results)=> {
+        if(results) {
+          callback(err, results[0]);
+        }
+        else {
+          callback(err);
+        }
+      });
+    };
+
+    this.replaceRows = (group_name, rows, callback)=> {
+      if(do_timestamp) {
+        let datenow = Utils.DatetoSQL(new Date());
+        for(let i in rows) {
+          (rows[i])['modifydate'] = datenow;
+          (rows[i])[model_group_key] = group_name;
+        }
+      }
+      else {
+        for(let i in rows) {
+          (rows[i])[model_group_key] = group_name;
+        }
+      }
+      _db.replaceRows(MODEL_TABLE_PREFIX+table_name, rows, callback);
+    };
+
+    this.updateRows = (group_name, rows, callback)=> {
+      let datenow;
+      let left = rows.length;
+      let call_callback = (err)=> {
+          left--;
+          if((left == 0 || err)&&(left >= 0)) {
+            callback(err);
+            left = -1;
+          }
+      };
+      if(do_timestamp) {
+        datenow = Utils.DatetoSQL(new Date());
+      }
+      for(let i in rows) {
+        let properties_dict = rows[i];
+        if(properties_dict[model_key]) {
+          if(do_timestamp) {
+            properties_dict['modifydate'] = datenow;
+            properties_dict[model_group_key] = group_name;
+          }
+          _db.updateRows(MODEL_TABLE_PREFIX+table_name, model_group_key+'=? AND '+model_key+'=?', [group_name, properties_dict[model_key]], properties_dict, call_callback);
+        }
+        else {
+          call_callback(new Error('Key "'+model_key+'" is required.'));
+        }
+      };
     };
 
     this.deleteRows = (group_name, begin, end, callback)=> {
+      _db.deleteRows(MODEL_TABLE_PREFIX+table_name, model_group_key+'=? AND '+model_key+' >= ? AND '+model_key+' <= ?', [group_name, begin, end], callback);
+    };
+
+    this.appendRows = (group_name, rows, callback)=> {
+      // _db.getRows(MODEL_TABLE_PREFIX+table_name, 'MAX('+model_key+')', [], (err, results)=> {
+      //
+      // });
+      if(do_timestamp) {
+        let datenow = Utils.DatetoSQL(new Date());
+        for(let i in rows) {
+          rows[i].createdate = datenow;
+          rows[i].modifydate = datenow;
+          (rows[i])[model_group_key] = group_name;
+        }
+      }
+      else {
+        for(let i in rows) {
+          (rows[i])[model_group_key] = group_name;
+        }
+      }
+      _db.appendRows(MODEL_TABLE_PREFIX+table_name, rows, callback);
+    };
+
+    this.getLatestNRows = (group_name, n, callback)=> {
+      _db.getRows(MODEL_TABLE_PREFIX+table_name, model_group_key+'=? AND '+MODEL_INDEXKEY+' > ((SELECT max('+MODEL_INDEXKEY+') FROM '+MODEL_TABLE_PREFIX+table_name+') - ?)', [group_name, n], callback);
+    };
+
+    this.getRowsFromTo = (group_name, begin, end, callback)=> {
+      _db.getRows(MODEL_TABLE_PREFIX+table_name, model_group_key+'=? AND '+MODEL_INDEXKEY+' >= ? AND '+ MODEL_INDEXKEY+' <= ?', [group_name, begin, end], callback);
+    };
+
+    this.getAllRows = (group_name, callback)=> {
+      _db.getRows(MODEL_TABLE_PREFIX+table_name, model_group_key+'=?', [group_name], callback);
+    };
+
+    this.getLatestIndex = (group_name, callback)=> {
+      _db.getRows(MODEL_TABLE_PREFIX+table_name, model_group_key+'=? AND '+MODEL_INDEXKEY+' = (SELECT max('+MODEL_INDEXKEY+') FROM '+MODEL_TABLE_PREFIX+table_name+')', [group_name], (err, results)=> {
+        if(err) {
+          callback(err);
+        }
+        else if(results.length) {
+          callback(err, (results[0])[MODEL_INDEXKEY]);
+        }
+        else {
+          callback(err);
+        }
+      });
+    };
+
+    this.addFields = (fields_dict, callback)=> {
+      for(let field in fields_dict) {
+        fields_dict[field] = {type: fields_dict[field]};
+      }
+      _db.addFields(MODEL_TABLE_PREFIX+table_name, fields_dict, callback);
+    };
+
+    this.existField = (field_name, callback)=> {
+      _db.existField(MODEL_TABLE_PREFIX+table_name, field_name, callback);
+    };
+
+    this.removeFields = (fields_dict, callback)=> {
+      _db.removeFields(MODEL_TABLE_PREFIX+table_name, fields_dict, callback);
     };
   };
 
@@ -93,7 +224,7 @@ function Model() {
     };
 
     this.deleteRows = (begin, end, callback)=> {
-
+      _db.deleteRows(MODEL_TABLE_PREFIX+table_name, model_key+' >= ? AND '+model_key+' <= ?', [begin, end], callback);
     };
 
     this.appendRows = (rows, callback)=> {
@@ -107,12 +238,11 @@ function Model() {
           rows[i].modifydate = datenow;
         }
       }
-
       _db.appendRows(MODEL_TABLE_PREFIX+table_name, rows, callback);
     };
 
     this.getLatestNRows = (n, callback)=> {
-      _db.getRows(MODEL_TABLE_PREFIX+table_name, MODEL_INDEXKEY+' >= ((SELECT max('+MODEL_INDEXKEY+') FROM '+MODEL_TABLE_PREFIX+table_name+') - ?)', [n], callback);
+      _db.getRows(MODEL_TABLE_PREFIX+table_name, MODEL_INDEXKEY+' > ((SELECT max('+MODEL_INDEXKEY+') FROM '+MODEL_TABLE_PREFIX+table_name+') - ?)', [n], callback);
     };
 
     this.getRowsFromTo = (begin, end, callback)=> {
@@ -471,6 +601,50 @@ function Model() {
             }
           });
         }
+        else if (model_type == 'GroupIndexedList') {
+          let field_structure = {};
+          let a = {};
+          a[MODEL_GROUPKEY] = 'VARCHAR(128)';
+          a[MODEL_INDEXKEY] = 'INTEGER';
+
+          structure = Object.assign({}, a, structure);
+          if(do_timestamp) {
+            structure['createdate'] = 'DATETIME';
+            structure['modifydate'] = 'DATETIME';
+          }
+
+          for(let field in structure) {
+            field_structure[field] = {
+              type: structure[field]
+            };
+          }
+
+          field_structure[MODEL_GROUPKEY].iskey = true;
+          field_structure[MODEL_GROUPKEY].notnull = true;
+
+          field_structure[MODEL_INDEXKEY].iskey = true;
+          field_structure[MODEL_INDEXKEY].notnull = true;
+          field_structure[MODEL_INDEXKEY].autoincrease = true;
+
+          _db.createTable(MODEL_TABLE_PREFIX+model_name, field_structure, (err)=> {
+            if(err) {
+              callback(err);
+            }
+            else {
+              _db.replaceRows(MODEL_TABLE_NAME, [{
+                name: model_name,
+                structure: JSON.stringify(model_structure)
+              }], (err)=> {
+                if(err) {
+                  callback(err);
+                }
+                else {
+                  callback(err, new GroupIndexedListModel(model_name, structure, do_timestamp));
+                }
+              });
+            }
+          });
+        }
         else if (model_type == 'Pair') {
           let field_structure = {};
 
@@ -528,7 +702,10 @@ function Model() {
           callback(err, new ObjModel(model_name, model_key, structure, do_timestamp));
         }
         else if (model_type == 'IndexedList') {
-          callback(err, new IndexedListModel(model_name, model_key, structure, do_timestamp));
+          callback(err, new IndexedListModel(model_name, structure, do_timestamp));
+        }
+        else if (model_type == 'GroupIndexedList') {
+          callback(err, new GroupIndexedListModel(model_name, structure, do_timestamp));
         }
         else if (model_type == 'Pair') {
           callback(err, new PairModel(model_name, model_key, structure, do_timestamp));

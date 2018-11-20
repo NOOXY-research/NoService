@@ -13,7 +13,8 @@ let Constant = {
   'AUTHE_USER_MODEL_NAME': 'NSUser',
   'MODEL_TABLE_NAME': 'NoService_Models',
   'MODEL_TABLE_PREFIX': 'NoService_Model_',
-  'MODEL_INDEXKEY': 'Idx'
+  'MODEL_INDEXKEY': 'Idx',
+  'MODEL_GROUPKEY': 'Grp'
 }
 
 module.exports = Constant;

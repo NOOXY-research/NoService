@@ -83,12 +83,12 @@
 
   "ssl_cert": null,
 
-  "kill_daemon_timeout": 3000,
+  "kill_daemon_timeout": 1500,
 
   "heartbeat_cycle": 60000,
 
   "database": {
-    "dialect": "sqlite3",
+    "dialect": "mariadb",
 
     "username": "root",
 

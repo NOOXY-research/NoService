@@ -15,7 +15,7 @@
 // getAllRows
 // replaceRows
 // updateRows
-// appendRows
+// appendRows // needed to be ordered
 // dropTable
 // createTable
 // existTable
@@ -167,16 +167,19 @@ function Sqlite3(meta) {
     }
     else {
       let left = rows_dict_list.length;
+      let op;
       let call_callback = (err)=> {
         left--;
         if((left == 0 || err)&&(left >= 0)) {
           callback(err);
           left = -1;
         }
+        else if (left >= 0) {
+          op();
+        }
       };
-
-      for(let index in rows_dict_list) {
-        let row = rows_dict_list[index];
+      op = ()=> {
+        let row = rows_dict_list[rows_dict_list.length - left];
         let sql = 'INSERT INTO '+table_name;
         let fields_str = Object.keys(row).join(', ');
         let q = [];
@@ -187,9 +190,9 @@ function Sqlite3(meta) {
           q.push('?');
         }
         sql = sql+'('+fields_str+') VALUES ('+q.join(', ')+')';
-        console.log(sql, values);
         _db.all(sql, values, call_callback);
-      }
+      };
+      op();
     }
 
   };
@@ -407,16 +410,19 @@ function Mariadb(meta) {
     }
     else {
         let left = rows_dict_list.length;
+        let op;
         let call_callback = (err)=> {
           left--;
           if((left == 0 || err)&&(left >= 0)) {
             callback(err);
             left = -1;
           }
+          else if (left >= 0) {
+            op();
+          }
         };
-
-        for(let index in rows_dict_list) {
-          let row = rows_dict_list[index];
+        op = ()=> {
+          let row = rows_dict_list[rows_dict_list.length - left];
           let sql = 'INSERT INTO '+table_name;
           let fields_str = Object.keys(row).join(', ');
           let q = [];
@@ -428,9 +434,9 @@ function Mariadb(meta) {
           }
           sql = sql+'('+fields_str+') VALUES ('+q.join(', ')+')';
           _db.query(sql, values, call_callback);
-        }
+        };
+        op();
     }
-
   };
 
   this.createTable = (table_name, structure, callback)=> {
@@ -462,7 +468,7 @@ function Mariadb(meta) {
       if(keys.length) {
         sql = sql + ', PRIMARY KEY ('+keys.join(', ')+')';
       }
-      sql = sql + ') ';
+      sql = sql + ')  ENGINE=MyISAM';
       if(fields_str_list != null) {
         _db.query(sql, callback);
       }

@@ -224,7 +224,7 @@ function Service(Me, api) {
               }
               else {
                 log(instance);
-                log('IndexedList Model Replace Test.');
+                log('IndexedList Model Update Test.');
                 model.updateRows([
                   {
                     Idx: 1,
@@ -239,7 +239,7 @@ function Service(Me, api) {
                     log(err);
                   }
                   else {
-                    model.get(1, (err, instance)=> {
+                    model.getRowsFromTo(1, 2, (err, instance)=> {
                       log(instance);
                       api.Database.Model.remove('IndexedListTest', (err)=>{
                         if(err) {
@@ -247,6 +247,85 @@ function Service(Me, api) {
                         }
                         else {
                           log('IndexedList Model PASS.');
+                        }
+                      });
+                    });
+                  }
+                });
+              }
+            });
+          }
+        });
+      }
+    });
+
+    // Test GroupIndexedList Model
+    log('GroupIndexedList Model Test.');
+    api.Database.Model.define('GroupIndexedList', {
+      model_type: "GroupIndexedList",
+      do_timestamp: true,
+      structure: {
+        property1: 'TEXT',
+        property2: 'INTEGER'
+      }
+    }, (err, model)=>{
+      if(err) {
+        log(err)
+      }
+      else {
+        log('GroupIndexedList Model Append Test.');
+        model.appendRows('Group1' ,[
+          {
+            property1: 'A',
+            property2: 0
+          },
+          {
+            property1: 'B',
+            property2: 1
+          },
+          {
+            property1: 'C',
+            property2: 2
+          },
+          {
+            property1: 'D',
+            property2: 3
+          }
+        ], (err)=> {
+          if(err) {
+            log(err)
+          }
+          else {
+            log('GroupIndexedList Model Get Test.');
+            model.getAllRows('Group1' ,(err, instance)=> {
+              if(err) {
+                log(err)
+              }
+              else {
+                log(instance);
+                log('GroupIndexedList Model Update Test.');
+                model.updateRows('Group1', [
+                  {
+                    Idx: 1,
+                    property1: 'Br'
+                  },
+                  {
+                    Idx: 2,
+                    property1: 'Cr'
+                  }
+                ], (err)=> {
+                  if(err) {
+                    log(err);
+                  }
+                  else {
+                    model.getRowsFromTo('Group1' ,1, 2, (err, instance)=> {
+                      log(instance);
+                      api.Database.Model.remove('GroupIndexedList', (err)=>{
+                        if(err) {
+                          log(err);
+                        }
+                        else {
+                          log('GroupIndexedList Model PASS.');
                         }
                       });
                     });
