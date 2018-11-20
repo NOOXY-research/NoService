@@ -1,6 +1,6 @@
 {
   "name": "NoShell",
-  "version": "0.0.0",
+  "version": "0.0.1",
   "displayname": "NoShell",
   "description": "NOOXY Shell. Default NoService Shell Client implementation.",
   "Authors": ["NOOXY", "noowyee"],

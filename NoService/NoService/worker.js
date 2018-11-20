@@ -136,6 +136,8 @@ function WorkerClient() {
                 }
 
                 _api.Database.Model = {};
+                _api.Database.RAWModel = {};
+
                 _api.Database.Model.remove = (model_name, callback)=>{
                   _model.remove(_service_name+'_'+model_name, _api.SafeCallback(callback));
                 };
@@ -148,6 +150,24 @@ function WorkerClient() {
                 _api.Database.Model.define= (model_name, model_structure, callback)=>{
                   _model.define(_service_name+'_'+model_name, model_structure, _api.SafeCallback(callback));
                 };
+
+                _api.Database.RAWModel.remove = (model_name, callback)=>{
+                  _model.remove(model_name, _api.SafeCallback(callback));
+                };
+                _api.Database.RAWModel.exist = (model_name, callback)=>{
+                  _model.exist(model_name, _api.SafeCallback(callback));
+                };
+                _api.Database.RAWModel.get= (model_name, callback)=>{
+                  _model.get(model_name, _api.SafeCallback(callback));
+                };
+                _api.Database.RAWModel.define= (model_name, model_structure, callback)=>{
+                  _model.define(model_name, model_structure, _api.SafeCallback(callback));
+                };
+
+                _api.Database.RAWModel.close= ()=>{
+                  _model.close();
+                };
+
                 _api.Database.Model.close= ()=>{
                   _model.close();
                 };
