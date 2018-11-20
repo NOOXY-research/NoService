@@ -39,7 +39,7 @@ NoService provide bundled services such as NoShell which give you access of NoSe
 ### Intergrated ORM
 
 ## Target version
-* daemon: alpha 0.3.1
+* daemon: alpha 0.3.5
 * protocol: NSP alpha
 
 ## Dependences
@@ -397,13 +397,18 @@ api.Authorization.Authby.Token(entityID, (err, pass)=>{
   api.Crypto.decryptString(algo, key, toDecrypt, callback)
 
   ### Database
-  api.Database.Databse
+  api.Database.Databse.query(sql, values, callback);
 
   ### Database Model
   api.Database.Model.define(model_name, model_structure, callback)\
   api.Database.Model.get(model_name, callback)\
   api.Database.Model.exist(model_name, callback)\
-  api.Database.Model.remove(model_name, callback)
+  api.Database.Model.remove(model_name, callback)\
+  api.Database.RAWModel.define(model_name, model_structure, callback)\
+  api.Database.RAWModel.get(model_name, callback)\
+  api.Database.RAWModel.exist(model_name, callback)\
+  api.Database.RAWModel.remove(model_name, callback)\
+  api.Database.RAWModel.getModelsDict(model_name, callback)
   ```
   model_structure
   ObjectModel example:
@@ -429,13 +434,87 @@ api.Authorization.Authby.Token(entityID, (err, pass)=>{
        content: 'text'
      }
   }
+
+  IndexedListModel example:
+  {
+     model_type: "IndexedList",
+     do_timestamp: false,
+     structure: {
+       u1: 'text',
+       u2: 'text',
+       content: 'text'
+     }
+  }
+
+  GroupIndexedList example:
+  {
+     model_type: "GroupIndexedList",
+     do_timestamp: false,
+     structure: {
+       u1: 'text',
+       u2: 'text',
+       content: 'text'
+     }
+  }
   ```
+  #### Model(Pair)
+  model.create(properties_dict, callback)\
+  model.getbyPair(pair, callback)\
+  model.getbyBoth(both, callback)\
+  model.getbyFirst(first, callback)\
+  model.getbySecond(second, callback)\
+  model.replace(properties_dict, callback)\
+  model.update(properties_dict, callback)\
+  model.removebyPair(pair, callback)\
+  model.removebyBoth(both, callback)\
+  model.removebyFirst(first, callback)\
+  model.removebySecond(second, callback)\
+  model.addProperties(properties_dict, callback)\
+  model.existProperty(property_name, callback)\
+  model.removeProperty(properties_list, callback)
 
   #### Model(Object)
+  model.get(key_value, callback)\
+  model.create(properties_dict, callback)\
+  model.replace(properties_dict, callback)\
+  model.remove(key, callback)\
+  model.update(properties_dict, callback)\
+  model.addProperties(properties_dict, callback)\
+  model.existProperty(property_name, callback)\
+  model.removeProperties(properties_list, callback)
 
-  #### Model(Pair)
+
+
 
   #### Model(IndexedList)
+  model.get(index_value, callback)\
+  model.replaceRows(rows, callback)\
+  model.updateRows(rows, callback)\
+  model.deleteRows(begin, end, callback)\
+  model.appendRows(rows, callback)\
+  model.getLatestNRows(n, callback)\
+  model.getRowsFromTo(begin, end, callback)\
+  model.getAllRows(callback)\
+  model.getLatestIndex(callback)\
+  model.addFields(fields_dict, callback)\
+  model.existField(fields_dict, callback)\
+  model.removeFields(fields_dict, callback)
+
+  #### Model(GroupIndexedList)
+  model.existGroup(group_name, callback)\
+  model.get(group_name, index_value, callback)\
+  model.replaceRows(group_name, rows, callback)\
+  model.updateRows(group_name, rows, callback)\
+  model.deleteRows(group_name, begin, end, callback)\
+  model.appendRows(group_name, rows, callback)\
+  model.getLatestNRows(group_name, n, callback)\
+  model.getRowsFromTo(group_name, begin, end, callback)\
+  model.getAllRows(group_name, callback)\
+  model.getLatestIndex(group_name, callback)\
+  model.addFields(fields_dict, callback)\
+  model.existField(fields_dict, callback)\
+  model.removeFields(fields_dict, callback)
+
 
   ### ServiceSocket
   api.Serivce.ServiceSocket.def(name, callback)\

@@ -41,8 +41,8 @@ function Model() {
     };
 
     // get an instense
-    this.get = (group_name, key_value, callback)=> {
-      _db.getRows(MODEL_TABLE_PREFIX+table_name, model_group_key+'=? AND'+model_key+'= ?', [group_name, key_value], (err, results)=> {
+    this.get = (group_name, index_value, callback)=> {
+      _db.getRows(MODEL_TABLE_PREFIX+table_name, model_group_key+'=? AND'+model_key+'= ?', [group_name, index_value], (err, results)=> {
         if(results) {
           callback(err, results[0]);
         }
@@ -719,6 +719,21 @@ function Model() {
 
   this.exist = (model_name, callback)=> {
     _db.existTable(MODEL_TABLE_PREFIX+model_name, callback);
+  };
+
+  this.getModelsDict = (callback)=> {
+    _db.getAllRows(MODEL_TABLE_NAME, (err, results)=> {
+      if(err) {
+        callback(err);
+      }
+      else {
+        let dict = {};
+        for(let i in results) {
+          dict[results[i].name] = JSON.parse(results[i].structure);
+        }
+        callback(err, dict);
+      }
+    });
   };
 
   this.importDatabase = (db, callback)=> {
