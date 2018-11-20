@@ -148,6 +148,9 @@ function WorkerClient() {
                 _api.Database.Model.define= (model_name, model_structure, callback)=>{
                   _model.define(_service_name+'_'+model_name, model_structure, _api.SafeCallback(callback));
                 };
+                _api.Database.Model.close= ()=>{
+                  _model.close();
+                };
 
                 try {
                   _service_module = new (require(message.p))(Me, _api);
