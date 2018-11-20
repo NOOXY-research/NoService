@@ -375,6 +375,7 @@ api.Database.Model.define('IndexedListTest', {
         ], (err)=> {
             // whatever
         });
+    }
 });
 ```
 
@@ -524,6 +525,8 @@ api.Database.Model.define('IndexedListTest', {
   model.addProperties(properties_dict, callback)\
   model.existProperty(property_name, callback)\
   model.removeProperties(properties_list, callback)
+
+
 
 
   #### Model(IndexedList)
