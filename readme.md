@@ -526,8 +526,6 @@ api.Database.Model.define('IndexedListTest', {
   model.removeProperties(properties_list, callback)
 
 
-
-
   #### Model(IndexedList)
   model.get(index_value, callback)\
   model.replaceRows(rows, callback)\
