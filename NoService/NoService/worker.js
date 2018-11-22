@@ -29,6 +29,7 @@ function WorkerClient() {
   let _clear_obj_garbage_timeout = 3000;
   let _close_timeout = 1000;
   let _service_name = 'NOOXY Service';
+  let _closed = false;
 
   let createLocalObjCallbacks = (obj)=> {
     let _Id = Utils.generateUniqueID();
@@ -241,22 +242,25 @@ function WorkerClient() {
       console.log(message.e);
     }
     else if(message.t == 99) {
-      if(_service_module)
-        try{
-          if(_service_module.close) {
-            _service_module.close();
-            process.send({t:3});
+      if(!_closed) {
+        _closed = true;
+        if(_service_module)
+          try{
+            if(_service_module.close) {
+              _service_module.close();
+              process.send({t:3});
+            }
+            else {
+              process.send({t: 96, e: 'The service "'+_service_name+'" have no "close" function.'});
+            }
           }
-          else {
-            process.send({t: 96, e: 'The service "'+_service_name+'" have no "close" function.'});
+          catch(e) {
+            process.send({t: 96, e: e.toString()});
+            // Utils.TagLog('*ERR*', 'Service "'+_service_name+'" occured error while closing.');
+            // console.log(e);
           }
-        }
-        catch(e) {
-          process.send({t: 96, e: e.toString()});
-          // Utils.TagLog('*ERR*', 'Service "'+_service_name+'" occured error while closing.');
-          // console.log(e);
-        }
-      setTimeout(()=> {process.exit()}, _close_timeout);
+        setTimeout(()=> {process.exit()}, _close_timeout);
+      }
     }
   }
 
