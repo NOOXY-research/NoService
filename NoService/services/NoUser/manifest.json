@@ -2,7 +2,7 @@
   "name": "NoUser",
   "version": "0.0.1",
   "displayname": "NOOXY User",
-  "description": "A advanced User System for NOOXY Service Framework.",
+  "description": "A advanced User System for NoService Framework.",
   "Authors": [
     "NOOXY",
     "noowyee"
