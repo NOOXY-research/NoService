@@ -4,6 +4,9 @@
   "displayname": "NoShell",
   "description": "NOOXY Shell. Default NoService Shell Client implementation.",
   "Authors": ["NOOXY", "noowyee"],
+
+  "git_url": "https://github.com/NOOXY-Research/NoShell",
+
   "implementation_api": true,
   "dependencies": {
     "node_packages" : {

@@ -273,6 +273,10 @@ function Service(Me, api) {
         returnJSON(false, jsonr);
       });
 
+      ss.sdef('checkServiceUpgrade', (json, entityID, returnJSON)=> {
+
+      });
+
       ss.sdef('installService', (json, entityID, returnJSON)=> {
         api.Authorization.Authby.Password(entityID, (err, valid)=> {
           let method = json.m; // git
