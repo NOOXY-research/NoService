@@ -227,7 +227,7 @@ function Core(settings) {
 
       // setup implementation
       _implementation.importConnectionModule(_connection);
-      
+
       // connect to database
       verbose('Daemon', 'Connecting to database.')
       _database.connect((err)=> {
@@ -267,6 +267,7 @@ function Core(settings) {
             _service.setDebug(settings.debug);
             _service.importWorkerDaemon(_workerd);
             _service.setDebugService(settings.debug_service);
+            _service.setMasterService(settings.master_service);
             _service.setupServicesPath(settings.services_path);
             _service.setupServicesFilesPath(settings.services_files_path);
             _service.importAuthorization(_authorization);

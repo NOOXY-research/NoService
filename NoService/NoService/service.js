@@ -22,7 +22,8 @@ function Service() {
   let _ASockets = {};
   let _debug = false;
   let _workerd;
-  let _debug_serivce;
+  let _master_service;
+  let _debug_service;
   let _emitRouter = () => {Utils.tagLog('*ERR*', 'emitRouter not implemented');};
 
   let ActivitySocketDestroyTimeout = 1000;
@@ -699,7 +700,6 @@ function Service() {
 
     let _isInitialized = false;
     let _isLaunched = false;
-    let _isClosed = false;
 
     this.isInitialized = (callback)=> {
       callback(false, _isInitialized);
@@ -709,21 +709,35 @@ function Service() {
       callback(false, _isClosed);
     };
 
-    this.isClosed = (callback)=> {
-      callback(false, _isClosed);
-    };
-
     this.relaunch = (callback)=> {
-      _service_socket.closeAll((err)=> {
+      _isInitialized = false;
+      _isLaunched = false;
+      if(_isLaunched) {
+        _service_socket.closeAll((err)=> {
+          _worker.relaunch(callback);
+        });
+      }
+      else {
         _worker.relaunch(callback);
-      });
+      }
     }
 
     this.launch = (callback)=> {
-      _worker.launch(callback);
+      if(_isLaunched) {
+        callback(new Error('Service "'+_service_name+'" already launched.'));
+      }
+      else {
+        _worker.launch((err)=> {
+          if(!err) {
+            _isLaunched = true;
+          }
+          callback(err);
+        });
+      }
+
     };
 
-    this.init = (depended_service_dict, callback) => {
+    this.init = (callback) => {
       let erreport = null;
       // check node packages dependenc
       try{
@@ -753,7 +767,6 @@ function Service() {
         return err;
       }
 
-      depended_service_dict[_service_name] = _service_manifest.dependencies.services;
       _worker = _workerd.returnWorker(_service_path+'/entry');
       // load module from local service directory
 
@@ -807,13 +820,23 @@ function Service() {
         if(_service_manifest.implementation_api == false) {
           _serviceapi_module.createServiceAPI(_service_socket, _service_manifest, (err, api) => {
             _worker.importAPI(api);
-            _worker.init(callback);
+            _worker.init((err)=> {
+              if(!err) {
+                _isInitialized = true;
+              }
+              callback(err);
+            });
           });
         }
         else {
           _serviceapi_module.createServiceAPIwithImplementaion(_service_socket, _service_manifest, (err, api) => {
             _worker.importAPI(api);
-            _worker.init(callback);
+            _worker.init((err)=> {
+              if(!err) {
+                _isInitialized = true;
+              }
+              callback(err);
+            });
           });
         }
       }
@@ -860,74 +883,85 @@ function Service() {
       return _service_manifest;
     };
 
-    this.close = () => {
-      _service_socket.closeAll(()=>{
-        _worker.close();
-      });
+    this.close = (callback) => {
+      if(_isLaunched) {
+        _service_socket.closeAll(()=>{
+          _worker.close(callback);
+        });
+      }
+      else if (_isInitialized) {
+        _worker.close(callback);
+      }
     };
   };
 
   this.setDebugService = (name)=> {
-    _debug_serivce = name;
+    _debug_service = name;
+  };
+
+  this.setMasterService = (name)=> {
+    _master_service = name;
   };
 
   // Service module launch
-  this.launch = () => {
-    let inited_service = [];
-    let depended_service_dict = {};
-    // setup debug service
-    let err = _local_services[_debug_serivce].init(depended_service_dict, (err)=> {});
-    if(err) {
-      Utils.tagLog('*ERR*', 'Error occured while initializing service "'+_debug_serivce+'".');
-      Utils.tagLog('*ERR*', err.toString());
-    }
-    else {
-      inited_service.push(_debug_serivce);
-    }
-
-    let launch_all = ()=> {
-      // check dependencies
-      for (let service_name in depended_service_dict) {
-        for(let depended in depended_service_dict[service_name]) {
-          if(!inited_service.includes(depended)) {
-            Utils.tagLog('*ERR*', 'Service "'+service_name+'" depend on another service "'+depended+'". But it doesn\'t initialized.');
-            process.exit();
-          }
+  this.launch = (callback) => {
+    if(_debug_service) {
+      // setup debug service
+      _local_services[_debug_service].init((err)=> {
+        if(err) {
+          Utils.tagLog('*ERR*', 'Error occured while initializing debug service "'+_debug_service+'".');
+          Utils.tagLog('*ERR*', err.toString());
         }
-      }
-      for (let key in _local_services) {
-        _local_services[key].launch(()=>{});
-      }
-    }
-    // then other
-    setTimeout(()=>{
-      let left = Object.keys(_local_services).length;
-      for (let key in _local_services) {
-        if(key!= _debug_serivce) {
-          _local_services[key].init(depended_service_dict, (err)=> {
+        else {
+          _local_services[_debug_service].launch((err)=> {
             if(err) {
-              Utils.tagLog('*ERR*', 'Error occured while initializing service "'+key+'".');
+              Utils.tagLog('*ERR*', 'Error occured while launching debug service "'+_debug_service+'".');
               Utils.tagLog('*ERR*', err.toString());
-              process.exit();
             }
             else {
-              inited_service.push(key);
-            }
-            left--;
-            if(!left) {
-              launch_all();
+              Utils.tagLog('Service', 'Debug Service "'+_debug_service+'" launched.');
+              _local_services[_master_service].init((err)=> {
+                if(err) {
+                  Utils.tagLog('*ERR*', 'Error occured while initializing master service "'+_debug_service+'".');
+                  Utils.tagLog('*ERR*', err.toString());
+                }
+                else {
+                  _local_services[_master_service].launch((err)=> {
+                    if(err) {
+                      Utils.tagLog('*ERR*', 'Error occured while launching master service "'+_debug_service+'".');
+                      Utils.tagLog('*ERR*', err.toString());
+                    }
+                    else {
+                      Utils.tagLog('Service', 'Master Service "'+_master_service+'" launched.');
+                    }
+                  });
+                }
+              });
             }
           });
         }
-        else {
-          left--;
-          if(!left) {
-            launch_all();
-          }
+      });
+    }
+    // without debug
+    else {
+      _local_services[_master_service].init((err)=> {
+        if(err) {
+          Utils.tagLog('*ERR*', 'Error occured while initializing master service "'+_debug_service+'".');
+          Utils.tagLog('*ERR*', err.toString());
         }
-      }
-    }, 500);
-
+        else {
+          _local_services[_master_service].launch((err)=> {
+            if(err) {
+              Utils.tagLog('*ERR*', 'Error occured while launching master service "'+_debug_service+'".');
+              Utils.tagLog('*ERR*', err.toString());
+            }
+            else {
+              Utils.tagLog('Service', 'Master Service "'+_master_service+'" launched.');
+            }
+          });
+        }
+      });
+    }
   };
 
   // Service module Path
@@ -1036,12 +1070,12 @@ function Service() {
   };
 
 // -------------------------- Service update
-  this.getServicesManifest = (callback)=> {
-    let results = {};
-    for(let service_name in _local_services) {
-      results[service_name] = _local_services[service_name].returnManifest();
-    };
-    callback(false, results);
+  this.launchService = (service_name, callback)=> {
+    _local_services[service_name].launch(callback);
+  };
+
+  this.closeService = (service_name, callback)=> {
+    _local_services[service_name].close(callback);
   };
 
   this.relaunchService = (service_name, callback)=> {
@@ -1050,10 +1084,6 @@ function Service() {
 
   this.initializeService = (service_name, callback)=> {
     _local_services[service_name].init(callback);
-  };
-
-  this.launchService = (service_name, callback)=> {
-    _local_services[service_name].launch(callback);
   };
 
   this.isServiceLaunched = (service_name, callback)=> {
@@ -1089,7 +1119,9 @@ function Service() {
   this.close = () => {
     for(let i in _local_services) {
       try{
-        _local_services[i].close();
+        _local_services[i].close(()=> {
+          // closed
+        });
       }
       catch(e) {
         Utils.tagLog('*ERR*', 'An error occured on closing service "'+i+'"');

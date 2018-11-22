@@ -19,14 +19,19 @@ function Service(Me, api) {
   // Your settings in manifest file.
   let settings = Me.Settings;
 
+  let serviceAPI = api.Service;
+
   let isWin = require('os').platform().indexOf('win') > -1;
   let where = isWin ? 'where' : 'whereis';
 
   let checkupdate = (callback)=> {
-    
+
   };
 
   this.start = ()=> {
+    // initializing and launching services
+
+    // initializing and launching services end
 
     setInterval(()=> {
       if(settings.reach_memory_limit_relaunch) {

@@ -77,6 +77,8 @@ function WorkerDaemon() {
     let _InfoRq = {};
     let _init_callback;
     let _launch_callback;
+    let _close_callback;
+    let _launched = false;
 
     _worker_clients[_service_name] = this;
 
@@ -97,7 +99,8 @@ function WorkerDaemon() {
     }
 
     this.emitChildClose = ()=> {
-      _child.send({t:99});
+      if(_launched)
+        _child.send({t:99});
     }
 
     this.emitRemoteUnbind = (id)=> {
@@ -139,6 +142,7 @@ function WorkerDaemon() {
         _init_callback(false);
       }
       else if(message.t == 2) {
+        _launched = true;
         _launch_callback(false);
       }
       else if(message.t == 3) {
