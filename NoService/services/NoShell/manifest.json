@@ -2,7 +2,7 @@
   "name": "NoShell",
   "version": "0.0.1",
   "displayname": "NoShell",
-  "description": "NOOXY Shell. Default NoService Shell Client implementation.",
+  "description": "NOOXY Shell. Default NoService Shell daemon implementation.",
   "Authors": ["NOOXY", "noowyee"],
 
   "git_url": "https://github.com/NOOXY-Research/NoShell",

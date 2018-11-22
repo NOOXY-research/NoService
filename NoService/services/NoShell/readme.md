@@ -4,7 +4,7 @@
 # Install
 launch you NoService framework and type
 ```
-service git install github NOOXY-Research/NoShell
+service git install NOOXY-Research/NoShell github
 ```
 
 # Upgrade
@@ -14,4 +14,4 @@ service git upgrade NoShell
 ```
 
 # Description
-NOOXY Shell. Default NoService Shell Client implementation.
+NOOXY Shell. Default NoService Shell service implementation.
