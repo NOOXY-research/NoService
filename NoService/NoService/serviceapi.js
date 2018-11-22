@@ -569,7 +569,7 @@ function ServiceAPI() {
       },
 
       relaunch: (service_name)=> {
-        _coregateway.Service.relaunch(service_name);
+        _coregateway.Service.relaunchService(service_name);
       },
 
       // CBO is designed for prevent memleak

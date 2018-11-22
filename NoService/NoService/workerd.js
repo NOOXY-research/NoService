@@ -7,13 +7,16 @@
 // NOOXY Service WorkerClient protocol
 // message.t
 // 0 worker established {t}
-// 1 successfully init
-// 2 api call {t, p, a: arguments, o:{arg_index, [obj_id, callback_tree]}}
-// 3 accessobj {t, p, a: arguments, o:{arg_index, [obj_id, callback_tree]}}
-// 4 returnLCBOcount
-// 5 returnMemoryUsage
+// 1 successfully inited
+// 2 successfully launched
+// 3 api call {t, p, a: arguments, o:{arg_index, [obj_id, callback_tree]}}
+// 4 accessobj {t, p, a: arguments, o:{arg_index, [obj_id, callback_tree]}}
+// 5 returnLCBOcount
+// 6 returnMemoryUsage
 
-// 99 launch error
+// 97 runtime error
+// 98 launch error
+// 99 init error
 // memory leak on ActivitySocket!!!
 
 'use strict';
@@ -132,7 +135,7 @@ function WorkerDaemon() {
       else if(message.t == 1){
         _init_callback(false);
       }
-      else if(message.t == 2) {
+      else if(message.t == 3) {
         try {
           _serviceapi.emitAPIRq(message.p, message.a, message.o);
         }
@@ -149,14 +152,6 @@ function WorkerDaemon() {
         }
       }
       else if(message.t == 4) {
-        _InfoRq[message.i](false, {daemon: _serviceapi.returnLCBOCount(), client: message.c})
-        delete _InfoRq[message.i];
-      }
-      else if(message.t == 5) {
-        _InfoRq[message.i](false, message.c)
-        delete _InfoRq[message.i];
-      }
-      else if(message.t == 3) {
         try {
           _serviceapi.emitCallbackRq(message.p, message.a, message.o);
         }
@@ -171,6 +166,14 @@ function WorkerDaemon() {
             e: e.stack
           });
         }
+      }
+      else if(message.t == 5) {
+        _InfoRq[message.i](false, {daemon: _serviceapi.returnLCBOCount(), client: message.c})
+        delete _InfoRq[message.i];
+      }
+      else if(message.t == 6) {
+        _InfoRq[message.i](false, message.c)
+        delete _InfoRq[message.i];
       }
       else if(message.t == 99){
         _init_callback(new Error('Initializing error'));

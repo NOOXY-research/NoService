@@ -47,6 +47,8 @@
     "NoTalk"
   ],
 
+  "master_service": "NoServiceManager",
+
   "shell_service": "NoShell",
 
   "shell_client_service": "NoShellc",

@@ -23,8 +23,7 @@ function Service() {
   let _debug = false;
   let _workerd;
   let _debug_serivce;
-  let _emitRouter = () => {Utils.tagLog('*ERR*', 'emitRouter not implemented');};;
-
+  let _emitRouter = () => {Utils.tagLog('*ERR*', 'emitRouter not implemented');};
 
   let ActivitySocketDestroyTimeout = 1000;
 
@@ -704,7 +703,7 @@ function Service() {
       });
     }
 
-    this.launch = ()=> {
+    this.launch = (callback)=> {
       _worker.launch();
     };
 
@@ -801,7 +800,6 @@ function Service() {
             _worker.init(callback);
           });
         }
-
       }
       catch(err) {
         erreport = new Error('Launching service "'+_service_name+'" ended with failure.');
@@ -1011,25 +1009,52 @@ function Service() {
 
   this.returnJSONfuncList = (service_name) => {
     return _local_services[service_name].returnJSONfuncList();
-  }
+  };
 
   this.returnJSONfuncDict = (service_name) => {
     return _local_services[service_name].returnJSONfuncDict();
-  }
+  };
 
-  this.relaunch = (service_name)=> {
+  this.returnJSONfuncDict = (service_name) => {
+    return _local_services[service_name].returnJSONfuncDict();
+  };
+
+// -------------------------- Service update
+  this.getServicesManifest = ()=> {
+
+  };
+
+  this.relaunchService = (service_name)=> {
     _local_services[service_name].relaunch();
-  }
+  };
+
+  this.initializeService = (service_name)=> {
+    _local_services[service_name].relaunch();
+  };
+
+  this.launchService = (service_name)=> {
+    _local_services[service_name].relaunch();
+  };
+
+  this.isServiceLaunched = (service_name)=> {
+    _local_services[service_name].relaunch();
+  };
+
+  this.isServiceInitialized = (service_name)=> {
+    _local_services[service_name].relaunch();
+  };
+
+// ----------------------------
 
   // get Callback Obj count
   this.getCBOCount = (callback)=> {
     _workerd.getCBOCount(callback);
-  }
+  };
 
   // get Callback Obj count
   this.getWorkerMemoryUsage = (callback)=> {
     _workerd.getMemoryUsage(callback);
-  }
+  };
 
   this.returnList = () => {
     return Object.keys(_local_services);

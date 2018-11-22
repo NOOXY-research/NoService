@@ -47,7 +47,7 @@ function WorkerClient() {
 
   const callParentAPI = ([id, APIpath], args) => {
     let _data = {
-      t: 2,
+      t: 3,
       p: APIpath,
       a: args,
       o: {}
@@ -65,7 +65,7 @@ function WorkerClient() {
 
   this.emitParentCallback = ([obj_id, path], args) => {
     let _data = {
-      t: 3,
+      t: 4,
       p: [obj_id, path],
       a: args,
       o: {}
@@ -221,12 +221,13 @@ function WorkerClient() {
       // console.log(Object.keys(_local_obj_callbacks_dict).length);
     }
     else if(message.t == 4) {
-      process.send({t:4, i:message.i, c:Object.keys(_local_obj_callbacks_dict).length});
+      process.send({t:5, i:message.i, c:Object.keys(_local_obj_callbacks_dict).length});
     }
     // memory
     else if(message.t == 5) {
-      process.send({t:5, i:message.i, c: process.memoryUsage()});
+      process.send({t:6, i:message.i, c: process.memoryUsage()});
     }
+
     else if(message.t == 98) {
       Utils.tagLog('*ERR*', 'Service "'+_service_name+'" occured error on API call.');
       console.log('Details: ');

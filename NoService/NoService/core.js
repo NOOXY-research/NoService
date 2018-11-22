@@ -227,7 +227,7 @@ function Core(settings) {
 
       // setup implementation
       _implementation.importConnectionModule(_connection);
-
+      
       // connect to database
       verbose('Daemon', 'Connecting to database.')
       _database.connect((err)=> {
