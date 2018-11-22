@@ -221,26 +221,33 @@ function ServiceAPI() {
             let local_callback_obj = new LCBO(as, (syncRefer)=> {
               return ({
                   call: (name, Json, remote_callback_obj_2)=> {
-                    syncRefer(remote_callback_obj_2);
-                    as.call(name, Json, (err, json)=> {
-                      remote_callback_obj_2.run([], [err, json]);
-                      remote_callback_obj_2.unbindRemote();
-                    });
+                    if(remote_callback_obj_2) {
+                      syncRefer(remote_callback_obj_2);
+                      as.call(name, Json, (err, json)=> {
+                        if(remote_callback_obj_2) {}
+                        remote_callback_obj_2.run([], [err, json]);
+                        remote_callback_obj_2.unbindRemote();
+                      });
+                    }
                   },
 
                   getEntityID: (remote_callback_obj_2)=> {
-                    syncRefer(remote_callback_obj_2);
-                    as.getEntityID((err, entityID)=>{
-                      remote_callback_obj_2.run([], [err, entityID]);
-                      remote_callback_obj_2.unbindRemote();
-                    });
+                    if(remote_callback_obj_2) {
+                      syncRefer(remote_callback_obj_2);
+                      as.getEntityID((err, entityID)=>{
+                        remote_callback_obj_2.run([], [err, entityID]);
+                        remote_callback_obj_2.unbindRemote();
+                      });
+                    }
                   },
 
                   on: (type, remote_callback_obj_2)=> {
-                    syncRefer(remote_callback_obj_2);
-                    as.on(type, (err, data)=>{
-                      remote_callback_obj_2.run([], [err, data]);
-                    });
+                    if(remote_callback_obj_2) {
+                      syncRefer(remote_callback_obj_2);
+                      as.on(type, (err, data)=>{
+                        remote_callback_obj_2.run([], [err, data]);
+                      });
+                    }
                   },
 
                   sendData: (data)=> {
@@ -252,8 +259,10 @@ function ServiceAPI() {
                   }
               })
             });
-            remote_callback_obj.run([], [err, local_callback_obj]);
-            remote_callback_obj.unbindRemote();
+            if(remote_callback_obj) {
+              remote_callback_obj.run([], [err, local_callback_obj]);
+              remote_callback_obj.unbindRemote();
+            }
           });
         },
         createDefaultDeamonSocket: (service, owner, remote_callback_obj) => {
@@ -261,26 +270,32 @@ function ServiceAPI() {
             let local_callback_obj = new LCBO(as, (syncRefer)=> {
               return ({
                   call: (name, Json, remote_callback_obj_2)=> {
-                    syncRefer(remote_callback_obj_2);
-                    as.call(name, Json, (err, json)=> {
-                      remote_callback_obj_2.run([], [err, json]);
-                      remote_callback_obj_2.unbindRemote();
-                    });
+                    if(remote_callback_obj_2) {
+                      syncRefer(remote_callback_obj_2);
+                      as.call(name, Json, (err, json)=> {
+                        remote_callback_obj_2.run([], [err, json]);
+                        remote_callback_obj_2.unbindRemote();
+                      });
+                    }
                   },
 
                   getEntityID: (remote_callback_obj_2)=> {
-                    syncRefer(remote_callback_obj_2);
-                    as.getEntityID((err, entityID)=>{
-                      remote_callback_obj_2.run([], [err, entityID]);
-                      remote_callback_obj_2.unbindRemote();
-                    });
+                    if(remote_callback_obj_2) {
+                      syncRefer(remote_callback_obj_2);
+                      as.getEntityID((err, entityID)=>{
+                        remote_callback_obj_2.run([], [err, entityID]);
+                        remote_callback_obj_2.unbindRemote();
+                      });
+                    }
                   },
 
                   on: (type, remote_callback_obj_2)=> {
-                    syncRefer(remote_callback_obj_2);
-                    as.on(type, (err, data)=>{
-                      remote_callback_obj_2.run([], [err, data]);
-                    });
+                    if(remote_callback_obj_2) {
+                      syncRefer(remote_callback_obj_2);
+                      as.on(type, (err, data)=>{
+                        remote_callback_obj_2.run([], [err, data]);
+                      });
+                    }
                   },
 
                   sendData: (data)=> {
@@ -292,8 +307,10 @@ function ServiceAPI() {
                   }
               })
             });
-            remote_callback_obj.run([], [err, local_callback_obj]);
-            remote_callback_obj.unbindRemote();
+            if(remote_callback_obj) {
+              remote_callback_obj.run([], [err, local_callback_obj]);
+              remote_callback_obj.unbindRemote();
+            }
           });
         },
         createDeamonSocket: (method, targetip, targetport, service, owner, remote_callback_obj) => {
@@ -301,26 +318,34 @@ function ServiceAPI() {
             let local_callback_obj = new LCBO(as, (syncRefer)=> {
               return ({
                   call: (name, Json, remote_callback_obj_2)=> {
-                    syncRefer(remote_callback_obj_2);
-                    as.call(name, Json, (err, json)=> {
-                      remote_callback_obj_2.run([], [err, json]);
-                      remote_callback_obj_2.unbindRemote();
-                    });
+                    if(remote_callback_obj_2) {
+                      syncRefer(remote_callback_obj_2);
+                      as.call(name, Json, (err, json)=> {
+                        remote_callback_obj_2.run([], [err, json]);
+                        remote_callback_obj_2.unbindRemote();
+                      });
+                    }
+
                   },
 
                   getEntityID: (remote_callback_obj_2)=> {
-                    syncRefer(remote_callback_obj_2);
-                    as.getEntityID((err, entityID)=>{
-                      remote_callback_obj_2.run([], [err, entityID]);
-                      remote_callback_obj_2.unbindRemote();
-                    });
+                    if(remote_callback_obj_2) {
+                      syncRefer(remote_callback_obj_2);
+                      as.getEntityID((err, entityID)=>{
+                        remote_callback_obj_2.run([], [err, entityID]);
+                        remote_callback_obj_2.unbindRemote();
+                      });
+                    }
+
                   },
 
                   on: (type, remote_callback_obj_2)=> {
-                    syncRefer(remote_callback_obj_2);
-                    as.on(type, (err, data)=>{
-                      remote_callback_obj_2.run([], [err, data]);
-                    });
+                    if(remote_callback_obj_2) {
+                      syncRefer(remote_callback_obj_2);
+                      as.on(type, (err, data)=>{
+                        remote_callback_obj_2.run([], [err, data]);
+                      });
+                    }
                   },
 
                   sendData: (data)=> {
@@ -332,8 +357,10 @@ function ServiceAPI() {
                   }
               })
             });
-            remote_callback_obj.run([], [err, local_callback_obj]);
-            remote_callback_obj.unbindRemote();
+            if(remote_callback_obj) {
+              remote_callback_obj.run([], [err, local_callback_obj]);
+              remote_callback_obj.unbindRemote();
+            }
           });
         },
         createAdminDeamonSocket: (method, targetip, targetport, service, remote_callback_obj) => {
@@ -341,26 +368,32 @@ function ServiceAPI() {
             let local_callback_obj = new LCBO(as, (syncRefer)=> {
               return ({
                   call: (name, Json, remote_callback_obj_2)=> {
-                    syncRefer(remote_callback_obj_2);
-                    as.call(name, Json, (err, json)=> {
-                      remote_callback_obj_2.run([], [err, json]);
-                      remote_callback_obj_2.unbindRemote();
-                    });
+                    if(remote_callback_obj_2) {
+                      syncRefer(remote_callback_obj_2);
+                      as.call(name, Json, (err, json)=> {
+                        remote_callback_obj_2.run([], [err, json]);
+                        remote_callback_obj_2.unbindRemote();
+                      });
+                    }
                   },
 
                   getEntityID: (remote_callback_obj_2)=> {
-                    syncRefer(remote_callback_obj_2);
-                    as.getEntityID((err, entityID)=>{
-                      remote_callback_obj_2.run([], [err, entityID]);
-                      remote_callback_obj_2.unbindRemote();
-                    });
+                    if(remote_callback_obj_2) {
+                      syncRefer(remote_callback_obj_2);
+                      as.getEntityID((err, entityID)=>{
+                        remote_callback_obj_2.run([], [err, entityID]);
+                        remote_callback_obj_2.unbindRemote();
+                      });
+                    }
                   },
 
                   on: (type, remote_callback_obj_2)=> {
-                    syncRefer(remote_callback_obj_2);
-                    as.on(type, (err, data)=>{
-                      remote_callback_obj_2.run([], [err, data]);
-                    });
+                    if(remote_callback_obj_2) {
+                      syncRefer(remote_callback_obj_2);
+                      as.on(type, (err, data)=>{
+                        remote_callback_obj_2.run([], [err, data]);
+                      });
+                    }
                   },
 
                   sendData: (data)=> {
@@ -372,8 +405,10 @@ function ServiceAPI() {
                   }
               })
             });
-            remote_callback_obj.run([], [err, local_callback_obj]);
-            remote_callback_obj.unbindRemote();
+            if(remote_callback_obj) {
+              remote_callback_obj.run([], [err, local_callback_obj]);
+              remote_callback_obj.unbindRemote();
+            }
           });
         },
 
@@ -382,26 +417,32 @@ function ServiceAPI() {
             let local_callback_obj = new LCBO(as, (syncRefer)=> {
               return ({
                   call: (name, Json, remote_callback_obj_2)=> {
-                    syncRefer(remote_callback_obj_2);
-                    as.call(name, Json, (err, json)=> {
-                      remote_callback_obj_2.run([], [err, json]);
-                      remote_callback_obj_2.unbindRemote();
-                    });
+                    if(remote_callback_obj_2) {
+                      syncRefer(remote_callback_obj_2);
+                      as.call(name, Json, (err, json)=> {
+                        remote_callback_obj_2.run([], [err, json]);
+                        remote_callback_obj_2.unbindRemote();
+                      });
+                    }
                   },
 
                   getEntityID: (remote_callback_obj_2)=> {
-                    syncRefer(remote_callback_obj_2);
-                    as.getEntityID((err, entityID)=>{
-                      remote_callback_obj_2.run([], [err, entityID]);
-                      remote_callback_obj_2.unbindRemote();
-                    });
+                    if(remote_callback_obj_2) {
+                      syncRefer(remote_callback_obj_2);
+                      as.getEntityID((err, entityID)=>{
+                        remote_callback_obj_2.run([], [err, entityID]);
+                        remote_callback_obj_2.unbindRemote();
+                      });
+                    }
                   },
 
                   on: (type, remote_callback_obj_2)=> {
-                    syncRefer(remote_callback_obj_2);
-                    as.on(type, (err, data)=>{
-                      remote_callback_obj_2.run([], [err, data]);
-                    });
+                    if(remote_callback_obj_2) {
+                      syncRefer(remote_callback_obj_2);
+                      as.on(type, (err, data)=>{
+                        remote_callback_obj_2.run([], [err, data]);
+                      });
+                    }
                   },
 
                   sendData: (data)=> {
@@ -413,8 +454,10 @@ function ServiceAPI() {
                   }
               })
             });
-            remote_callback_obj.run([], [err, local_callback_obj]);
-            remote_callback_obj.unbindRemote();
+            if(remote_callback_obj) {
+              remote_callback_obj.run([], [err, local_callback_obj]);
+              remote_callback_obj.unbindRemote();
+            }
           });
         },
       },
@@ -422,98 +465,129 @@ function ServiceAPI() {
       Entity: {
         getfliteredEntitiesMetaData: (key, value, remote_callback_obj) => {
           _coregateway.Entity.getfliteredEntitiesMetaData(key, value, (err, metatdata)=> {
-            remote_callback_obj.run([], [err, metatdata])
-            remote_callback_obj.unbindRemote();
+            if(remote_callback_obj) {
+              remote_callback_obj.run([], [err, metatdata])
+              remote_callback_obj.unbindRemote();
+            }
           });
         },
         getfliteredEntitiesList: (query, remote_callback_obj) => {
           _coregateway.Entity.getfliteredEntitiesList(query, (err, list)=> {
-            remote_callback_obj.run([], [err, list])
-            remote_callback_obj.unbindRemote();
+            if(remote_callback_obj) {
+              remote_callback_obj.run([], [err, list])
+              remote_callback_obj.unbindRemote();
+            }
           });
         },
         getEntityValue: (entityID, key, remote_callback_obj) => {
-          remote_callback_obj.run([], [false, _coregateway.Entity.returnEntityValue(entityID, key)])
-          remote_callback_obj.unbindRemote();
+          if(remote_callback_obj) {
+            remote_callback_obj.run([], [false, _coregateway.Entity.returnEntityValue(entityID, key)])
+            remote_callback_obj.unbindRemote();
+          }
         },
         getEntityOwner: (entityID, remote_callback_obj) => {
-          remote_callback_obj.run([], [false, _coregateway.Entity.returnEntityOwner(entityID)])
-          remote_callback_obj.unbindRemote();
+          if(remote_callback_obj) {
+            remote_callback_obj.run([], [false, _coregateway.Entity.returnEntityOwner(entityID)])
+            remote_callback_obj.unbindRemote();
+          }
         },
         getEntitiesMetaData: (remote_callback_obj) => {
           _coregateway.Entity.getEntitiesMeta((err, metatdata)=> {
-            remote_callback_obj.run([], [err, metatdata])
-            remote_callback_obj.unbindRemote();
+            if(remote_callback_obj) {
+              remote_callback_obj.run([], [err, metatdata])
+              remote_callback_obj.unbindRemote();
+            }
           });
         },
         getEntityMetaData: (entityID, remote_callback_obj) => {
-          remote_callback_obj.run([], [false, _coregateway.Entity.returnEntityMetaData(entityID)])
-          remote_callback_obj.unbindRemote();
+          if(remote_callback_obj) {
+            remote_callback_obj.run([], [false, _coregateway.Entity.returnEntityMetaData(entityID)])
+            remote_callback_obj.unbindRemote();
+          }
         },
         getCount: (remote_callback_obj) => {
-          remote_callback_obj.run([], [false, _coregateway.Entity.returnEntitycount()])
-          remote_callback_obj.unbindRemote();
+          if(remote_callback_obj) {
+            remote_callback_obj.run([], [false, _coregateway.Entity.returnEntitycount()])
+            remote_callback_obj.unbindRemote();
+          }
         },
         getEntities: (remote_callback_obj) => {
           _coregateway.Entity.getEntitiesMeta((err, meta)=> {
-            remote_callback_obj.run([], [err, meta]);
-            remote_callback_obj.unbindRemote();
+            if(remote_callback_obj) {
+              remote_callback_obj.run([], [err, meta]);
+              remote_callback_obj.unbindRemote();
+            }
           });
         },
         getEntitiesId: (remote_callback_obj) => {
-          remote_callback_obj.run([], [false, _coregateway.Entity.returnEntitiesID()]);
-          remote_callback_obj.unbindRemote();
+          if(remote_callback_obj) {
+            remote_callback_obj.run([], [false, _coregateway.Entity.returnEntitiesID()]);
+            remote_callback_obj.unbindRemote();
+          }
         },
         getEntityConnProfile: (entityID, remote_callback_obj)=> {
           _coregateway.Entity.getEntityConnProfile(entityID, (err, conn_profile)=> {
             let local_callback_obj = new LCBO(conn_profile, (conn_profile_syncRefer)=> {
               return ({
                   getServerID: (remote_callback_obj_2)=> {
-                    conn_profile_syncRefer(remote_callback_obj_2);
-                    conn_profile.getServerID((err, serverid)=> {
-                      remote_callback_obj_2.run([], [err, serverid]);
-                      remote_callback_obj_2.unbindRemote();
-                    });
+                    if(remote_callback_obj_2) {
+                      conn_profile_syncRefer(remote_callback_obj_2);
+                      conn_profile.getServerID((err, serverid)=> {
+                        if(remote_callback_obj_2) {}
+                        remote_callback_obj_2.run([], [err, serverid]);
+                        remote_callback_obj_2.unbindRemote();
+                      });
+                    }
                   },
 
                   getHostIP: (remote_callback_obj_2)=> {
-                    conn_profile_syncRefer(remote_callback_obj_2);
-                    conn_profile.getHostIP((err, hostip)=> {
-                      remote_callback_obj_2.run([], [err, hostip]);
-                      remote_callback_obj_2.unbindRemote();
-                    });
+                    if(remote_callback_obj_2) {
+                      conn_profile_syncRefer(remote_callback_obj_2);
+                      conn_profile.getHostIP((err, hostip)=> {
+                        remote_callback_obj_2.run([], [err, hostip]);
+                        remote_callback_obj_2.unbindRemote();
+                      });
+                    }
                   },
 
                   getHostPort: (remote_callback_obj_2)=> {
-                    conn_profile_syncRefer(remote_callback_obj_2);
-                    conn_profile.getHostPort((err, hostport)=> {
-                      remote_callback_obj_2.run([], [err, hostport]);
-                      remote_callback_obj_2.unbindRemote();
-                    });
+                    if(remote_callback_obj_2) {
+                      conn_profile_syncRefer(remote_callback_obj_2);
+                      conn_profile.getHostPort((err, hostport)=> {
+                        remote_callback_obj_2.run([], [err, hostport]);
+                        remote_callback_obj_2.unbindRemote();
+                      });
+                    }
                   },
 
                   getClientIP: (remote_callback_obj_2)=> {
-                    conn_profile_syncRefer(remote_callback_obj_2);
-                    conn_profile.getClientIP((err, clientip)=> {
-                      remote_callback_obj_2.run([], [err, clientip]);
-                      remote_callback_obj_2.unbindRemote();
-                    });
+                    if(remote_callback_obj_2) {
+                      conn_profile_syncRefer(remote_callback_obj_2);
+                      conn_profile.getClientIP((err, clientip)=> {
+                        remote_callback_obj_2.run([], [err, clientip]);
+                        remote_callback_obj_2.unbindRemote();
+                      });
+                    }
                   },
 
                   getConnMethod: (remote_callback_obj_2)=> {
-                    conn_profile_syncRefer(remote_callback_obj_2);
-                    conn_profile.getConnMethod((err, connMethod)=> {
-                      remote_callback_obj_2.run([], [err, connMethod]);
-                      remote_callback_obj_2.unbindRemote();
-                    });
+                    if(remote_callback_obj_2) {
+                      conn_profile_syncRefer(remote_callback_obj_2);
+                      conn_profile.getConnMethod((err, connMethod)=> {
+                        remote_callback_obj_2.run([], [err, connMethod]);
+                        remote_callback_obj_2.unbindRemote();
+                      });
+                    }
                   },
 
                   getRemotePosition: (remote_callback_obj_2)=> {
-                    conn_profile_syncRefer(remote_callback_obj_2);
-                    conn_profile.getRemotePosition((err, remotepos)=> {
-                      remote_callback_obj_2.run([], [err, remotepos]);
-                      remote_callback_obj_2.unbindRemote();
-                    });
+                    if(remote_callback_obj_2) {
+                      conn_profile_syncRefer(remote_callback_obj_2);
+                      conn_profile.getRemotePosition((err, remotepos)=> {
+                        remote_callback_obj_2.run([], [err, remotepos]);
+                        remote_callback_obj_2.unbindRemote();
+                      });
+                    }
                   },
 
                   setBundle: (key, value)=> {
@@ -521,115 +595,149 @@ function ServiceAPI() {
                   },
 
                   getBundle: (key, remote_callback_obj_2)=> {
-                    conn_profile_syncRefer(remote_callback_obj_2);
-                    conn_profile.getBundle(key, (err, bundle)=> {
-                      remote_callback_obj_2.run([], [err, bundle]);
-                      remote_callback_obj_2.unbindRemote();
-                    });
+                    if(remote_callback_obj_2) {
+                      conn_profile_syncRefer(remote_callback_obj_2);
+                      conn_profile.getBundle(key, (err, bundle)=> {
+                        remote_callback_obj_2.run([], [err, bundle]);
+                        remote_callback_obj_2.unbindRemote();
+                      });
+                    }
                   },
 
                   getGUID: (remote_callback_obj_2)=> {
-                    conn_profile_syncRefer(remote_callback_obj_2);
-                    conn_profile.getGUID((err, guid)=> {
-                      remote_callback_obj_2.run([], [err, guid]);
-                      remote_callback_obj_2.unbindRemote();
-                    });
+                    if(remote_callback_obj_2) {
+                      conn_profile_syncRefer(remote_callback_obj_2);
+                      conn_profile.getGUID((err, guid)=> {
+                        remote_callback_obj_2.run([], [err, guid]);
+                        remote_callback_obj_2.unbindRemote();
+                      });
+                    }
                   }
               })
             });
-            remote_callback_obj.run([], [err, local_callback_obj]);
-            remote_callback_obj.unbindRemote();
+            if(remote_callback_obj) {
+              remote_callback_obj.run([], [err, local_callback_obj]);
+              remote_callback_obj.unbindRemote();
+            }
           });
         },
         on: (type, remote_callback_obj)=> {
           _coregateway.Entity.on(type, (entityID, entityJson)=> {
-            remote_callback_obj.run([], [entityID, entityJson])
+            if(remote_callback_obj) {
+              remote_callback_obj.run([], [entityID, entityJson])
+            }
           });
         }
       },
 
       getList: (remote_callback_obj) => {
-        remote_callback_obj.run([], [false, _coregateway.Service.returnList()]);
-        remote_callback_obj.unbindRemote();
+        if(remote_callback_obj) {
+          remote_callback_obj.run([], [false, _coregateway.Service.returnList()]);
+          remote_callback_obj.unbindRemote();
+        }
       },
 
       getServiceManifest: (service_name, remote_callback_obj)=> {
-        remote_callback_obj.run([], [false, _coregateway.Service.returnServiceManifest(service_name)]);
-        remote_callback_obj.unbindRemote();
+        if(remote_callback_obj) {
+          remote_callback_obj.run([], [false, _coregateway.Service.returnServiceManifest(service_name)]);
+          remote_callback_obj.unbindRemote();
+        }
       },
 
       getServicesManifest: (remote_callback_obj)=> {
         _coregateway.Service.getServicesManifest((err, manifest)=> {
-          remote_callback_obj.run([], [err, manifest]);
-          remote_callback_obj.unbindRemote();
+          if(remote_callback_obj) {
+            remote_callback_obj.run([], [err, manifest]);
+            remote_callback_obj.unbindRemote();
+          }
         });
       },
 
       getJSONfuncList: (service_name, remote_callback_obj)=> {
-        remote_callback_obj.run([], [false, _coregateway.Service.returnJSONfuncList(service_name)]);
-        remote_callback_obj.unbindRemote();
+        if(remote_callback_obj) {
+          remote_callback_obj.run([], [false, _coregateway.Service.returnJSONfuncList(service_name)]);
+          remote_callback_obj.unbindRemote();
+        }
       },
 
       getJSONfuncDict: (service_name, remote_callback_obj)=> {
-        remote_callback_obj.run([], [false, _coregateway.Service.returnJSONfuncDict(service_name)]);
-        remote_callback_obj.unbindRemote();
+        if(remote_callback_obj) {
+          remote_callback_obj.run([], [false, _coregateway.Service.returnJSONfuncDict(service_name)]);
+          remote_callback_obj.unbindRemote();
+        }
       },
 
       launch: (service_name, remote_callback_obj)=> {
         _coregateway.Service.launchService(service_name, (err)=> {
-          remote_callback_obj.run([], [err]);
-          remote_callback_obj.unbindRemote();
+          if(remote_callback_obj) {
+            remote_callback_obj.run([], [err]);
+            remote_callback_obj.unbindRemote();
+          }
         });
       },
 
       initialize: (service_name, remote_callback_obj)=> {
         _coregateway.Service.initializeService(service_name, (err)=> {
-          remote_callback_obj.run([], [err]);
-          remote_callback_obj.unbindRemote();
+          if(remote_callback_obj) {
+            remote_callback_obj.run([], [err]);
+            remote_callback_obj.unbindRemote();
+          }
         });
       },
 
       relaunch: (service_name, remote_callback_obj)=> {
         _coregateway.Service.relaunchService(service_name, (err)=> {
-          remote_callback_obj.run([], [err]);
-          remote_callback_obj.unbindRemote();
+          if(remote_callback_obj) {
+            remote_callback_obj.run([], [err]);
+            remote_callback_obj.unbindRemote();
+          }
         });
       },
 
       close: (service_name, remote_callback_obj)=> {
         _coregateway.Service.closeService(service_name, (err)=> {
-          remote_callback_obj.run([], [err]);
-          remote_callback_obj.unbindRemote();
+          if(remote_callback_obj) {
+            remote_callback_obj.run([], [err]);
+            remote_callback_obj.unbindRemote();
+          }
         });
       },
 
       isServiceLaunched: (service_name, remote_callback_obj)=> {
         _coregateway.Service.isServiceLaunched(service_name, (err)=> {
-          remote_callback_obj.run([], [err]);
-          remote_callback_obj.unbindRemote();
+          if(remote_callback_obj) {
+            remote_callback_obj.run([], [err]);
+            remote_callback_obj.unbindRemote();
+          }
         });
       },
 
       isServiceInitialized: (service_name, remote_callback_obj)=> {
         _coregateway.Service.isServiceInitialized(service_name, (err)=> {
-          remote_callback_obj.run([], [err]);
-          remote_callback_obj.unbindRemote();
+          if(remote_callback_obj) {
+            remote_callback_obj.run([], [err]);
+            remote_callback_obj.unbindRemote();
+          }
         });
       },
 
       // CBO is designed for prevent memleak
       getCBOCount: (remote_callback_obj)=> {
         _coregateway.Service.getCBOCount((err, count)=> {
-          remote_callback_obj.run([], [err, count]);
-          remote_callback_obj.unbindRemote();
+          if(remote_callback_obj) {
+            remote_callback_obj.run([], [err, count]);
+            remote_callback_obj.unbindRemote();
+          }
         });
       },
 
       // CBO is designed for prevent memleak
       getWorkerMemoryUsage: (remote_callback_obj)=> {
         _coregateway.Service.getWorkerMemoryUsage((err, usage)=> {
-          remote_callback_obj.run([], [err, usage]);
-          remote_callback_obj.unbindRemote();
+          if(remote_callback_obj) {
+            remote_callback_obj.run([], [err, usage]);
+            remote_callback_obj.unbindRemote();
+          }
         });
       }
     };
@@ -638,14 +746,18 @@ function ServiceAPI() {
       Authby: {
         Token: (entityID, remote_callback_obj) => {
           _coregateway.Authorization.Authby.Token(entityID, (err, pass)=> {
-            remote_callback_obj.run([], [err, pass]);
-            remote_callback_obj.unbindRemote();
+            if(remote_callback_obj) {
+              remote_callback_obj.run([], [err, pass]);
+              remote_callback_obj.unbindRemote();
+            }
           });
         },
         Password: (entityID, remote_callback_obj) => {
           _coregateway.Authorization.Authby.Password(entityID, (err, pass)=> {
-            remote_callback_obj.run([], [err, pass]);
-            remote_callback_obj.unbindRemote();
+            if(remote_callback_obj) {
+              remote_callback_obj.run([], [err, pass]);
+              remote_callback_obj.unbindRemote();
+            }
           });
         },
         Action: (entityID, action_meta_data, callback)=> {
@@ -653,20 +765,26 @@ function ServiceAPI() {
         },
         isSuperUser: (entityID, remote_callback_obj) => {
           _coregateway.Authorization.Authby.isSuperUser(entityID, (err, pass)=> {
-            remote_callback_obj.run([], [err, pass]);
-            remote_callback_obj.unbindRemote();
+            if(remote_callback_obj) {
+              remote_callback_obj.run([], [err, pass]);
+              remote_callback_obj.unbindRemote();
+            }
           });
         },
         Domain: (entityID, remote_callback_obj) => {
           _coregateway.Authorization.Authby.Domain(entityID, (err, pass)=> {
-            remote_callback_obj.run([], [err, pass]);
-            remote_callback_obj.unbindRemote();
+            if(remote_callback_obj) {
+              remote_callback_obj.run([], [err, pass]);
+              remote_callback_obj.unbindRemote();
+            }
           });
         },
         DaemonAuthKey: (entityID, remote_callback_obj) => {
           _coregateway.Authorization.Authby.DaemonAuthKey(entityID, (err, pass)=> {
-            remote_callback_obj.run([], [err, pass]);
-            remote_callback_obj.unbindRemote();
+            if(remote_callback_obj) {
+              remote_callback_obj.run([], [err, pass]);
+              remote_callback_obj.unbindRemote();
+            }
           });
         }
       },
@@ -677,13 +795,17 @@ function ServiceAPI() {
 
     _api.Daemon = {
       getSettings: (remote_callback_obj)=>{
-        remote_callback_obj.run([], [false, _coregateway.Daemon.Settings]);
-        remote_callback_obj.unbindRemote();
+        if(remote_callback_obj) {
+          remote_callback_obj.run([], [false, _coregateway.Daemon.Settings]);
+          remote_callback_obj.unbindRemote();
+        }
       },
 
       getVariables: (remote_callback_obj)=>{
-        remote_callback_obj.run([], [false, _coregateway.Daemon.Variables]);
-        remote_callback_obj.unbindRemote();
+        if(remote_callback_obj) {
+          remote_callback_obj.run([], [false, _coregateway.Daemon.Variables]);
+          remote_callback_obj.unbindRemote();
+        }
       },
 
       close: ()=>{_coregateway.Daemon.close()}
@@ -692,71 +814,91 @@ function ServiceAPI() {
     _api.Authenticity = {
       createUser: (username, displayname, password, privilege, detail, firstname, lastname, remote_callback_obj) => {
         _coregateway.Authenticity.createUser(username, displayname, password, privilege, detail, firstname, lastname, (err)=> {
-          remote_callback_obj.run([], [err]);
-          remote_callback_obj.unbindRemote();
+          if(remote_callback_obj) {
+            remote_callback_obj.run([], [err]);
+            remote_callback_obj.unbindRemote();
+          }
         });
       },
 
       deleteUser: (username, remote_callback_obj) => {
         _coregateway.Authenticity.deleteUser(username, (err)=> {
-          remote_callback_obj.run([], [err]);
-          remote_callback_obj.unbindRemote();
+          if(remote_callback_obj) {
+            remote_callback_obj.run([], [err]);
+            remote_callback_obj.unbindRemote();
+          }
         });
       },
 
       updatePassword: (username, newpassword, remote_callback_obj) => {
         _coregateway.Authenticity.updatePassword(username, newpassword, (err)=> {
-          remote_callback_obj.run([], [err]);
-          remote_callback_obj.unbindRemote();
+          if(remote_callback_obj) {
+            remote_callback_obj.run([], [err]);
+            remote_callback_obj.unbindRemote();
+          }
         });
       },
 
       updateToken: (username, remote_callback_obj) => {
         _coregateway.Authenticity.updateToken(username, (err)=> {
-          remote_callback_obj.run([], [err]);
-          remote_callback_obj.unbindRemote();
+          if(remote_callback_obj) {
+            remote_callback_obj.run([], [err]);
+            remote_callback_obj.unbindRemote();
+          }
         });
       },
 
       updatePrivilege: (username, privilege, remote_callback_obj) => {
         _coregateway.Authenticity.updatePrivilege(username, privilege, (err)=> {
-          remote_callback_obj.run([], [err]);
-          remote_callback_obj.unbindRemote();
+          if(remote_callback_obj) {
+            remote_callback_obj.run([], [err]);
+            remote_callback_obj.unbindRemote();
+          }
         });
       },
 
       updateName: (username, firstname, lastname, remote_callback_obj) => {
         _coregateway.Authenticity.updateName(username, firstname, lastname, (err)=> {
-          remote_callback_obj.run([], [err]);
-          remote_callback_obj.unbindRemote();
+          if(remote_callback_obj) {
+            remote_callback_obj.run([], [err]);
+            remote_callback_obj.unbindRemote();
+          }
         });
       },
 
       getUserMeta: (username, remote_callback_obj) => {
         _coregateway.Authenticity.getUserMeta(username, (err, usermeta)=> {
-          remote_callback_obj.run([], [err, usermeta]);
-          remote_callback_obj.unbindRemote();
+          if(remote_callback_obj) {
+            remote_callback_obj.run([], [err, usermeta]);
+            remote_callback_obj.unbindRemote();
+          }
         });
       },
 
       getUserID: (username, remote_callback_obj) => {
         _coregateway.Authenticity.getUserID(username, (err, userid)=> {
-          remote_callback_obj.run([], [err, userid]);
-          remote_callback_obj.unbindRemote();
+          if(remote_callback_obj) {
+            remote_callback_obj.run([], [err, userid]);
+            remote_callback_obj.unbindRemote();
+          }
         });
       },
 
       getUsernamebyId: (userid, remote_callback_obj) => {
         _coregateway.Authenticity.getUsernamebyId(userid, (err, username)=> {
-          remote_callback_obj.run([], [err, username]);
-          remote_callback_obj.unbindRemote();
+          if(remote_callback_obj) {
+            remote_callback_obj.run([], [err, username]);
+            remote_callback_obj.unbindRemote();
+          }
         });
       },
 
       getUserExistence: (username, remote_callback_obj)=>{
         _coregateway.Authenticity.getUserExistence(username, (err, exisitence)=> {
-          remote_callback_obj.run([], [err, exisitence]);
-          remote_callback_obj.unbindRemote();
+          if(remote_callback_obj) {
+            remote_callback_obj.run([], [err, exisitence]);
+            remote_callback_obj.unbindRemote();
+          }
         });
       }
     };
@@ -770,20 +912,26 @@ function ServiceAPI() {
     _api.Crypto = {
       generateAESCBC256KeyByHash: (string1, string2, remote_callback_obj)=>{
         _coregateway.NoCrypto.generateAESCBC256KeyByHash(string1, string2, (err, key)=> {
-          remote_callback_obj.run([], [err, key]);
-          remote_callback_obj.unbindRemote();
+          if(remote_callback_obj) {
+            remote_callback_obj.run([], [err, key]);
+            remote_callback_obj.unbindRemote();
+          }
         });
       },
       encryptString: (algo, key, toEncrypt, remote_callback_obj)=>{
         _coregateway.NoCrypto.encryptString(algo, key, toEncrypt, (err, enstr)=> {
-          remote_callback_obj.run([], [err, enstr]);
-          remote_callback_obj.unbindRemote();
+          if(remote_callback_obj) {
+            remote_callback_obj.run([], [err, enstr]);
+            remote_callback_obj.unbindRemote();
+          }
         });
       },
       decryptString: (algo, key, toDecrypt, remote_callback_obj) =>{
         _coregateway.NoCrypto.decryptString(algo, key, toDecrypt, (err, destr)=> {
-          remote_callback_obj.run([], [err, destr]);
-          remote_callback_obj.unbindRemote();
+          if(remote_callback_obj) {
+            remote_callback_obj.run([], [err, destr]);
+            remote_callback_obj.unbindRemote();
+          }
         });
       }
     }
@@ -792,12 +940,16 @@ function ServiceAPI() {
     _api.Sniffer = {
       onRouterJSON: (remote_callback_obj)=> {
         _coregateway.Router.addJSONSniffer((err, data)=> {
-          remote_callback_obj.run([], [err, data]);
+          if(remote_callback_obj) {
+            remote_callback_obj.run([], [err, data]);
+          }
         });
       },
       onRouterRawData: (remote_callback_obj)=> {
         _coregateway.Router.addRAWSniffer((err, data)=> {
-          remote_callback_obj.run([], [err, data]);
+          if(remote_callback_obj) {
+            remote_callback_obj.run([], [err, data]);
+          }
         });
       },
     }
@@ -825,7 +977,9 @@ function ServiceAPI() {
                   returnJSON(err, json_be_returned);
                 });
               }, true);
-              remote_callback_obj.run([], [json, entityID, returnJSON_LCBO]);
+              if(remote_callback_obj) {
+                remote_callback_obj.run([], [json, entityID, returnJSON_LCBO]);
+              }
             });
           },
 
@@ -836,7 +990,9 @@ function ServiceAPI() {
                   returnJSON(err, json_be_returned);
                 });
               }, true);
-              remote_callback_obj.run([], [json, entityID, returnJSON_LCBO]);
+              if(remote_callback_obj) {
+                remote_callback_obj.run([], [json, entityID, returnJSON_LCBO]);
+              }
             },
             (json, entityID, returnJSON)=> {
               let returnJSON_LCBO = new LCBO(returnJSON, (returnJSON_syncRefer)=> {
@@ -844,14 +1000,18 @@ function ServiceAPI() {
                   returnJSON(err, json_be_returned);
                 });
               }, true);
-              remote_callback_obj_2.run([], [json, entityID, returnJSON_LCBO]);
+              if(remote_callback_obj_2) {
+                remote_callback_obj_2.run([], [json, entityID, returnJSON_LCBO]);
+              }
             });
           },
 
           on: (type, remote_callback_obj)=> {
             if(type == 'data') {
               service_socket.on('data', (entityID, data)=> {
-                remote_callback_obj.run([], [entityID, data]);
+                if(remote_callback_obj) {
+                  remote_callback_obj.run([], [entityID, data]);
+                }
               });
             }
             else {
@@ -861,7 +1021,9 @@ function ServiceAPI() {
                     callback(err);
                   });
                 }, true);
-                remote_callback_obj.run([], [entityID, callback_LCBO]);
+                if(remote_callback_obj) {
+                  remote_callback_obj.run([], [entityID, callback_LCBO]);
+                }
               });
             }
           },
@@ -877,12 +1039,14 @@ function ServiceAPI() {
       });
       api.addAPI(['getMe'], (LCBO)=> {
         return((remote_callback_obj)=> {
-          remote_callback_obj.run([], [false, {
-            Settings: manifest.settings,
-            Manifest: manifest,
-            FilesPath: _coregateway.Daemon.Settings.services_files_path+manifest.name+'/'
-          }])
-          remote_callback_obj.unbindRemote();
+          if(remote_callback_obj) {
+            remote_callback_obj.run([], [false, {
+              Settings: manifest.settings,
+              Manifest: manifest,
+              FilesPath: _coregateway.Daemon.Settings.services_files_path+manifest.name+'/'
+            }])
+            remote_callback_obj.unbindRemote();
+          }
         });
       });
       callback(false, api);
@@ -900,7 +1064,9 @@ function ServiceAPI() {
                   returnJSON(err, json_be_returned);
                 });
               }, true);
-              remote_callback_obj.run([], [json, entityID, returnJSON_LCBO]);
+              if(remote_callback_obj) {
+                remote_callback_obj.run([], [json, entityID, returnJSON_LCBO]);
+              }
             });
           },
 
@@ -911,7 +1077,9 @@ function ServiceAPI() {
                   returnJSON(err, json_be_returned);
                 });
               }, true);
-              remote_callback_obj.run([], [json, entityID, returnJSON_LCBO]);
+              if(remote_callback_obj) {
+                remote_callback_obj.run([], [json, entityID, returnJSON_LCBO]);
+              }
             },
             (json, entityID, returnJSON)=> {
               let returnJSON_LCBO = new LCBO(returnJSON, (returnJSON_syncRefer)=> {
@@ -919,14 +1087,18 @@ function ServiceAPI() {
                   returnJSON(err, json_be_returned);
                 });
               }, true);
-              remote_callback_obj_2.run([], [json, entityID, returnJSON_LCBO]);
+              if(remote_callback_obj_2) {
+                remote_callback_obj_2.run([], [json, entityID, returnJSON_LCBO]);
+              }
             });
           },
 
           on: (type, remote_callback_obj)=> {
             if(type == 'data') {
               service_socket.on('data', (entityID, data)=> {
-                remote_callback_obj.run([], [entityID, data]);
+                if(remote_callback_obj) {
+                  remote_callback_obj.run([], [entityID, data]);
+                }
               });
             }
             else {
@@ -936,7 +1108,9 @@ function ServiceAPI() {
                     callback(err);
                   });
                 }, true);
-                remote_callback_obj.run([], [entityID, callback_LCBO]);
+                if(remote_callback_obj) {
+                  remote_callback_obj.run([], [entityID, callback_LCBO]);
+                }
               });
             }
           },
@@ -956,20 +1130,24 @@ function ServiceAPI() {
       });
       api.addAPI(['getMe'], (LCBO)=> {
         return((remote_callback_obj)=> {
-          remote_callback_obj.run([], [false, {
-            Settings: manifest.settings,
-            Manifest: manifest,
-            FilesPath: _coregateway.Daemon.Settings.services_files_path+manifest.name+'/'
-          }])
-          remote_callback_obj.unbindRemote();
+          if(remote_callback_obj) {
+            remote_callback_obj.run([], [false, {
+              Settings: manifest.settings,
+              Manifest: manifest,
+              FilesPath: _coregateway.Daemon.Settings.services_files_path+manifest.name+'/'
+            }])
+            remote_callback_obj.unbindRemote();
+          }
         });
       });
 
       api.addAPI(['getImplementation'], (LCBO)=> {
         return((remote_callback_obj)=> {
           let Implementation_LCBO = new LCBO(_coregateway.Implementation, null, false, true);
-          remote_callback_obj.run([], [false, Implementation_LCBO]);
-          remote_callback_obj.unbindRemote();
+          if(remote_callback_obj) {
+            remote_callback_obj.run([], [false, Implementation_LCBO]);
+            remote_callback_obj.unbindRemote();
+          }
         });
       });
 

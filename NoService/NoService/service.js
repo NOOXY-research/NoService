@@ -917,14 +917,14 @@ function Service() {
               Utils.TagLog('Service', 'Debug Service "'+_debug_service+'" launched.');
               _local_services[_master_service].init((err)=> {
                 if(err) {
-                  Utils.TagLog('*ERR*', 'Error occured while initializing master service "'+_debug_service+'".');
-                  Utils.TagLog('*ERR*', err.toString());
+                  Utils.TagLog('*ERR*', 'Error occured while initializing debug service "'+_debug_service+'".');
+                  console.log(err);
                 }
                 else {
                   _local_services[_master_service].launch((err)=> {
                     if(err) {
-                      Utils.TagLog('*ERR*', 'Error occured while launching master service "'+_debug_service+'".');
-                      Utils.TagLog('*ERR*', err.toString());
+                      Utils.TagLog('*ERR*', 'Error occured while launching master service "'+_master_service+'".');
+                      console.log(err);
                     }
                     else {
                       Utils.TagLog('Service', 'Master Service "'+_master_service+'" launched.');

@@ -208,7 +208,7 @@ function WorkerClient() {
         process.send({t: 2});
       }
       catch(err) {
-        process.send({t: 98, e: err.toString()});
+        process.send({t: 98, e: err.stack});
       }
     }
     // function return
@@ -255,7 +255,7 @@ function WorkerClient() {
             }
           }
           catch(e) {
-            process.send({t: 96, e: e.toString()});
+            process.send({t: 96, e: e.stack});
             // Utils.TagLog('*ERR*', 'Service "'+_service_name+'" occured error while closing.');
             // console.log(e);
           }
