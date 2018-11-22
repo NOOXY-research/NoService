@@ -47,7 +47,7 @@ function WorkerClient() {
 
   const callParentAPI = ([id, APIpath], args) => {
     let _data = {
-      t: 3,
+      t: 4,
       p: APIpath,
       a: args,
       o: {}
@@ -65,7 +65,7 @@ function WorkerClient() {
 
   this.emitParentCallback = ([obj_id, path], args) => {
     let _data = {
-      t: 4,
+      t: 5,
       p: [obj_id, path],
       a: args,
       o: {}
@@ -183,7 +183,7 @@ function WorkerClient() {
                 }
                 catch(e) {
                   console.log(e);
-                  process.send({t:99});
+                  process.send({t:99, e:e});
                 }
               });
             });
@@ -195,14 +195,20 @@ function WorkerClient() {
             }
             catch(e) {
               console.log(e);
-              process.send({t:99});
+              process.send({t:99, e:e});
             }
           }
         });
       });
     }
     else if (message.t == 1) {
-      _service_module.start();
+      try {
+        _service_module.start();
+        process.send({t: 2});
+      }
+      catch(err) {
+        process.send({t: 98, e: err});
+      }
     }
     // function return
     else if(message.t == 2) {
@@ -221,11 +227,11 @@ function WorkerClient() {
       // console.log(Object.keys(_local_obj_callbacks_dict).length);
     }
     else if(message.t == 4) {
-      process.send({t:5, i:message.i, c:Object.keys(_local_obj_callbacks_dict).length});
+      process.send({t:6, i:message.i, c:Object.keys(_local_obj_callbacks_dict).length});
     }
     // memory
     else if(message.t == 5) {
-      process.send({t:6, i:message.i, c: process.memoryUsage()});
+      process.send({t:7, i:message.i, c: process.memoryUsage()});
     }
 
     else if(message.t == 98) {
@@ -239,14 +245,16 @@ function WorkerClient() {
         try{
           if(_service_module.close) {
             _service_module.close();
+            process.send({t:3});
           }
           else {
-            throw new Error('The service have no "close" function.');
+            process.send({t: 96, e: new Error('The service have no "close" function.')});
           }
         }
         catch(e) {
-          Utils.tagLog('*ERR*', 'Service "'+_service_name+'" occured error while closing.');
-          console.log(e);
+          process.send({t: 96, e: e});
+          // Utils.tagLog('*ERR*', 'Service "'+_service_name+'" occured error while closing.');
+          // console.log(e);
         }
       setTimeout(()=> {process.exit()}, _close_timeout);
     }

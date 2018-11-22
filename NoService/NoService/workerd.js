@@ -9,11 +9,13 @@
 // 0 worker established {t}
 // 1 successfully inited
 // 2 successfully launched
-// 3 api call {t, p, a: arguments, o:{arg_index, [obj_id, callback_tree]}}
-// 4 accessobj {t, p, a: arguments, o:{arg_index, [obj_id, callback_tree]}}
-// 5 returnLCBOcount
-// 6 returnMemoryUsage
+// 3 successfully closed
+// 4 api call {t, p, a: arguments, o:{arg_index, [obj_id, callback_tree]}}
+// 5 accessobj {t, p, a: arguments, o:{arg_index, [obj_id, callback_tree]}}
+// 6 returnLCBOcount
+// 7 returnMemoryUsage
 
+// 96 close error
 // 97 runtime error
 // 98 launch error
 // 99 init error
@@ -74,6 +76,7 @@ function WorkerDaemon() {
     let _service_name =  /.*\/([^\/]*)\/entry/g.exec(path)[1];
     let _InfoRq = {};
     let _init_callback;
+    let _launch_callback;
 
     _worker_clients[_service_name] = this;
 
@@ -132,10 +135,16 @@ function WorkerDaemon() {
       if(message.t == 0) {
         _child.send({t:0, p: path, a: _serviceapi.returnAPITree(), c: _close_worker_timeout, g: _clear_obj_garbage_timeout});
       }
-      else if(message.t == 1){
+      else if(message.t == 1) {
         _init_callback(false);
       }
+      else if(message.t == 2) {
+        _launch_callback(false);
+      }
       else if(message.t == 3) {
+        _close_callback(false);
+      }
+      else if(message.t == 4) {
         try {
           _serviceapi.emitAPIRq(message.p, message.a, message.o);
         }
@@ -151,7 +160,7 @@ function WorkerDaemon() {
           });
         }
       }
-      else if(message.t == 4) {
+      else if(message.t == 5) {
         try {
           _serviceapi.emitCallbackRq(message.p, message.a, message.o);
         }
@@ -167,20 +176,30 @@ function WorkerDaemon() {
           });
         }
       }
-      else if(message.t == 5) {
+      else if(message.t == 6) {
         _InfoRq[message.i](false, {daemon: _serviceapi.returnLCBOCount(), client: message.c})
         delete _InfoRq[message.i];
       }
-      else if(message.t == 6) {
+      else if(message.t == 7) {
         _InfoRq[message.i](false, message.c)
         delete _InfoRq[message.i];
       }
+      else if(message.t == 96){
+        _launch_callback(new Error('Worker closing error:\n'+message.e));
+      }
+      else if(message.t == 97){
+        _launch_callback(new Error('Worker runtime error:\n'+message.e));
+      }
+      else if(message.t == 98){
+        _launch_callback(new Error('Worker launching error:\n'+message.e));
+      }
       else if(message.t == 99){
-        _init_callback(new Error('Initializing error'));
+        _init_callback(new Error('Worker initializing error:\n'+message.e));
       }
     };
 
-    this.launch = ()=> {
+    this.launch = (launch_callback)=> {
+      _launch_callback = launch_callback;
       _child.send({t:1});
     };
 
@@ -192,12 +211,25 @@ function WorkerDaemon() {
       });
     };
 
-    this.relaunch = ()=> {
-      this.close()
+    this.relaunch = (relaunch_callback)=> {
       Utils.tagLog('Workerd', 'Relaunching service "'+_service_name+'"');
-      setTimeout(()=>{
-        this.init(this.launch);
-      }, _close_worker_timeout+10);
+      this.close((err)=> {
+        if(err) {
+          relaunch_callback(err);
+        }
+        else {
+          setTimeout(()=>{
+            this.init((err)=> {
+              if(err) {
+                relaunch_callback(err);
+              }
+              else {
+                this.launch(relaunch_callback);
+              }
+            });
+          }, _close_worker_timeout+10);
+        }
+      });
     };
 
     this.importAPI = (api) => {
@@ -206,7 +238,8 @@ function WorkerDaemon() {
       _serviceapi.setRemoteUnbindEmitter(this.emitRemoteUnbind);
     };
 
-    this.close = ()=> {
+    this.close = (callback)=> {
+      _close_callback = callback;
       _serviceapi.reset();
       this.emitChildClose();
     };

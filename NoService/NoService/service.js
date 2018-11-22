@@ -697,14 +697,30 @@ function Service() {
     let _worker = null;
     let _service_manifest = null;
 
-    this.relaunch = ()=> {
+    let _isInitialized = false;
+    let _isLaunched = false;
+    let _isClosed = false;
+
+    this.isInitialized = (callback)=> {
+      callback(false, _isInitialized);
+    };
+
+    this.isLaunched = (callback)=> {
+      callback(false, _isClosed);
+    };
+
+    this.isClosed = (callback)=> {
+      callback(false, _isClosed);
+    };
+
+    this.relaunch = (callback)=> {
       _service_socket.closeAll((err)=> {
-        _worker.relaunch();
+        _worker.relaunch(callback);
       });
     }
 
     this.launch = (callback)=> {
-      _worker.launch();
+      _worker.launch(callback);
     };
 
     this.init = (depended_service_dict, callback) => {
@@ -880,7 +896,7 @@ function Service() {
         }
       }
       for (let key in _local_services) {
-        _local_services[key].launch();
+        _local_services[key].launch(()=>{});
       }
     }
     // then other
@@ -1020,29 +1036,38 @@ function Service() {
   };
 
 // -------------------------- Service update
-  this.getServicesManifest = ()=> {
-
+  this.getServicesManifest = (callback)=> {
+    let results = {};
+    for(let service_name in _local_services) {
+      results[service_name] = _local_services[service_name].returnManifest();
+    };
+    callback(false, results);
   };
 
-  this.relaunchService = (service_name)=> {
-    _local_services[service_name].relaunch();
+  this.relaunchService = (service_name, callback)=> {
+    _local_services[service_name].relaunch(callback);
   };
 
-  this.initializeService = (service_name)=> {
-    _local_services[service_name].relaunch();
+  this.initializeService = (service_name, callback)=> {
+    _local_services[service_name].init(callback);
   };
 
-  this.launchService = (service_name)=> {
-    _local_services[service_name].relaunch();
+  this.launchService = (service_name, callback)=> {
+    _local_services[service_name].launch(callback);
   };
 
-  this.isServiceLaunched = (service_name)=> {
-    _local_services[service_name].relaunch();
+  this.isServiceLaunched = (service_name, callback)=> {
+    _local_services[service_name].isLaunched(callback);
   };
 
-  this.isServiceInitialized = (service_name)=> {
-    _local_services[service_name].relaunch();
+  this.isServiceInitialized = (service_name, callback)=> {
+    _local_services[service_name].isInitialized(callback);
   };
+
+  this.isServiceClosed = (service_name, callback)=> {
+    _local_services[service_name].isClosed(callback);
+  };
+
 
 // ----------------------------
 
