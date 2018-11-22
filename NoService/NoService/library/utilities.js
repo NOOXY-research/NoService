@@ -6,10 +6,59 @@
 
 const fs = require('fs');
 const crypto = require('crypto');
+const { exec } = require('child_process');
 
 const UUID_pool = 31 * 128; // 36 chars minus 4 dashes and 1 four
 const UUID_template = "10000000-1000-4000-8000-100000000000";
 const BACKSPACE = String.fromCharCode(127);
+
+let existCmd = (cmd, callback)=> {
+  exec('which '+cmd , (err, stdout, stderr) => {
+    if(err) {
+      callback(false, false);
+    }
+    else {
+      callback(false, true);
+    }
+  });
+};
+
+let isDirGitInited = (dir, callback)=> {
+  exec('cd '+dir+'/.git' , (err, stdout, stderr) => {
+    if (err) {
+      callback(false ,false);
+    }
+    else {
+      callback(false, true);
+    }
+  });
+};
+
+let initGitDir = (dir, giturl, callback)=> {
+  exec('chmod +x '+__dirname+'/scripts/unix_git_init.sh' , (err, stdout, stderr) => {
+    if (err) {
+      callback(err);
+    }
+    else {
+      exec(__dirname+'/scripts/unix_git_init.sh '+dir+' '+giturl, (err, stdout, stderr) => {
+        callback(err);
+      });
+    }
+  });
+};
+
+let pullGitDir = (dir, callback)=> {
+  exec('chmod +x '+__dirname+'/scripts/unix_git_pull.sh' , (err, stdout, stderr) => {
+    if (err) {
+      callback(err);
+    }
+    else {
+      exec(__dirname+'/scripts/unix_git_pull.sh '+dir, (err, stdout, stderr) => {
+        callback(err);
+      });
+    }
+  });
+};
 
 let compareVersion = (v1, v2, options)=> {
     var lexicographical = options && options.lexicographical,
@@ -352,6 +401,12 @@ let SQLtoDate = (sqlDate) => {
 }
 
 module.exports = {
+  UnixCmd: {
+    existCmd: existCmd,
+    isDirGitInited: isDirGitInited,
+    initGitDir: initGitDir,
+    pullGitDir: pullGitDir
+  },
   compareVersion: compareVersion,
   validateEmail: validateEmail,
   generateObjCallbacks: generateObjCallbacks,
