@@ -113,7 +113,7 @@ function Service(Me, api) {
                   '  daemon [settings|stop|memuse]\n'+
                   '\n'+
                   '[service]\n'+
-                  '  service [list|cbo|memuse]\n'+
+                  '  service [list|cbo|memuse|dependstack]\n'+
                   '  service [manifest|create|relaunch] {service name}\n'+
                   '  service [jfunclist|jfuncdict|jfuncshow] {target service}\n'+
                   '  service jfunc {target service} {target username} {target jfunc} {JSON} ---Call a JSONfunction as target user.\n'+
@@ -227,6 +227,20 @@ function Service(Me, api) {
                   list: (t1, c1) => {
                     api.Service.getList((err, list)=> {
                       c1(false, {r:JSON.stringify(list, null, 2)});
+                    });
+                  },
+
+                  dependstack:(t1, c1)=> {
+                    api.Service.ActivitySocket.createDefaultAdminDeamonSocket('NoServiceManager', (err, as)=> {
+                      if(err) {
+                        c1(false, {r:'Failed'});
+                      }
+                      else {
+                        as.call('getDependStack', null, (err, json)=>{
+                          c1(false, {r:JSON.stringify(json.r, null, 2)});
+                          as.close();
+                        });
+                      }
                     });
                   },
 

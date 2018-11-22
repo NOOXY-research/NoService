@@ -69,7 +69,7 @@ function Service(Me, api) {
                 }
               }
               if(Object.keys(dependencies.services).length == 0) {
-                root_level[service_name]={launched: false};
+                root_level[service_name]={version: manifests[service_name].version};
                 stacked_services.push(service_name);
                 let index = unstacked_services.indexOf(service_name);
                 if (index > -1) {
@@ -106,7 +106,7 @@ function Service(Me, api) {
               }
 
               if(satisfied == true) {
-                this_level[service]={launched: false};
+                this_level[service]={version: manifests[service].version, dependencies: dependended_services};
                 stacked_services.push(service);
                 let index = unstacked_services.indexOf(service);
                 if (index > -1) {
@@ -139,7 +139,7 @@ function Service(Me, api) {
           let init_from_level = (level, callback)=> {
             let left = Object.keys(dependencies_level_stack[level]).length;
             let call_callback = (err)=> {
-              if(err) {
+              if(err&&left>=0) {
                 left = -1;
                 callback(err);
               }
@@ -161,10 +161,16 @@ function Service(Me, api) {
           }
 
           init_from_level(0, (err)=> {
+            if(err) {
+              Utils.TagLog('*ERR*', '****** An error occured on initializing service. ******');
+              console.log(err);
+              api.Daemon.close();
+            }
+
             let launch_from_level = (level, callback)=> {
               let left = Object.keys(dependencies_level_stack[level]).length;
               let call_callback = (err)=> {
-                if(err) {
+                if(err&&left>=0) {
                   left = -1;
                   callback(err);
                 }
@@ -186,7 +192,9 @@ function Service(Me, api) {
             }
             launch_from_level(0, (err)=> {
               if(err) {
+                Utils.TagLog('*ERR*', '****** An error occured on lauching service. ******');
                 console.log(err);
+                api.Daemon.close();
               }
               else {
                 Utils.TagLog('service', Me.Manifest.name+' have launched your service successfully.');
@@ -256,6 +264,13 @@ function Service(Me, api) {
             }
           }
         });
+      });
+
+      ss.sdef('getDependStack', (json, entityID, returnJSON)=> {
+        let jsonr = {
+          r: dependencies_level_stack
+        };
+        returnJSON(false, jsonr);
       });
 
       ss.sdef('installService', (json, entityID, returnJSON)=> {

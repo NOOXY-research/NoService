@@ -189,10 +189,10 @@ function WorkerDaemon() {
         delete _InfoRq[message.i];
       }
       else if(message.t == 96){
-        _launch_callback(new Error('Worker closing error:\n'+message.e));
+        _close_callback(new Error('Worker closing error:\n'+message.e));
       }
       else if(message.t == 97){
-        _launch_callback(new Error('Worker runtime error:\n'+message.e));
+        // _launch_callback(new Error('Worker runtime error:\n'+message.e));
       }
       else if(message.t == 98){
         _launch_callback(new Error('Worker launching error:\n'+message.e));
