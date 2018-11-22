@@ -11,6 +11,52 @@ const UUID_pool = 31 * 128; // 36 chars minus 4 dashes and 1 four
 const UUID_template = "10000000-1000-4000-8000-100000000000";
 const BACKSPACE = String.fromCharCode(127);
 
+let compareVersion = (v1, v2, options)=> {
+    var lexicographical = options && options.lexicographical,
+        zeroExtend = options && options.zeroExtend,
+        v1parts = v1.split('.'),
+        v2parts = v2.split('.');
+
+    function isValidPart(x) {
+        return (lexicographical ? /^\d+[A-Za-z]*$/ : /^\d+$/).test(x);
+    }
+
+    if (!v1parts.every(isValidPart) || !v2parts.every(isValidPart)) {
+        return NaN;
+    }
+
+    if (zeroExtend) {
+        while (v1parts.length < v2parts.length) v1parts.push("0");
+        while (v2parts.length < v1parts.length) v2parts.push("0");
+    }
+
+    if (!lexicographical) {
+        v1parts = v1parts.map(Number);
+        v2parts = v2parts.map(Number);
+    }
+
+    for (var i = 0; i < v1parts.length; ++i) {
+        if (v2parts.length == i) {
+            return 1;
+        }
+
+        if (v1parts[i] == v2parts[i]) {
+            continue;
+        }
+        else if (v1parts[i] > v2parts[i]) {
+            return 1;
+        }
+        else {
+            return -1;
+        }
+    }
+
+    if (v1parts.length != v2parts.length) {
+        return -1;
+    }
+
+    return 0;
+}
 
 let generateGUID = ()=>{
   let r = crypto.randomBytes(UUID_pool);
@@ -221,7 +267,7 @@ let printLOGO = (version, copyright) => {
 };
 
 // print log with tag
-let tagLog = (tag, logstring) => {
+let TagLog = (tag, logstring) => {
   if(typeof(logstring)!='string') {
     logstring = JSON.stringify(logstring, null, 2);
   }
@@ -306,6 +352,7 @@ let SQLtoDate = (sqlDate) => {
 }
 
 module.exports = {
+  compareVersion: compareVersion,
   validateEmail: validateEmail,
   generateObjCallbacks: generateObjCallbacks,
   callObjCallback: callObjCallback,
@@ -315,7 +362,7 @@ module.exports = {
   returnPassword: returnPassword,
   returnJSONfromFile: returnJSONfromFile,
   printLOGO: printLOGO,
-  tagLog: tagLog,
+  TagLog: TagLog,
   generateUniqueID: generateUniqueID,
   hashString: hashString,
   removeHTML: removeHTML,

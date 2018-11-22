@@ -47,22 +47,24 @@
     "NoTalk"
   ],
 
+  "debug": false,
+  "verbose": true,
+
   "master_service": "NoServiceManager",
-
-  "shell_service": "NoShell",
-
-  "shell_client_service": "NoShellc",
+  "master_config": {
+    "auto_updagrade_service": true,
+    "check_service_version": true
+  },
 
   "debug_service": "NoActivity",
-
-  "debug": false,
-
   "debug_config": {
   	"show_json": true,
 	  "show_conn_data": false
   },
 
-  "verbose": true,
+  "shell_service": "NoShell",
+
+  "shell_client_service": "NoShellc",
 
   "shell_client_service_delay": 0,
 

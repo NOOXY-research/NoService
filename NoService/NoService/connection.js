@@ -43,7 +43,7 @@ function Connection(options) {
     }
 
     this.closeConnetion = () => {
-      // Utils.tagLog('*ERR*', 'closeConnetion not implemented. Of '+this.type);
+      // Utils.TagLog('*ERR*', 'closeConnetion not implemented. Of '+this.type);
       _conn.closeConnetion(_GUID);
     };
 
@@ -74,7 +74,7 @@ function Connection(options) {
       delete _clients[_GUID];
     };
     // this.onConnectionDropout = () => {
-    //   Utils.tagLog('*ERR*', 'onConnectionDropout not implemented');
+    //   Utils.TagLog('*ERR*', 'onConnectionDropout not implemented');
     // }
 
   }
@@ -89,12 +89,12 @@ function Connection(options) {
       // define an virtual socket
       function VirtualSocket(type, lIP, rIP, selfdestruct) {
         this.type = type;
-        this.send = (d)=>{Utils.tagLog('*ERR*', 'VirtualSocket send not implemented. Of '+this.type+'. d=>'+d)};
+        this.send = (d)=>{Utils.TagLog('*ERR*', 'VirtualSocket send not implemented. Of '+this.type+'. d=>'+d)};
         let _types = {
-          open : ()=>{Utils.tagLog('*ERR*', 'VirtualSocket opopen not implemented. Of '+this.type)},
-          message : ()=>{Utils.tagLog('*ERR*', 'VirtualSocket onmessage not implemented. Of '+this.type)},
-          error : ()=>{Utils.tagLog('*ERR*', 'VirtualSocket onerror not implemented. Of '+this.type)},
-          close : ()=>{Utils.tagLog('*ERR*', 'VirtualSocket onclose not implemented. Of '+this.type)}
+          open : ()=>{Utils.TagLog('*ERR*', 'VirtualSocket opopen not implemented. Of '+this.type)},
+          message : ()=>{Utils.TagLog('*ERR*', 'VirtualSocket onmessage not implemented. Of '+this.type)},
+          error : ()=>{Utils.TagLog('*ERR*', 'VirtualSocket onerror not implemented. Of '+this.type)},
+          close : ()=>{Utils.TagLog('*ERR*', 'VirtualSocket onclose not implemented. Of '+this.type)}
         };
 
         this.returnLocalIP = () => {
@@ -108,7 +108,7 @@ function Connection(options) {
         let _returntype = (type) => {
           return _types[type];
         }
-        this.close = () => {Utils.tagLog('*ERR*', 'VirtualSocket onClose not implemented. Of '+this.type)};
+        this.close = () => {Utils.TagLog('*ERR*', 'VirtualSocket onClose not implemented. Of '+this.type)};
         this.on = (type, callback)=> {_types[type] = callback;};
         this.emit = (type, d) =>{
           let _exe = _returntype(type);
@@ -233,9 +233,9 @@ function Connection(options) {
       delete _myclients[GUID];
     };
 
-    this.onData = (connprofile, data) => {Utils.tagLog('*ERR*', 'onData not implemented');};
+    this.onData = (connprofile, data) => {Utils.TagLog('*ERR*', 'onData not implemented');};
 
-    this.onClose = (connprofile) => {Utils.tagLog('*ERR*', 'onClose not implemented');};
+    this.onClose = (connprofile) => {Utils.TagLog('*ERR*', 'onClose not implemented');};
 
     this.send = function(connprofile, data) {
       _myclients[connprofile.returnGUID()].send(data);
@@ -262,8 +262,8 @@ function Connection(options) {
         });
 
         ws.on('error', (message) => {
-          Utils.tagLog('*WARN*', 'An error occured on connection module.');
-          Utils.tagLog('*WARN*', message);
+          Utils.TagLog('*WARN*', 'An error occured on connection module.');
+          Utils.TagLog('*WARN*', message);
           ws.close();
           this.onClose(connprofile);
         });
@@ -288,9 +288,9 @@ function Connection(options) {
       _ws.close();
     };
 
-    this.onData = (connprofile, data) => {Utils.tagLog('*ERR*', 'onData not implemented');};
+    this.onData = (connprofile, data) => {Utils.TagLog('*ERR*', 'onData not implemented');};
 
-    this.onClose = () => {Utils.tagLog('*ERR*', 'onClose not implemented');};
+    this.onClose = () => {Utils.TagLog('*ERR*', 'onClose not implemented');};
 
     this.send = function(connprofile, data) {
       _ws.send(data);
@@ -309,8 +309,8 @@ function Connection(options) {
       });
 
       _ws.on('error', (error) => {
-        Utils.tagLog('*WARN*', 'An error occured on connection module.');
-        Utils.tagLog('*WARN*', error);
+        Utils.TagLog('*WARN*', 'An error occured on connection module.');
+        Utils.TagLog('*WARN*', error);
         _ws.close();
         this.onClose(connprofile);
       });
@@ -334,9 +334,9 @@ function Connection(options) {
       delete _myclients[GUID];
     };
 
-    this.onData = (connprofile, data) => {Utils.tagLog('*ERR*', 'onData not implemented');};
+    this.onData = (connprofile, data) => {Utils.TagLog('*ERR*', 'onData not implemented');};
 
-    this.onClose = (connprofile) => {Utils.tagLog('*ERR*', 'onClose not implemented');};
+    this.onClose = (connprofile) => {Utils.TagLog('*ERR*', 'onClose not implemented');};
 
     this.send = function(connprofile, data) {
       let c = _myclients[connprofile.returnGUID()];
@@ -367,8 +367,8 @@ function Connection(options) {
         });
 
         ws.on('error', (error) => {
-          Utils.tagLog('*WARN*', 'An error occured on connection module.');
-          Utils.tagLog('*WARN*', error);
+          Utils.TagLog('*WARN*', 'An error occured on connection module.');
+          Utils.TagLog('*WARN*', error);
           ws.close();
           this.onClose(connprofile);
         });
@@ -393,9 +393,9 @@ function Connection(options) {
       _ws.close();
     };
 
-    this.onData = (connprofile, data) => {Utils.tagLog('*ERR*', 'onData not implemented');};
+    this.onData = (connprofile, data) => {Utils.TagLog('*ERR*', 'onData not implemented');};
 
-    this.onClose = () => {Utils.tagLog('*ERR*', 'onClose not implemented');};
+    this.onClose = () => {Utils.TagLog('*ERR*', 'onClose not implemented');};
 
     this.send = function(connprofile, data) {
       _ws.send(data);
@@ -414,8 +414,8 @@ function Connection(options) {
       });
 
       _ws.on('error', (error) => {
-        Utils.tagLog('*WARN*', 'An error occured on connection module.');
-        Utils.tagLog('*WARN*', error);
+        Utils.TagLog('*WARN*', 'An error occured on connection module.');
+        Utils.TagLog('*WARN*', error);
         _ws.close();
         this.onClose(connprofile);
       });
@@ -438,9 +438,9 @@ function Connection(options) {
       delete _myclients[GUID];
     };
 
-    this.onData = (connprofile, data) => {Utils.tagLog('*ERR*', 'onData not implemented');};
+    this.onData = (connprofile, data) => {Utils.TagLog('*ERR*', 'onData not implemented');};
 
-    this.onClose = (connprofile) => {Utils.tagLog('*ERR*', 'onClose not implemented');};
+    this.onClose = (connprofile) => {Utils.TagLog('*ERR*', 'onClose not implemented');};
 
     this.send = function(connprofile, data) {
       _myclients[connprofile.returnGUID()].write(_tcp_ip_chunk_token+data);
@@ -468,8 +468,8 @@ function Connection(options) {
         });
 
         socket.on('error', (error) => {
-          Utils.tagLog('*WARN*', 'An error occured on connection module.');
-          Utils.tagLog('*WARN*', error);
+          Utils.TagLog('*WARN*', 'An error occured on connection module.');
+          Utils.TagLog('*WARN*', error);
           socket.destroy();
           this.onClose(connprofile);
         });
@@ -493,9 +493,9 @@ function Connection(options) {
 
     this.closeConnetion = (GUID) => {_netc.destroy()};
 
-    this.onData = (connprofile, data) => {Utils.tagLog('*ERR*', 'onData not implemented');};
+    this.onData = (connprofile, data) => {Utils.TagLog('*ERR*', 'onData not implemented');};
 
-    this.onClose = () => {Utils.tagLog('*ERR*', 'onClose not implemented');};
+    this.onClose = () => {Utils.TagLog('*ERR*', 'onClose not implemented');};
 
     this.send = (connprofile, data) => {
       _netc.write(_tcp_ip_chunk_token+data);
@@ -518,8 +518,8 @@ function Connection(options) {
       });
 
       _netc.on('error', (error) => {
-        Utils.tagLog('*WARN*', 'An error occured on connection module.');
-        Utils.tagLog('*WARN*', message);
+        Utils.TagLog('*WARN*', 'An error occured on connection module.');
+        Utils.TagLog('*WARN*', message);
         _netc.destroy();
         this.onClose(connprofile);
       });
@@ -542,9 +542,9 @@ function Connection(options) {
       delete _myclients[GUID];
     };
 
-    this.onData = (connprofile, data) => {Utils.tagLog('*ERR*', 'LocalServer onData not implemented.');};
+    this.onData = (connprofile, data) => {Utils.TagLog('*ERR*', 'LocalServer onData not implemented.');};
 
-    this.onClose = (connprofile) => {Utils.tagLog('*ERR*', 'LocalServer onClose not implemented');};
+    this.onClose = (connprofile) => {Utils.TagLog('*ERR*', 'LocalServer onClose not implemented');};
 
     this.send = (connprofile, data) => {
       _myclients[connprofile.returnGUID()].send(data);
@@ -567,7 +567,7 @@ function Connection(options) {
           });
 
           vs.on('error', (err) => {
-            Utils.tagLog('*ERR*', err);
+            Utils.TagLog('*ERR*', err);
             delete _myclients[connprofile.returnGUID()];
             this.onClose(connprofile);
             vs.close();
@@ -593,9 +593,9 @@ function Connection(options) {
 
     this.closeConnetion = (GUID) => {_vs.close()};
 
-    this.onData = (connprofile, data) => {Utils.tagLog('*ERR*', 'onData not implemented');};
+    this.onData = (connprofile, data) => {Utils.TagLog('*ERR*', 'onData not implemented');};
 
-    this.onClose = () => {Utils.tagLog('*ERR*', 'onClose not implemented');};
+    this.onClose = () => {Utils.TagLog('*ERR*', 'onClose not implemented');};
 
     this.send = function(connprofile, data) {
       _vs.send(data);
@@ -613,7 +613,7 @@ function Connection(options) {
         });
 
         vs.on('error', (error) => {
-            Utils.tagLog('*ERR*', error);
+            Utils.TagLog('*ERR*', error);
             vs.close();
         });
 
@@ -658,7 +658,7 @@ function Connection(options) {
         _have_local_server = true;
       }
       else {
-        Utils.tagLog('*ERR*', 'Can only exist one local server.');
+        Utils.TagLog('*ERR*', 'Can only exist one local server.');
       }
     }
 
@@ -672,7 +672,7 @@ function Connection(options) {
     }
 
     else {
-      Utils.tagLog('*ERR*', 'ConnType '+conn_method+' not implemented. Skipped.');
+      Utils.TagLog('*ERR*', 'ConnType '+conn_method+' not implemented. Skipped.');
     }
     // Heartbeat
     if(Object.keys(_servers).length==1) {
@@ -683,7 +683,7 @@ function Connection(options) {
           }
           catch(e) {
             if(_debug) {
-              Utils.tagLog('*WARN*', 'Server '+i+' occured error on heartbeat. Skipped.');
+              Utils.TagLog('*WARN*', 'Server '+i+' occured error on heartbeat. Skipped.');
             }
           }
         };
@@ -719,7 +719,7 @@ function Connection(options) {
 
     else if(conn_method == 'loc'||conn_method =='Local') {
       if(_have_local_server == false) {
-        Utils.tagLog('*ERR*', 'Local server not started.');
+        Utils.TagLog('*ERR*', 'Local server not started.');
       }
       else {
         let serverID = "LOCAL";
@@ -739,7 +739,7 @@ function Connection(options) {
     }
 
     else {
-      Utils.tagLog('*ERR*', 'ConnType '+conn_method+' not implemented. Skipped.');
+      Utils.TagLog('*ERR*', 'ConnType '+conn_method+' not implemented. Skipped.');
     }
   };
 
@@ -751,7 +751,7 @@ function Connection(options) {
     }
     catch (e) {
       if(_debug) {
-        Utils.tagLog('*WARN*', 'Error occured while sending Data.');
+        Utils.TagLog('*WARN*', 'Error occured while sending Data.');
         console.log(e);
       }
     }
@@ -765,18 +765,18 @@ function Connection(options) {
     }
     catch (e) {
       if(_debug) {
-        Utils.tagLog('*WARN*', 'Error occured while broadcasting Data.');
+        Utils.TagLog('*WARN*', 'Error occured while broadcasting Data.');
         console.log(e);
       }
     }
   };
 
   this.onData = (conn_profile, data) => {
-    Utils.tagLog('*ERR*', 'Connection module onData not implement');
+    Utils.TagLog('*ERR*', 'Connection module onData not implement');
   };
 
   this.onClose = (connprofile) => {
-    Utils.tagLog('*ERR*', 'Connection module onClose not implement');
+    Utils.TagLog('*ERR*', 'Connection module onClose not implement');
   }
 
   this.getServers = (callback) => {
@@ -809,10 +809,10 @@ function Connection(options) {
 
   this.close = () =>{
     this.onClose = (connprofile) => {
-      Utils.tagLog('*ERR*', 'Connection module onClose not implement');
+      Utils.TagLog('*ERR*', 'Connection module onClose not implement');
     };
     this.onData = (conn_profile, data) => {
-      Utils.tagLog('*ERR*', 'Connection module onData not implement');
+      Utils.TagLog('*ERR*', 'Connection module onData not implement');
     };
     for(let i in _clients) {
       _clients[i].closeConnetion();

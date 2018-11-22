@@ -103,7 +103,7 @@ function WorkerClient() {
               callback.apply(null, args);
             }
             catch (err) {
-              Utils.tagLog('*ERR*', 'Service API occured error. Please restart daemon.');
+              Utils.TagLog('*ERR*', 'Service API occured error. Please restart daemon.');
               console.log(err);
             }
           }
@@ -125,12 +125,12 @@ function WorkerClient() {
 
             _db.connect((err)=> {
               if(err) {
-                Utils.tagLog('*ERR*', 'Occur failure on connecting database. At service worker of "'+_service_name+'".');
+                Utils.TagLog('*ERR*', 'Occur failure on connecting database. At service worker of "'+_service_name+'".');
                 throw(err);
               }
               _model.importDatabase(_db, (err)=> {
                 if(err) {
-                  Utils.tagLog('*ERR*', 'Occur failure on importing database for model.  At service worker of "'+_service_name+'".');
+                  Utils.TagLog('*ERR*', 'Occur failure on importing database for model.  At service worker of "'+_service_name+'".');
                   console.log(err);
                   process.exit();
                 }
@@ -183,7 +183,7 @@ function WorkerClient() {
                 }
                 catch(e) {
                   console.log(e);
-                  process.send({t:99, e:e});
+                  process.send({t:99, e:e.toString()});
                 }
               });
             });
@@ -195,7 +195,7 @@ function WorkerClient() {
             }
             catch(e) {
               console.log(e);
-              process.send({t:99, e:e});
+              process.send({t:99, e:e.toString()});
             }
           }
         });
@@ -207,7 +207,7 @@ function WorkerClient() {
         process.send({t: 2});
       }
       catch(err) {
-        process.send({t: 98, e: err});
+        process.send({t: 98, e: err.toString()});
       }
     }
     // function return
@@ -216,7 +216,7 @@ function WorkerClient() {
         Utils.callObjCallback(_local_obj_callbacks_dict[message.p[0]], message.p[1], message.a, message.o, this.emitParentCallback, Utils.generateObjCallbacks);
       }
       catch (e) {
-        Utils.tagLog('*ERR*', 'Callback error occured on service "'+_service_name+'".');
+        Utils.TagLog('*ERR*', 'Callback error occured on service "'+_service_name+'".');
         console.log('Details: ');
         console.log(message);
         console.log(e);
@@ -235,7 +235,7 @@ function WorkerClient() {
     }
 
     else if(message.t == 98) {
-      Utils.tagLog('*ERR*', 'Service "'+_service_name+'" occured error on API call.');
+      Utils.TagLog('*ERR*', 'Service "'+_service_name+'" occured error on API call.');
       console.log('Details: ');
       console.log(message.d);
       console.log(message.e);
@@ -248,12 +248,12 @@ function WorkerClient() {
             process.send({t:3});
           }
           else {
-            process.send({t: 96, e: new Error('The service have no "close" function.')});
+            process.send({t: 96, e: 'The service "'+_service_name+'" have no "close" function.'});
           }
         }
         catch(e) {
-          process.send({t: 96, e: e});
-          // Utils.tagLog('*ERR*', 'Service "'+_service_name+'" occured error while closing.');
+          process.send({t: 96, e: e.toString()});
+          // Utils.TagLog('*ERR*', 'Service "'+_service_name+'" occured error while closing.');
           // console.log(e);
         }
       setTimeout(()=> {process.exit()}, _close_timeout);

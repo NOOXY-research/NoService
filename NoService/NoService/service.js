@@ -24,7 +24,7 @@ function Service() {
   let _workerd;
   let _master_service;
   let _debug_service;
-  let _emitRouter = () => {Utils.tagLog('*ERR*', 'emitRouter not implemented');};
+  let _emitRouter = () => {Utils.TagLog('*ERR*', 'emitRouter not implemented');};
 
   let ActivitySocketDestroyTimeout = 1000;
 
@@ -66,7 +66,7 @@ function Service() {
     _workerd.importAPI(serviceapi_module);
   };
 
-  this.spwanClient = () => {Utils.tagLog('*ERR*', 'spwanClient not implemented');};
+  this.spwanClient = () => {Utils.TagLog('*ERR*', 'spwanClient not implemented');};
 
   this.setEmitRouter = (emitRouter) => {_emitRouter = emitRouter};
 
@@ -411,18 +411,18 @@ function Service() {
     let _on_dict = {
       connect: (entityID, callback) => {
         if(_debug)
-          Utils.tagLog('*WARN*', 'onConnect of service "'+service_name+'" not implemented');
+          Utils.TagLog('*WARN*', 'onConnect of service "'+service_name+'" not implemented');
         callback(false);
       },
 
       data: (entityID, data) => {
         if(_debug)
-          Utils.tagLog('*WARN*', 'onData of service "'+service_name+'" not implemented');
+          Utils.TagLog('*WARN*', 'onData of service "'+service_name+'" not implemented');
       },
 
       close: (entityID, callback) => {
         if(_debug)
-          Utils.tagLog('*WARN*', 'onClose of service "'+service_name+'" not implemented');
+          Utils.TagLog('*WARN*', 'onClose of service "'+service_name+'" not implemented');
         callback(false);
       }
     }
@@ -475,17 +475,12 @@ function Service() {
     this.closeAll = (callback)=>{
       // console.log('f');
       let query = 'service='+service_name+',type=Activity';
-      let closed = false
       _entity_module.getfliteredEntitiesList(query, (err, entitiesID)=>{
         for(let i in entitiesID) {
           this.close(entitiesID[i]);
         }
         callback(false);
       });
-      setTimeout(()=>{
-        if(!closed)
-          callback(new Error("ServiceSocket closeAll reached timeout limited!"));
-      }, 1000);
     }
 
     this.onJFCall = (entityID, JFname, jsons, callback) => {
@@ -501,7 +496,7 @@ function Service() {
       }
       catch (err) {
         if(_debug) {
-          Utils.tagLog('*ERR*', 'An error occured on JSON function call. Jfunc might not be exist.');
+          Utils.TagLog('*ERR*', 'An error occured on JSON function call. Jfunc might not be exist.');
           console.log(err);
         }
         callback(err);
@@ -584,10 +579,10 @@ function Service() {
     let _jfqueue = {};
     let _on_dict = {
       data: ()=> {
-        if(_debug) Utils.tagLog('*WARN*', 'ActivitySocket on "data" not implemented')
+        if(_debug) Utils.TagLog('*WARN*', 'ActivitySocket on "data" not implemented')
       },
       close: ()=> {
-        if(_debug) Utils.tagLog('*WARN*', 'ActivitySocket on "close" not implemented')
+        if(_debug) Utils.TagLog('*WARN*', 'ActivitySocket on "close" not implemented')
       }
     };
 
@@ -739,15 +734,6 @@ function Service() {
 
     this.init = (callback) => {
       let erreport = null;
-      // check node packages dependenc
-      try{
-        _service_manifest = Utils.returnJSONfromFile(_service_path+'/manifest.json');
-      }
-      catch(err) {
-        erreport = new Error('Service "'+_service_name+'" load manifest.json with failure.');
-        callback(erreport);
-        return err;
-      };
       // check node packages dependencies
       try {
         for(let package_name in _service_manifest.dependencies.node_packages) {
@@ -799,13 +785,13 @@ function Service() {
         else if(!fs.existsSync(_service_files_path)) {
           fs.mkdirSync(_service_files_path);
           if(_debug) {
-            Utils.tagLog('Service', 'Created service files folder at '+_service_files_path);
+            Utils.TagLog('Service', 'Created service files folder at '+_service_files_path);
           }
         }
         if(!fs.existsSync(_service_files_path+'/settings.json')) {
           if(typeof(_service_manifest.settings) != 'undefined') {
             fs.writeFileSync(_service_files_path+'/settings.json', JSON.stringify(_service_manifest.settings, null, 2));
-            Utils.tagLog('Service', 'Settings file not exist. Created service settings at "'+_service_files_path+'/settings.json"');
+            Utils.TagLog('Service', 'Settings file not exist. Created service settings at "'+_service_files_path+'/settings.json"');
           }
         }
         else {
@@ -813,7 +799,7 @@ function Service() {
             _service_manifest.settings = JSON.parse(fs.readFileSync(_service_files_path+'/settings.json', 'utf8'));
           }
           catch (err) {
-            Utils.tagLog('*ERR*', 'Settings file corrupted. FilesPath "'+_service_files_path+'/settings.json"');
+            Utils.TagLog('*ERR*', 'Settings file corrupted. FilesPath "'+_service_files_path+'/settings.json"');
             callback(err);
           }
         }
@@ -857,6 +843,12 @@ function Service() {
 
     this.setupPath = (path) => {
       _service_path = path;
+      try{
+        _service_manifest = Utils.returnJSONfromFile(_service_path+'/manifest.json');
+      }
+      catch(err) {
+        throw new Error('Service "'+_service_name+'" load manifest.json with failure.');
+      };
     };
 
     this.setupFilesPath = (path) => {
@@ -892,6 +884,9 @@ function Service() {
       else if (_isInitialized) {
         _worker.close(callback);
       }
+      else {
+        callback(false);
+      }
     };
   };
 
@@ -909,30 +904,30 @@ function Service() {
       // setup debug service
       _local_services[_debug_service].init((err)=> {
         if(err) {
-          Utils.tagLog('*ERR*', 'Error occured while initializing debug service "'+_debug_service+'".');
-          Utils.tagLog('*ERR*', err.toString());
+          Utils.TagLog('*ERR*', 'Error occured while initializing debug service "'+_debug_service+'".');
+          Utils.TagLog('*ERR*', err.toString());
         }
         else {
           _local_services[_debug_service].launch((err)=> {
             if(err) {
-              Utils.tagLog('*ERR*', 'Error occured while launching debug service "'+_debug_service+'".');
-              Utils.tagLog('*ERR*', err.toString());
+              Utils.TagLog('*ERR*', 'Error occured while launching debug service "'+_debug_service+'".');
+              Utils.TagLog('*ERR*', err.toString());
             }
             else {
-              Utils.tagLog('Service', 'Debug Service "'+_debug_service+'" launched.');
+              Utils.TagLog('Service', 'Debug Service "'+_debug_service+'" launched.');
               _local_services[_master_service].init((err)=> {
                 if(err) {
-                  Utils.tagLog('*ERR*', 'Error occured while initializing master service "'+_debug_service+'".');
-                  Utils.tagLog('*ERR*', err.toString());
+                  Utils.TagLog('*ERR*', 'Error occured while initializing master service "'+_debug_service+'".');
+                  Utils.TagLog('*ERR*', err.toString());
                 }
                 else {
                   _local_services[_master_service].launch((err)=> {
                     if(err) {
-                      Utils.tagLog('*ERR*', 'Error occured while launching master service "'+_debug_service+'".');
-                      Utils.tagLog('*ERR*', err.toString());
+                      Utils.TagLog('*ERR*', 'Error occured while launching master service "'+_debug_service+'".');
+                      Utils.TagLog('*ERR*', err.toString());
                     }
                     else {
-                      Utils.tagLog('Service', 'Master Service "'+_master_service+'" launched.');
+                      Utils.TagLog('Service', 'Master Service "'+_master_service+'" launched.');
                     }
                   });
                 }
@@ -946,17 +941,17 @@ function Service() {
     else {
       _local_services[_master_service].init((err)=> {
         if(err) {
-          Utils.tagLog('*ERR*', 'Error occured while initializing master service "'+_debug_service+'".');
-          Utils.tagLog('*ERR*', err.toString());
+          Utils.TagLog('*ERR*', 'Error occured while initializing master service "'+_debug_service+'".');
+          Utils.TagLog('*ERR*', err.toString());
         }
         else {
           _local_services[_master_service].launch((err)=> {
             if(err) {
-              Utils.tagLog('*ERR*', 'Error occured while launching master service "'+_debug_service+'".');
-              Utils.tagLog('*ERR*', err.toString());
+              Utils.TagLog('*ERR*', 'Error occured while launching master service "'+_debug_service+'".');
+              Utils.TagLog('*ERR*', err.toString());
             }
             else {
-              Utils.tagLog('Service', 'Master Service "'+_master_service+'" launched.');
+              Utils.TagLog('Service', 'Master Service "'+_master_service+'" launched.');
             }
           });
         }
@@ -1070,6 +1065,14 @@ function Service() {
   };
 
 // -------------------------- Service update
+  this.getServicesManifest = (callback)=> {
+    let results = {};
+    for(let service_name in _local_services) {
+      results[service_name] = _local_services[service_name].returnManifest();
+    }
+    callback(false, results);
+  };
+
   this.launchService = (service_name, callback)=> {
     _local_services[service_name].launch(callback);
   };
@@ -1117,14 +1120,16 @@ function Service() {
 
   // service module close
   this.close = () => {
+
     for(let i in _local_services) {
+
       try{
         _local_services[i].close(()=> {
           // closed
         });
       }
       catch(e) {
-        Utils.tagLog('*ERR*', 'An error occured on closing service "'+i+'"');
+        Utils.TagLog('*ERR*', 'An error occured on closing service "'+i+'"');
         console.log(e);
       }
     }

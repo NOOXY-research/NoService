@@ -5,7 +5,8 @@
 'use strict';
 
 function Service(Me, api) {
-  // Your service entry point
+  // Initialize your service here synchronous. Do not use async here!
+
   // Get the service socket of your service
   let ss = api.Service.ServiceSocket;
   // BEWARE! To prevent callback error crash the system.
@@ -98,6 +99,7 @@ function Service(Me, api) {
 
   // If the daemon stop, your service recieve close signal here.
   this.close = ()=> {
+    // Close your service here synchronous. Do not use async here!
     // Saving state of you service.
     // Please save and manipulate your files in this directory
   }

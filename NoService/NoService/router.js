@@ -314,7 +314,7 @@ function Router() {
       }
       catch (er) {
         if(_debug) {
-          Utils.tagLog('*ERR*', 'An error occured in router module.');
+          Utils.TagLog('*ERR*', 'An error occured in router module.');
           console.log(er);
         }
       }
@@ -328,7 +328,7 @@ function Router() {
       }
       catch (er) {
         if(_debug) {
-          Utils.tagLog('*WARN*', 'An error occured in router module.');
+          Utils.TagLog('*WARN*', 'An error occured in router module.');
           console.log(er);
         }
       }

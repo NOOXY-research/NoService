@@ -106,7 +106,7 @@ function WorkerDaemon() {
     this.emitRemoteUnbind = (id)=> {
       _child.send({t:3, i: id}, (err)=> {
         if (err) {
-          Utils.tagLog('*ERR*' , 'Occured error on sending data to child "'+_service_name+'".');
+          Utils.TagLog('*ERR*' , 'Occured error on sending data to child "'+_service_name+'".');
           console.log(err);
         }
       });
@@ -123,13 +123,13 @@ function WorkerDaemon() {
       try {
         _child.send(_data, (err)=> {
           if (err) {
-            Utils.tagLog('*ERR*' , 'Occured error on sending data to child "'+_service_name+'".');
+            Utils.TagLog('*ERR*' , 'Occured error on sending data to child "'+_service_name+'".');
             console.log(err);
           }
         });
       }
       catch(err) {
-        Utils.tagLog('*ERR*' , 'Occured error on "'+_service_name+'".');
+        Utils.TagLog('*ERR*' , 'Occured error on "'+_service_name+'".');
         console.log(err);
       }
     }
@@ -216,7 +216,7 @@ function WorkerDaemon() {
     };
 
     this.relaunch = (relaunch_callback)=> {
-      Utils.tagLog('Workerd', 'Relaunching service "'+_service_name+'"');
+      Utils.TagLog('Workerd', 'Relaunching service "'+_service_name+'"');
       this.close((err)=> {
         if(err) {
           relaunch_callback(err);

@@ -9,6 +9,7 @@ function Service(Me, api) {
   // Your service entry point
   // Get the service socket of your service
   let ss = api.Service.ServiceSocket;
+  let Utils = api.Library.Utilities;
   // BEWARE! To prevent callback error crash the system.
   // If you call an callback function which is not API provided. Such as setTimeout(callback, timeout).
   // You need to wrap the callback funciton by api.SafeCallback.
@@ -18,11 +19,9 @@ function Service(Me, api) {
   let files_path = Me.FilesPath;
   // Your settings in manifest file.
   let settings = Me.Settings;
-
-  let serviceAPI = api.Service;
-
   let isWin = require('os').platform().indexOf('win') > -1;
   let where = isWin ? 'where' : 'whereis';
+  let dependencies_level_stack = [];
 
   let checkupdate = (callback)=> {
 
@@ -30,6 +29,174 @@ function Service(Me, api) {
 
   this.start = ()=> {
     // initializing and launching services
+    let launch_other_services = ()=> {
+      api.Daemon.getSettings((err, dsettings)=> {
+        let ServiceAPI = api.Service;
+
+        let stacked_services = [];
+        let unstacked_services = [];
+        // Check version and dependencies.
+        ServiceAPI.getServicesManifest((err, manifests)=> {
+          unstacked_services = Object.keys(manifests);
+          let root_level = {};
+          for(let service_name in manifests) {
+            let dependencies = manifests[service_name].dependencies;
+            // check node
+            if(dependencies) {
+              for(let package in dependencies.node_packages) {
+                try {
+                  require.resolve(package);
+                } catch (e) {
+                  console.log('Please install package "'+package+'" for service "'+service_name+'".');
+                  api.Daemon.close();
+                }
+              }
+              for(let service in dependencies.services) {
+                let require_version = dependencies.services[service];
+                if(manifests[service]) {
+                  let actual_version = manifests[service].version;
+                  if(Utils.compareVersion(actual_version, require_version)>=0||!dsettings.master_config.check_service_version) {
+
+                  }
+                  else {
+                    console.log('Please deploy service "'+service+'(ver: '+require_version+')" for service "'+service_name+'".');
+                    api.Daemon.close();
+                  }
+                }
+                else {
+                  console.log('Please deploy service "'+service+'(ver: '+require_version+')" for service "'+service_name+'".');
+                  api.Daemon.close();
+                }
+              }
+              if(Object.keys(dependencies.services).length == 0) {
+                root_level[service_name]={launched: false};
+                stacked_services.push(service_name);
+                let index = unstacked_services.indexOf(service_name);
+                if (index > -1) {
+                  unstacked_services.splice(index, 1);
+                }
+              };
+            }
+            else {
+              console.log('Service "'+service_name+'" missing dependencies settings.');
+              api.Daemon.close();
+            }
+          };
+          // push root level
+          dependencies_level_stack.push(root_level);
+          // root should not be empty
+          if(Object.keys(root_level).length == 0) {
+            console.log('Occured circular dependency');
+            console.log('List of successfully parse service: ', stacked_services);
+            api.Daemon.close();
+          }
+          let finish_stacking = false;
+          // stacking dependencies level
+          while(!finish_stacking) {
+            let this_level = {};
+            for(let i in unstacked_services) {
+              let service = unstacked_services[i];
+              let dependended_services = manifests[service].dependencies.services;
+              // check node
+              let satisfied = true;
+              for(let service_be_check in dependended_services) {
+                if(!stacked_services.includes(service_be_check)) {
+                  satisfied = false;
+                }
+              }
+
+              if(satisfied == true) {
+                this_level[service]={launched: false};
+                stacked_services.push(service);
+                let index = unstacked_services.indexOf(service);
+                if (index > -1) {
+                  unstacked_services.splice(index, 1);
+                }
+              }
+            }
+
+            if(Object.keys(this_level).length == 0&&unstacked_services.length != 0) {
+              Utils.TagLog('*ERR*', 'Occured circular dependency');
+              Utils.TagLog('*ERR*', 'List of successfully parsed service:');
+              console.log(stacked_services);
+              Utils.TagLog('*ERR*','List of not parsed service:');
+              console.log(unstacked_services);
+              api.Daemon.close();
+              break;
+            }
+            else if(Object.keys(this_level).length != 0) {
+              dependencies_level_stack.push(this_level);
+            }
+            finish_stacking = (unstacked_services.length == 0);
+          }
+          // launch services by dependencies level
+          // remove launched
+          // remove myself
+          delete (dependencies_level_stack[0])[dsettings.master_service];
+          // remove debug
+          delete (dependencies_level_stack[0])[dsettings.debug_service];
+          // start launching
+          let init_from_level = (level, callback)=> {
+            let left = Object.keys(dependencies_level_stack[level]).length;
+            let call_callback = (err)=> {
+              if(err) {
+                left = -1;
+                callback(err);
+              }
+              else {
+                left--;
+                if(left == 0) {
+                  if(level<Object.keys(dependencies_level_stack).length-1) {
+                    init_from_level(level+1, callback);
+                  }
+                  else {
+                    callback(false);
+                  }
+                }
+              }
+            }
+            for(let service_name in dependencies_level_stack[level]) {
+              ServiceAPI.initialize(service_name, call_callback);
+            }
+          }
+
+          init_from_level(0, (err)=> {
+            let launch_from_level = (level, callback)=> {
+              let left = Object.keys(dependencies_level_stack[level]).length;
+              let call_callback = (err)=> {
+                if(err) {
+                  left = -1;
+                  callback(err);
+                }
+                else {
+                  left--;
+                  if(left == 0) {
+                    if(level<Object.keys(dependencies_level_stack).length-1) {
+                      launch_from_level(level+1, callback);
+                    }
+                    else {
+                      callback(false);
+                    }
+                  }
+                }
+              }
+              for(let service_name in dependencies_level_stack[level]) {
+                ServiceAPI.launch(service_name, call_callback);
+              }
+            }
+            launch_from_level(0, (err)=> {
+              if(err) {
+                console.log(err);
+              }
+              else {
+                Utils.TagLog('service', Me.Manifest.name+' have launched your service successfully.');
+              }
+            });
+          });
+        });
+      });
+    };
+
 
     // initializing and launching services end
 
@@ -116,9 +283,13 @@ function Service(Me, api) {
           }
         }
       });
+
+      ss.sdef('killService', (json, entityID, returnJSON)=> {
+
+      });
+
+      launch_other_services();
     });
-
-
   }
 
   // If the daemon stop, your service recieve close signal here.

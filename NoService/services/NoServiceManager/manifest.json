@@ -3,7 +3,7 @@
 
   "version": "0.0.0",
 
-  "displayname": "NOOXY Service Framework service manager",
+  "displayname": "NoService manager",
 
   "description": "Providing ablilty to create, manipulate or modify NoService Services.",
 
@@ -11,6 +11,8 @@
     "noowyee",
      "NOOXY"
   ],
+
+  "LibraryAPI": true,
 
   "implementation_api": false,
 

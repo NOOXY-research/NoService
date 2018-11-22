@@ -111,7 +111,7 @@ function ServiceAPI() {
           }
         }
         catch(e) {
-          Utils.tagLog('*ERR*', 'LCBO occured error.');
+          Utils.TagLog('*ERR*', 'LCBO occured error.');
           console.log(e);
         }
         if(isOneTimeObj) {
@@ -558,6 +558,13 @@ function ServiceAPI() {
         remote_callback_obj.unbindRemote();
       },
 
+      getServicesManifest: (remote_callback_obj)=> {
+        _coregateway.Service.getServicesManifest((err, manifest)=> {
+          remote_callback_obj.run([], [err, manifest]);
+          remote_callback_obj.unbindRemote();
+        });
+      },
+
       getJSONfuncList: (service_name, remote_callback_obj)=> {
         remote_callback_obj.run([], [false, _coregateway.Service.returnJSONfuncList(service_name)]);
         remote_callback_obj.unbindRemote();
@@ -570,42 +577,42 @@ function ServiceAPI() {
 
       launch: (service_name, remote_callback_obj)=> {
         _coregateway.Service.launchService(service_name, (err)=> {
-          emote_callback_obj.run([], [err]);
+          remote_callback_obj.run([], [err]);
           remote_callback_obj.unbindRemote();
         });
       },
 
       initialize: (service_name, remote_callback_obj)=> {
         _coregateway.Service.initializeService(service_name, (err)=> {
-          emote_callback_obj.run([], [err]);
+          remote_callback_obj.run([], [err]);
           remote_callback_obj.unbindRemote();
         });
       },
 
       relaunch: (service_name, remote_callback_obj)=> {
         _coregateway.Service.relaunchService(service_name, (err)=> {
-          emote_callback_obj.run([], [err]);
+          remote_callback_obj.run([], [err]);
           remote_callback_obj.unbindRemote();
         });
       },
 
       close: (service_name, remote_callback_obj)=> {
         _coregateway.Service.closeService(service_name, (err)=> {
-          emote_callback_obj.run([], [err]);
+          remote_callback_obj.run([], [err]);
           remote_callback_obj.unbindRemote();
         });
       },
 
       isServiceLaunched: (service_name, remote_callback_obj)=> {
         _coregateway.Service.isServiceLaunched(service_name, (err)=> {
-          emote_callback_obj.run([], [err]);
+          remote_callback_obj.run([], [err]);
           remote_callback_obj.unbindRemote();
         });
       },
 
       isServiceInitialized: (service_name, remote_callback_obj)=> {
         _coregateway.Service.isServiceInitialized(service_name, (err)=> {
-          emote_callback_obj.run([], [err]);
+          remote_callback_obj.run([], [err]);
           remote_callback_obj.unbindRemote();
         });
       },

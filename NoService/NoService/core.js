@@ -40,7 +40,7 @@ function Core(settings) {
 
   let verbose = (tag, log) => {
     if(settings.verbose||settings.debug) {
-      Utils.tagLog(tag, log);
+      Utils.TagLog(tag, log);
     };
   };
 
@@ -136,20 +136,23 @@ function Core(settings) {
         let _daemon = {
           Settings: settings,
           close: () => {
-            _connection.close();
-            _router.close();
-            _service.close();
-            _authorization.close();
-            _authorizationhandler.close();
-            _authenticity.close();
-            _entity.close();
-            _serviceAPI.close();
-            _implementation.close();
-            _nocrypto.close();
-            _nsps.close();
-            _workerd.close();
-            verbose('Daemon', 'Stopping daemon in '+settings.kill_daemon_timeout+'ms.');
-            setTimeout(process.exit, settings.kill_daemon_timeout);
+            if(!_daemon.close_emmited) {
+              _daemon.close_emmited = true;
+              _connection.close();
+              _router.close();
+              _service.close();
+              _authorization.close();
+              _authorizationhandler.close();
+              _authenticity.close();
+              _entity.close();
+              _serviceAPI.close();
+              _implementation.close();
+              _nocrypto.close();
+              _nsps.close();
+              _workerd.close();
+              verbose('Daemon', 'Stopping daemon in '+settings.kill_daemon_timeout+'ms.');
+              setTimeout(process.exit, settings.kill_daemon_timeout);
+            }
           },
           restart: ()=> {
             _daemon.close();
@@ -232,14 +235,14 @@ function Core(settings) {
       verbose('Daemon', 'Connecting to database.')
       _database.connect((err)=> {
         if(err) {
-          Utils.tagLog('*ERR*', 'Occur failure on connecting database.');
+          Utils.TagLog('*ERR*', 'Occur failure on connecting database.');
           throw(err);
         }
         verbose('Daemon', 'Importing Database to Model...');
         // Import connected db to model module
         _model.importDatabase(_database, (err)=> {
           if(err) {
-            Utils.tagLog('*ERR*', 'Occur failure on importing database for model.');
+            Utils.TagLog('*ERR*', 'Occur failure on importing database for model.');
             throw(err);
           }
           verbose('Daemon', 'Importing Model to Authenticity...')
@@ -248,7 +251,7 @@ function Core(settings) {
           _authenticity.TokenExpirePeriod = settings.token_expire_period;
           _authenticity.importModelModule(_model, (err)=> {
             if(err) {
-              Utils.tagLog('*ERR*', 'Occur failure on importing model for authenticity.');
+              Utils.TagLog('*ERR*', 'Occur failure on importing model for authenticity.');
               throw(err);
             }
             // setup entity
@@ -339,15 +342,15 @@ function Core(settings) {
         return true;
       }
       else {
-        Utils.tagLog('*ERR*', 'Secure is on. But RSA2048 Key Pair is not set. Please geneate it by openssl.');
-        Utils.tagLog('*ERR*', 'Your settings:');
-        Utils.tagLog('*ERR*', 'PrivateKey: '+settings.rsa_2048_priv_key);
-        Utils.tagLog('*ERR*', 'PublicKey: '+settings.rsa_2048_pub_key);
-        Utils.tagLog('*ERR*', '-');
-        Utils.tagLog('*ERR*', 'You can generate it in UNIX system by openssl.');
-        Utils.tagLog('*ERR*', '$ openssl genrsa -des3 -out private.pem 2048');
-        Utils.tagLog('*ERR*', '$ openssl rsa -in private.pem -outform PEM -pubout -out public.pem');
-        Utils.tagLog('*ERR*', '$ openssl rsa -in private.pem -out private.pem -outform PEM');
+        Utils.TagLog('*ERR*', 'Secure is on. But RSA2048 Key Pair is not set. Please geneate it by openssl.');
+        Utils.TagLog('*ERR*', 'Your settings:');
+        Utils.TagLog('*ERR*', 'PrivateKey: '+settings.rsa_2048_priv_key);
+        Utils.TagLog('*ERR*', 'PublicKey: '+settings.rsa_2048_pub_key);
+        Utils.TagLog('*ERR*', '-');
+        Utils.TagLog('*ERR*', 'You can generate it in UNIX system by openssl.');
+        Utils.TagLog('*ERR*', '$ openssl genrsa -des3 -out private.pem 2048');
+        Utils.TagLog('*ERR*', '$ openssl rsa -in private.pem -outform PEM -pubout -out public.pem');
+        Utils.TagLog('*ERR*', '$ openssl rsa -in private.pem -out private.pem -outform PEM');
         process.exit()
         return false;
       }
@@ -369,27 +372,27 @@ function Core(settings) {
     // Connect to db
     _init_db.connect((err)=> {
       if(err) {
-        Utils.tagLog('*ERR*', 'Occur failure on connecting database.');
+        Utils.TagLog('*ERR*', 'Occur failure on connecting database.');
         throw(err);
       }
       verbose('Daemon', 'Importing Database...')
       // Import connected db to model module
       _init_model.importDatabase(_init_db, (err)=> {
         if(err) {
-          Utils.tagLog('*ERR*', 'Occur failure on importing database for model.');
+          Utils.TagLog('*ERR*', 'Occur failure on importing database for model.');
           throw(err);
         }
         verbose('Daemon', 'Importing Model...')
         // Import set Model Module to authenticity.
         _init_auth.importModelModule(_init_model, (err)=>{
           if(err) {
-            Utils.tagLog('*ERR*', 'Occur failure on importing model for authenticity.');
+            Utils.TagLog('*ERR*', 'Occur failure on importing model for authenticity.');
             throw(err);
           }
           verbose('Daemon', 'Initializing authenticity...')
           _init_auth.createUser(Constants.default_user.username, Constants.default_user.displayname, Constants.default_user.password, 0, null, 'The', 'Admin', (err)=> {
             if(err) {
-              Utils.tagLog('*ERR*', 'Occur failure on creating database.');
+              Utils.TagLog('*ERR*', 'Occur failure on creating database.');
               console.log(err);
               callback(err);
             }
@@ -398,7 +401,7 @@ function Core(settings) {
               verbose('Daemon', 'Creating eula...')
               fs.writeFile('./eula.txt', '', (err)=> {
                 if(err) {
-                  Utils.tagLog('*ERR*', 'Writing EULA error.');
+                  Utils.TagLog('*ERR*', 'Writing EULA error.');
                   console.log(err);
                   callback(err);
                 }
