@@ -74,7 +74,7 @@ function Service(Me, API) {
     });
 
     ss.sdef('unbindServiceRepo', (json, entityID, returnJSON)=> {
-
+      
     });
 
     ss.sdef('installService', (json, entityID, returnJSON)=> {

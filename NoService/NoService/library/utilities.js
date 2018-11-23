@@ -6,7 +6,7 @@
 
 const fs = require('fs');
 const crypto = require('crypto');
-const { exec } = require('child_process');
+const { exec, execSync } = require('child_process');
 
 const UUID_pool = 31 * 128; // 36 chars minus 4 dashes and 1 four
 const UUID_template = "10000000-1000-4000-8000-100000000000";
@@ -16,11 +16,23 @@ let existCmd = (cmd, callback)=> {
   exec('which '+cmd , (err, stdout, stderr) => {
     if(err) {
       callback(false, false);
+      return false;
     }
     else {
       callback(false, true);
+      return true;
     }
   });
+};
+
+let isDirGitInitedSync = (dir, callback)=> {
+  try {
+    execSync('cd '+dir+'/.git');
+    return true;
+  }
+  catch (e) {
+    return false;
+  }
 };
 
 let isDirGitInited = (dir, callback)=> {
@@ -416,6 +428,7 @@ let SQLtoDate = (sqlDate) => {
 module.exports = {
   UnixCmd: {
     uninitGitDir: uninitGitDir,
+    isDirGitInitedSync: isDirGitInitedSync,
     existCmd: existCmd,
     isDirGitInited: isDirGitInited,
     initGitDir: initGitDir,

@@ -19,6 +19,7 @@ function NoServiceManager() {
   let _on_handler = {};
 
   let dependencies_level_stack = [];
+  let service_bind_repo_status = {};
 
   // import model from API in entry.js
   this.importModel = (model)=> {
@@ -58,7 +59,6 @@ function NoServiceManager() {
   // define you own funciton to be called in entry.js
   this.launchOtherServices = ()=> {
     Daemon.getSettings((err, dsettings)=> {
-
       let stacked_services = [];
       let unstacked_services = [];
       // Check version and dependencies.
@@ -66,6 +66,15 @@ function NoServiceManager() {
         unstacked_services = Object.keys(manifests);
         let root_level = {};
         for(let service_name in manifests) {
+          // reslove service_bind_repo_status
+          let services_path = dsettings.services_path;
+          service_bind_repo_status[service_name] = {};
+          if(manifests[service_name].git_url) {
+            service_bind_repo_status[service_name].git_url = manifests[service_name].git_url;
+          }
+
+          service_bind_repo_status[service_name].init = Utils.UnixCmd.isDirGitInitedSync(services_path+'/'+service_name);
+          //
           let dependencies = manifests[service_name].dependencies;
           // check node
           if(dependencies) {
@@ -108,6 +117,7 @@ function NoServiceManager() {
             Daemon.close();
           }
         };
+        console.log(service_bind_repo_status);
         // push root level
         dependencies_level_stack.push(root_level);
         // root should not be empty
@@ -289,6 +299,33 @@ function NoServiceManager() {
     });
   };
 
+  this.killService = (service_name, callback)=> {
+    
+  };
+
+  this.upgradeService = (service_name, callback)=> {
+
+  };
+
+  this.upgradeAllService = (callback)=> {
+
+  };
+
+  this.installService = (giturl, callback)=> {
+
+  };
+
+  this.bindServiceToRepository = ()=> {
+
+  };
+
+  this.unbindServiceFromRepository = ()=> {
+
+  };
+
+  this.getServiceRepositoryBindList = ()=> {
+
+  };
   // on event register
   this.on = (event, callback)=> {
     _on_handler[event] = callback;
