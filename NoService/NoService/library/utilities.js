@@ -27,7 +27,7 @@ let existCmd = (cmd, callback)=> {
 
 let isDirGitInitedSync = (dir, callback)=> {
   try {
-    execSync('cd '+dir+'/.git');
+    execSync('cd '+dir+'/.git').toString();
     return true;
   }
   catch (e) {

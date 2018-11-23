@@ -21,6 +21,8 @@ function NoServiceManager() {
   let dependencies_level_stack = [];
   let service_bind_repo_status = {};
 
+  let services_path;
+
   // import model from API in entry.js
   this.importModel = (model)=> {
     Model = model;
@@ -56,6 +58,26 @@ function NoServiceManager() {
     ServiceAPI = api;
   };
 
+  this.loadServiceBindRepoStatus = ()=> {
+    fs.readdirSync(services_path).forEach(servicedir => {
+      try {
+        if(fs.lstatSync(services_path+'/'+servicedir).isDirectory()) {
+          // reslove service_bind_repo_status
+          let manifest = JSON.parse(fs.readFileSync(services_path+'/'+servicedir+'/manifest.json', 'utf8'));
+          service_bind_repo_status[servicedir] = {};
+          if(manifest.git_url) {
+            service_bind_repo_status[servicedir].git_url = manifest.git_url;
+          }
+          service_bind_repo_status[servicedir].init = Utils.UnixCmd.isDirGitInitedSync(services_path+servicedir);
+          // resolve end
+        }
+      }
+      catch(e) {
+
+      }
+    })
+  };
+
   // define you own funciton to be called in entry.js
   this.launchOtherServices = ()=> {
     Daemon.getSettings((err, dsettings)=> {
@@ -65,16 +87,9 @@ function NoServiceManager() {
       ServiceAPI.getServicesManifest((err, manifests)=> {
         unstacked_services = Object.keys(manifests);
         let root_level = {};
+        services_path = dsettings.services_path;
+        this.loadServiceBindRepoStatus();
         for(let service_name in manifests) {
-          // reslove service_bind_repo_status
-          let services_path = dsettings.services_path;
-          service_bind_repo_status[service_name] = {};
-          if(manifests[service_name].git_url) {
-            service_bind_repo_status[service_name].git_url = manifests[service_name].git_url;
-          }
-
-          service_bind_repo_status[service_name].init = Utils.UnixCmd.isDirGitInitedSync(services_path+'/'+service_name);
-          //
           let dependencies = manifests[service_name].dependencies;
           // check node
           if(dependencies) {
@@ -117,7 +132,6 @@ function NoServiceManager() {
             Daemon.close();
           }
         };
-        console.log(service_bind_repo_status);
         // push root level
         dependencies_level_stack.push(root_level);
         // root should not be empty
@@ -198,7 +212,7 @@ function NoServiceManager() {
 
         init_from_level(0, (err)=> {
           if(err) {
-            Utils.TagLog('*ERR*', '****** An error occured on initializing service. ******');
+            Utils.TagLog('*ERR*', '****** An error occured on initializing service. Closeing... ******');
             console.log(err);
             Daemon.close();
           }
@@ -228,7 +242,7 @@ function NoServiceManager() {
           }
           launch_from_level(0, (err)=> {
             if(err) {
-              Utils.TagLog('*ERR*', '****** An error occured on lauching service. ******');
+              Utils.TagLog('*ERR*', '****** An error occured on lauching service. Closeing...  ******');
               console.log(err);
               Daemon.close();
             }
@@ -247,7 +261,7 @@ function NoServiceManager() {
 
   this.createService = (service_name, type, callback) => {
     Daemon.getSettings((err, DaemonSettings)=> {
-      let services_path = DaemonSettings.services_path;
+      services_path = DaemonSettings.services_path;
       let services_files_path = DaemonSettings.services_files_path;
       let prototype_path = services_path+Me.Manifest.name+'/prototypes/normal/';
       let commons_path = services_path+Me.Manifest.name+'/prototypes/__commons__/';
@@ -300,7 +314,7 @@ function NoServiceManager() {
   };
 
   this.killService = (service_name, callback)=> {
-    
+
   };
 
   this.upgradeService = (service_name, callback)=> {
@@ -312,10 +326,52 @@ function NoServiceManager() {
   };
 
   this.installService = (giturl, callback)=> {
-
+    Daemon.getSettings((err, DaemonSettings)=> {
+      let workingdir = Utils.generateUniqueID();
+      services_path = DaemonSettings.services_path;
+      fs.mkdirSync(FilesPath+workingdir);
+      try {
+        fs.mkdirSync(FilesPath+workingdir);
+      }
+      catch(e) {}
+      Utils.UnixCmd.initGitDir(FilesPath+workingdir, giturl, (err)=> {
+        if(err) {
+          callback(err);
+        }
+        else {
+          Utils.UnixCmd.pullGitDir(FilesPath+workingdir, (err)=>{
+            if(err) {
+              callback(err);
+            }
+            else {
+              try {
+                let manifest = JSON.parse(fs.readFileSync(FilesPath+workingdir+'/manifest.json', 'utf8'));
+                fs.renameSync(FilesPath+workingdir, services_path+'/'+manifest.name);
+                service_bind_repo_status[manifest.name] = {
+                  git_url: giturl,
+                  init: true
+                };
+                callback(false);
+              }
+              catch(err) {
+                callback(err);
+              }
+            }
+          });
+        }
+      });
+    });
   };
 
   this.bindServiceToRepository = ()=> {
+
+  };
+
+  this.bindAllServiceToRepository = ()=> {
+
+  };
+
+  this.unbindAllServiceFromRepository = ()=> {
 
   };
 

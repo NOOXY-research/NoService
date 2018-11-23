@@ -118,7 +118,7 @@ function Service(Me, api) {
                   '  service [jfunclist|jfuncdict|jfuncshow] {target service}\n'+
                   '  service jfunc {target service} {target username} {target jfunc} {JSON} ---Call a JSONfunction as target user.\n'+
                   '  service entity [show {entityID}|list|count|showuser {username}]\n'+
-                  ' *[not yet, will be avalible 0.4.x] service git install {repos/repo} {gitsource} \n'+
+                  '  service git install {repos/repo} {gitsource} \n'+
                   ' *[not yet, will be avalible 0.4.x] service git [upgrade|init] {servicename}\n'+
                   ' *[not yet, will be avalible 0.4.x] service git upgrade all\n'+
                   '\n'+
@@ -162,6 +162,23 @@ function Service(Me, api) {
 
               service: (t0, c0) => {
                 return _(t0, {
+                  git: (t1, c1) => {
+                    return _(t1, {
+                      install: (t2, c2)=>{
+                        api.Service.ActivitySocket.createDefaultAdminDeamonSocket('NoServiceManager', (err, as)=> {
+                          if(err) {
+                            c2(false, {r:'Failed'});
+                          }
+                          else {
+                            as.call('installService', {m: 'git', r: t2[0], s: t2[1]}, (err, json)=>{
+                              c2(false, {r:JSON.stringify(json, null, 2)});
+                              as.close();
+                            });
+                          }
+                        });
+                      }
+                    }, c1)
+                  },
                   entity: (t1, c1) => {
                     api.Authorization.Authby.Token(entityID, (err, pass)=>{
                       if(pass) {

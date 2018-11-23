@@ -74,7 +74,7 @@ function Service(Me, API) {
     });
 
     ss.sdef('unbindServiceRepo', (json, entityID, returnJSON)=> {
-      
+
     });
 
     ss.sdef('installService', (json, entityID, returnJSON)=> {
@@ -83,10 +83,27 @@ function Service(Me, API) {
         let source = json.s; // github gitlab
         let repo =json.r;
 
+        let jsonr = {
+          // succeess
+          s: "succeess"
+        };
+
         if(method = 'git') {
           if(source = 'github') {
-
+            NoServiceManager.installService(settings.git_sources[source]+repo, (err)=> {
+              if(err)
+                jsonr.s = err;
+              returnJSON(false, jsonr);
+            });
           }
+          else {
+            jsonr.s = 'Unsupport source '+json.s;
+            returnJSON(false, jsonr);
+          }
+        }
+        else {
+          jsonr.s = 'Unsupport method '+json.m;
+          returnJSON(false, jsonr);
         }
       });
     });
