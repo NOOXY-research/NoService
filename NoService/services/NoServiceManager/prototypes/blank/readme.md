@@ -4,14 +4,14 @@
 # Install
 launch you NoService framework and type
 ```
-service git install YourRepos/ServiceName github
+service git install YourRepos/{{ servicename }} github
 ```
 
 # Upgrade
 launch you NoService framework and type
 ```
-service git upgrade ServiceName
+service git upgrade {{ servicename }}
 ```
 
 # Description
-Description for your service.
+Description for your service "{{ servicename }}".

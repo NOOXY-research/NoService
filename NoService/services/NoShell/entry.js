@@ -212,7 +212,11 @@ function Service(Me, api) {
                         c1(false, {r:'Failed'});
                       }
                       else {
-                        as.call('createService', {name: t1[0]}, (err, msg)=>{
+                        let cmd = {name: t1[0]};
+                        if(t1[1]) {
+                          cmd.type = t1[1];
+                        }
+                        as.call('createService', cmd, (err, msg)=>{
                           c1(false, {r:msg.s});
                           as.close();
                         });

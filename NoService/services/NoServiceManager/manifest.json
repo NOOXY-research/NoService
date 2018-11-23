@@ -1,13 +1,17 @@
 {
   "name": "NoServiceManager",
 
-  "version": "0.0.0",
+  "version": "0.0.1",
 
   "displayname": "NoService manager",
 
   "description": "Providing ablilty to create, manipulate or modify NoService Services.",
 
   "git_url": "https://github.com/NOOXY-Research/NoServiceManager",
+
+  "LibraryAPI": true,
+
+  "DatabaseAPI": true,
 
   "Authors": [
     "noowyee",
@@ -48,15 +52,10 @@
     "check_memory_interval_sec": 300,
     "max_memory_per_service_MB": 2048,
     "reach_memory_limit_relaunch": true,
+    "upgrade_channel": "master",
     "git_sources": {
-      "github": "https://github.com/"
-    },
-    "upgrade_sources": {
-      "NoShell": ["github", "NOOXY-Research/NoShell"],
-      "NoShellc": ["github", "NOOXY-Research/NoShellClient"],
-      "NoUser": ["github", "NOOXY-Research/NoUser"],
-      "NoActivity": ["github", "NOOXY-Research/NoActivity"],
-      "NoServiceManager": ["github", "NOOXY-Research/NoServiceManager"]
+      "github": "https://github.com/",
+      "gitlab": "https://gitlab.com/"
     }
   }
 }

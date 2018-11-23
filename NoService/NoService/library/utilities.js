@@ -34,6 +34,19 @@ let isDirGitInited = (dir, callback)=> {
   });
 };
 
+let uninitGitDir = (dir, callback)=> {
+  exec('chmod +x '+__dirname+'/scripts/unix_git_uninit.sh' , (err, stdout, stderr) => {
+    if (err) {
+      callback(err);
+    }
+    else {
+      exec(__dirname+'/scripts/unix_git_uninit.sh '+dir, (err, stdout, stderr) => {
+        callback(err);
+      });
+    }
+  });
+};
+
 let initGitDir = (dir, giturl, callback)=> {
   exec('chmod +x '+__dirname+'/scripts/unix_git_init.sh' , (err, stdout, stderr) => {
     if (err) {
@@ -402,6 +415,7 @@ let SQLtoDate = (sqlDate) => {
 
 module.exports = {
   UnixCmd: {
+    uninitGitDir: uninitGitDir,
     existCmd: existCmd,
     isDirGitInited: isDirGitInited,
     initGitDir: initGitDir,

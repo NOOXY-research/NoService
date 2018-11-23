@@ -1,41 +1,51 @@
-// NoService/services/youservice/entry.js
+// NoService/services/{{ servicename }}/entry.js
 // Description:
-// "youservice/entry.js" description.
+// "{{ servicename }}/entry.js" description.
 // Copyright 2018 NOOXY. All Rights Reserved.
 'use strict';
 
-function Service(Me, api) {
+let {{ servicename }} = new (require('./{{ servicename }}'))()
+
+function Service(Me, API) {
   // Initialize your service here synchronous. Do not use async here!
 
   // Get the service socket of your service
-  let ss = api.Service.ServiceSocket;
+  let ss = API.Service.ServiceSocket;
   // BEWARE! To prevent callback error crash the system.
   // If you call an callback function which is not API provided. Such as setTimeout(callback, timeout).
-  // You need to wrap the callback funciton by api.SafeCallback.
-  // E.g. setTimeout(api.SafeCallback(callback), timeout)
-  let safec = api.SafeCallback;
+  // You need to wrap the callback funciton by API.SafeCallback.
+  // E.g. setTimeout(API.SafeCallback(callback), timeout)
+  let safec = API.SafeCallback;
   // Please save and manipulate your files in this directory
   let files_path = Me.FilesPath;
   // Your settings in manifest file.
   let settings = Me.Settings;
 
+  // import API to {{ servicename }} module
+  {{ servicename }}.importModel(API.Database.Model);
+  {{ servicename }}.importLibrary(API.Database.Library);
+  {{ servicename }}.importSettings(settings);
+
   // Here is where your service start
   this.start = ()=> {
     // Access another service on this daemon
-    api.Service.ActivitySocket.createDefaultAdminDeamonSocket('Another Service', (err, activitysocket)=> {
+    API.Service.ActivitySocket.createDefaultAdminDeamonSocket('Another Service', (err, activitysocket)=> {
       // accessing other service
     });
 
     // JSONfunction is a function that can be defined, which others entities can call.
     // It is a NOOXY Service Framework Standard
     ss.def('JSONfunction', (json, entityID, returnJSON)=> {
-      // Code here for JSONfunciton
-      // Return Value for JSONfunction call. Otherwise remote will not recieve funciton return value.
-      let json_be_returned = {
-        d: 'Hello! NOOXY Service Framework!'
-      }
-      // First parameter for error, next is JSON to be returned.
-      returnJSON(false, json_be_returned);
+      {{ servicename }}.whateverfunction((err, msg)=> {
+        // Code here for JSONfunciton
+        // Return Value for JSONfunction call. Otherwise remote will not recieve funciton return value.
+        let json_be_returned = {
+          d: 'Hello! NOOXY Service Framework!',
+          msg: msg
+        }
+        // First parameter for error, next is JSON to be returned.
+        returnJSON(false, json_be_returned);
+      });
     });
 
     // Safe define a JSONfunction.
@@ -57,12 +67,12 @@ function Service(Me, api) {
     // You will need entityID to Authorize remote user. And identify remote.
     ss.on('data', (entityID, data) => {
       // Get Username and process your work.
-      api.Service.Entity.getEntityOwner(entityID, (err, username)=> {
+      API.Service.Entity.getEntityOwner(entityID, (err, username)=> {
         // To store your data and associated with userid INSEAD OF USERNAME!!!
         // Since userid can be promised as a unique identifer!!!
         let userid = null;
         // Get userid from API
-        api.Authenticity.getUserID(username, (err, id) => {
+        API.Authenticity.getUserID(username, (err, id) => {
           userid = id;
         });
         // process you operation here
@@ -81,12 +91,12 @@ function Service(Me, api) {
     // ServiceSocket.onClose, in case connection close.
     ss.on('close', (entityID, callback) => {
       // Get Username and process your work.
-      api.Service.Entity.getEntityOwner(entityID, (err, username)=> {
+      API.Service.Entity.getEntityOwner(entityID, (err, username)=> {
         // To store your data and associated with userid INSEAD OF USERNAME!!!
         // Since userid can be promised as a unique identifer!!!
         let userid = null;
         // Get userid from API
-        api.Authenticity.getUserID(username, (err, id) => {
+        API.Authenticity.getUserID(username, (err, id) => {
           userid = id;
         });
         // process you operation here

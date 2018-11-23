@@ -1,6 +1,6 @@
 {
   "name": "NoShell",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "displayname": "NoShell",
   "description": "NOOXY Shell. Default NoService Shell service implementation.",
   "Authors": ["NOOXY", "noowyee"],
@@ -13,7 +13,7 @@
 
     },
     "services" : {
-      "NoServiceManager": "0.0.0",
+      "NoServiceManager": "0.0.1",
       "NoUser": "0.0.0",
       "NoActivity": "0.0.0"
     }
