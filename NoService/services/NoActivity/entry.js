@@ -31,8 +31,8 @@ function Service(Me, api) {
     api.Daemon.getSettings((err, daemon_setting)=>{
       if(daemon_setting.debug) {
         api.Sniffer.onRouterJSON((err, Json)=>{
-          api.Utils.Taglog('DEGUG', 'Received a Json.');
-          api.Utils.Taglog('DEGUG', Json);
+          api.Utils.TagLog('DEGUG', 'Received a Json.');
+          api.Utils.TagLog('DEGUG', Json);
         })
       }
     });
