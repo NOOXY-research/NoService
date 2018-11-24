@@ -81,7 +81,7 @@ function Core(settings) {
           process.exit();
         }
         else {
-          verbose('OKAY', 'Initialized. Please restart!');
+          Utils.TagLog('OKAY', 'Initialized. Please restart!');
           process.exit();
         }
       });
