@@ -59,26 +59,26 @@ let uninitGitDir = (dir, callback)=> {
   });
 };
 
-let initGitDir = (dir, giturl, callback)=> {
+let initGitDir = (dir, giturl, reponame, callback)=> {
   exec('chmod +x '+__dirname+'/scripts/unix_git_init.sh' , (err, stdout, stderr) => {
     if (err) {
       callback(err);
     }
     else {
-      exec(__dirname+'/scripts/unix_git_init.sh '+dir+' '+giturl, (err, stdout, stderr) => {
+      exec(__dirname+'/scripts/unix_git_init.sh '+dir+' '+giturl+' '+reponame, (err, stdout, stderr) => {
         callback(err);
       });
     }
   });
 };
 
-let pullGitDir = (dir, callback)=> {
+let pullGitDir = (dir, reponame, branch, callback)=> {
   exec('chmod +x '+__dirname+'/scripts/unix_git_pull.sh' , (err, stdout, stderr) => {
     if (err) {
       callback(err);
     }
     else {
-      exec(__dirname+'/scripts/unix_git_pull.sh '+dir, (err, stdout, stderr) => {
+      exec(__dirname+'/scripts/unix_git_pull.sh '+dir+' '+reponame+' '+branch, (err, stdout, stderr) => {
         callback(err);
       });
     }

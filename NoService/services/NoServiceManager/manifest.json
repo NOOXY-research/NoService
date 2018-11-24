@@ -52,7 +52,9 @@
     "check_memory_interval_sec": 300,
     "max_memory_per_service_MB": 2048,
     "reach_memory_limit_relaunch": true,
-    "upgrade_channel": "master",
+    "startup_auto_upgrade": true,
+    "upgrade_branch": "master",
+    "repo_name": "origin",
     "git_sources": {
       "github": "https://github.com/",
       "gitlab": "https://gitlab.com/"

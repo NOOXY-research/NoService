@@ -136,7 +136,9 @@ function Service(Me, API) {
 
     });
 
-    NoServiceManager.launchOtherServices();
+    NoServiceManager.launchOtherServices(()=> {
+      
+    });
   }
 
   // If the daemon stop, your service recieve close signal here.
