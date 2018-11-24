@@ -7,6 +7,7 @@
     "NOOXY",
     "noowyee"
   ],
+  "git_url": "https://github.com/NOOXY-Research/NoActivity",
   "implementation_api": false,
   "dependencies": {
     "node_packages": {},

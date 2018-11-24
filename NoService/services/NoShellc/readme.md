@@ -4,13 +4,13 @@
 # Install
 launch you NoService framework and type
 ```
-service install github YourRepos/ServiceName
+service git install NOOXY-Research/NoShellc github
 ```
 
 # Upgrade
 launch you NoService framework and type
 ```
-service upgrade github YourRepos/ServiceName
+service git upgrade NoShellc
 ```
 
 # Description

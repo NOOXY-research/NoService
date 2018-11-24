@@ -3,6 +3,7 @@
   "version": "0.0.1",
   "displayname": "NOOXY User",
   "description": "A advanced User System for NoService Framework.",
+  "git_url": "https://github.com/NOOXY-Research/NoUser",
   "Authors": [
     "NOOXY",
     "noowyee"

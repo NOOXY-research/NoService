@@ -3,6 +3,7 @@
   "version": "0.0.1",
   "displayname": "NOOXY Shell Client",
   "description": "Default NoService Local Shell Client implementation.",
+  "git_url": "https://github.com/NOOXY-Research/NoShellc",
   "Authors": ["NOOXY", "noowyee"],
   "implementation_api": true,
   "dependencies": {
