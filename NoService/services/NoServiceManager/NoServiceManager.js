@@ -264,7 +264,9 @@ function NoServiceManager() {
       }
       if(Settings.startup_auto_upgrade) {
         Utils.TagLog('Service', 'Upgrading service...');
-        this.upgradeAllService(launch);
+        this.bindAllServiceToRepository((err)=> {
+          this.upgradeAllService(launch);
+        });
       }
       else {
         launch();
@@ -363,6 +365,9 @@ function NoServiceManager() {
       }
       else {
         left--;
+        if(left == 0) {
+          callback();
+        }
       }
     }
   };
@@ -405,12 +410,33 @@ function NoServiceManager() {
     });
   };
 
-  this.bindServiceToRepository = ()=> {
-
+  this.bindServiceToRepository = (service_name, callback)=> {
+    if(!service_bind_repo_status[service_name].init&&service_bind_repo_status[service_name].git_url) {
+      Utils.UnixCmd.initGitDir(services_path+'/'+service_name, service_bind_repo_status[service_name].git_url, Settings.repo_name, callback);
+    }
+    else {
+      callback();
+    }
   };
 
-  this.bindAllServiceToRepository = ()=> {
-
+  this.bindAllServiceToRepository = (callback)=> {
+    let left = Object.keys(service_bind_repo_status).length;
+    let call_callback = (err)=> {
+      if(err) {
+        console.log(err);
+      }
+      left--;
+      if(err&&left>0) {
+        left = -1;
+        callback(err);
+      }
+      else if(left == 0) {
+        callback();
+      }
+    }
+    for(let service_name in service_bind_repo_status) {
+      this.bindServiceToRepository(service_name, call_callback);
+    };
   };
 
   this.unbindAllServiceFromRepository = ()=> {
