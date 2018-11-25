@@ -165,7 +165,7 @@ function WorkerClient() {
                   _model.define(model_name, model_structure, _api.SafeCallback(callback));
                 };
 
-                _api.Database.RAWModel.getModelsDict= ()=>{
+                _api.Database.RAWModel.getModelsDict= (callback)=>{
                   _model.getModelsDict(_api.SafeCallback(callback));
                 };
 

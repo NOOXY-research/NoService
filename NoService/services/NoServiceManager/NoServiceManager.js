@@ -263,7 +263,7 @@ function NoServiceManager() {
         });
       }
       if(Settings.startup_auto_upgrade) {
-        Utils.TagLog('Service', 'Upgrading service...');
+        Utils.TagLog('Service', 'Upgrading and checking service...');
         this.bindAllServiceToRepository((err)=> {
           this.upgradeAllService(launch);
         });
@@ -360,7 +360,7 @@ function NoServiceManager() {
     }
     for(let service_name in service_bind_repo_status) {
       if(service_bind_repo_status[service_name].init) {
-        Utils.TagLog('Service', 'Upgrading Service "'+service_name+'"');
+        Utils.TagLog('Service', 'Checking and updating service "'+service_name+'"');
         this.upgradeService(service_name, call_callback);
       }
       else {

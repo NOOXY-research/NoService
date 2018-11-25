@@ -796,7 +796,11 @@ function Service() {
         }
         else {
           try {
-            _service_manifest.settings = JSON.parse(fs.readFileSync(_service_files_path+'/settings.json', 'utf8'));
+            let real_settings = JSON.parse(fs.readFileSync(_service_files_path+'/settings.json', 'utf8'));
+            for(let item in real_settings) {
+              (_service_manifest.settings)[item] = real_settings[item];
+            }
+            fs.writeFileSync(_service_files_path+'/settings.json', JSON.stringify(_service_manifest.settings, null, 2));
           }
           catch (err) {
             Utils.TagLog('*ERR*', 'Settings file corrupted. FilesPath "'+_service_files_path+'/settings.json"');

@@ -160,6 +160,37 @@ function Service(Me, api) {
                 });;
               },
 
+              db: (t0, c0) => {
+                return _(t0, {
+                  query: (t1, c1) => {
+                    api.Service.Entity.getEntityMetaData(t1[0], (err, r)=>{
+                      c1(false, {r:JSON.stringify(r, null, 2)});
+                    });
+                  },
+                  model: (t1, c1) => {
+                    _(t1, {
+                      list: (t2, c2) => {
+                        api.Database.RAWModel.getModelsDict((err, dict)=>{
+                          c2(false, {r:JSON.stringify(Object.keys(dict), null, 2)});
+                        });
+                      },
+
+                      show: (t2, c2) => {
+                        api.Database.RAWModel.getModelsDict((err, dict)=>{
+                          c2(false, {r:JSON.stringify(dict[t2[0]], null, 2)});
+                        });
+                      },
+
+                      exist: (t2, c2)=> {
+                        api.Database.RAWModel.exist(t2[0], (err, exist)=> {
+                          c1(false, {r:exist});
+                        });
+                      }
+                    }, c1);
+                  }
+                }, c0);
+              },
+
               service: (t0, c0) => {
                 return _(t0, {
                   git: (t1, c1) => {
