@@ -1,13 +1,11 @@
 {
   "name": "NoShell",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "displayname": "NoShell",
   "description": "NOOXY Shell. Default NoService Shell service implementation.",
   "Authors": ["NOOXY", "noowyee"],
 
   "git_url": "https://github.com/NOOXY-Research/NoShell",
-
-  "DatabaseAPI": true,
 
   "implementation_api": true,
   "dependencies": {
@@ -15,7 +13,7 @@
 
     },
     "services" : {
-      "NoServiceManager": "0.0.1",
+      "NoServiceManager": "0.0.3",
       "NoUser": "0.0.0",
       "NoActivity": "0.0.0"
     }

@@ -9,7 +9,11 @@
 
   "Authors": [],
 
+<<<<<<< HEAD
+  "git_url": "",
+=======
   "git_url": null,
+>>>>>>> 67751a7b9b68f2f088ba73271e76f00be17625bc
 
   "upgrade_branch": "master",
 

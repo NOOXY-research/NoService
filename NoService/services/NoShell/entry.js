@@ -118,9 +118,9 @@ function Service(Me, api) {
                   '  service [jfunclist|jfuncdict|jfuncshow] {target service}\n'+
                   '  service jfunc {target service} {target username} {target jfunc} {JSON} ---Call a JSONfunction as target user.\n'+
                   '  service entity [show {entityID}|list|count|showuser {username}]\n'+
-                  '  service git install {repos/repo} {gitsource} \n'+
-                  ' *[not yet, will be avalible 0.4.x] service git [upgrade|init] {servicename}\n'+
-                  ' *[not yet, will be avalible 0.4.x] service git upgrade all\n'+
+                  '  service git install {repos/service} {gitsource} \n'+
+                  '  service git [upgrade|bind|unbind] {service name}\n'+
+                  '  service git [list|upgradeall|bindall|unbindall]\n'+
                   '\n'+
                   '[activity]\n'+
                   '  activity [listuser|showuser {username}]\n'+
@@ -159,38 +159,6 @@ function Service(Me, api) {
                   '  Me -> your entityID.'
                 });;
               },
-
-              db: (t0, c0) => {
-                return _(t0, {
-                  query: (t1, c1) => {
-                    api.Service.Entity.getEntityMetaData(t1[0], (err, r)=>{
-                      c1(false, {r:JSON.stringify(r, null, 2)});
-                    });
-                  },
-                  model: (t1, c1) => {
-                    _(t1, {
-                      list: (t2, c2) => {
-                        api.Database.RAWModel.getModelsDict((err, dict)=>{
-                          c2(false, {r:JSON.stringify(Object.keys(dict), null, 2)});
-                        });
-                      },
-
-                      show: (t2, c2) => {
-                        api.Database.RAWModel.getModelsDict((err, dict)=>{
-                          c2(false, {r:JSON.stringify(dict[t2[0]], null, 2)});
-                        });
-                      },
-
-                      exist: (t2, c2)=> {
-                        api.Database.RAWModel.exist(t2[0], (err, exist)=> {
-                          c1(false, {r:exist});
-                        });
-                      }
-                    }, c1);
-                  }
-                }, c0);
-              },
-
               service: (t0, c0) => {
                 return _(t0, {
                   git: (t1, c1) => {
@@ -207,7 +175,98 @@ function Service(Me, api) {
                             });
                           }
                         });
-                      }
+                      },
+                      bind: (t2, c2)=>{
+                        api.Service.ActivitySocket.createDefaultAdminDeamonSocket('NoServiceManager', (err, as)=> {
+                          if(err) {
+                            c2(false, {r:'Failed'});
+                          }
+                          else {
+                            as.call('bindServiceRepo', {n: t2[0]}, (err, json)=>{
+                              c2(false, {r:JSON.stringify(json, null, 2)});
+                              as.close();
+                            });
+                          }
+                        });
+                      },
+                      unbind: (t2, c2)=>{
+                        api.Service.ActivitySocket.createDefaultAdminDeamonSocket('NoServiceManager', (err, as)=> {
+                          if(err) {
+                            c2(false, {r:'Failed'});
+                          }
+                          else {
+                            as.call('unbindServiceRepo', {n: t2[0]}, (err, json)=>{
+                              c2(false, {r:JSON.stringify(json, null, 2)});
+                              as.close();
+                            });
+                          }
+                        });
+                      },
+                      upgrade: (t2, c2)=>{
+                        api.Service.ActivitySocket.createDefaultAdminDeamonSocket('NoServiceManager', (err, as)=> {
+                          if(err) {
+                            c2(false, {r:'Failed'});
+                          }
+                          else {
+                            as.call('upgradeService', {n: t2[0]}, (err, json)=>{
+                              c2(false, {r:JSON.stringify(json, null, 2)});
+                              as.close();
+                            });
+                          }
+                        });
+                      },
+                      upgradeall: (t2, c2)=>{
+                        api.Service.ActivitySocket.createDefaultAdminDeamonSocket('NoServiceManager', (err, as)=> {
+                          if(err) {
+                            c2(false, {r:'Failed'});
+                          }
+                          else {
+                            as.call('upgradeAllService', {}, (err, json)=>{
+                              c2(false, {r:JSON.stringify(json, null, 2)});
+                              as.close();
+                            });
+                          }
+                        });
+                      },
+                      bindall: (t2, c2)=>{
+                        api.Service.ActivitySocket.createDefaultAdminDeamonSocket('NoServiceManager', (err, as)=> {
+                          if(err) {
+                            c2(false, {r:'Failed'});
+                          }
+                          else {
+                            as.call('bindAllServiceRepo', {}, (err, json)=>{
+                              c2(false, {r:JSON.stringify(json, null, 2)});
+                              as.close();
+                            });
+                          }
+                        });
+                      },
+                      unbindall: (t2, c2)=>{
+                        api.Service.ActivitySocket.createDefaultAdminDeamonSocket('NoServiceManager', (err, as)=> {
+                          if(err) {
+                            c2(false, {r:'Failed'});
+                          }
+                          else {
+                            as.call('unbindAllServiceRepo', {}, (err, json)=>{
+                              c2(false, {r:JSON.stringify(json, null, 2)});
+                              as.close();
+                            });
+                          }
+                        });
+                      },
+                      list: (t2, c2)=>{
+                        api.Service.ActivitySocket.createDefaultAdminDeamonSocket('NoServiceManager', (err, as)=> {
+                          if(err) {
+                            c2(false, {r:'Failed'});
+                          }
+                          else {
+                            as.call('listServicesRepoBind', {}, (err, json)=>{
+                              c2(false, {r:JSON.stringify(json, null, 2)});
+                              as.close();
+                            });
+                          }
+                        });
+                      },
                     }, c1)
                   },
                   entity: (t1, c1) => {

@@ -66,15 +66,33 @@ function Service(Me, API) {
     });
 
     ss.sdef('listServicesRepoBind', (json, entityID, returnJSON)=> {
-
+      NoServiceManager.getServiceRepositoryBindList((err, list)=> {
+        returnJSON(false, {s: err?err:'succeess', r: list});
+      });
     });
 
     ss.sdef('bindServiceRepo', (json, entityID, returnJSON)=> {
+      NoServiceManager.bindServiceToRepository(json.n, (err)=> {
+        returnJSON(false, {s: err?err:'succeess'});
+      });
+    });
 
+    ss.sdef('bindAllServiceRepo', (json, entityID, returnJSON)=> {
+      NoServiceManager.bindAllServiceToRepository((err)=> {
+        returnJSON(false, {s: err?err:'succeess'});
+      });
+    });
+
+    ss.sdef('unbindAllServiceRepo', (json, entityID, returnJSON)=> {
+      NoServiceManager.unbindAllServiceFromRepository((err)=> {
+        returnJSON(false, {s: err?err:'succeess'});
+      });
     });
 
     ss.sdef('unbindServiceRepo', (json, entityID, returnJSON)=> {
-
+      NoServiceManager.unbindServiceFromRepository(json.n, (err)=> {
+        returnJSON(false, {s: err?err:'succeess'});
+      });
     });
 
     ss.sdef('installService', (json, entityID, returnJSON)=> {
@@ -109,27 +127,15 @@ function Service(Me, API) {
     });
 
     ss.sdef('upgradeAllService', (json, entityID, returnJSON)=> {
-      let method = json.m; // git
-      let source = json.s; // github gitlab
-      let repo =json.r;
-
-      if(method = 'git') {
-        if(source = 'github') {
-
-        }
-      }
+      NoServiceManager.upgradeAllService((err)=> {
+        returnJSON(false, {s: err?err:'succeess'});
+      });
     });
 
     ss.sdef('upgradeService', (json, entityID, returnJSON)=> {
-      let method = json.m; // git
-      let source = json.s; // github gitlab
-      let repo =json.r;
-
-      if(method = 'git') {
-        if(source = 'github') {
-
-        }
-      }
+      NoServiceManager.upgradeService(json.n, (err)=> {
+        returnJSON(false, {s: err?err:'succeess'});
+      });
     });
 
     ss.sdef('killService', (json, entityID, returnJSON)=> {
