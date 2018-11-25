@@ -159,6 +159,45 @@ function Service(Me, api) {
                   '  Me -> your entityID.'
                 });;
               },
+              db: (t0, c0) => {
+                return _(t0, {
+                  query: (t1, c1) => {
+                    let query = "";
+                    for(let i=0; i<t1.length; i++) {
+                      query += ' '+t1[i];
+                    }
+                    query = query.trim();
+                    api.Database.Database.query(query, (err, r)=>{
+                      c1(false, {r:{
+                        query: query,
+                        err: JSON.stringify(err, null, 2),
+                        results: r
+                      }});
+                    });
+                  },
+                  model: (t1, c1) => {
+                    _(t1, {
+                      list: (t2, c2) => {
+                        api.Database.RAWModel.getModelsDict((err, dict)=>{
+                          c2(false, {r:JSON.stringify(Object.keys(dict), null, 2)});
+                        });
+                      },
+
+                      show: (t2, c2) => {
+                        api.Database.RAWModel.getModelsDict((err, dict)=>{
+                          c2(false, {r:JSON.stringify(dict[t2[0]], null, 2)});
+                        });
+                      },
+
+                      exist: (t2, c2)=> {
+                        api.Database.RAWModel.exist(t2[0], (err, exist)=> {
+                          c1(false, {r:exist});
+                        });
+                      }
+                    }, c1);
+                  }
+                }, c0);
+              },
               service: (t0, c0) => {
                 return _(t0, {
                   git: (t1, c1) => {
