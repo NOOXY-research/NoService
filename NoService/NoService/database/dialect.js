@@ -277,8 +277,8 @@ function Sqlite3(meta) {
     });
   };
 
-  this.query = (...args)=> {
-    _db.all.apply(null, args);
+  this.query = (q, callback)=> {
+    _db.all(q, callback);
   }
 
   this.close = ()=> {
@@ -526,8 +526,8 @@ function Mariadb(meta) {
     });
   };
 
-  this.query = (...args)=> {
-    _db.query.apply(null, args);
+  this.query = (q, callback)=> {
+    _db.query(q, callback);
   }
 
   this.close = ()=> {
