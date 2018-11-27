@@ -28,11 +28,6 @@ function NoServiceManager() {
     Model = model;
   };
 
-  // import model from API in entry.js
-  this.importModel = (model)=> {
-    Model = model;
-  };
-
   // import library from API in entry.js
   this.importLibrary = (library)=> {
     Library = library;
@@ -99,13 +94,18 @@ function NoServiceManager() {
             let dependencies = manifests[service_name].dependencies;
             // check node
             if(dependencies) {
+              let err = false;
               for(let package in dependencies.node_packages) {
                 try {
                   require.resolve(package);
                 } catch (e) {
                   console.log('Please install package "'+package+'" for service "'+service_name+'".');
-                  Daemon.close();
+                  err = true;
                 }
+              }
+              if(err) {
+                Daemon.close();
+                return 0;
               }
               for(let service in dependencies.services) {
                 let require_version = dependencies.services[service];
@@ -255,6 +255,11 @@ function NoServiceManager() {
               else {
                 if(callback)
                   callback(false);
+                // add back
+                (dependencies_level_stack[0])[dsettings.master_service]={version: manifests[dsettings.master_service].version};
+                // add back
+                if(dsettings.debug_service)
+                  (dependencies_level_stack[0])[dsettings.debug_service]={version: manifests[dsettings.debug_service].version};
                 Utils.TagLog('service', Me.Manifest.name+' have launched your services successfully');
                 console.log('\n');
               }
@@ -308,6 +313,25 @@ function NoServiceManager() {
 
           let manifest = JSON.parse(fs.readFileSync(commons_path+'manifest.json', 'utf8'));
           manifest.name = service_name;
+          if(type == "complete") {
+            manifest.JSONfunciton_prototypes['JSONfunciton1'] = {
+              "displayname": "JSONfunction",
+              "description": "JSONfunction description.",
+              "secure": true,
+              "protocol": {
+                "JSON_call": {
+                  "a": "return a related stuff."
+                },
+                "JSON_return": {
+                  "c": "return c related stuff.",
+                  "d": {
+                    "e": "return c related stuff."
+                  }
+                }
+              }
+            }
+          }
+
           fs.writeFileSync(services_path+service_name+'/manifest.json', JSON.stringify(manifest, null, 2));
 
           fs.readdirSync(prototype_path).forEach(file => {

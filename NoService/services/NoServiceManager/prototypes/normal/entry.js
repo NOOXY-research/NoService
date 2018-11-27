@@ -19,81 +19,81 @@ function Service(Me, API) {
   // Your settings in manifest file.
   let settings = Me.Settings;
 
+  // JSONfunction is a function that can be defined, which others entities can call.
+  // It is a NOOXY Service Framework Standard
+  ss.def('JSONfunction', (json, entityID, returnJSON)=> {
+    // Code here for JSONfunciton
+    // Return Value for JSONfunction call. Otherwise remote will not recieve funciton return value.
+    let json_be_returned = {
+      d: 'Hello! NOOXY Service Framework!'
+    }
+    // First parameter for error, next is JSON to be returned.
+    returnJSON(false, json_be_returned);
+  });
+
+  // Safe define a JSONfunction.
+  ss.sdef('SafeJSONfunction', (json, entityID, returnJSON)=> {
+    // Code here for JSONfunciton
+    // Return Value for JSONfunction call. Otherwise remote will not recieve funciton return value.
+    let json_be_returned = {
+      d: 'Hello! NOOXY Service Framework!'
+    }
+    // First parameter for error, next is JSON to be returned.
+    returnJSON(false, json_be_returned);
+  },
+  // In case fail.
+  ()=>{
+    console.log('Auth Failed.');
+  });
+
+  // ServiceSocket.onData, in case client send data to this Service.
+  // You will need entityID to Authorize remote user. And identify remote.
+  ss.on('data', (entityID, data) => {
+    // Get Username and process your work.
+    API.Service.Entity.getEntityOwner(entityID, (err, username)=> {
+      // To store your data and associated with userid INSEAD OF USERNAME!!!
+      // Since userid can be promised as a unique identifer!!!
+      let userid = null;
+      // Get userid from API
+      API.Authenticity.getUserID(username, (err, id) => {
+        userid = id;
+      });
+      // process you operation here
+      console.log('recieved a data');
+      console.log(data);
+    });
+  });
+  // Send data to client.
+  ss.sendData('A entity ID', 'My data to be transfer.');
+  // ServiceSocket.onConnect, in case on new connection.
+  ss.on('connect', (entityID, callback) => {
+    // Do something.
+    // report error;
+    callback(false);
+  });
+  // ServiceSocket.onClose, in case connection close.
+  ss.on('close', (entityID, callback) => {
+    // Get Username and process your work.
+    API.Service.Entity.getEntityOwner(entityID, (err, username)=> {
+      // To store your data and associated with userid INSEAD OF USERNAME!!!
+      // Since userid can be promised as a unique identifer!!!
+      let userid = null;
+      // Get userid from API
+      API.Authenticity.getUserID(username, (err, id) => {
+        userid = id;
+      });
+      // process you operation here
+      console.log('ServiceSocket closed');
+      // report error;
+      callback(false);
+    });
+  });
+
   // Here is where your service start
   this.start = ()=> {
     // Access another service on this daemon
     API.Service.ActivitySocket.createDefaultAdminDeamonSocket('Another Service', (err, activitysocket)=> {
       // accessing other service
-    });
-
-    // JSONfunction is a function that can be defined, which others entities can call.
-    // It is a NOOXY Service Framework Standard
-    ss.def('JSONfunction', (json, entityID, returnJSON)=> {
-      // Code here for JSONfunciton
-      // Return Value for JSONfunction call. Otherwise remote will not recieve funciton return value.
-      let json_be_returned = {
-        d: 'Hello! NOOXY Service Framework!'
-      }
-      // First parameter for error, next is JSON to be returned.
-      returnJSON(false, json_be_returned);
-    });
-
-    // Safe define a JSONfunction.
-    ss.sdef('SafeJSONfunction', (json, entityID, returnJSON)=> {
-      // Code here for JSONfunciton
-      // Return Value for JSONfunction call. Otherwise remote will not recieve funciton return value.
-      let json_be_returned = {
-        d: 'Hello! NOOXY Service Framework!'
-      }
-      // First parameter for error, next is JSON to be returned.
-      returnJSON(false, json_be_returned);
-    },
-    // In case fail.
-    ()=>{
-      console.log('Auth Failed.');
-    });
-
-    // ServiceSocket.onData, in case client send data to this Service.
-    // You will need entityID to Authorize remote user. And identify remote.
-    ss.on('data', (entityID, data) => {
-      // Get Username and process your work.
-      API.Service.Entity.getEntityOwner(entityID, (err, username)=> {
-        // To store your data and associated with userid INSEAD OF USERNAME!!!
-        // Since userid can be promised as a unique identifer!!!
-        let userid = null;
-        // Get userid from API
-        API.Authenticity.getUserID(username, (err, id) => {
-          userid = id;
-        });
-        // process you operation here
-        console.log('recieved a data');
-        console.log(data);
-      });
-    });
-    // Send data to client.
-    ss.sendData('A entity ID', 'My data to be transfer.');
-    // ServiceSocket.onConnect, in case on new connection.
-    ss.on('connect', (entityID, callback) => {
-      // Do something.
-      // report error;
-      callback(false);
-    });
-    // ServiceSocket.onClose, in case connection close.
-    ss.on('close', (entityID, callback) => {
-      // Get Username and process your work.
-      API.Service.Entity.getEntityOwner(entityID, (err, username)=> {
-        // To store your data and associated with userid INSEAD OF USERNAME!!!
-        // Since userid can be promised as a unique identifer!!!
-        let userid = null;
-        // Get userid from API
-        API.Authenticity.getUserID(username, (err, id) => {
-          userid = id;
-        });
-        // process you operation here
-        console.log('ServiceSocket closed');
-        // report error;
-        callback(false);
-      });
     });
   }
 

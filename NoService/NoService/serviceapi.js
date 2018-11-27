@@ -113,6 +113,13 @@ function ServiceAPI() {
         catch(e) {
           Utils.TagLog('*ERR*', 'LCBO occured error.');
           console.log(e);
+          Utils.TagLog('*ERR*', 'LCBO detail.');
+          Utils.TagLog('*ERR*', 'Object: ');
+          console.log(obj);
+          Utils.TagLog('*ERR*', 'Tree: ');
+          console.log(Utils.generateObjCallbacksTree(obj));
+          Utils.TagLog('*ERR*', 'Arguments: ');
+          console.log(path, args, arg_objs_trees);
         }
         if(isOneTimeObj) {
           this.destroy();

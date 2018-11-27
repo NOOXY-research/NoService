@@ -29,6 +29,103 @@ function Service(Me, API) {
   NoServiceManager.importDaemon(API.Daemon);
   NoServiceManager.importServiceAPI(ServiceAPI);
 
+  ss.sdef('createService', (json, entityID, returnJSON)=>{
+    NoServiceManager.createService(json.name, json.type, (err)=> {
+      let jsonr = {
+        // succeess
+        s: "succeess"
+      };
+      if(err)
+        jsonr.s = err.toString();
+
+      returnJSON(false, jsonr);
+    });
+  });
+
+  ss.sdef('getDependStack', (json, entityID, returnJSON)=> {
+    let jsonr = {
+      r: NoServiceManager.returnDependStack()
+    };
+    returnJSON(false, jsonr);
+  });
+
+  ss.sdef('listServicesRepoBind', (json, entityID, returnJSON)=> {
+    NoServiceManager.getServiceRepositoryBindList((err, list)=> {
+      returnJSON(false, {s: err?err:'succeess', r: list});
+    });
+  });
+
+  ss.sdef('bindServiceRepo', (json, entityID, returnJSON)=> {
+    NoServiceManager.bindServiceToRepository(json.n, (err)=> {
+      returnJSON(false, {s: err?err:'succeess'});
+    });
+  });
+
+  ss.sdef('bindAllServiceRepo', (json, entityID, returnJSON)=> {
+    NoServiceManager.bindAllServiceToRepository((err)=> {
+      returnJSON(false, {s: err?err:'succeess'});
+    });
+  });
+
+  ss.sdef('unbindAllServiceRepo', (json, entityID, returnJSON)=> {
+    NoServiceManager.unbindAllServiceFromRepository((err)=> {
+      returnJSON(false, {s: err?err:'succeess'});
+    });
+  });
+
+  ss.sdef('unbindServiceRepo', (json, entityID, returnJSON)=> {
+    NoServiceManager.unbindServiceFromRepository(json.n, (err)=> {
+      returnJSON(false, {s: err?err:'succeess'});
+    });
+  });
+
+  ss.sdef('installService', (json, entityID, returnJSON)=> {
+    API.Authorization.Authby.Password(entityID, (err, valid)=> {
+      let method = json.m; // git
+      let source = json.s; // github gitlab
+      let repo =json.r;
+
+      let jsonr = {
+        // succeess
+        s: "succeess"
+      };
+
+      if(method = 'git') {
+        if(source = 'github') {
+          NoServiceManager.installService(settings.git_sources[source]+repo, (err)=> {
+            if(err)
+              jsonr.s = err;
+            returnJSON(false, jsonr);
+          });
+        }
+        else {
+          jsonr.s = 'Unsupport source '+json.s;
+          returnJSON(false, jsonr);
+        }
+      }
+      else {
+        jsonr.s = 'Unsupport method '+json.m;
+        returnJSON(false, jsonr);
+      }
+    });
+  });
+
+  ss.sdef('upgradeAllService', (json, entityID, returnJSON)=> {
+    NoServiceManager.upgradeAllService((err)=> {
+      returnJSON(false, {s: err?err:'succeess'});
+    });
+  });
+
+  ss.sdef('upgradeService', (json, entityID, returnJSON)=> {
+    NoServiceManager.upgradeService(json.n, (err)=> {
+      returnJSON(false, {s: err?err:'succeess'});
+    });
+  });
+
+  ss.sdef('killService', (json, entityID, returnJSON)=> {
+
+  });
+
   this.start = ()=> {
 
     // memoryUsage limit control
@@ -45,110 +142,14 @@ function Service(Me, API) {
       }
     }, settings.check_memory_interval_sec*1000);
 
-    ss.sdef('createService', (json, entityID, returnJSON)=>{
-      NoServiceManager.createService(json.name, json.type, (err)=> {
-        let jsonr = {
-          // succeess
-          s: "succeess"
-        };
-        if(err)
-          jsonr.s = err;
-
-        returnJSON(false, jsonr);
-      });
-    });
-
-    ss.sdef('getDependStack', (json, entityID, returnJSON)=> {
-      let jsonr = {
-        r: NoServiceManager.returnDependStack()
-      };
-      returnJSON(false, jsonr);
-    });
-
-    ss.sdef('listServicesRepoBind', (json, entityID, returnJSON)=> {
-      NoServiceManager.getServiceRepositoryBindList((err, list)=> {
-        returnJSON(false, {s: err?err:'succeess', r: list});
-      });
-    });
-
-    ss.sdef('bindServiceRepo', (json, entityID, returnJSON)=> {
-      NoServiceManager.bindServiceToRepository(json.n, (err)=> {
-        returnJSON(false, {s: err?err:'succeess'});
-      });
-    });
-
-    ss.sdef('bindAllServiceRepo', (json, entityID, returnJSON)=> {
-      NoServiceManager.bindAllServiceToRepository((err)=> {
-        returnJSON(false, {s: err?err:'succeess'});
-      });
-    });
-
-    ss.sdef('unbindAllServiceRepo', (json, entityID, returnJSON)=> {
-      NoServiceManager.unbindAllServiceFromRepository((err)=> {
-        returnJSON(false, {s: err?err:'succeess'});
-      });
-    });
-
-    ss.sdef('unbindServiceRepo', (json, entityID, returnJSON)=> {
-      NoServiceManager.unbindServiceFromRepository(json.n, (err)=> {
-        returnJSON(false, {s: err?err:'succeess'});
-      });
-    });
-
-    ss.sdef('installService', (json, entityID, returnJSON)=> {
-      API.Authorization.Authby.Password(entityID, (err, valid)=> {
-        let method = json.m; // git
-        let source = json.s; // github gitlab
-        let repo =json.r;
-
-        let jsonr = {
-          // succeess
-          s: "succeess"
-        };
-
-        if(method = 'git') {
-          if(source = 'github') {
-            NoServiceManager.installService(settings.git_sources[source]+repo, (err)=> {
-              if(err)
-                jsonr.s = err;
-              returnJSON(false, jsonr);
-            });
-          }
-          else {
-            jsonr.s = 'Unsupport source '+json.s;
-            returnJSON(false, jsonr);
-          }
-        }
-        else {
-          jsonr.s = 'Unsupport method '+json.m;
-          returnJSON(false, jsonr);
-        }
-      });
-    });
-
-    ss.sdef('upgradeAllService', (json, entityID, returnJSON)=> {
-      NoServiceManager.upgradeAllService((err)=> {
-        returnJSON(false, {s: err?err:'succeess'});
-      });
-    });
-
-    ss.sdef('upgradeService', (json, entityID, returnJSON)=> {
-      NoServiceManager.upgradeService(json.n, (err)=> {
-        returnJSON(false, {s: err?err:'succeess'});
-      });
-    });
-
-    ss.sdef('killService', (json, entityID, returnJSON)=> {
-
-    });
-
     NoServiceManager.launchOtherServices(()=> {
-      
+
     });
   }
 
   // If the daemon stop, your service recieve close signal here.
   this.close = ()=> {
+    NoServiceManager.close();
     // Saving state of you service.
   }
 }
