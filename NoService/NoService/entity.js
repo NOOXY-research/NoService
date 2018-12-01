@@ -90,7 +90,7 @@ function Entity() {
       _entities[entityID].getConnProfile(callback);
     }
     catch {
-      throw new Error('Entity not existed with this ID.');
+      callback(new Error('Entity not existed with this ID('+entityID+').'));
     }
   };
 

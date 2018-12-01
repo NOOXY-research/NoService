@@ -120,7 +120,7 @@ function Service() {
     let methods = {
       // nooxy service protocol implementation of "Call Service: Close ServiceSocket"
       CS: (connprofile, data, response_emit) => {
-        theservice.emitSSClose(data.i);
+        theservice.emitSSClose(data.i, true);
       },
 
       // nooxy service protocol implementation of "Call Service: Vertify Entity"
@@ -361,6 +361,7 @@ function Service() {
       },
       // nooxy service protocol implementation of "Call Activity: Close ActivitySocket"
       CS: () => {
+        _ASockets[data.d.i].remoteClosed = true;
         _ASockets[data.d.i].close();
       }
     }
@@ -504,13 +505,17 @@ function Service() {
       }
     };
 
-    this.close = (entityID)=> {
+    this.close = (entityID, remoteClosed)=> {
       _entity_module.getEntityConnProfile(entityID, (err, connprofile)=>{
-        _emitasclose(connprofile, entityID);
+        if(remoteClosed)
+          _emitasclose(connprofile, entityID);
         this.onClose(entityID, (err)=>{
           _entity_module.deleteEntity(entityID, (err)=> {
             if(err) {
-              Utils.TagLog(err);
+              if(err) {
+                Utils.TagLog('*ERR*', 'Error occured at ServiceSocket close.');
+                console.log(err);
+              }
             }
           });
         });
@@ -663,12 +668,15 @@ function Service() {
       _on_dict['close'](false);
     };
 
+    this.remoteClosed = false;
+
     this.close = () => {
       let op = ()=> {
         let bundle = conn_profile.returnBundle('bundle_entities');
         for (let i=bundle.length-1; i>=0; i--) {
           if (bundle[i] === _entity_id) {
-            _emitclose(_entity_id);
+            if(!this.remoteClosed)
+              _emitclose(_entity_id);
             this.onClose();
             setTimeout(()=>{
               // tell worker abort referance
@@ -866,8 +874,8 @@ function Service() {
       _service_socket.onConnect(entityID, callback);
     };
 
-    this.emitSSClose = (entityID) => {
-      _service_socket.close(entityID);
+    this.emitSSClose = (entityID, remoteClosed) => {
+      _service_socket.close(entityID, remoteClosed);
     };
 
     this.sendSSData = (entityID, data) => {
