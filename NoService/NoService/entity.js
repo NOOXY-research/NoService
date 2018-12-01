@@ -81,6 +81,10 @@ function Entity() {
     return this.returnEntityValue(entityID, 'owner');
   };
 
+  this.returnIsEntityExist = (entityID)=> {
+    return _entities[entityID]?true:false;
+  };
+
   this.getEntityConnProfile = (entityID, callback) => {
     try {
       _entities[entityID].getConnProfile(callback);
@@ -142,11 +146,19 @@ function Entity() {
     callback(false, _e);
   };
 
-  this.deleteEntity = (entityID) => {
-    for(let i in _on_callbacks['EntityDeleted']) {
-      (_on_callbacks['EntityDeleted'])[i](entityID, _entities[entityID].returnMeta());
+  this.deleteEntity = (entityID, callback) => {
+    if(_entities[entityID]) {
+      for(let i in _on_callbacks['EntityDeleted']) {
+        (_on_callbacks['EntityDeleted'])[i](entityID, _entities[entityID].returnMeta());
+      }
+      delete _entities[entityID];
+      if(callback)
+        callback(false);
     }
-    delete _entities[entityID];
+    else {
+      if(callback)
+        callback(new Error('Entity "'+entityID+'" doesn\'t exist.'));
+    }
   };
 
   this.close = () => {

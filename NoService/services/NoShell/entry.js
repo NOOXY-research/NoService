@@ -168,11 +168,11 @@ function Service(Me, api) {
                     }
                     query = query.trim();
                     api.Database.Database.query(query, (err, r)=>{
-                      c1(false, {r:{
+                      c1(false, {r:JSON.stringify({
                         query: query,
-                        err: JSON.stringify(err, null, 2),
+                        err: err,
                         results: r
-                      }});
+                      }, null, 2)});
                     });
                   },
                   model: (t1, c1) => {

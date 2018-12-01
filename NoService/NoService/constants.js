@@ -1,7 +1,7 @@
 let Constant = {
   'version': 'aphla-0.4.6',
   'NSP_version': 'aphla 0.2.0',
-  'copyright': 'copyright(c)2018 NOOXY inc.',
+  'copyright': 'copyright(c)2018-2019 NOOXY inc.',
   'default_user': {
     'username': 'admin',
     'displayname': 'NoService Superuser',

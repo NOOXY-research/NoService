@@ -383,6 +383,7 @@ function Service() {
 
   function ServiceSocket(service_name, prototype) {
     let _jsonfunctions = prototype==null?{}:prototype;
+    let _holding_entities = [];
     // as on data callback
     let _emitasdata = (conn_profile, i, d) => {
       let _data = {
@@ -395,7 +396,7 @@ function Service() {
       _emitRouter(conn_profile, 'CA', _data);
     }
 
-    let _emitasclose = (conn_profile, i, d) => {
+    let _emitasclose = (conn_profile, i) => {
       let _data = {
         "m": "CS",
         "d": {
@@ -507,7 +508,11 @@ function Service() {
       _entity_module.getEntityConnProfile(entityID, (err, connprofile)=>{
         _emitasclose(connprofile, entityID);
         this.onClose(entityID, (err)=>{
-          _entity_module.deleteEntity(entityID);
+          _entity_module.deleteEntity(entityID, (err)=> {
+            if(err) {
+              Utils.TagLog(err);
+            }
+          });
         });
       });
     };
@@ -705,16 +710,14 @@ function Service() {
     };
 
     this.relaunch = (callback)=> {
-      _isInitialized = false;
-      _isLaunched = false;
-      if(_isLaunched) {
-        _service_socket.closeAll((err)=> {
-          _worker.relaunch(callback);
-        });
-      }
-      else {
-        _worker.relaunch(callback);
-      }
+      this.close((err)=> {
+        if(err) {
+          callback(err);
+        }
+        else {
+          this.launch(callback);
+        }
+      });
     }
 
     this.launch = (callback)=> {
@@ -881,14 +884,20 @@ function Service() {
 
     this.close = (callback) => {
       if(_isLaunched) {
+        _isInitialized = false;
+        _isLaunched = false;
         _service_socket.closeAll(()=>{
           _worker.close(callback);
         });
       }
       else if (_isInitialized) {
+        _isInitialized = false;
+        _isLaunched = false;
         _worker.close(callback);
       }
       else {
+        _isInitialized = false;
+        _isLaunched = false;
         callback(false);
       }
     };
