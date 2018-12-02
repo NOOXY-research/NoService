@@ -262,8 +262,10 @@ function Connection(options) {
         });
 
         ws.on('error', (message) => {
-          Utils.TagLog('*WARN*', 'An error occured on connection module.');
-          Utils.TagLog('*WARN*', message);
+          if(_debug) {
+            Utils.TagLog('*WARN*', 'An error occured on connection module.');
+            Utils.TagLog('*WARN*', message);
+          }
           ws.close();
           this.onClose(connprofile);
         });
@@ -309,8 +311,10 @@ function Connection(options) {
       });
 
       _ws.on('error', (error) => {
-        Utils.TagLog('*WARN*', 'An error occured on connection module.');
-        Utils.TagLog('*WARN*', error);
+        if(_debug) {
+          Utils.TagLog('*WARN*', 'An error occured on connection module.');
+          Utils.TagLog('*WARN*', error);
+        }
         _ws.close();
         this.onClose(connprofile);
       });
@@ -367,8 +371,10 @@ function Connection(options) {
         });
 
         ws.on('error', (error) => {
-          Utils.TagLog('*WARN*', 'An error occured on connection module.');
-          Utils.TagLog('*WARN*', error);
+          if(_debug) {
+            Utils.TagLog('*WARN*', 'An error occured on connection module.');
+            Utils.TagLog('*WARN*', error);
+          }
           ws.close();
           this.onClose(connprofile);
         });
@@ -414,8 +420,10 @@ function Connection(options) {
       });
 
       _ws.on('error', (error) => {
-        Utils.TagLog('*WARN*', 'An error occured on connection module.');
-        Utils.TagLog('*WARN*', error);
+        if(_debug) {
+          Utils.TagLog('*WARN*', 'An error occured on connection module.');
+          Utils.TagLog('*WARN*', error);
+        }
         _ws.close();
         this.onClose(connprofile);
       });
@@ -468,8 +476,10 @@ function Connection(options) {
         });
 
         socket.on('error', (error) => {
-          Utils.TagLog('*WARN*', 'An error occured on connection module.');
-          Utils.TagLog('*WARN*', error);
+          if(_debug) {
+            Utils.TagLog('*WARN*', 'An error occured on connection module.');
+            Utils.TagLog('*WARN*', error);
+          }
           socket.destroy();
           this.onClose(connprofile);
         });
@@ -518,8 +528,10 @@ function Connection(options) {
       });
 
       _netc.on('error', (error) => {
-        Utils.TagLog('*WARN*', 'An error occured on connection module.');
-        Utils.TagLog('*WARN*', message);
+        if(_debug) {
+          Utils.TagLog('*WARN*', 'An error occured on connection module.');
+          Utils.TagLog('*WARN*', message);
+        }
         _netc.destroy();
         this.onClose(connprofile);
       });
