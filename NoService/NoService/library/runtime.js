@@ -6,6 +6,18 @@
 'use strict';
 
 module.exports.MatchRoom = function() {
+  let _on_dict = {
+    'ParticipateMatched': null,
+    'MatchModified': null,
+    'MatchEstablished': null,
+    'MatchClosed': null,
+    'MatchFail': null
+  };
+
+
+  // matchid: {participates:{id1: meta, id2: meta}, content: whatever}
+  let _matches_queue = {};
+  let _matches = {};
 
   this.setMaxParticipate = ()=> {
 
@@ -15,26 +27,43 @@ module.exports.MatchRoom = function() {
 
   };
 
-  this.setTimeoutAction = ()=> {
+  // return true or false callback(participateid, participate_meta, match_data)
+  this.setMatchJoinPolicy = (callback)=> {
 
   };
 
-  this.joinParticipate = (id) => {
+  // return true or false callback(match_data)
+  this.setMatchEstablishPolicy = (callback)=> {
 
   };
 
-  this.quitParticipate = (id) => {
+  this.queueParticipate = (participateid, participate_meta) => {
 
   };
 
-  this.modifyMatch = (id, content, callback)=> {
+  this.endMatch = (matchid) => {
 
   };
 
-  this.onMatchChange = ()=> {
+  this.quitParticipate = (participateid) => {
 
   };
 
+  this.ParticipatejoinMatchbyId = (matchid) => {
+
+  };
+
+  this.createMatch = (matchid, participates, content) => {
+
+  };
+
+  this.modifyMatch = (participateid, content, callback)=> {
+
+  };
+
+  this.on = (eventname, callback)=> {
+    _on_dict[eventname] = callback;
+  };
 };
 
 module.exports.GroupMatchRoom = function() {

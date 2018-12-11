@@ -142,7 +142,8 @@ function Service(Me, api) {
                   '[database]\n'+
                   '  db query "{your query}"\n'+
                   '  db model list ---List all model on this daemon.\n'+
-                  '  db model [show|exist] {model_name} ---Show model structure.\n'+
+                  '  db model [show|exist|remove] {model_name} ---Show model structure.\n'+
+                  '  db model get {model_name} {key_value} ---get model instance.\n'+
                   '\n'+
                   '[me]\n'+
                   '  me\n'+
@@ -183,9 +184,33 @@ function Service(Me, api) {
                         });
                       },
 
+                      remove: (t2, c2) => {
+                        api.Database.RAWModel.remove(t2[0], (err)=>{
+                          c2(false, {r:JSON.stringify({err: err}, null, 2)});
+                        });
+                      },
+
                       show: (t2, c2) => {
                         api.Database.RAWModel.getModelsDict((err, dict)=>{
                           c2(false, {r:JSON.stringify(dict[t2[0]], null, 2)});
+                        });
+                      },
+
+                      get: (t2, c2) => {
+                        api.Database.RAWModel.get(t2[0], (err, model)=>{
+                          if(model.modeltype == 'GroupIndexedList') {
+                            c2(false, {r: "ModelType \"GroupIndexedList\" not support yet."});
+                          }
+                          else if(model.modeltype == 'Pair'){
+                            model.getbyBoth(t2[1], (err, result)=> {
+                              c2(false, {r:JSON.stringify(result, null, 2)});
+                            });
+                          }
+                          else {
+                            model.get(t2[1], (err, result)=> {
+                              c2(false, {r:JSON.stringify(result, null, 2)});
+                            });
+                          }
                         });
                       },
 
@@ -742,7 +767,6 @@ function Service(Me, api) {
             let msg = '\nHello. '+emeta.owner+'(as entity '+entityID+').\n  You have no NoShell access to "'+DaemonSettings.daemon_name+'".\n';
             returnJSON(false, msg);
           });
-
         });
       });
     });

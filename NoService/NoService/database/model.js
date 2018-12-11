@@ -516,178 +516,184 @@ function Model() {
   //
 
   this.define = (model_name, model_structure, callback)=> {
-    let model_type = model_structure.model_type;
-    let do_timestamp = model_structure.do_timestamp;
-    let model_key = model_structure.model_key;
-    let structure = model_structure.structure;
-    _db.existTable(MODEL_TABLE_PREFIX+model_name, (err, exist)=> {
-      if(exist) {
-        callback(new Error('Model "'+model_name+'" exist.'));
-      }
-      else {
-        if(model_type == 'Object') {
-          let field_structure = {};
-
-          if(do_timestamp) {
-            structure['createdate'] = 'DATETIME';
-            structure['modifydate'] = 'DATETIME';
-          }
-
-          for(let field in structure) {
-            field_structure[field] = {
-              type: structure[field]
-            };
-          }
-
-          field_structure[model_key].iskey = true;
-          field_structure[model_key].notnull = true;
-
-          _db.createTable(MODEL_TABLE_PREFIX+model_name, false, field_structure, (err)=> {
-            if(err) {
-              callback(err);
-            }
-            else {
-              _db.replaceRows(MODEL_TABLE_NAME, [{
-                name: model_name,
-                structure: JSON.stringify(model_structure)
-              }], (err)=> {
-                if(err) {
-                  callback(err);
-                }
-                else {
-                  callback(err, new ObjModel(model_name, model_key, structure, do_timestamp));
-                }
-              });
-            }
-          });
-        }
-        else if (model_type == 'IndexedList') {
-          let field_structure = {};
-          let a = {};
-          a[MODEL_INDEXKEY] = 'INTEGER';
-
-          structure = Object.assign({}, a, structure);
-          if(do_timestamp) {
-            structure['createdate'] = 'DATETIME';
-            structure['modifydate'] = 'DATETIME';
-          }
-
-          for(let field in structure) {
-            field_structure[field] = {
-              type: structure[field]
-            };
-          }
-
-          field_structure[MODEL_INDEXKEY].iskey = true;
-          field_structure[MODEL_INDEXKEY].notnull = true;
-          field_structure[MODEL_INDEXKEY].autoincrease = true;
-
-          _db.createTable(MODEL_TABLE_PREFIX+model_name, true, field_structure, (err)=> {
-            if(err) {
-              callback(err);
-            }
-            else {
-              _db.replaceRows(MODEL_TABLE_NAME, [{
-                name: model_name,
-                structure: JSON.stringify(model_structure)
-              }], (err)=> {
-                if(err) {
-                  callback(err);
-                }
-                else {
-                  callback(err, new IndexedListModel(model_name, structure, do_timestamp));
-                }
-              });
-            }
-          });
-        }
-        else if (model_type == 'GroupIndexedList') {
-          let field_structure = {};
-          let a = {};
-          a[MODEL_GROUPKEY] = 'VARCHAR(128)';
-          a[MODEL_INDEXKEY] = 'INTEGER';
-
-          structure = Object.assign({}, a, structure);
-          if(do_timestamp) {
-            structure['createdate'] = 'DATETIME';
-            structure['modifydate'] = 'DATETIME';
-          }
-
-          for(let field in structure) {
-            field_structure[field] = {
-              type: structure[field]
-            };
-          }
-
-          field_structure[MODEL_GROUPKEY].iskey = true;
-          field_structure[MODEL_GROUPKEY].notnull = true;
-
-          field_structure[MODEL_INDEXKEY].iskey = true;
-          field_structure[MODEL_INDEXKEY].notnull = true;
-          field_structure[MODEL_INDEXKEY].autoincrease = true;
-
-          _db.createTable(MODEL_TABLE_PREFIX+model_name, true, field_structure, (err)=> {
-            if(err) {
-              callback(err);
-            }
-            else {
-              _db.replaceRows(MODEL_TABLE_NAME, [{
-                name: model_name,
-                structure: JSON.stringify(model_structure)
-              }], (err)=> {
-                if(err) {
-                  callback(err);
-                }
-                else {
-                  callback(err, new GroupIndexedListModel(model_name, structure, do_timestamp));
-                }
-              });
-            }
-          });
-        }
-        else if (model_type == 'Pair') {
-          let field_structure = {};
-
-          if(do_timestamp) {
-            structure['createdate'] = 'DATETIME';
-            structure['modifydate'] = 'DATETIME';
-          }
-
-          for(let field in structure) {
-            field_structure[field] = {
-              type: structure[field]
-            };
-          }
-
-          field_structure[model_key[0]].iskey = true;
-          field_structure[model_key[0]].notnull = true;
-          field_structure[model_key[1]].iskey = true;
-          field_structure[model_key[1]].notnull = true;
-
-          _db.createTable(MODEL_TABLE_PREFIX+model_name, false, field_structure, (err)=> {
-            if(err) {
-              callback(err);
-            }
-            else {
-              _db.replaceRows(MODEL_TABLE_NAME, [{
-                name: model_name,
-                structure: JSON.stringify(model_structure)
-              }], (err)=> {
-                if(err) {
-                  callback(err);
-                }
-                else {
-                  callback(err, new PairModel(model_name, model_key, structure, do_timestamp));
-                }
-              });
-            }
-          });
+    try {
+      let model_type = model_structure.model_type;
+      let do_timestamp = model_structure.do_timestamp;
+      let model_key = model_structure.model_key;
+      let structure = model_structure.structure;
+      _db.existTable(MODEL_TABLE_PREFIX+model_name, (err, exist)=> {
+        if(exist) {
+          callback(new Error('Model "'+model_name+'" exist.'));
         }
         else {
-          callback(new Error('Model type "'+modeltype+'" not supposed.'));
-        };
-      }
-    });
+          if(model_type == 'Object') {
+            let field_structure = {};
+
+            if(do_timestamp) {
+              structure['createdate'] = 'DATETIME';
+              structure['modifydate'] = 'DATETIME';
+            }
+
+            for(let field in structure) {
+              field_structure[field] = {
+                type: structure[field]
+              };
+            }
+
+            field_structure[model_key].iskey = true;
+            field_structure[model_key].notnull = true;
+
+            _db.createTable(MODEL_TABLE_PREFIX+model_name, false, field_structure, (err)=> {
+              if(err) {
+                callback(err);
+              }
+              else {
+                _db.replaceRows(MODEL_TABLE_NAME, [{
+                  name: model_name,
+                  structure: JSON.stringify(model_structure)
+                }], (err)=> {
+                  if(err) {
+                    callback(err);
+                  }
+                  else {
+                    callback(err, new ObjModel(model_name, model_key, structure, do_timestamp));
+                  }
+                });
+              }
+            });
+          }
+          else if (model_type == 'IndexedList') {
+            let field_structure = {};
+            let a = {};
+            a[MODEL_INDEXKEY] = 'INTEGER';
+
+            structure = Object.assign({}, a, structure);
+            if(do_timestamp) {
+              structure['createdate'] = 'DATETIME';
+              structure['modifydate'] = 'DATETIME';
+            }
+
+            for(let field in structure) {
+              field_structure[field] = {
+                type: structure[field]
+              };
+            }
+
+            field_structure[MODEL_INDEXKEY].iskey = true;
+            field_structure[MODEL_INDEXKEY].notnull = true;
+            field_structure[MODEL_INDEXKEY].autoincrease = true;
+
+            _db.createTable(MODEL_TABLE_PREFIX+model_name, true, field_structure, (err)=> {
+              if(err) {
+                callback(err);
+              }
+              else {
+                _db.replaceRows(MODEL_TABLE_NAME, [{
+                  name: model_name,
+                  structure: JSON.stringify(model_structure)
+                }], (err)=> {
+                  if(err) {
+                    callback(err);
+                  }
+                  else {
+                    callback(err, new IndexedListModel(model_name, structure, do_timestamp));
+                  }
+                });
+              }
+            });
+          }
+          else if (model_type == 'GroupIndexedList') {
+            let field_structure = {};
+            let a = {};
+            a[MODEL_GROUPKEY] = 'VARCHAR(128)';
+            a[MODEL_INDEXKEY] = 'INTEGER';
+
+            structure = Object.assign({}, a, structure);
+            if(do_timestamp) {
+              structure['createdate'] = 'DATETIME';
+              structure['modifydate'] = 'DATETIME';
+            }
+
+            for(let field in structure) {
+              field_structure[field] = {
+                type: structure[field]
+              };
+            }
+
+            field_structure[MODEL_GROUPKEY].iskey = true;
+            field_structure[MODEL_GROUPKEY].notnull = true;
+
+            field_structure[MODEL_INDEXKEY].iskey = true;
+            field_structure[MODEL_INDEXKEY].notnull = true;
+            field_structure[MODEL_INDEXKEY].autoincrease = true;
+
+            _db.createTable(MODEL_TABLE_PREFIX+model_name, true, field_structure, (err)=> {
+              if(err) {
+                callback(err);
+              }
+              else {
+                _db.replaceRows(MODEL_TABLE_NAME, [{
+                  name: model_name,
+                  structure: JSON.stringify(model_structure)
+                }], (err)=> {
+                  if(err) {
+                    callback(err);
+                  }
+                  else {
+                    callback(err, new GroupIndexedListModel(model_name, structure, do_timestamp));
+                  }
+                });
+              }
+            });
+          }
+          else if (model_type == 'Pair') {
+            let field_structure = {};
+
+            if(do_timestamp) {
+              structure['createdate'] = 'DATETIME';
+              structure['modifydate'] = 'DATETIME';
+            }
+
+            for(let field in structure) {
+              field_structure[field] = {
+                type: structure[field]
+              };
+            }
+
+            field_structure[model_key[0]].iskey = true;
+            field_structure[model_key[0]].notnull = true;
+            field_structure[model_key[1]].iskey = true;
+            field_structure[model_key[1]].notnull = true;
+
+            _db.createTable(MODEL_TABLE_PREFIX+model_name, false, field_structure, (err)=> {
+              if(err) {
+                callback(err);
+              }
+              else {
+                _db.replaceRows(MODEL_TABLE_NAME, [{
+                  name: model_name,
+                  structure: JSON.stringify(model_structure)
+                }], (err)=> {
+                  if(err) {
+                    callback(err);
+                  }
+                  else {
+                    callback(err, new PairModel(model_name, model_key, structure, do_timestamp));
+                  }
+                });
+              }
+            });
+          }
+          else {
+            callback(new Error('Model type "'+modeltype+'" not supposed.'));
+          };
+        }
+      });
+    }
+    catch(e) {
+      callback(e);
+    }
+
   };
 
   this.get = (model_name, callback) => {
