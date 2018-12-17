@@ -14,8 +14,6 @@ function Service(Me, API) {
   // You need to wrap the callback funciton by API.SafeCallback.
   // E.g. setTimeout(API.SafeCallback(callback), timeout)
   let safec = API.SafeCallback;
-  // Please save and manipulate your files in this directory
-  let files_path = Me.FilesPath;
   // Your settings in manifest file.
   let settings = Me.Settings;
   let services_path = __dirname.split('/'+Me.Manifest.name)[0];
@@ -25,7 +23,6 @@ function Service(Me, API) {
   NoServiceManager.importModel(API.Database.Model);
   NoServiceManager.importLibrary(API.Library);
   NoServiceManager.importMe(Me);
-  NoServiceManager.importFilesPath(files_path);
   NoServiceManager.importDaemon(API.Daemon);
   NoServiceManager.importServiceAPI(ServiceAPI);
 

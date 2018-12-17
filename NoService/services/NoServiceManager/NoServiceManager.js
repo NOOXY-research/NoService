@@ -6,8 +6,6 @@
 const fs = require('fs');
 let Library;
 let Model;
-let Settings;
-let FilesPath;
 let Utils;
 let Daemon;
 let ServiceAPI;
@@ -38,11 +36,6 @@ function NoServiceManager() {
   this.importMe = (me)=> {
     Me = me;
     Settings = me.Settings;
-  };
-
-  // import FilesPath from API in entry.js
-  this.importFilesPath = (path)=> {
-    FilesPath = path;
   };
 
   this.importDaemon = (daemon) => {
@@ -400,24 +393,24 @@ function NoServiceManager() {
     Daemon.getSettings((err, DaemonSettings)=> {
       let workingdir = Utils.generateUniqueID();
       services_path = DaemonSettings.services_path;
-      fs.mkdirSync(FilesPath+workingdir);
+      fs.mkdirSync(workingdir);
       try {
-        fs.mkdirSync(FilesPath+workingdir);
+        fs.mkdirSync(workingdir);
       }
       catch(e) {}
-      Utils.UnixCmd.initGitDir(FilesPath+workingdir, giturl, Settings.repo_name, (err)=> {
+      Utils.UnixCmd.initGitDir(workingdir, giturl, Settings.repo_name, (err)=> {
         if(err) {
           callback(err);
         }
         else {
-          Utils.UnixCmd.pullGitDir(FilesPath+workingdir, Settings.repo_name, Settings.upgrade_branch, (err)=>{
+          Utils.UnixCmd.pullGitDir(workingdir, Settings.repo_name, Settings.upgrade_branch, (err)=>{
             if(err) {
               callback(err);
             }
             else {
               try {
-                let manifest = JSON.parse(fs.readFileSync(FilesPath+workingdir+'/manifest.json', 'utf8'));
-                fs.renameSync(FilesPath+workingdir, services_path+'/'+manifest.name);
+                let manifest = JSON.parse(fs.readFileSync(workingdir+'/manifest.json', 'utf8'));
+                fs.renameSync(workingdir, services_path+'/'+manifest.name);
                 service_bind_repo_status[manifest.name] = {
                   git_url: giturl,
                   init: true

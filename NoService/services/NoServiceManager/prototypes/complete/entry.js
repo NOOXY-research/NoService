@@ -16,8 +16,6 @@ function Service(Me, API) {
   // You need to wrap the callback funciton by API.SafeCallback.
   // E.g. setTimeout(API.SafeCallback(callback), timeout)
   let safec = API.SafeCallback;
-  // Please save and manipulate your files in this directory
-  let files_path = Me.FilesPath;
   // Your settings in manifest file.
   let settings = Me.Settings;
 
@@ -105,7 +103,7 @@ function Service(Me, API) {
     API.Service.ActivitySocket.createDefaultAdminDeamonSocket('Another Service', (err, activitysocket)=> {
       // accessing other service
     });
-    
+
   }
 
   // If the daemon stop, your service recieve close signal here.

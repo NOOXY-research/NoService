@@ -13,8 +13,6 @@ function Service(Me, api) {
   // You need to wrap the callback funciton by api.SafeCallback.
   // E.g. setTimeout(api.SafeCallback(callback), timeout)
   let safec = api.SafeCallback;
-  // Please save and manipulate your files in this directory
-  let files_path = Me.FilesPath;
   // Your settings in manifest file.
   let settings = Me.Settings;
 

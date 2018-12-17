@@ -6,7 +6,6 @@
 let Library;
 let Model;
 let Settings;
-let FilesPath;
 
 'use strict';
 
@@ -26,11 +25,6 @@ function {{ servicename }}() {
   // import settings from API in entry.js
   this.importSettings = (settings)=> {
     Settings = settings;
-  };
-
-  // import FilesPath from API in entry.js
-  this.importFilesPath = (path)=> {
-    FilesPath = path;
   };
 
   // define you own funciton to be called in entry.js
