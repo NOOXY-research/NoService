@@ -19,6 +19,7 @@ const Utils = require('./library').Utilities;
 // For injecting database to api
 const Database = require('./database/database');
 const Model = require('./database/model');
+const fs = require('fs');
 process.title = 'NoService_worker';
 
 
@@ -97,6 +98,8 @@ function WorkerClient() {
       _clear_obj_garbage_timeout = message.g;
       _api = Utils.generateObjCallbacks('API', message.a, callParentAPI);
       _api.getMe((err, Me)=>{
+        // change workingdir
+        process.chdir(Me.FilesPath);
         // add api
         _api.SafeCallback = (callback) => {
           return (...args) => {
