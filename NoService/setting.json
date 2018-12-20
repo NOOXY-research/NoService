@@ -5,6 +5,10 @@
 
   "description": "A NOOXY Service Framework Daemon.",
 
+  "company_name": "NOOXY",
+
+  "copyright": "copyright©2017-2018 NOOXY inc.",
+
   "connection_servers": [
     {
       "type": "WebSocketSecure",

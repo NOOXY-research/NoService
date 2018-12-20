@@ -87,29 +87,40 @@ function WorkerDaemon() {
     });
 
     this.getCBOCount = (callback)=> {
-      let _rqid = Utils.generateUniqueID();
-      _InfoRq[_rqid] = callback;
-      _child.send({t: 4, i: _rqid});
+      if(_launched&&_child) {
+        let _rqid = Utils.generateUniqueID();
+        _InfoRq[_rqid] = callback;
+        _child.send({t: 4, i: _rqid});
+      }
+      else {
+        callback(new Error("Child is not alive."));
+      }
     };
 
     this.getMemoryUsage = (callback)=> {
-      let _rqid = Utils.generateUniqueID();
-      _InfoRq[_rqid] = callback;
-      _child.send({t: 5, i: _rqid});
+      if(_launched&&_child) {
+        let _rqid = Utils.generateUniqueID();
+        _InfoRq[_rqid] = callback;
+        _child.send({t: 5, i: _rqid});
+      }
+      else {
+        callback(new Error("Child is not alive."));
+      }
     }
 
     this.emitChildClose = ()=> {
-      if(_launched)
+      if(_launched&&_child)
         _child.send({t:99});
     }
 
     this.emitRemoteUnbind = (id)=> {
-      _child.send({t:3, i: id}, (err)=> {
-        if (err) {
-          Utils.TagLog('*ERR*' , 'Occured error on sending data to child "'+_service_name+'".');
-          console.log(err);
-        }
-      });
+      if(_launched&&_child)
+        _child.send({t:3, i: id}, (err)=> {
+          if (err) {
+            Utils.TagLog('*ERR*' , 'Occured error on sending data to child "'+_service_name+'".');
+            console.log(err);
+          }
+        });
     }
 
     this.emitChildCallback = ([obj_id, path], args, argsobj) => {
