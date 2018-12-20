@@ -17,7 +17,9 @@
 
   "dependencies": {
     "node_packages": {},
-    "services": {}
+    "services": {
+      "NoMailer": "0.0.0"
+    }
   },
 
   "JSONfunciton_prototypes": {

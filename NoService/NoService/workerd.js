@@ -147,6 +147,9 @@ function WorkerDaemon() {
       }
       else if(message.t == 3) {
         _close_callback(false);
+        _child.kill();
+        _child = null;
+        _launched = false;
       }
       else if(message.t == 4) {
         try {
@@ -190,6 +193,9 @@ function WorkerDaemon() {
       }
       else if(message.t == 96){
         _close_callback(new Error('Worker closing error:\n'+message.e));
+        _child.kill();
+        _child = null;
+        _launched = false;
       }
       else if(message.t == 97){
         // _launch_callback(new Error('Worker runtime error:\n'+message.e));

@@ -44,7 +44,8 @@
     "NoActivity",
     "NoServiceManager",
     "NoUser",
-    "NoTalk"
+    "NoTalk",
+    "NoMailer"
   ],
 
   "debug": false,

@@ -723,7 +723,14 @@ function Service() {
           callback(err);
         }
         else {
-          this.launch(callback);
+          this.init((err)=> {
+            if(err) {
+              callback(err);
+            }
+            else {
+              this.launch(callback);
+            }
+          });
         }
       });
     }
@@ -887,6 +894,7 @@ function Service() {
     };
 
     this.returnManifest = () => {
+      _service_manifest = Utils.returnJSONfromFile(_service_path+'/manifest.json');
       return _service_manifest;
     };
 

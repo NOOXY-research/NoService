@@ -262,7 +262,7 @@ function WorkerClient() {
             // Utils.TagLog('*ERR*', 'Service "'+_service_name+'" occured error while closing.');
             // console.log(e);
           }
-        setTimeout(()=> {process.exit()}, _close_timeout);
+        // setTimeout(()=> {process.exit()}, _close_timeout);
       }
     }
   }

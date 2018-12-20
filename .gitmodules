@@ -1,0 +1,12 @@
+[submodule "NoService/NoService/services/NoMailer"]
+	path = NoService/NoService/services/NoMailer
+	url = https://github.com/NOOXY-research/NoMailer
+[submodule "NoService/NoService/services/NoActivity"]
+	path = NoService/NoService/services/NoActivity
+	url = https://github.com/NOOXY-research/NoActivity
+[submodule "NoService/NoService/services/NoUser"]
+	path = NoService/NoService/services/NoUser
+	url = https://github.com/NOOXY-research/NoUser
+[submodule "NoService/NoService/services/NoShell"]
+	path = NoService/NoService/services/NoShell
+	url = https://github.com/NOOXY-research/NoShell

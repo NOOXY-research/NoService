@@ -38,7 +38,7 @@ function Service(Me, api) {
       api.Sniffer.onRouterJSON((err, Json)=>{
         let date = new Date();
         date = date.toISOString().replace(/T/, ' ').replace(/\..+/, '') ;
-        fs.appendFile(files_path+'protocol.log', '['+date+'] '+JSON.stringify(Json, null, 0)+'\n', safec((err)=> {
+        fs.appendFile('protocol.log', '['+date+'] '+JSON.stringify(Json, null, 0)+'\n', safec((err)=> {
           if (err) throw err;
         }));
       });
@@ -72,7 +72,7 @@ function Service(Me, api) {
         else {
           meta = entitymeta;
         }
-        fs.appendFile(files_path+'entity.log', '['+date+'] '+entityID+' '+JSON.stringify(meta, null, 0)+'\n', safec((err)=> {
+        fs.appendFile('entity.log', '['+date+'] '+entityID+' '+JSON.stringify(meta, null, 0)+'\n', safec((err)=> {
           if (err) throw err;
         }));
       };
@@ -90,7 +90,7 @@ function Service(Me, api) {
       if(settings.entity_log) {
         let date = new Date();
         date = date.toISOString().replace(/T/, ' ').replace(/\..+/, '') ;
-        fs.appendFile(files_path+'entity.log', '['+date+'] '+entityID+' closed\n', safec((err)=> {
+        fs.appendFile('entity.log', '['+date+'] '+entityID+' closed\n', safec((err)=> {
           if (err) throw err;
         }));
       }
