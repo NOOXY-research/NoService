@@ -78,7 +78,8 @@ function WorkerDaemon() {
     let _init_callback;
     let _launch_callback;
     let _close_callback;
-    let _launched = false;
+    let _child_alive = false;
+    let _init = false;
 
     _worker_clients[_service_name] = this;
 
@@ -87,7 +88,7 @@ function WorkerDaemon() {
     });
 
     this.getCBOCount = (callback)=> {
-      if(_launched&&_child) {
+      if(_child_alive&&_child) {
         let _rqid = Utils.generateUniqueID();
         _InfoRq[_rqid] = callback;
         _child.send({t: 4, i: _rqid});
@@ -98,7 +99,7 @@ function WorkerDaemon() {
     };
 
     this.getMemoryUsage = (callback)=> {
-      if(_launched&&_child) {
+      if(_child_alive&&_child) {
         let _rqid = Utils.generateUniqueID();
         _InfoRq[_rqid] = callback;
         _child.send({t: 5, i: _rqid});
@@ -109,12 +110,12 @@ function WorkerDaemon() {
     }
 
     this.emitChildClose = ()=> {
-      if(_launched&&_child)
+      if(_child_alive&&_child)
         _child.send({t:99});
     }
 
     this.emitRemoteUnbind = (id)=> {
-      if(_launched&&_child)
+      if(_child_alive&&_child)
         _child.send({t:3, i: id}, (err)=> {
           if (err) {
             Utils.TagLog('*ERR*' , 'Occured error on sending data to child "'+_service_name+'".');
@@ -132,12 +133,13 @@ function WorkerDaemon() {
       }
 
       try {
-        _child.send(_data, (err)=> {
-          if (err) {
-            Utils.TagLog('*ERR*' , 'Occured error on sending data to child "'+_service_name+'".');
-            console.log(err);
-          }
-        });
+        if(_child_alive&&_child)
+          _child.send(_data, (err)=> {
+            if (err) {
+              Utils.TagLog('*ERR*' , 'Occured error on sending data to child "'+_service_name+'".');
+              console.log(err);
+            }
+          });
       }
       catch(err) {
         Utils.TagLog('*ERR*' , 'Occured error on "'+_service_name+'".');
@@ -153,14 +155,13 @@ function WorkerDaemon() {
         _init_callback(false);
       }
       else if(message.t == 2) {
-        _launched = true;
         _launch_callback(false);
       }
       else if(message.t == 3) {
         _close_callback(false);
         _child.kill();
         _child = null;
-        _launched = false;
+        _child_alive = false;
       }
       else if(message.t == 4) {
         try {
@@ -206,7 +207,7 @@ function WorkerDaemon() {
         _close_callback(new Error('Worker closing error:\n'+message.e));
         _child.kill();
         _child = null;
-        _launched = false;
+        _child_alive = false;
       }
       else if(message.t == 97){
         // _launch_callback(new Error('Worker runtime error:\n'+message.e));
@@ -227,6 +228,7 @@ function WorkerDaemon() {
     this.init = (init_callback)=> {
       _init_callback = init_callback;
       _child = fork(require.resolve('./worker.js'), {stdio: [process.stdin, process.stdout, process.stderr, 'ipc']});
+      _child_alive = true;
       _child.on('message', message => {
         this.onMessage(message);
       });
