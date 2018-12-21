@@ -511,12 +511,10 @@ function Service() {
           _emitasclose(connprofile, entityID);
         this.onClose(entityID, (err)=>{
           _entity_module.deleteEntity(entityID, (err)=> {
-            if(err) {
-              if(err) {
+              if(err && _debug) {
                 Utils.TagLog('*ERR*', 'Error occured at ServiceSocket close.');
                 console.log(err);
               }
-            }
           });
         });
       });

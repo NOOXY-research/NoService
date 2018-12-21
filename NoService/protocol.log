@@ -1,0 +1,22 @@
+[2018-12-21 19:07:13] {"m":"SP","s":"rq","d":{"p":"-----BEGIN PUBLIC KEY-----\nMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAr7IKnBKNuch0N/EN8a8s\ncdPp8wDhY/vDsbFYvzSv39Lg0az9/imuepyGuDxQcsWsTix6VlakeHJY/rTkUXHy\nuRsIqK2GJeiTxTYVp2EZSU6Sl4XaZ6YssbxWa5sAK+9tfdRit4X96Mg7IKnMeA8d\nrBdBosQE6ZeZ4WaHd10iKyUZcuzZjZVVMGhQ4DgF3od29jurOOI6QnJzZlWW+9xd\nfqrBdDVCZhlQ8KKquBETZeIxNZkixlFa6jrdDss6E96PFknZHbXCCDhg786VsEQ6\nGPi2zUDz/5tz6rryq+qlM6lfue29CamOgKq15WVejjSPCCc8hkUq2vZDIiNZwmRW\nfQIDAQAB\n-----END PUBLIC KEY-----\n"}}
+[2018-12-21 19:07:13] {"m":"SP","s":"rs","d":"ron3MMcPzcQZg8IVBsYor9UE1TwEFgf+Ob3QiiWV+qWcK1Kqvt3J/F/mMvjFnZ41F4v8OduBLqdG6oO3c5KutWW5hu8MPv6Svp0kWi++mVrrCnNkzDJnwz4wx2nZu1A+pAb6QzZQe1ySnLFK2mTAg6d8+1MxTiZArVlkq/TDz473VQQhaHNbLIUXB/3V/pwFVlS70krAnACoIMCjyyZRPxIfd0QjlY9Jz1BgYhNpWKo9Ij2P2zvcVZN2qC0c694FpyEqXjrki+bUfQvaNhorB19PGeYmyUEL5XOmxq0eHPEjh8iExMOMS6vDnCrG0shR7cEgVAJpt8HzzqbLIv58Dg=="}
+[2018-12-21 19:07:13] {"m":"CS","s":"rq","d":{"m":"CE","d":{"t":"0051febd-2fe6-4f82-9f45-6d55344238bd","m":"daemon","k":"WHATAKEY","o":"admin","s":"NoMailer","od":"0.0.0.0"}}}
+[2018-12-21 19:07:13] {"m":"CS","s":"rs","d":{"m":"CE","d":{"t":"0051febd-2fe6-4f82-9f45-6d55344238bd","i":"_cbwnrlirs"}}}
+[2018-12-21 19:07:13] {"m":"CS","s":"rq","d":{"m":"VE","d":{"i":"_cbwnrlirs"}}}
+[2018-12-21 19:07:13] {"m":"CS","s":"rs","d":{"m":"VE","d":{"i":"_cbwnrlirs","s":"OK"}}}
+[2018-12-21 19:07:14] {"m":"SP","s":"rq","d":{"p":"-----BEGIN PUBLIC KEY-----\nMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAr7IKnBKNuch0N/EN8a8s\ncdPp8wDhY/vDsbFYvzSv39Lg0az9/imuepyGuDxQcsWsTix6VlakeHJY/rTkUXHy\nuRsIqK2GJeiTxTYVp2EZSU6Sl4XaZ6YssbxWa5sAK+9tfdRit4X96Mg7IKnMeA8d\nrBdBosQE6ZeZ4WaHd10iKyUZcuzZjZVVMGhQ4DgF3od29jurOOI6QnJzZlWW+9xd\nfqrBdDVCZhlQ8KKquBETZeIxNZkixlFa6jrdDss6E96PFknZHbXCCDhg786VsEQ6\nGPi2zUDz/5tz6rryq+qlM6lfue29CamOgKq15WVejjSPCCc8hkUq2vZDIiNZwmRW\nfQIDAQAB\n-----END PUBLIC KEY-----\n"}}
+[2018-12-21 19:07:14] {"m":"SP","s":"rs","d":"hqctbEmt7AnoqUO8QTE2dHJ+QtnVsLQUpZICSYu5ooF0bKnp9PKXVbdScKzORJOVkRIfIL8XvwCgLsUURAwerl0FaXUvW9909vSnM12iig4R8M/sjeZ08kQI1IIs4N8pyV+VEGhESsSL22+ewffvajxhsIY8Gn1c26eFFVQarI2szGgl2MCLl1DUVSt3R8wuotGJkOIKXuHYLzJcAC2YH5RkbzLkYODqn6eJAPJziodHHD3xk/XGsxvZcSY8hVKPrDhE0ug1mkyQVaDk5wBOA9AKyxmtpNodEW/YNLGcWIkzFw6EaCYwJ4yqmew0UlgrJYGFUZvf0Qcm08nI6so65w=="}
+[2018-12-21 19:07:14] {"m":"CS","s":"rq","d":{"m":"CE","d":{"t":"bf9ce60c-b3fa-4ce4-9b00-08f2cd656265","o":"admin","m":"normal","s":"NoShell","od":"0.0.0.0"}}}
+[2018-12-21 19:07:14] {"m":"CS","s":"rs","d":{"m":"CE","d":{"t":"bf9ce60c-b3fa-4ce4-9b00-08f2cd656265","i":"_9n3d4gysn"}}}
+[2018-12-21 19:07:14] {"m":"CS","s":"rq","d":{"m":"VE","d":{"i":"_9n3d4gysn"}}}
+[2018-12-21 19:07:14] {"m":"CS","s":"rs","d":{"m":"VE","d":{"i":"_9n3d4gysn","s":"OK"}}}
+[2018-12-21 19:07:14] {"m":"CS","s":"rq","d":{"m":"JF","d":{"i":"_9n3d4gysn","n":"welcome","j":"null","t":"_8w2t37f4m"}}}
+[2018-12-21 19:07:14] {"m":"AU","s":"rq","d":{"m":"TK","d":{"t":"a24e026b-b2ca-4d70-89da-3012cc9361c8"}}}
+[2018-12-21 19:07:15] {"m":"GT","s":"rq","d":{"u":"admin","p":"admin"}}
+[2018-12-21 19:07:15] {"m":"GT","s":"rs","d":{"t":"dd8f2d47-96be-494c-9602-639c2cb24356","s":"OK"}}
+[2018-12-21 19:07:15] {"m":"CS","s":"rq","d":{"m":"JF","d":{"i":"_9n3d4gysn","n":"welcome","j":"null","t":"_pyu6ty5z0"}}}
+[2018-12-21 19:07:15] {"m":"AU","s":"rq","d":{"m":"TK","d":{"t":"7b39fb21-4ba7-4dd2-8a3a-9fefd7481a4e"}}}
+[2018-12-21 19:07:15] {"m":"AU","s":"rs","d":{"m":"TK","d":{"t":"7b39fb21-4ba7-4dd2-8a3a-9fefd7481a4e","v":"dd8f2d47-96be-494c-9602-639c2cb24356"}}}
+[2018-12-21 19:07:15] {"m":"CS","s":"rs","d":{"m":"JF","d":{"t":"_pyu6ty5z0","i":"_9n3d4gysn","s":"OK","r":"\"\\nHello. admin(as entity _9n3d4gysn).\\n  Welcome accessing NoShell service of Daemon \\\"NoService_default\\\".\\n  Daemon description: \\n  A NOOXY Service Framework Daemon.\\nNoService Daemon Version: aphla-0.4.8\\n\""}}}
+[2018-12-21 19:07:19] {"m":"CS","s":"rq","d":{"m":"JF","d":{"i":"_9n3d4gysn","n":"sendC","j":"{\"c\":\"db model list\"}","t":"_mdhwgugcj"}}}
+[2018-12-21 19:07:19] {"m":"CS","s":"rs","d":{"m":"JF","d":{"t":"_mdhwgugcj","i":"_9n3d4gysn","s":"OK","r":"{\"r\":\"[\\n  \\\"NSUser\\\",\\n  \\\"NoUser_User\\\",\\n  \\\"NoTester_ObjectTest\\\",\\n  \\\"NoTester_IndexedListTest\\\",\\n  \\\"NoTester_GroupIndexedList\\\"\\n]\"}"}}}

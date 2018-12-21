@@ -99,8 +99,6 @@ function WorkerClient() {
         _clear_obj_garbage_timeout = message.g;
         _api = Utils.generateObjCallbacks('API', message.a, callParentAPI);
         _api.getMe((err, Me)=>{
-          // change workingdir
-          process.chdir(Me.FilesPath);
           // add api
           _api.SafeCallback = (callback) => {
             return (...args) => {
@@ -181,6 +179,10 @@ function WorkerClient() {
                   _api.Database.Model.close= ()=>{
                     _model.close();
                   };
+
+
+                  // change workingdir
+                  process.chdir(Me.FilesPath);
 
                   try {
                     _service_module = new (require(message.p))(Me, _api);
