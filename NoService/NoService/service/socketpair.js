@@ -48,13 +48,13 @@ function ServiceSocket(service_name, prototype, emitRouter, debug, entity_module
   let _on_dict = {
     connect: (entityID, callback) => {
       if(debug)
-        Utils.TagLog('*WARN*', '_emitConnect of service "'+service_name+'" not implemented');
+        Utils.TagLog('*WARN*', 'onConnect of service "'+service_name+'" not implemented');
       callback(false);
     },
 
     data: (entityID, data) => {
       if(debug)
-        Utils.TagLog('*WARN*', '_emitData of service "'+service_name+'" not implemented');
+        Utils.TagLog('*WARN*', 'onData of service "'+service_name+'" not implemented');
     },
 
     close: (entityID, callback) => {
