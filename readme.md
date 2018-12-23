@@ -411,6 +411,7 @@ api.Database.Model.define('IndexedListTest', {
   api.getWorkerMemoryUsage(callback)
 
   ### Authorization
+  api.Authorization.emitSignin: (entityID)\
   api.Authorization.Authby.Token: (entityID, callback)\
   api.Authorization.Authby.Password(entityID, callback)\
   api.Authorization.Authby.isSuperUser(entityID, callback)\
@@ -564,6 +565,8 @@ api.Database.Model.define('IndexedListTest', {
   api.Serivce.ServiceSocket.sdef(name, callback, failopearation)\
   api.Serivce.ServiceSocket.sendData(entityID, data)\
   api.Serivce.ServiceSocket.broadcastData(data)\
+  api.Serivce.ServiceSocket.sendEvent(entityID, event, data)\
+  api.Serivce.ServiceSocket.broadcastEvent(event, data)\
   api.Serivce.ServiceSocket.on(type, callback)\
   api.Serivce.ServiceSocket.close(entityId)
 
@@ -578,6 +581,7 @@ api.Database.Model.define('IndexedListTest', {
   ActivitySocket.returnEntityID()\
   ActivitySocket.on(type, callback)\
   ActivitySocket.close()
+  ActivitySocket.onEvent(event, callback);
 
 ## NoService Protocol
 ### Basic

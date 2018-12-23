@@ -97,7 +97,7 @@ function Service() {
       else {
 
         for(let i in _entitiesID) {
-          _ASockets[_entitiesID[i]].onClose();
+          _ASockets[_entitiesID[i]]._emitClose();
           setTimeout(()=>{
             // for worker abort referance
             _ASockets[_entitiesID[i]].worker_cancel_refer = true;
@@ -300,7 +300,7 @@ function Service() {
           _ASockets[data.d.i].launch();
         }
         else {
-          _ASockets[data.d.i].onClose();
+          _ASockets[data.d.i]._emitClose();
         }
       },
       // nooxy service protocol implementation of "Call Service: ServiceSocket"
@@ -349,7 +349,20 @@ function Service() {
     let methods = {
       // nooxy service protocol implementation of "Call Activity: ActivitySocket"
       AS: () => {
-        _ASockets[data.d.i].emitOnData(data.d.d);
+        _ASockets[data.d.i]._emitData(data.d.d);
+        let _data = {
+          "m": "AS",
+          "d": {
+            // status
+            "i": data.d.i,
+            "s": "OK"
+          }
+        };
+        response_emit(connprofile, 'CA', 'rs', _data);
+      },
+      // nooxy service protocol implementation of "Call Activity: Event"
+      EV: () => {
+        _ASockets[data.d.i]._emitEvent(data.d.n, data.d.d);
         let _data = {
           "m": "AS",
           "d": {
@@ -577,19 +590,19 @@ function Service() {
     };
 
     this.emitSSConnection = (entityID, callback) => {
-      _service_socket.onConnect(entityID, callback);
+      _service_socket._emitConnect(entityID, callback);
     };
 
     this.emitSSClose = (entityID, remoteClosed) => {
-      _service_socket.close(entityID, remoteClosed);
+      _service_socket._closeSocket(entityID, remoteClosed);
     };
 
     this.sendSSData = (entityID, data) => {
-      _service_socket.onData(entityID, data);
+      _service_socket._emitData(entityID, data);
     };
 
     this.sendSSJFCall = (entityID, JFname, jsons, callback) => {
-      _service_socket.emitFunctionCall(entityID, JFname, jsons, callback);
+      _service_socket._emitFunctionCall(entityID, JFname, jsons, callback);
     };
 
     this.returnManifest = () => {

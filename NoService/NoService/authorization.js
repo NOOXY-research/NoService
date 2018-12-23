@@ -284,6 +284,12 @@ function Authorization() {
 
   this.getRealtimeToken = (callback) => {callback(_realtime_token);}
 
+  this.emitSignin = (entityID)=> {
+    _entity_module.getEntityConnProfile(entityID, (err, connprofile) => {
+      this.emitRouter(connprofile, 'AU', {m: 'SI'});
+    });
+  };
+
   this.close = () =>{
     _queue_operation = null;
   }

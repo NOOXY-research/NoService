@@ -257,6 +257,15 @@ function ServiceAPI() {
                     }
                   },
 
+                  onEvent: (event, remote_callback_obj_2)=> {
+                    if(remote_callback_obj_2) {
+                      syncRefer(remote_callback_obj_2);
+                      as.onEvent(event, (err, data)=>{
+                        remote_callback_obj_2.run([], [err, data]);
+                      });
+                    }
+                  },
+
                   sendData: (data)=> {
                     as.sendData(data);
                   },
@@ -300,6 +309,15 @@ function ServiceAPI() {
                     if(remote_callback_obj_2) {
                       syncRefer(remote_callback_obj_2);
                       as.on(type, (err, data)=>{
+                        remote_callback_obj_2.run([], [err, data]);
+                      });
+                    }
+                  },
+
+                  onEvent: (event, remote_callback_obj_2)=> {
+                    if(remote_callback_obj_2) {
+                      syncRefer(remote_callback_obj_2);
+                      as.onEvent(event, (err, data)=>{
                         remote_callback_obj_2.run([], [err, data]);
                       });
                     }
@@ -355,6 +373,15 @@ function ServiceAPI() {
                     }
                   },
 
+                  onEvent: (event, remote_callback_obj_2)=> {
+                    if(remote_callback_obj_2) {
+                      syncRefer(remote_callback_obj_2);
+                      as.onEvent(event, (err, data)=>{
+                        remote_callback_obj_2.run([], [err, data]);
+                      });
+                    }
+                  },
+
                   sendData: (data)=> {
                     as.sendData(data);
                   },
@@ -398,6 +425,15 @@ function ServiceAPI() {
                     if(remote_callback_obj_2) {
                       syncRefer(remote_callback_obj_2);
                       as.on(type, (err, data)=>{
+                        remote_callback_obj_2.run([], [err, data]);
+                      });
+                    }
+                  },
+
+                  onEvent: (event, remote_callback_obj_2)=> {
+                    if(remote_callback_obj_2) {
+                      syncRefer(remote_callback_obj_2);
+                      as.onEvent(event, (err, data)=>{
                         remote_callback_obj_2.run([], [err, data]);
                       });
                     }
@@ -447,6 +483,15 @@ function ServiceAPI() {
                     if(remote_callback_obj_2) {
                       syncRefer(remote_callback_obj_2);
                       as.on(type, (err, data)=>{
+                        remote_callback_obj_2.run([], [err, data]);
+                      });
+                    }
+                  },
+
+                  onEvent: (event, remote_callback_obj_2)=> {
+                    if(remote_callback_obj_2) {
+                      syncRefer(remote_callback_obj_2);
+                      as.onEvent(event, (err, data)=>{
                         remote_callback_obj_2.run([], [err, data]);
                       });
                     }
@@ -795,9 +840,14 @@ function ServiceAPI() {
           });
         }
       },
+
       importTrustDomains: (domains) => {
-        _coregateway.importDaemonAuthKey(domains);
-      }
+        _coregateway.Authorization.importDaemonAuthKey(domains);
+      },
+
+      emitSignin: (entityID) => {
+        _coregateway.Authorization.emitSignin(entityID);
+      },
     };
 
     _api.Daemon = {
@@ -1041,6 +1091,14 @@ function ServiceAPI() {
 
           broadcastData: (data)=> {
             service_socket.broadcastData(data);
+          },
+
+          sendEvent: (entityID, event, data)=> {
+            service_socket.sendEvent(entityID, event, data);
+          },
+
+          broadcastEvent: (event, data)=> {
+            service_socket.broadcastEvent(event, data);
           }
         })
       });
@@ -1132,6 +1190,14 @@ function ServiceAPI() {
 
           broadcastData: (data)=> {
             service_socket.broadcastData(data);
+          },
+
+          sendEvent: (entityID, event, data)=> {
+            service_socket.sendEvent(entityID, event, data);
+          },
+
+          broadcastEvent: (event, data)=> {
+            service_socket.broadcastEvent(event, data);
           }
         })
       });

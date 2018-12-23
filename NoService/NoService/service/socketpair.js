@@ -20,6 +20,18 @@ function ServiceSocket(service_name, prototype, emitRouter, debug, entity_module
     emitRouter(conn_profile, 'CA', _data);
   }
 
+  let _emitasevent = (conn_profile, i, n, d) => {
+    let _data = {
+      "m": "EV",
+      "d": {
+        "i": i,
+        "n": n,
+        "d": d,
+      }
+    };
+    emitRouter(conn_profile, 'CA', _data);
+  }
+
   let _emitasclose = (conn_profile, i) => {
     let _data = {
       "m": "CS",
@@ -36,13 +48,13 @@ function ServiceSocket(service_name, prototype, emitRouter, debug, entity_module
   let _on_dict = {
     connect: (entityID, callback) => {
       if(debug)
-        Utils.TagLog('*WARN*', 'onConnect of service "'+service_name+'" not implemented');
+        Utils.TagLog('*WARN*', '_emitConnect of service "'+service_name+'" not implemented');
       callback(false);
     },
 
     data: (entityID, data) => {
       if(debug)
-        Utils.TagLog('*WARN*', 'onData of service "'+service_name+'" not implemented');
+        Utils.TagLog('*WARN*', '_emitData of service "'+service_name+'" not implemented');
     },
 
     close: (entityID, callback) => {
@@ -65,6 +77,22 @@ function ServiceSocket(service_name, prototype, emitRouter, debug, entity_module
     _jsonfunctions[name].obj = callback;
   };
 
+  this.sendEvent = (entityID, event, data)=> {
+    entity_module.getEntityConnProfile(entityID, (err, connprofile)=>{
+      _emitasevent(connprofile, entityID, event, data);
+    });
+  };
+
+  this.broadcastEvent = (event, data)=> {
+    let query = 'service='+service_name+',type=Activity';
+    entity_module.getfliteredEntitiesList(query, (err, entitiesID)=>{
+      for(let i in entitiesID) {
+        entity_module.getEntityConnProfile(entitiesID[i], (err, connprofile) => {
+          _emitasevent(connprofile, entitiesID[i], event, data);
+        });
+      }
+    });
+  };
 
   this.sendData = (entityID, data) => {
     entity_module.getEntityConnProfile(entityID, (err, connprofile)=>{
@@ -89,13 +117,21 @@ function ServiceSocket(service_name, prototype, emitRouter, debug, entity_module
     let query = 'service='+service_name+',type=Activity';
     entity_module.getfliteredEntitiesList(query, (err, entitiesID)=>{
       for(let i in entitiesID) {
-        this.close(entitiesID[i]);
+        this._closeSocket(entitiesID[i]);
       }
       callback(false);
     });
-  }
+  };
 
-  this.emitFunctionCall = (entityID, JFname, jsons, callback) => {
+  this.close = ()=> {
+
+  };
+
+  this.on = (type, callback)=> {
+    _on_dict[type] = callback;
+  };
+
+  this._emitFunctionCall = (entityID, JFname, jsons, callback) => {
     try {
       if(_jsonfunctions[JFname]) {
         _jsonfunctions[JFname].obj(JSON.parse(jsons==null?'{}':jsons), entityID, (err, returnVal)=> {
@@ -115,11 +151,11 @@ function ServiceSocket(service_name, prototype, emitRouter, debug, entity_module
     }
   };
 
-  this.close = (entityID, remoteClosed)=> {
+  this._closeSocket = (entityID, remoteClosed)=> {
     entity_module.getEntityConnProfile(entityID, (err, connprofile)=>{
       if(remoteClosed)
         _emitasclose(connprofile, entityID);
-      this.onClose(entityID, (err)=>{
+      this._emitClose(entityID, (err)=>{
         entity_module.deleteEntity(entityID, (err)=> {
             if(err && debug) {
               Utils.TagLog('*ERR*', 'Error occured at ServiceSocket close.');
@@ -130,19 +166,15 @@ function ServiceSocket(service_name, prototype, emitRouter, debug, entity_module
     });
   };
 
-  this.on = (type, callback)=> {
-    _on_dict[type] = callback;
-  }
-
-  this.onConnect = (entityID, callback)=> {
+  this._emitConnect = (entityID, callback)=> {
     _on_dict['connect'](entityID, callback);
   }
 
-  this.onData = (entityID, data)=> {
+  this._emitData = (entityID, data)=> {
     _on_dict['data'](entityID, data);
   }
 
-  this.onClose = (entityID, callback)=> {
+  this._emitClose = (entityID, callback)=> {
     _on_dict['close'](entityID, callback);
   }
 
@@ -155,29 +187,29 @@ function ServiceSocket(service_name, prototype, emitRouter, debug, entity_module
 function ActivitySocket(conn_profile, emitRouter, debug) {
   // Service Socket callback
   let _emitdata = (i, d) => {
-    let _data2 = {
+    let _data = {
       "m": "SS",
       "d": {
         "i": i,
         "d": d,
       }
     };
-    emitRouter(conn_profile, 'CS', _data2);
+    emitRouter(conn_profile, 'CS', _data);
   }
 
   // Service Socket callback
   let _emitclose = (i) => {
-    let _data2 = {
+    let _data = {
       "m": "CS",
       "d": {
         "i": i
       }
     };
-    emitRouter(conn_profile, 'CS', _data2);
+    emitRouter(conn_profile, 'CS', _data);
   }
 
   let _emitjfunc = (entity_id, name, tempid, Json)=> {
-    let _data2 = {
+    let _data = {
       "m": "JF",
       "d": {
         "i": entity_id,
@@ -186,7 +218,7 @@ function ActivitySocket(conn_profile, emitRouter, debug) {
         "t": tempid
       }
     };
-    emitRouter(conn_profile, 'CS', _data2);
+    emitRouter(conn_profile, 'CS', _data);
   }
 
   let _entity_id = null;
@@ -202,6 +234,10 @@ function ActivitySocket(conn_profile, emitRouter, debug) {
     close: ()=> {
       if(debug) Utils.TagLog('*WARN*', 'ActivitySocket on "close" not implemented')
     }
+  };
+
+  let _on_event = {
+
   };
 
   // For waiting connection is absolutly established. We need to wrap operations and make it queued.
@@ -268,11 +304,19 @@ function ActivitySocket(conn_profile, emitRouter, debug) {
     _on_dict[type] = callback;
   };
 
-  this.emitOnData = (data) => {
+  this.onEvent = (event, callback)=> {
+    _on_event[event] = callback;
+  };
+
+  this._emitData = (data) => {
     _on_dict['data'](false, data);
   };
 
-  this.onClose = () => {
+  this._emitEvent = (event, data)=> {
+    _on_event[event](false, data);
+  };
+
+  this._emitClose = () => {
     _on_dict['close'](false);
   };
 
@@ -285,7 +329,7 @@ function ActivitySocket(conn_profile, emitRouter, debug) {
         if (bundle[i] === _entity_id) {
           if(!this.remoteClosed)
             _emitclose(_entity_id);
-          this.onClose();
+          this._emitClose();
           setTimeout(()=>{
             // tell worker abort referance
             if(_ASockets[_entity_id])
