@@ -1,4 +1,4 @@
-// NoService/NoService/workerd.js
+// NoService/NoService/serviceworkerd.js
 // Description:
 // "workerd.js" is a service worker daemon for NOOXY service framework. With workers the
 // services is multithreaded.
