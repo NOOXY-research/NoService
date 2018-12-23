@@ -5,7 +5,7 @@
 'use strict';
 
 const fs = require('fs');
-const Utils = require('./library').Utilities;
+const Utils = require('../library').Utilities;
 const WorkerDaemon = require('./workerd');
 
 function Service() {

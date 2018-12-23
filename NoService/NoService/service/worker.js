@@ -15,10 +15,10 @@
 'use strict';
 
 const fork = require('child_process').fork;
-const Utils = require('./library').Utilities;
+const Utils = require('../library').Utilities;
 // For injecting database to api
-const Database = require('./database/database');
-const Model = require('./database/model');
+const Database = require('../database').Database;
+const Model = require('../database').Model;
 const fs = require('fs');
 process.title = 'NoService_worker';
 
@@ -116,7 +116,7 @@ function WorkerClient() {
           _api.Daemon.getSettings((err, daemon_setting)=>{
             // inject Library API
             if(Me.Manifest.LibraryAPI)
-              _api.Library = require('./library');
+              _api.Library = require('../library');
 
             // inject Database API
             if(Me.Manifest.DatabaseAPI) {

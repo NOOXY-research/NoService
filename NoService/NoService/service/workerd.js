@@ -24,7 +24,7 @@
 'use strict';
 
 const {fork} = require('child_process');
-const Utils = require('./library').Utilities;
+const Utils = require('../library').Utilities;
 
 function WorkerDaemon() {
   let _worker_clients = {};

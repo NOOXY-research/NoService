@@ -22,17 +22,17 @@ const Authorization = require('./authorization').Authorization;
 const AuthorizationHandler = require('./authorization').AuthorizationHandler;
 const Authenticity = require('./authenticity');
 const Router = require('./router');
-const Service = require('./service');
+const Service = require('./service').Service;
 const Entity = require('./entity');
-const ServiceAPI = require('./serviceapi');
+const ServiceAPI = require('./service').ServiceAPI;
 const Implementation = require('./implementation');
 const Log = null;
 const Utils = require('./library').Utilities;
 const NoCrypto = require('./crypto').NoCrypto;
 const NSPS = require('./crypto').NSPS;
-const WorkerDaemon = require('./workerd');
-const Database = require('./database/database');
-const Model = require('./database/model');
+const WorkerDaemon = require('./service').WorkerDaemon;
+const Database = require('./database').Database;
+const Model = require('./database').Model;
 
 
 function Core(settings) {

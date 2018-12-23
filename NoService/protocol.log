@@ -20,3 +20,23 @@
 [2018-12-21 19:07:15] {"m":"CS","s":"rs","d":{"m":"JF","d":{"t":"_pyu6ty5z0","i":"_9n3d4gysn","s":"OK","r":"\"\\nHello. admin(as entity _9n3d4gysn).\\n  Welcome accessing NoShell service of Daemon \\\"NoService_default\\\".\\n  Daemon description: \\n  A NOOXY Service Framework Daemon.\\nNoService Daemon Version: aphla-0.4.8\\n\""}}}
 [2018-12-21 19:07:19] {"m":"CS","s":"rq","d":{"m":"JF","d":{"i":"_9n3d4gysn","n":"sendC","j":"{\"c\":\"db model list\"}","t":"_mdhwgugcj"}}}
 [2018-12-21 19:07:19] {"m":"CS","s":"rs","d":{"m":"JF","d":{"t":"_mdhwgugcj","i":"_9n3d4gysn","s":"OK","r":"{\"r\":\"[\\n  \\\"NSUser\\\",\\n  \\\"NoUser_User\\\",\\n  \\\"NoTester_ObjectTest\\\",\\n  \\\"NoTester_IndexedListTest\\\",\\n  \\\"NoTester_GroupIndexedList\\\"\\n]\"}"}}}
+[2018-12-23 08:57:24] {"m":"SP","s":"rq","d":{"p":"-----BEGIN PUBLIC KEY-----\nMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAr7IKnBKNuch0N/EN8a8s\ncdPp8wDhY/vDsbFYvzSv39Lg0az9/imuepyGuDxQcsWsTix6VlakeHJY/rTkUXHy\nuRsIqK2GJeiTxTYVp2EZSU6Sl4XaZ6YssbxWa5sAK+9tfdRit4X96Mg7IKnMeA8d\nrBdBosQE6ZeZ4WaHd10iKyUZcuzZjZVVMGhQ4DgF3od29jurOOI6QnJzZlWW+9xd\nfqrBdDVCZhlQ8KKquBETZeIxNZkixlFa6jrdDss6E96PFknZHbXCCDhg786VsEQ6\nGPi2zUDz/5tz6rryq+qlM6lfue29CamOgKq15WVejjSPCCc8hkUq2vZDIiNZwmRW\nfQIDAQAB\n-----END PUBLIC KEY-----\n"}}
+[2018-12-23 08:57:24] {"m":"SP","s":"rs","d":"PZ6z48WD03H7kUR2NInEe4LmGsmJrIklquNSQUllWXHu3sJ/PYJ2MhgKzMTyAyEbw/LHjW8Hk20VwcziCoLGhNSipDQ+n2fSsN/odO+vQs6bGZsP1rw22KLSVbiayyRhldBZ/B25dPC6BnL0nWMnISLja4lr+t19pEUbHgrftte3tmRod4+Zmx9fMQ8/33Spw3iKaM6FOjQVCzQMc5qios0nzWXkx2LY71lqGgd/RI5bYWWC5fLNdHDWHXL23SOs7o57tFyx6znALFplQnWfCRV+UP0GZaAzMnm/j/g+RTYeK8+un/vxv0xWu0EMGJGTQbJWTYcxN7xf3cAnKNGKDg=="}
+[2018-12-23 08:57:24] {"m":"CS","s":"rq","d":{"m":"CE","d":{"t":"e95a1c69-34e6-4f1d-b8d6-30fcad130c29","m":"daemon","k":"WHATAKEY","o":"admin","s":"NoMailer","od":"0.0.0.0"}}}
+[2018-12-23 08:57:24] {"m":"CS","s":"rs","d":{"m":"CE","d":{"t":"e95a1c69-34e6-4f1d-b8d6-30fcad130c29","i":"_pm1ccmuvf"}}}
+[2018-12-23 08:57:24] {"m":"CS","s":"rq","d":{"m":"VE","d":{"i":"_pm1ccmuvf"}}}
+[2018-12-23 08:57:24] {"m":"CS","s":"rs","d":{"m":"VE","d":{"i":"_pm1ccmuvf","s":"OK"}}}
+[2018-12-23 08:57:26] {"m":"SP","s":"rq","d":{"p":"-----BEGIN PUBLIC KEY-----\nMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAr7IKnBKNuch0N/EN8a8s\ncdPp8wDhY/vDsbFYvzSv39Lg0az9/imuepyGuDxQcsWsTix6VlakeHJY/rTkUXHy\nuRsIqK2GJeiTxTYVp2EZSU6Sl4XaZ6YssbxWa5sAK+9tfdRit4X96Mg7IKnMeA8d\nrBdBosQE6ZeZ4WaHd10iKyUZcuzZjZVVMGhQ4DgF3od29jurOOI6QnJzZlWW+9xd\nfqrBdDVCZhlQ8KKquBETZeIxNZkixlFa6jrdDss6E96PFknZHbXCCDhg786VsEQ6\nGPi2zUDz/5tz6rryq+qlM6lfue29CamOgKq15WVejjSPCCc8hkUq2vZDIiNZwmRW\nfQIDAQAB\n-----END PUBLIC KEY-----\n"}}
+[2018-12-23 08:57:26] {"m":"SP","s":"rs","d":"c1JjfXBTQf5epwSZJK0hdVRh+Vrb2N/0CLAgO1EkmwwZuEOvXkMaGAuGY77DZ+52MjB9vUriG6tRgSWJmQiRW9EhYfa1/abLMSXIe/XL0uNmZ5g05yzm3zBt2IkCVmesaY/tgKsWQNqsEbL+oUDT0zFojTwXliMb7NEi+Rx37oOlH8T34sdUFNZp/Gdsx/K7AcDKTXtixfJ5vTzmcuP/Lv92OtjB0BEGSBOMJGfzwrauOCIoZmvwz3aJ20yINvbEUiyqqtzMk82fUyHuXXzdWWZreYnyr5HuBLKdxZuOcu3RW2iY7kHPL4Uk1LyJIcdfgEVN2PELGzDHCbui3ccB1w=="}
+[2018-12-23 08:57:26] {"m":"CS","s":"rq","d":{"m":"CE","d":{"t":"fd6032d3-a7c5-45b4-bfe5-24242b5cd9d6","o":"admin","m":"normal","s":"NoShell","od":"0.0.0.0"}}}
+[2018-12-23 08:57:26] {"m":"CS","s":"rs","d":{"m":"CE","d":{"t":"fd6032d3-a7c5-45b4-bfe5-24242b5cd9d6","i":"_ynx2lz9vm"}}}
+[2018-12-23 08:57:26] {"m":"CS","s":"rq","d":{"m":"VE","d":{"i":"_ynx2lz9vm"}}}
+[2018-12-23 08:57:26] {"m":"CS","s":"rs","d":{"m":"VE","d":{"i":"_ynx2lz9vm","s":"OK"}}}
+[2018-12-23 08:57:26] {"m":"CS","s":"rq","d":{"m":"JF","d":{"i":"_ynx2lz9vm","n":"welcome","j":"null","t":"_2gyjwxnab"}}}
+[2018-12-23 08:57:26] {"m":"AU","s":"rq","d":{"m":"TK","d":{"t":"5a6bbd7f-c670-46ef-ac2d-6055df74a61f"}}}
+[2018-12-23 08:57:27] {"m":"GT","s":"rq","d":{"u":"admin","p":"admin"}}
+[2018-12-23 08:57:27] {"m":"GT","s":"rs","d":{"t":"dd8f2d47-96be-494c-9602-639c2cb24356","s":"OK"}}
+[2018-12-23 08:57:27] {"m":"CS","s":"rq","d":{"m":"JF","d":{"i":"_ynx2lz9vm","n":"welcome","j":"null","t":"_jmnfil7h5"}}}
+[2018-12-23 08:57:27] {"m":"AU","s":"rq","d":{"m":"TK","d":{"t":"f76bea9a-3bf6-48dd-a594-2e858f64e7dd"}}}
+[2018-12-23 08:57:27] {"m":"AU","s":"rs","d":{"m":"TK","d":{"t":"f76bea9a-3bf6-48dd-a594-2e858f64e7dd","v":"dd8f2d47-96be-494c-9602-639c2cb24356"}}}
+[2018-12-23 08:57:27] {"m":"CS","s":"rs","d":{"m":"JF","d":{"t":"_jmnfil7h5","i":"_ynx2lz9vm","s":"OK","r":"\"\\nHello. admin(as entity _ynx2lz9vm).\\n  Welcome accessing NoShell service of Daemon \\\"NoService_default\\\".\\n  Daemon description: \\n  A NOOXY Service Framework Daemon.\\nNoService Daemon Version: aphla-0.4.8\\n\""}}}
