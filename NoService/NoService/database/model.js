@@ -55,7 +55,7 @@ function Model() {
     this.getWhere = (where, query_values, callback)=> {
       _db.getRows(MODEL_TABLE_PREFIX+table_name, where, query_values, (err, results)=> {
         if(results) {
-          callback(err, results[0]);
+          callback(err, results);
         }
         else {
           callback(err);
@@ -204,7 +204,7 @@ function Model() {
     this.getWhere = (where, query_values, callback)=> {
       _db.getRows(MODEL_TABLE_PREFIX+table_name, where, query_values, (err, results)=> {
         if(results) {
-          callback(err, results[0]);
+          callback(err, results);
         }
         else {
           callback(err);
@@ -328,7 +328,7 @@ function Model() {
     this.getWhere = (where, query_values, callback)=> {
       _db.getRows(MODEL_TABLE_PREFIX+table_name, where, query_values, (err, results)=> {
         if(results) {
-          callback(err, results[0]);
+          callback(err, results);
         }
         else {
           callback(err);
@@ -424,7 +424,7 @@ function Model() {
     this.getWhere = (where, query_values, callback)=> {
       _db.getRows(MODEL_TABLE_PREFIX+table_name, where, query_values, (err, results)=> {
         if(results) {
-          callback(err, results[0]);
+          callback(err, results);
         }
         else {
           callback(err);
