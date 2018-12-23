@@ -52,6 +52,17 @@ function Model() {
       });
     };
 
+    this.getWhere = (where, query_values, callback)=> {
+      _db.getRows(MODEL_TABLE_PREFIX+table_name, where, query_values, (err, results)=> {
+        if(results) {
+          callback(err, results[0]);
+        }
+        else {
+          callback(err);
+        }
+      });
+    };
+
     this.replaceRows = (group_name, rows, callback)=> {
       if(do_timestamp) {
         let datenow = Utils.DatetoSQL(new Date());
@@ -120,6 +131,10 @@ function Model() {
       _db.appendRowsandGroupAutoIncrease(MODEL_TABLE_PREFIX+table_name, [model_key, model_group_key], rows, callback);
     };
 
+    this.appendRowsAllGroup = (group_name, rows, callback)=> {
+      // not finished
+    };
+
     this.getLatestNRows = (group_name, n, callback)=> {
       _db.getRows(MODEL_TABLE_PREFIX+table_name, model_group_key+'=? AND '+MODEL_INDEXKEY+' > ((SELECT max('+MODEL_INDEXKEY+') FROM '+MODEL_TABLE_PREFIX+table_name+') - ?)', [group_name, n], callback);
     };
@@ -177,6 +192,17 @@ function Model() {
     // get an instense
     this.get = (key_value, callback)=> {
       _db.getRows(MODEL_TABLE_PREFIX+table_name, model_key+'= ?', [key_value], (err, results)=> {
+        if(results) {
+          callback(err, results[0]);
+        }
+        else {
+          callback(err);
+        }
+      });
+    };
+
+    this.getWhere = (where, query_values, callback)=> {
+      _db.getRows(MODEL_TABLE_PREFIX+table_name, where, query_values, (err, results)=> {
         if(results) {
           callback(err, results[0]);
         }
@@ -299,6 +325,17 @@ function Model() {
       });
     };
 
+    this.getWhere = (where, query_values, callback)=> {
+      _db.getRows(MODEL_TABLE_PREFIX+table_name, where, query_values, (err, results)=> {
+        if(results) {
+          callback(err, results[0]);
+        }
+        else {
+          callback(err);
+        }
+      });
+    };
+
     this.search = (keyword, callback)=> {
       let sql = '';
       sql = Objects.keys(structure).join(' LIKE '+keyword+' OR ');
@@ -382,6 +419,17 @@ function Model() {
       sql = Objects.keys(structure).join(' LIKE '+keyword+' OR ');
       sql = sql + ' LIKE ' + keyword;
       _db.getRows(MODEL_TABLE_PREFIX+table_name, [sql, null], callback);
+    };
+
+    this.getWhere = (where, query_values, callback)=> {
+      _db.getRows(MODEL_TABLE_PREFIX+table_name, where, query_values, (err, results)=> {
+        if(results) {
+          callback(err, results[0]);
+        }
+        else {
+          callback(err);
+        }
+      });
     };
 
     // return list
