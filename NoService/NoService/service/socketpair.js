@@ -1,6 +1,6 @@
-// NoService/NoService/socket.js
+// NoService/NoService/socketpair.js
 // Description:
-// "socket.js" provide functions of socket.
+// "socketpair.js" provide functions of socket.
 // Copyright 2018 NOOXY. All Rights Reserved.
 'use strict';
 const Utils = require('../library').Utilities;

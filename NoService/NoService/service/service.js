@@ -7,7 +7,7 @@
 const fs = require('fs');
 const Utils = require('../library').Utilities;
 const WorkerDaemon = require('./workerd');
-const Socket = require('./socket');
+const SocketPair = require('./socketpair');
 
 function Service() {
   // need add service event system
@@ -71,7 +71,7 @@ function Service() {
 
   this.setEmitRouter = (emitRouter) => {_emitRouter = emitRouter};
 
-  this.onConnectionClose = (connprofile, callback) => {
+  this.emitConnectionClose = (connprofile, callback) => {
 
     let _entitiesID = connprofile.returnBundle('bundle_entities');
     if(_entitiesID == null) {
@@ -478,7 +478,7 @@ function Service() {
         _entity_id = entity_id;
       });
 
-      _service_socket = new Socket.ServiceSocket(_service_name, _service_manifest.JSONfunciton_prototypes, _emitRouter, _debug, _entity_module); // _onJFCAll = on JSONfunction call
+      _service_socket = new SocketPair.ServiceSocket(_service_name, _service_manifest.JSONfunciton_prototypes, _emitRouter, _debug, _entity_module); // _onJFCAll = on JSONfunction call
       // securly define
       _service_socket.sdef = (name, callback, fail) => {
         _service_socket.def(name, (json, entityID, returnJSON)=>{
@@ -720,7 +720,7 @@ function Service() {
     };
 
     this.spwanClient(method, targetip, targetport, (err, connprofile) => {
-      let _as = new Socket.ActivitySocket(connprofile, _emitRouter, _debug);
+      let _as = new SocketPair.ActivitySocket(connprofile, _emitRouter, _debug);
       _ActivityRsCEcallbacks[_data.d.t] = (connprofile, data) => {
         if(data.d.i != "FAIL") {
           _as.setEntityID(data.d.i);
@@ -757,7 +757,7 @@ function Service() {
 
 
     this.spwanClient(method, targetip, targetport, (err, connprofile) => {
-      let _as = new Socket.ActivitySocket(connprofile, _emitRouter, _debug);
+      let _as = new SocketPair.ActivitySocket(connprofile, _emitRouter, _debug);
       _ActivityRsCEcallbacks[_data.d.t] = (connprofile, data) => {
 
         if(data.d.i != "FAIL") {

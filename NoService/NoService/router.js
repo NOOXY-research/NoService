@@ -322,7 +322,7 @@ function Router() {
 
     _coregateway.Connection.onClose = (connprofile) => {
       try {
-        _coregateway.Service.onConnectionClose(connprofile, (err)=>{
+        _coregateway.Service.emitConnectionClose(connprofile, (err)=>{
           connprofile.destroy();
         });
       }
