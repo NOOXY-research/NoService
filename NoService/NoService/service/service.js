@@ -25,9 +25,18 @@ function Service() {
   let _workerd;
   let _master_service;
   let _debug_service;
-  let _emitRouter = () => {Utils.TagLog('*ERR*', 'emitRouter not implemented');};
 
   let ActivitySocketDestroyTimeout = 1000;
+
+  let _emitRouter = () => {Utils.TagLog('*ERR*', 'emitRouter not implemented');};
+  let _unbindActivitySocketList = (_entity_id)=> {
+    setTimeout(()=>{
+      // tell worker abort referance
+      if(_ASockets[_entity_id])
+        _ASockets[_entity_id].worker_cancel_refer = true;
+      delete _ASockets[_entity_id];
+    }, ActivitySocketDestroyTimeout);
+  };
 
   this.setDebug = (boolean) => {
     _debug = boolean;
@@ -154,7 +163,7 @@ function Service() {
       SS: (connprofile, data, response_emit) => {
         let _data = null;
         if(typeof(theservice) != 'undefined'||theservice!=null) {
-          theservice.sendSSData(data.i, data.d);
+          theservice.emitSSData(data.i, data.d);
           _data = {
             m: "SS",
             d: {
@@ -180,7 +189,7 @@ function Service() {
       JF: (connprofile, data, response_emit) => {
         let _data = null;
         if(typeof(theservice) != 'undefined') {
-          theservice.sendSSJFCall(data.i, data.n, data.j, (err, returnvalue)=>{
+          theservice.emitSSJFCall(data.i, data.n, data.j, (err, returnvalue)=>{
             if(err) {
               _data = {
                 m: "JF",
@@ -491,20 +500,8 @@ function Service() {
         _entity_id = entity_id;
       });
 
-      _service_socket = new SocketPair.ServiceSocket(_service_name, _service_manifest.JSONfunciton_prototypes, _emitRouter, _debug, _entity_module); // _onJFCAll = on JSONfunction call
-      // securly define
-      _service_socket.sdef = (name, callback, fail) => {
-        _service_socket.def(name, (json, entityID, returnJSON)=>{
-          _authorization_module.Authby.isSuperUserwithToken(entityID, (err, pass)=>{
-            if(pass) {
-              callback(json, entityID, returnJSON);
-            }
-            else {
-              fail(json, entityID, returnJSON);
-            }
-          });
-        });
-      };
+      _service_socket = new SocketPair.ServiceSocket(_service_name, _service_manifest.JSONfunciton_prototypes, _emitRouter, _debug, _entity_module, _authorization_module); // _onJFCAll = on JSONfunction call
+
       // create the service for module.
       try {
         if(_service_manifest.name != _service_name) {
@@ -597,11 +594,11 @@ function Service() {
       _service_socket._closeSocket(entityID, remoteClosed);
     };
 
-    this.sendSSData = (entityID, data) => {
+    this.emitSSData = (entityID, data) => {
       _service_socket._emitData(entityID, data);
     };
 
-    this.sendSSJFCall = (entityID, JFname, jsons, callback) => {
+    this.emitSSJFCall = (entityID, JFname, jsons, callback) => {
       _service_socket._emitFunctionCall(entityID, JFname, jsons, callback);
     };
 
@@ -733,7 +730,7 @@ function Service() {
     };
 
     this.spwanClient(method, targetip, targetport, (err, connprofile) => {
-      let _as = new SocketPair.ActivitySocket(connprofile, _emitRouter, _debug);
+      let _as = new SocketPair.ActivitySocket(connprofile, _emitRouter, _unbindActivitySocketList, _debug);
       _ActivityRsCEcallbacks[_data.d.t] = (connprofile, data) => {
         if(data.d.i != "FAIL") {
           _as.setEntityID(data.d.i);
@@ -770,7 +767,7 @@ function Service() {
 
 
     this.spwanClient(method, targetip, targetport, (err, connprofile) => {
-      let _as = new SocketPair.ActivitySocket(connprofile, _emitRouter, _debug);
+      let _as = new SocketPair.ActivitySocket(connprofile, _emitRouter, _unbindActivitySocketList, _debug);
       _ActivityRsCEcallbacks[_data.d.t] = (connprofile, data) => {
 
         if(data.d.i != "FAIL") {

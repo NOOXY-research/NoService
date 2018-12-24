@@ -5,7 +5,7 @@
 'use strict';
 const Utils = require('../library').Utilities;
 
-function ServiceSocket(service_name, prototype, emitRouter, debug, entity_module) {
+function ServiceSocket(service_name, prototype, emitRouter, debug, entity_module, authorization_module) {
   let _jsonfunctions = prototype==null?{}:prototype;
   let _holding_entities = [];
   // as on data callback
@@ -77,9 +77,38 @@ function ServiceSocket(service_name, prototype, emitRouter, debug, entity_module
     _jsonfunctions[name].obj = callback;
   };
 
+  // securly define
+  this.sdef = (name, callback, fail) => {
+    this.def(name, (json, entityID, returnJSON)=>{
+      authorization_module.Authby.isSuperUserwithToken(entityID, (err, pass)=>{
+        if(pass) {
+          callback(json, entityID, returnJSON);
+        }
+        else {
+          fail(json, entityID, returnJSON);
+        }
+      });
+    });
+  };
+
   this.sendEvent = (entityID, event, data)=> {
     entity_module.getEntityConnProfile(entityID, (err, connprofile)=>{
       _emitasevent(connprofile, entityID, event, data);
+    });
+  };
+
+  this.broadcastEventtoUsername = (username, event, data)=> {
+    let query = 'owner='+username+',service='+service_name+',type=Activity';
+    entity_module.getfliteredEntitiesList(query, (err, entitiesID)=>{
+      for(let i in entitiesID) {
+        authorization_module.Authby.Token(entitiesID[i], (err, pass)=>{
+          if(pass) {
+            entity_module.getEntityConnProfile(entitiesID[i], (err, connprofile) => {
+              _emitasevent(connprofile, entitiesID[i], event, data);
+            });
+          }
+        });
+      }
     });
   };
 
@@ -97,6 +126,22 @@ function ServiceSocket(service_name, prototype, emitRouter, debug, entity_module
   this.sendData = (entityID, data) => {
     entity_module.getEntityConnProfile(entityID, (err, connprofile)=>{
       _emitasdata(connprofile, entityID, data);
+    });
+  };
+
+  this.broadcastDatatoUsername = (username, data) => {
+    // console.log('f');
+    let query = 'owner='+username+',service='+service_name+',type=Activity';
+    entity_module.getfliteredEntitiesList(query, (err, entitiesID)=>{
+      for(let i in entitiesID) {
+        authorization_module.Authby.Token(entitiesID[i], (err, pass)=>{
+          if(pass) {
+            entity_module.getEntityConnProfile(entitiesID[i], (err, connprofile) => {
+              _emitasdata(connprofile, entitiesID[i], data);
+            });
+          }
+        });
+      }
     });
   };
 
@@ -184,7 +229,7 @@ function ServiceSocket(service_name, prototype, emitRouter, debug, entity_module
 
 };
 
-function ActivitySocket(conn_profile, emitRouter, debug) {
+function ActivitySocket(conn_profile, emitRouter, unbindActivitySocketList, debug) {
   // Service Socket callback
   let _emitdata = (i, d) => {
     let _data = {
@@ -322,20 +367,19 @@ function ActivitySocket(conn_profile, emitRouter, debug) {
 
   this.remoteClosed = false;
 
+  this.unbindActivitySocketList = ()=> {
+    Utils.TagLog('*ERR*', '_aftercloseLaunched not implemented');
+  };
+
   this.close = () => {
     let op = ()=> {
+      if(!this.remoteClosed)
+        _emitclose(_entity_id);
+      this._emitClose();
       let bundle = conn_profile.returnBundle('bundle_entities');
       for (let i=bundle.length-1; i>=0; i--) {
         if (bundle[i] === _entity_id) {
-          if(!this.remoteClosed)
-            _emitclose(_entity_id);
-          this._emitClose();
-          setTimeout(()=>{
-            // tell worker abort referance
-            if(_ASockets[_entity_id])
-              _ASockets[_entity_id].worker_cancel_refer = true;
-            delete _ASockets[_entity_id];
-          }, ActivitySocketDestroyTimeout);
+          unbindActivitySocketList(_entity_id);
           bundle.splice(i, 1);
         }
       }

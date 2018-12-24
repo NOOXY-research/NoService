@@ -21,7 +21,8 @@ function Service(Me, api) {
     let sniffonRAW = false;
     api.Daemon.getSettings((err, DaemonSettings)=>{
       api.Daemon.getVariables((err, DaemonVars)=>{
-        api.Sniffer.onRouterJSON((err, json)=>{
+
+        api.Sniffer.onRouterJSON((err, json)=> {
           let j = JSON.stringify(json, null, 2);
           if(sniffonJSON) {
             try {
@@ -57,6 +58,36 @@ function Service(Me, api) {
             }
           }
         })
+
+        ss.on('connect', (entityID, callback)=>{
+          api.Authorization.Authby.isSuperUser(entityID, (err, pass)=> {
+            if(pass) {
+              api.Service.Entity.getEntityMetaData(entityID, (err, emeta)=>{
+                let msg = '\nHello. '+emeta.owner+'(as entity '+entityID+').\n  Welcome accessing NoShell service of Daemon "'+DaemonSettings.daemon_name+'".\n';
+                msg = msg + '  Daemon description: \n  ' + DaemonSettings.description+'\n'+'NoService Daemon Version: '+DaemonVars.version+'\n';
+                api.Authorization.Authby.Token(entityID, (err, pass)=> {
+                  if(pass) {
+                    ss.sendEvent(entityID, 'welcome', msg);
+                  }
+                  else {
+
+                  }
+                });
+                // api.Authorization.emitSignin(entityID);
+                callback(false);
+              });
+            }
+            else {
+              api.Service.Entity.getEntityMetaData(entityID, (err, emeta)=>{
+                let msg = '\nHello. '+emeta.owner+'(as entity '+entityID+').\n  You have no NoShell access to "'+DaemonSettings.daemon_name+'".\n';
+                ss.sendEvent(entityID, 'welcome', msg);
+                // api.Authorization.emitSignin(entityID);
+
+                callback(false);
+              });
+            }
+          });
+        });
 
         let spliter = ' ';
 

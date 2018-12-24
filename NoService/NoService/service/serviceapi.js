@@ -1099,6 +1099,14 @@ function ServiceAPI() {
 
           broadcastEvent: (event, data)=> {
             service_socket.broadcastEvent(event, data);
+          },
+
+          broadcastEventtoUsername: (username, event, data)=> {
+            service_socket.broadcastEventtoUsername(username, event, data);
+          },
+
+          broadcastDatatoUsername: (username, data)=> {
+            service_socket.broadcastDatatoUsername(username, data);
           }
         })
       });
@@ -1198,9 +1206,18 @@ function ServiceAPI() {
 
           broadcastEvent: (event, data)=> {
             service_socket.broadcastEvent(event, data);
+          },
+
+          broadcastEventtoUsername: (username, event, data)=> {
+            service_socket.broadcastEventtoUsername(event, data);
+          },
+
+          broadcastDatatoUsername: (username, data)=> {
+            service_socket.broadcastDatatoUsername(event, data);
           }
         })
       });
+
       api.addAPI(['getMe'], (LCBO)=> {
         return((remote_callback_obj)=> {
           if(remote_callback_obj) {

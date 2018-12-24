@@ -96,12 +96,13 @@ function Service(Me, api) {
             }
             _username = _data.u;
             Implementation.emitRouter(connprofile, 'GT', _data);
-            setTimeout(()=> {
-              _as.call('welcome', null, (err, msg) => {
-                console.log(msg);
-                commandread();
-              });
-            }, 100)
+            commandread();
+            // setTimeout(()=> {
+            //   // _as.call('welcome', null, (err, msg) => {
+            //     // console.log(msg);
+            //     commandread();
+            //   // });
+            // }, 100)
           });
 
         });
@@ -176,6 +177,10 @@ function Service(Me, api) {
               console.log('You are now "'+uname+'". Type "exit" to end this session.');
               _username = uname;
               api.Service.ActivitySocket.createSocket(DAEMONTYPE, DAEMONIP, DAEMONPORT, 'NoShell', _username, (err, as) => {
+                as.onEvent('welcome', (err, msg) => {
+                  console.log(msg);
+                  commandread();
+                });
                 _as = as;
                 commandread = () => {
                   rl.question('>>> ', (cmd)=> {
@@ -199,10 +204,6 @@ function Service(Me, api) {
                   if(data.t == 'stream') {
                     console.log(data.d);
                   }
-                });
-                as.call('welcome', null, (err, msg) => {
-                  console.log(msg);
-                  commandread();
                 });
               });
             });

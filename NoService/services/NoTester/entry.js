@@ -13,8 +13,6 @@ function Service(Me, api) {
   // You need to wrap the callback funciton by api.SafeCallback.
   // E.g. setTimeout(api.SafeCallback(callback), timeout)
   let safec = api.SafeCallback;
-  // Please save and manipulate your files in this directory
-  let files_path = Me.FilesPath;
   // Your settings in manifest file.
   let settings = Me.Settings;
 
@@ -47,7 +45,7 @@ function Service(Me, api) {
     api.Service.ActivitySocket.createDefaultAdminDeamonSocket('NoTester', (err, activitysocket)=> {
       activitysocket.on('data', (err, data)=> {
         log('Received data from service.')
-        log(data)
+        log(data);
       });
       activitysocket.sendData('A sent data from activity.');
       activitysocket.call('jfunc1', {d:'Hello! Jfunc call from client!'}, (err, json)=> {
@@ -94,6 +92,7 @@ function Service(Me, api) {
       log('Activty "'+entityID+'" connected.');
       // Send data to client.
       ss.sendData(entityID, 'A sent data from service.');
+      ss.broadcastDatatoUsername('admin2', 'An entity connected. Msg to admin.');
       // Do something.
       // report error;
       callback(false);

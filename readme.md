@@ -518,7 +518,8 @@ api.Database.Model.define('IndexedListTest', {
   model.removeProperty(properties_list, callback)
 
   #### Model(Object)
-  model.get(key_value, callback)\
+  model.get(where, callback)\
+  model.getWhere(key_value, callback)\
   model.create(properties_dict, callback)\
   model.replace(properties_dict, callback)\
   model.remove(key, callback)\
@@ -532,6 +533,7 @@ api.Database.Model.define('IndexedListTest', {
 
   #### Model(IndexedList)
   model.get(index_value, callback)\
+  model.getWhere(where, callback)\
   model.replaceRows(rows, callback)\
   model.updateRows(rows, callback)\
   model.deleteRows(begin, end, callback)\
@@ -547,6 +549,7 @@ api.Database.Model.define('IndexedListTest', {
   #### Model(GroupIndexedList)
   model.existGroup(group_name, callback)\
   model.get(group_name, index_value, callback)\
+  model.getWhere(where, callback)\
   model.replaceRows(group_name, rows, callback)\
   model.updateRows(group_name, rows, callback)\
   model.deleteRows(group_name, begin, end, callback)\
@@ -565,8 +568,10 @@ api.Database.Model.define('IndexedListTest', {
   api.Serivce.ServiceSocket.sdef(name, callback, failopearation)\
   api.Serivce.ServiceSocket.sendData(entityID, data)\
   api.Serivce.ServiceSocket.broadcastData(data)\
+  api.Serivce.ServiceSocket.broadcastDatatoUsername(username, data)\
   api.Serivce.ServiceSocket.sendEvent(entityID, event, data)\
   api.Serivce.ServiceSocket.broadcastEvent(event, data)\
+  api.Serivce.ServiceSocket.broadcastEventtoUsername(username, data)\
   api.Serivce.ServiceSocket.on(type, callback)\
   api.Serivce.ServiceSocket.close(entityId)
 
@@ -580,7 +585,7 @@ api.Database.Model.define('IndexedListTest', {
   ActivitySocket.sendData(data)\
   ActivitySocket.returnEntityID()\
   ActivitySocket.on(type, callback)\
-  ActivitySocket.close()
+  ActivitySocket.close()\
   ActivitySocket.onEvent(event, callback);
 
 ## NoService Protocol

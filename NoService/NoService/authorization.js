@@ -160,7 +160,7 @@ function Authorization() {
     Token : (entityID, callback) =>{
       let mode = _entity_module.returnEntityValue(entityID, 'mode');
       if(mode == 'normal') {
-        _checkhaveusername(entityID, callback, ()=>{
+        _checkhaveusername(entityID, callback, ()=> {
           let user = _entity_module.returnEntityValue(entityID, 'owner');
           let data = {
             m: "TK",
