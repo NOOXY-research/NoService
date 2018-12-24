@@ -67,7 +67,7 @@ function Service(Me, api) {
                 msg = msg + '  Daemon description: \n  ' + DaemonSettings.description+'\n'+'NoService Daemon Version: '+DaemonVars.version+'\n';
                 api.Authorization.Authby.Token(entityID, (err, pass)=> {
                   if(pass) {
-                    ss.sendEvent(entityID, 'welcome', msg);
+                    ss.semit(entityID, 'welcome', msg);
                   }
                   else {
 
@@ -80,7 +80,7 @@ function Service(Me, api) {
             else {
               api.Service.Entity.getEntityMetaData(entityID, (err, emeta)=>{
                 let msg = '\nHello. '+emeta.owner+'(as entity '+entityID+').\n  You have no NoShell access to "'+DaemonSettings.daemon_name+'".\n';
-                ss.sendEvent(entityID, 'welcome', msg);
+                ss.semit(entityID, 'welcome', msg);
                 // api.Authorization.emitSignin(entityID);
 
                 callback(false);

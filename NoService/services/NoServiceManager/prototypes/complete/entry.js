@@ -4,8 +4,6 @@
 // Copyright 2018 NOOXY. All Rights Reserved.
 'use strict';
 
-let {{ servicename }} = new (require('./{{ servicename }}'))()
-
 function Service(Me, API) {
   // Initialize your service here synchronous. Do not use async here!
 
@@ -16,13 +14,9 @@ function Service(Me, API) {
   // You need to wrap the callback funciton by API.SafeCallback.
   // E.g. setTimeout(API.SafeCallback(callback), timeout)
   let safec = API.SafeCallback;
-  // Your settings in manifest file.
-  let settings = Me.Settings;
 
   // import API to {{ servicename }} module
-  {{ servicename }}.importModel(API.Database.Model);
-  {{ servicename }}.importLibrary(API.Database.Library);
-  {{ servicename }}.importSettings(settings);
+  const {{ servicename }} = new (require('./{{ servicename }}'))(Me, API);
 
   // JSONfunction is a function that can be defined, which others entities can call.
   // It is a NOOXY Service Framework Standard
@@ -99,6 +93,7 @@ function Service(Me, API) {
 
   // Here is where your service start
   this.start = ()=> {
+    {{ servicename }}.launch();
     // Access another service on this daemon
     API.Service.ActivitySocket.createDefaultAdminDeamonSocket('Another Service', (err, activitysocket)=> {
       // accessing other service
@@ -111,6 +106,7 @@ function Service(Me, API) {
     // Close your service here synchronous. Do not use async here!
     // Saving state of you service.
     // Please save and manipulate your files in this directory
+    {{ servicename }}.close();
   }
 }
 

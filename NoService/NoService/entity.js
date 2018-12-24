@@ -25,13 +25,53 @@ function Entity() {
       owner: Json.owner,
       ownerdomain: Json.ownerdomain,
       connectiontype: Json.connectiontype,
-      description: Json.description
+      description: Json.description,
+      groups: new Set()
     };
 
     this.getConnProfile = (callback) => {callback(false, _conn_profile)};
 
     this.modify = (key, value) => {
       _json[key] = value;
+    };
+
+    this.addGroups = (grouplist, callback)=> {
+      for(let i in grouplist) {
+        _meta.groups.add(grouplist[i]);
+      }
+      callback(false);
+    };
+
+    this.deleteGroups = (grouplist, callback)=> {
+      for(let i in grouplist) {
+        _meta.groups.delete(grouplist[i]);
+      }
+      callback(false);
+    };
+
+    this.clearGroups = (grouplist, callback)=> {
+      _meta.groups.clear();
+      callback(false);
+    };
+
+    this.includeGroups = (grouplist, callback)=> {
+      let result = true;
+      for(let i in grouplist) {
+        // console.log(group, !_meta.groups.has(group));
+        if(!_meta.groups.has(grouplist[i])) {
+          result = false;
+          break;
+        };
+      }
+      callback(false, result);
+    };
+
+    this.inGroup = (group, callback)=> {
+      callback(false, _meta.groups.has(group));
+    };
+
+    this.getGroups = (callback)=> {
+      callback(false, _meta.groups.keys());
     };
 
     this.returnVal = (key) => {
@@ -147,13 +187,81 @@ function Entity() {
   };
 
   this.deleteEntity = (entityID, callback) => {
-    if(_entities[entityID]) {
+    let et = _entities[entityID];
+    if(et) {
       for(let i in _on_callbacks['EntityDeleted']) {
-        (_on_callbacks['EntityDeleted'])[i](entityID, _entities[entityID].returnMeta());
+        (_on_callbacks['EntityDeleted'])[i](entityID, et.returnMeta());
       }
       delete _entities[entityID];
       if(callback)
         callback(false);
+    }
+    else {
+      if(callback)
+        callback(new Error('Entity "'+entityID+'" doesn\'t exist.'));
+    }
+  };
+
+
+  this.addEntityToGroups = (entityID, grouplist, callback)=> {
+    let et =_entities[entityID];
+    if(et) {
+      et.addGroups(grouplist, callback);
+    }
+    else {
+      if(callback)
+        callback(new Error('Entity "'+entityID+'" doesn\'t exist.'));
+    }
+  };
+
+  this.deleteEntityFromGroups = (entityID, grouplist, callback)=> {
+    let et =_entities[entityID];
+    if(et) {
+      et.deleteGroups(grouplist, callback);
+    }
+    else {
+      if(callback)
+        callback(new Error('Entity "'+entityID+'" doesn\'t exist.'));
+    }
+  };
+
+  this.clearAllGroupsOfEntity = (entityID, callback)=> {
+    let et =_entities[entityID];
+    if(et) {
+      et.clearGroups(callback);
+    }
+    else {
+      if(callback)
+        callback(new Error('Entity "'+entityID+'" doesn\'t exist.'));
+    }
+  };
+
+  this.isEntityIncludingGroups = (entityID, grouplist, callback)=> {
+    let et =_entities[entityID];
+    if(et) {
+      et.includeGroups(grouplist, callback);
+    }
+    else {
+      if(callback)
+        callback(new Error('Entity "'+entityID+'" doesn\'t exist.'));
+    }
+  };
+
+  this.isEntityInGroup = (entityID, group, callback)=> {
+    let et =_entities[entityID];
+    if(et) {
+      et.inGroup(group, callback);
+    }
+    else {
+      if(callback)
+        callback(new Error('Entity "'+entityID+'" doesn\'t exist.'));
+    }
+  };
+
+  this.getGroupsofEntity = (entityID, callback)=> {
+    let et =_entities[entityID];
+    if(et) {
+      et.getGroups(callback);
     }
     else {
       if(callback)

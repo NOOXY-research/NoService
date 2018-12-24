@@ -47,12 +47,31 @@ function Service(Me, api) {
         log('Received data from service.')
         log(data);
       });
+      activitysocket.onEvent('event1', (err, data)=> {
+        log('Received event1 data from service.')
+        log(data);
+      });
+      let i = 0;
+      let p = ['(-*)', '(*-)', '(-*)', '(*-)'];
+      activitysocket.onEvent('stress', (err, data)=> {
+        // process.stdout.clearLine();  // clear current text
+        process.stdout.cursorTo(0);  // move cursor to beginning of line
+        i = (i + 1) % 4;
+        process.stdout.write('  '+p[i]+'stressing  ');  // write text
+      });
+      activitysocket.onEvent('stressOK', (err, data)=> {
+        console.log('');
+        log('StressOK');
+        setTimeout(()=>{
+          activitysocket.close();
+        }, 1000);
+      });
       activitysocket.sendData('A sent data from activity.');
       activitysocket.call('jfunc1', {d:'Hello! Jfunc call from client!'}, (err, json)=> {
         log(json);
-        activitysocket.close();
       });
-      // accessing other service
+
+
     });
 
     // Safe define a JSONfunction.
@@ -92,7 +111,27 @@ function Service(Me, api) {
       log('Activty "'+entityID+'" connected.');
       // Send data to client.
       ss.sendData(entityID, 'A sent data from service.');
-      ss.broadcastDatatoUsername('admin2', 'An entity connected. Msg to admin.');
+      ss.sendDataToUsername('admin', 'An entity connected. Msg to admin.');
+      ss.emit(entityID, 'event1', 'Event msg. SHOULD APPEAR(1/3)');
+      ss.emit(entityID, 'event2', 'Event msg. SHOULD NOT APPEAR.');
+
+      api.Service.Entity.addEntityToGroups(entityID, ['superuser', 'whatever', 'good'], (err)=> {
+        ss.sendDataToIncludingGroups(['superuser', 'good', 'excluded'], 'Superuser entity group msg. SHOULD NOT APPEAR');
+        ss.sendDataToIncludingGroups(['superuser', 'good'], 'Superuser entity group msg. SHOULD APPEAR(1/2)');
+        ss.sendDataToGroups(['superuser', 'good'], 'Superuser entity group msg. SHOULD APPEAR(2/2)');
+        ss.emitToGroups(['superuser', 'good', 'excluded'], 'event2', 'Event msg. SHOULD NOT APPEAR');
+        ss.emitToGroups(['superuser', 'good'], 'event1', 'Event msg. SHOULD APPEAR(2/3)');
+        ss.emitToIncludingGroups(['superuser', 'good'], 'event1', 'Event msg. SHOULD APPEAR(3/3)');
+        ss.emitToIncludingGroups(['superuser', 'good', 'excluded'], 'event1', 'Event msg. SHOULD NOT APPEAR');
+        log('Starting stress test on emiting event. In 5 sec.');
+        setTimeout(()=> {
+          for(let i=0; i< 1500; i++) {
+            ss.emitToGroups(['superuser', 'good', 'excluded'], 'stress', 'Event msg. SHOULD NOT APPEAR');
+            ss.emitToGroups(['superuser', 'good'], 'stress', 'Event msg. SHOULD APPEAR(2/3)');
+          };
+          ss.emit(entityID, 'stressOK');
+        }, 5000);
+      });
       // Do something.
       // report error;
       callback(false);
@@ -351,17 +390,15 @@ function Service(Me, api) {
                             }
                           });
                         });
-                      }
+                      };
                     });
-                  }
-
+                  };
                 });
-
-              }
+              };
             });
-          }
+          };
         });
-      }
+      };
     });
   }
 

@@ -49,8 +49,7 @@
     "NoServiceManager",
     "NoUser",
     "NoTalk",
-    "NoMailer",
-    "NoTester"
+    "NoMailer"
   ],
 
   "debug": false,

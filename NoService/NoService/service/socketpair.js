@@ -81,7 +81,7 @@ function ServiceSocket(service_name, prototype, emitRouter, debug, entity_module
   this.sdef = (name, callback, fail) => {
     this.def(name, (json, entityID, returnJSON)=>{
       authorization_module.Authby.isSuperUserwithToken(entityID, (err, pass)=>{
-        if(pass) {
+        if(pass&&!err) {
           callback(json, entityID, returnJSON);
         }
         else {
@@ -91,24 +91,83 @@ function ServiceSocket(service_name, prototype, emitRouter, debug, entity_module
     });
   };
 
-  this.sendEvent = (entityID, event, data)=> {
+  // emit event to entityID
+  this.emit = (entityID, event, data)=> {
     entity_module.getEntityConnProfile(entityID, (err, connprofile)=>{
       _emitasevent(connprofile, entityID, event, data);
     });
   };
 
-  this.broadcastEventtoUsername = (username, event, data)=> {
+  // emit event to entityID securly
+  this.semit = (entityID, event, data)=> {
+    authorization_module.Authby.isSuperUserwithToken(entityID, (err, pass)=>{
+      if(pass&&!err) {
+        entity_module.getEntityConnProfile(entityID, (err, connprofile)=>{
+          _emitasevent(connprofile, entityID, event, data);
+        });
+      };
+    });
+  };
+
+  this.emitToUsername = (username, event, data)=> {
     let query = 'owner='+username+',service='+service_name+',type=Activity';
     entity_module.getfliteredEntitiesList(query, (err, entitiesID)=>{
       for(let i in entitiesID) {
         authorization_module.Authby.Token(entitiesID[i], (err, pass)=>{
-          if(pass) {
+          if(pass&&!err) {
             entity_module.getEntityConnProfile(entitiesID[i], (err, connprofile) => {
               _emitasevent(connprofile, entitiesID[i], event, data);
             });
           }
         });
       }
+    });
+  };
+
+  this.emitToGroups = (groups, event, data)=> {
+    // console.log('f');
+    let query = 'service='+service_name+',type=Activity';
+    entity_module.getfliteredEntitiesList(query, (err, entitiesID)=>{
+      for(let i in entitiesID) {
+        let j = groups.length-1;
+        let op = ()=> {
+          let sent = false;
+          entity_module.isEntityInGroup(entitiesID[i], groups[j], (err, pass) => {
+            // console.log(pass, !sent, !err);
+            // console.log(err);
+            if(pass&&!sent&&!err) {
+              sent = true;
+              entity_module.getEntityConnProfile(entitiesID[i], (err, connprofile) => {
+                _emitasevent(connprofile, entitiesID[i], event, data);
+
+              });
+            }
+            else {
+              if(j>0) {
+                j--;
+                op();
+              }
+            }
+          });
+        };
+        op();
+      };
+    });
+  };
+
+  // broadcast to have all of this groups
+  this.emitToIncludingGroups = (groups, event, data)=> {
+    // console.log('f');
+    let query = 'service='+service_name+',type=Activity';
+    entity_module.getfliteredEntitiesList(query, (err, entitiesID)=>{
+      for(let i in entitiesID) {
+        entity_module.isEntityIncludingGroups(entitiesID[i], groups, (err, pass) => {
+          if(pass&&!err)
+            entity_module.getEntityConnProfile(entitiesID[i], (err, connprofile) => {
+              _emitasevent(connprofile, entitiesID[i], event, data);
+            });
+        });
+      };
     });
   };
 
@@ -129,19 +188,65 @@ function ServiceSocket(service_name, prototype, emitRouter, debug, entity_module
     });
   };
 
-  this.broadcastDatatoUsername = (username, data) => {
+  this.sendDataToUsername = (username, data) => {
     // console.log('f');
     let query = 'owner='+username+',service='+service_name+',type=Activity';
     entity_module.getfliteredEntitiesList(query, (err, entitiesID)=>{
       for(let i in entitiesID) {
         authorization_module.Authby.Token(entitiesID[i], (err, pass)=>{
-          if(pass) {
+          if(pass&&!err) {
             entity_module.getEntityConnProfile(entitiesID[i], (err, connprofile) => {
               _emitasdata(connprofile, entitiesID[i], data);
             });
           }
         });
       }
+    });
+  };
+
+  this.sendDataToGroups = (groups, data)=> {
+    // console.log('f');
+    let query = 'service='+service_name+',type=Activity';
+    entity_module.getfliteredEntitiesList(query, (err, entitiesID)=>{
+      for(let i in entitiesID) {
+        let j = groups.length-1;
+        let op = ()=> {
+          let sent = false;
+          entity_module.isEntityInGroup(entitiesID[i], groups[j], (err, pass) => {
+            // console.log(pass, !sent, !err);
+            // console.log(err);
+            if(pass&&!sent&&!err) {
+              sent = true;
+              entity_module.getEntityConnProfile(entitiesID[i], (err, connprofile) => {
+                _emitasdata(connprofile, entitiesID[i], data);
+              });
+            }
+            else {
+              if(j>0) {
+                j--;
+                op();
+              }
+            }
+          });
+        };
+        op();
+      };
+    });
+  };
+
+  // broadcast to have all of this groups
+  this.sendDataToIncludingGroups = (groups, data)=> {
+    // console.log('f');
+    let query = 'service='+service_name+',type=Activity';
+    entity_module.getfliteredEntitiesList(query, (err, entitiesID)=>{
+      for(let i in entitiesID) {
+        entity_module.isEntityIncludingGroups(entitiesID[i], groups, (err, pass) => {
+          if(pass&&!err)
+            entity_module.getEntityConnProfile(entitiesID[i], (err, connprofile) => {
+              _emitasdata(connprofile, entitiesID[i], data);
+            });
+        });
+      };
     });
   };
 

@@ -568,10 +568,10 @@ api.Database.Model.define('IndexedListTest', {
   api.Serivce.ServiceSocket.sdef(name, callback, failopearation)\
   api.Serivce.ServiceSocket.sendData(entityID, data)\
   api.Serivce.ServiceSocket.broadcastData(data)\
-  api.Serivce.ServiceSocket.broadcastDatatoUsername(username, data)\
+  api.Serivce.ServiceSocket.sendDataToUsername(username, data)\
   api.Serivce.ServiceSocket.sendEvent(entityID, event, data)\
   api.Serivce.ServiceSocket.broadcastEvent(event, data)\
-  api.Serivce.ServiceSocket.broadcastEventtoUsername(username, data)\
+  api.Serivce.ServiceSocket.sendEventToUsername(username, data)\
   api.Serivce.ServiceSocket.on(type, callback)\
   api.Serivce.ServiceSocket.close(entityId)
 

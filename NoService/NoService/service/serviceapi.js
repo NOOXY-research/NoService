@@ -679,6 +679,60 @@ function ServiceAPI() {
               remote_callback_obj.run([], [entityID, entityJson])
             }
           });
+        },
+
+        addEntityToGroups:(entityID, grouplist, remote_callback_obj)=> {
+          _coregateway.Entity.addEntityToGroups(entityID, grouplist, (err)=> {
+            if(remote_callback_obj) {
+              remote_callback_obj.run([], [err]);
+              remote_callback_obj.unbindRemote();
+            }
+          });
+        },
+
+        deleteEntityFromGroups:(entityID, grouplist, remote_callback_obj)=> {
+          _coregateway.Entity.deleteEntityFromGroups(entityID, grouplist, (err)=> {
+            if(remote_callback_obj) {
+              remote_callback_obj.run([], [err]);
+              remote_callback_obj.unbindRemote();
+            }
+          });
+        },
+
+        clearAllGroupsOfEntity:(entityID, remote_callback_obj)=> {
+          _coregateway.Entity.clearAllGroupsOfEntity(entityID, (err)=> {
+            if(remote_callback_obj) {
+              remote_callback_obj.run([], [err]);
+              remote_callback_obj.unbindRemote();
+            }
+          });
+        },
+
+        isEntityIncludingGroups:(entityID, grouplist, remote_callback_obj)=> {
+          _coregateway.Entity.isEntityIncludingGroups(entityID, grouplist, (err)=> {
+            if(remote_callback_obj) {
+              remote_callback_obj.run([], [err]);
+              remote_callback_obj.unbindRemote();
+            }
+          });
+        },
+
+        isEntityInGroup:(entityID, grouplist, remote_callback_obj)=> {
+          _coregateway.Entity.isEntityInGroup(entityID, grouplist, (err)=> {
+            if(remote_callback_obj) {
+              remote_callback_obj.run([], [err]);
+              remote_callback_obj.unbindRemote();
+            }
+          });
+        },
+
+        getGroupsofEntity:(entityID, remote_callback_obj)=> {
+          _coregateway.Entity.getGroupsofEntity(entityID, (err, results)=> {
+            if(remote_callback_obj) {
+              remote_callback_obj.run([], [err, results]);
+              remote_callback_obj.unbindRemote();
+            }
+          });
         }
       },
 
@@ -1093,21 +1147,37 @@ function ServiceAPI() {
             service_socket.broadcastData(data);
           },
 
-          sendEvent: (entityID, event, data)=> {
-            service_socket.sendEvent(entityID, event, data);
+          emit: (entityID, event, data)=> {
+            service_socket.emit(entityID, event, data);
           },
 
           broadcastEvent: (event, data)=> {
             service_socket.broadcastEvent(event, data);
           },
 
-          broadcastEventtoUsername: (username, event, data)=> {
-            service_socket.broadcastEventtoUsername(username, event, data);
+          emitToUsername: (username, event, data)=> {
+            service_socket.emitToUsername(username, event, data);
           },
 
-          broadcastDatatoUsername: (username, data)=> {
-            service_socket.broadcastDatatoUsername(username, data);
-          }
+          sendDataToUsername: (username, data)=> {
+            service_socket.sendDataToUsername(username, data);
+          },
+
+          emitToGroups: (groups, event, data)=> {
+            service_socket.emitToGroups(groups, event, data);
+          },
+
+          sendDataToGroups: (groups, data)=> {
+            service_socket.sendDataToGroups(groups, data);
+          },
+
+          emitToIncludingGroups: (groups, event, data)=> {
+            service_socket.emitToIncludingGroups(groups, event, data);
+          },
+
+          sendDataToIncludingGroups: (groups, data)=> {
+            service_socket.sendDataToIncludingGroups(groups, data);
+          },
         })
       });
       api.addAPI(['getMe'], (LCBO)=> {
@@ -1200,21 +1270,38 @@ function ServiceAPI() {
             service_socket.broadcastData(data);
           },
 
-          sendEvent: (entityID, event, data)=> {
-            service_socket.sendEvent(entityID, event, data);
+          emit: (entityID, event, data)=> {
+            service_socket.emit(entityID, event, data);
           },
 
           broadcastEvent: (event, data)=> {
             service_socket.broadcastEvent(event, data);
           },
 
-          broadcastEventtoUsername: (username, event, data)=> {
-            service_socket.broadcastEventtoUsername(event, data);
+          emitToUsername: (username, event, data)=> {
+            service_socket.emitToUsername(username, event, data);
           },
 
-          broadcastDatatoUsername: (username, data)=> {
-            service_socket.broadcastDatatoUsername(event, data);
-          }
+          sendDataToUsername: (username, data)=> {
+            service_socket.sendDataToUsername(username, data);
+          },
+
+          emitToGroups: (groups, event, data)=> {
+            service_socket.emitToGroups(groups, event, data);
+          },
+
+          sendDataToGroups: (groups, data)=> {
+            service_socket.sendDataToGroups(groups, data);
+          },
+
+          emitToIncludingGroups: (groups, event, data)=> {
+            service_socket.emitToIncludingGroups(groups, event, data);
+          },
+
+          sendDataToIncludingGroups: (groups, data)=> {
+            service_socket.sendDataToIncludingGroups(groups, data);
+          },
+
         })
       });
 
