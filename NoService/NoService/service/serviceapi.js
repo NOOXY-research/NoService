@@ -1151,6 +1151,10 @@ function ServiceAPI() {
             service_socket.emit(entityID, event, data);
           },
 
+          semit: (entityID, event, data)=> {
+            service_socket.semit(entityID, event, data);
+          },
+
           broadcastEvent: (event, data)=> {
             service_socket.broadcastEvent(event, data);
           },
@@ -1272,6 +1276,10 @@ function ServiceAPI() {
 
           emit: (entityID, event, data)=> {
             service_socket.emit(entityID, event, data);
+          },
+
+          semit: (entityID, event, data)=> {
+            service_socket.semit(entityID, event, data);
           },
 
           broadcastEvent: (event, data)=> {

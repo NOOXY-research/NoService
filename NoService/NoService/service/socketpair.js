@@ -273,8 +273,8 @@ function ServiceSocket(service_name, prototype, emitRouter, debug, entity_module
     });
   };
 
-  this.close = ()=> {
-
+  this.close = (entityID)=> {
+    this._closeSocket(entityID);
   };
 
   this.on = (type, callback)=> {
@@ -303,16 +303,18 @@ function ServiceSocket(service_name, prototype, emitRouter, debug, entity_module
 
   this._closeSocket = (entityID, remoteClosed)=> {
     entity_module.getEntityConnProfile(entityID, (err, connprofile)=>{
-      if(remoteClosed)
-        _emitasclose(connprofile, entityID);
-      this._emitClose(entityID, (err)=>{
-        entity_module.deleteEntity(entityID, (err)=> {
-            if(err && debug) {
-              Utils.TagLog('*ERR*', 'Error occured at ServiceSocket close.');
-              console.log(err);
-            }
+      if(!err) {
+        if(!remoteClosed)
+          _emitasclose(connprofile, entityID);
+        this._emitClose(entityID, (err)=>{
+          entity_module.deleteEntity(entityID, (err)=> {
+              if(err && debug) {
+                Utils.TagLog('*ERR*', 'Error occured at ServiceSocket close.');
+                console.log(err);
+              }
+          });
         });
-      });
+      }
     });
   };
 
@@ -463,7 +465,8 @@ function ActivitySocket(conn_profile, emitRouter, unbindActivitySocketList, debu
   };
 
   this._emitEvent = (event, data)=> {
-    _on_event[event](false, data);
+    if(_on_event[event])
+      _on_event[event](false, data);
   };
 
   this._emitClose = () => {

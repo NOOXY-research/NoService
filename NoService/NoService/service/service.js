@@ -94,7 +94,7 @@ function Service() {
           let nowidx = i;
           let theservice = _local_services[_entity_module.returnEntityValue(_entitiesID[nowidx], 'service')];
           if(theservice)
-            theservice.emitSSClose(_entitiesID[nowidx]);
+            theservice.emitSSClose(_entitiesID[nowidx], true);
           if(i < _entitiesID.length-1) {
             i++;
             loop();
@@ -130,6 +130,12 @@ function Service() {
     let methods = {
       // nooxy service protocol implementation of "Call Service: Close ServiceSocket"
       CS: (connprofile, data, response_emit) => {
+        let _entitiesID = connprofile.returnBundle('bundle_entities');
+        let index = _entitiesID.indexOf(data.i);
+        if (index > -1) {
+          _entitiesID.splice(index, 1);
+        }
+        connprofile.setBundle('bundle_entities', _entitiesID);
         theservice.emitSSClose(data.i, true);
       },
 
@@ -373,7 +379,7 @@ function Service() {
       EV: () => {
         _ASockets[data.d.i]._emitEvent(data.d.n, data.d.d);
         let _data = {
-          "m": "AS",
+          "m": "EV",
           "d": {
             // status
             "i": data.d.i,
@@ -398,6 +404,10 @@ function Service() {
     let methods = {
       // nooxy service protocol implementation of "Call Activity: ActivitySocket"
       AS: (connprofile, data) => {
+        // no need to implement anything
+      },
+
+      EV: (connprofile, data) => {
         // no need to implement anything
       }
     }
