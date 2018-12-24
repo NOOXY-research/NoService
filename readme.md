@@ -403,6 +403,12 @@ api.Database.Model.define('IndexedListTest', {
   api.Service.Entity.getEntitiesID(callback)\
   api.Service.Entity.getEntityConnProfile(entityId, callback)\
   api.Service.Entity.on(type, callback)\
+  api.Service.Entity.addEntityToGroups(entityID, grouplist, callback)\
+  api.Service.Entity.deleteEntityFromGroups(entityID, grouplist, callback)\
+  api.Service.Entity.clearAllGroupsOfEntity(entityID, callback)\
+  api.Service.Entity.isEntityIncludingGroups(entityID, grouplist, callback)\
+  api.Service.Entity.isEntityInGroup(entityID, group, callback)\
+  api.Service.Entity.getGroupsofEntity(entityID, callback)\
   api.Service.getList()\
   api.Service.getServiceManifest(service_name)\
   api.Service.getJSONfuncList(service_name)\
@@ -569,9 +575,16 @@ api.Database.Model.define('IndexedListTest', {
   api.Serivce.ServiceSocket.sendData(entityID, data)\
   api.Serivce.ServiceSocket.broadcastData(data)\
   api.Serivce.ServiceSocket.sendDataToUsername(username, data)\
-  api.Serivce.ServiceSocket.sendEvent(entityID, event, data)\
+  api.Serivce.ServiceSocket.emit(entityID, event, data)\
+  api.Serivce.ServiceSocket.semit(entityID, event, data)\
+  api.Serivce.ServiceSocket.emitToUsername(username, event, data)\
+  api.Serivce.ServiceSocket.emitToGroups(groups, event, data)\
+  api.Serivce.ServiceSocket.emitToIncludingGroups(groups, event, data)\
   api.Serivce.ServiceSocket.broadcastEvent(event, data)\
-  api.Serivce.ServiceSocket.sendEventToUsername(username, data)\
+  api.Serivce.ServiceSocket.sendDataToUsername(username, data)\
+  api.Serivce.ServiceSocket.sendDataToGroups(groups, data)\
+  api.Serivce.ServiceSocket.sendDataToIncludingGroups(groups, data)\
+  api.Serivce.ServiceSocket.broadcastData(data)\
   api.Serivce.ServiceSocket.on(type, callback)\
   api.Serivce.ServiceSocket.close(entityId)
 
