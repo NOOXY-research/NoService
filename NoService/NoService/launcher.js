@@ -1,7 +1,7 @@
 // NoService/NoService/launcher.js
 // Description:
 // "launcher.js" launch NOOXY Service deamon.
-// Copyright 2018 NOOXY. All Rights Reserved.
+// Copyright 2018-2019 NOOXY. All Rights Reserved.
 
 'use strict';
 const fork = require('child_process').fork;

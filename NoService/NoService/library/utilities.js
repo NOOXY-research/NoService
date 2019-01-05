@@ -1,7 +1,7 @@
 // NoService/NoService/utilities.js
 // Description:
 // "utilities.js" provides general function to be widely used.
-// Copyright 2018 NOOXY. All Rights Reserved.
+// Copyright 2018-2019 NOOXY. All Rights Reserved.
 'use strict';
 
 const fs = require('fs');

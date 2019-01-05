@@ -1,7 +1,7 @@
 // NoService/NoService/crypto.js
 // Description:
 // "crypto.js" provide wrapped crypto api for nooxy service framework.
-// Copyright 2018 NOOXY. All Rights Reserved.
+// Copyright 2018-2019 NOOXY. All Rights Reserved.
 'use strict';
 
 const crypto = require('crypto');

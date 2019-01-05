@@ -1,7 +1,7 @@
 // NoService/NoService/serviceservices.js
 // Description:
 // "services.js" provide functions of services stuff.
-// Copyright 2018 NOOXY. All Rights Reserved.
+// Copyright 2018-2019 NOOXY. All Rights Reserved.
 'use strict';
 
 const fs = require('fs');

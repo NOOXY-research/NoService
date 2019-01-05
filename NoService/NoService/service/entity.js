@@ -1,7 +1,7 @@
 // NoService/NoService/service/entity.js
 // Description:
 // "entity.js" provide identity system for Service, Activity..., the perspective is this daemon. Entity is part of service module.
-// Copyright 2018 NOOXY. All Rights Reserved.
+// Copyright 2018-2019 NOOXY. All Rights Reserved.
 'use strict';
 
 const Utils = require('../library').Utilities;

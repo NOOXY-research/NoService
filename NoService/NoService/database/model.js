@@ -2,7 +2,7 @@
 // Description:
 // "model.js" provides ORM to manage objects and database. Then you will no need
 // to keep retyping sql for table.
-// Copyright 2018 NOOXY. All Rights Reserved.
+// Copyright 2018-2019 NOOXY. All Rights Reserved.
 
 'use strict';
 

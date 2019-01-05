@@ -1,7 +1,7 @@
 // NoService/NoService/core.js
 // Description:
 // "core.js" control main behavior of deamon.
-// Copyright 2018 NOOXY. All Rights Reserved.
+// Copyright 2018-2019 NOOXY. All Rights Reserved.
 'use strict';
 
 const fs = require('fs');

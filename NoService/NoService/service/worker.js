@@ -1,7 +1,7 @@
 // NoService/NoService/serviceworker.js
 // Description:
 // "worker.js" is service worker client for NOOXY service framework.
-// Copyright 2018 NOOXY. All Rights Reserved.
+// Copyright 2018-2019 NOOXY. All Rights Reserved.
 
 // NOOXY Service WorkerDaemon protocol
 // message.t

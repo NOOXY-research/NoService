@@ -2,7 +2,7 @@
 // Description:
 // "implementation.js" provides manager to manage implemented functions which need to be
 // implemented by service owner itself.
-// Copyright 2018 NOOXY. All Rights Reserved.
+// Copyright 2018-2019 NOOXY. All Rights Reserved.
 'use strict';
 
 const Utils = require('./library').Utilities;

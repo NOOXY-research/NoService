@@ -2,7 +2,7 @@
 // Description:
 // "api.js" provide interface of interacting with core. This module is desgined
 // for multithreading.
-// Copyright 2018 NOOXY. All Rights Reserved.
+// Copyright 2018-2019 NOOXY. All Rights Reserved.
 // All api tree's top should be callable! For worker calling.
 
 'use strict';

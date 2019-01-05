@@ -1,7 +1,7 @@
 // NoService/NoService/connection.js
 // Description:
 // "connection.js" provide connection interface.
-// Copyright 2018 NOOXY. All Rights Reserved.
+// Copyright 2018-2019 NOOXY. All Rights Reserved.
 'use strict';
 
 const Utils = require('./library').Utilities;
