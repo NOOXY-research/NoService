@@ -162,7 +162,7 @@ After the core finish navigating the directories under “services”. It will c
 // Copyright 2018 NOOXY. All Rights Reserved.
 'use strict';
 
-function Service(Me, api) {
+function Service(Me, NoService) {
 
   // Here is where your service start
   this.start = ()=> {
@@ -202,7 +202,7 @@ In service
 // Your service's entry.js
 this.start = ()=> {
   // Get the service socket of your service
-  let ss = api.Service.ServiceSocket;
+  let ss = NoService.Service.ServiceSocket;
   ss.onConnect = (entityID, callback) => {
     // Send msg on connected entity.
     ss.sendData(entityID, 'Hello world!');
@@ -326,7 +326,7 @@ In case that the service that user acesses might be sensitive. You can call many
 For example:
 ``` javascript
 // Token can vertify that the userA is that true userA.
-api.Authorization.Authby.Token(entityID, (err, pass)=>{
+NoService.Authorization.Authby.Token(entityID, (err, pass)=>{
   if(pass) {
       // what ever you want.
   }
@@ -341,7 +341,7 @@ In case that the service that user acesses might be sensitive. You can call many
 For example:
 ``` javascript
 //
-api.Database.Model.define('IndexedListTest', {
+NoService.Database.Model.define('IndexedListTest', {
       model_type: "IndexedList",
       do_timestamp: true,
       structure: {
@@ -382,83 +382,85 @@ api.Database.Model.define('IndexedListTest', {
 ## APIs
 
 ### Safecallback
-  api.SafeCallback(callback)
+  NoService.SafeCallback(callback)
 
 ### ActivitySocket
-  api.Service.ActivitySocket.createSocket(method, targetip, targetport, service, owner, callback)\
-  api.Service.ActivitySocket.createDefaultDeamonSocket(service, owner, callback)\
-  api.Service.ActivitySocket.createDeamonSocket(method, targetip, targetport, service, owner, callback)\
-  api.Service.ActivitySocket.createAdminDeamonSocket(method, targetip, targetport, service, callback)
-  api.Service.ActivitySocket.createDefaultAdminDeamonSocket(service, callback)
+  NoService.Service.ActivitySocket.createSocket(method, targetip, targetport, service, owner, callback)\
+  NoService.Service.ActivitySocket.createDefaultDeamonSocket(service, owner, callback)\
+  NoService.Service.ActivitySocket.createDeamonSocket(method, targetip, targetport, service, owner, callback)\
+  NoService.Service.ActivitySocket.createAdminDeamonSocket(method, targetip, targetport, service, callback)
+  NoService.Service.ActivitySocket.createDefaultAdminDeamonSocket(service, callback)
 
   ### Service
-  api.Service.Entity.getfliteredEntitiesMetaData: (key, value, callback)\
-  api.Service.Entity.getfliteredEntitiesList: (query, callback)\
-  api.Service.Entity.getEntityValue(entityID, key, callback)\
-  api.Service.Entity.getEntityOwner(entityID, key, callback)\
-  api.Service.Entity.getEntitiesMetaData(callback)\
-  api.Service.Entity.getEntityMetaData(entityID, callback)\
-  api.Service.Entity.getCount(callback)\
-  api.Service.Entity.getEntities(callback)\
-  api.Service.Entity.getEntitiesID(callback)\
-  api.Service.Entity.getEntityConnProfile(entityId, callback)\
-  api.Service.Entity.on(type, callback)\
-  api.Service.Entity.addEntityToGroups(entityID, grouplist, callback)\
-  api.Service.Entity.deleteEntityFromGroups(entityID, grouplist, callback)\
-  api.Service.Entity.clearAllGroupsOfEntity(entityID, callback)\
-  api.Service.Entity.isEntityIncludingGroups(entityID, grouplist, callback)\
-  api.Service.Entity.isEntityInGroup(entityID, group, callback)\
-  api.Service.Entity.getGroupsofEntity(entityID, callback)\
-  api.Service.getList()\
-  api.Service.getServiceManifest(service_name)\
-  api.Service.getJSONfuncList(service_name)\
-  api.Service.getJSONfuncDict(service_name)\
-  api.Service.relaunch(service_name)\
-  api.getWorkerMemoryUsage(callback)
+  NoService.Service.Entity.getfliteredEntitiesMetaData: (key, value, callback)\
+  NoService.Service.Entity.getfliteredEntitiesList: (query, callback)\
+  NoService.Service.Entity.getEntityValue(entityID, key, callback)\
+  NoService.Service.Entity.getEntityOwner(entityID, key, callback)\
+  NoService.Service.Entity.getEntitiesMetaData(callback)\
+  NoService.Service.Entity.getEntityMetaData(entityID, callback)\
+  NoService.Service.Entity.getCount(callback)\
+  NoService.Service.Entity.getEntities(callback)\
+  NoService.Service.Entity.getEntitiesID(callback)\
+  NoService.Service.Entity.getEntityConnProfile(entityId, callback)\
+  NoService.Service.Entity.on(type, callback)\
+  NoService.Service.Entity.addEntityToGroups(entityID, grouplist, callback)\
+  NoService.Service.Entity.deleteEntityFromGroups(entityID, grouplist, callback)\
+  NoService.Service.Entity.clearAllGroupsOfEntity(entityID, callback)\
+  NoService.Service.Entity.isEntityIncludingGroups(entityID, grouplist, callback)\
+  NoService.Service.Entity.isEntityInGroup(entityID, group, callback)\
+  NoService.Service.Entity.getGroupsofEntity(entityID, callback)\
+  NoService.Service.getList()\
+  NoService.Service.getServiceManifest(service_name)\
+  NoService.Service.getJSONfuncList(service_name)\
+  NoService.Service.getJSONfuncDict(service_name)\
+  NoService.Service.relaunch(service_name)\
+  NoService.getWorkerMemoryUsage(callback)
 
   ### Authorization
-  api.Authorization.emitSignin: (entityID)\
-  api.Authorization.Authby.Token: (entityID, callback)\
-  api.Authorization.Authby.Password(entityID, callback)\
-  api.Authorization.Authby.isSuperUser(entityID, callback)\
-  api.Authorization.Authby.Domain(entityID, callback)\
-  api.Authorization.Authby.DaemonAuthKey(entityID, callback)\
-  api.Authorization.importTrustDomains(domains)
+  NoService.Authorization.emitSignin: (entityID)\
+  NoService.Authorization.Authby.Token: (entityID, callback)\
+  NoService.Authorization.Authby.Password(entityID, callback)\
+  NoService.Authorization.Authby.isSuperUser(entityID, callback)\
+  NoService.Authorization.Authby.Domain(entityID, callback)\
+  NoService.Authorization.Authby.DaemonAuthKey(entityID, callback)\
+  NoService.Authorization.importTrustDomains(domains)
 
   ### Daemon
-  api.Daemon.getSettings(callback)\
-  api.Daemon.getVariables(callback)
+  NoService.Daemon.getSettings(callback)\
+  NoService.Daemon.close()\
+  NoService.Daemon.relaunch()\
+  NoService.Daemon.getVariables(callback)
 
   ### Authenticity
-  api.Authenticity.createUser(username, displayname, password, privilege, detail, firstname, lastname, callback)\
-  api.Authenticity.deleteUser(username, callback)\
-  api.Authenticity.updatePassword(username, newpassword, callback)\
-  api.Authenticity.updateToken(username, callback)\
-  api.Authenticity.updatePrivilege(username, privilege, callback)\
-  api.Authenticity.updateName(username, privilege, callback)\
-  api.Authenticity.getUserMeta(username, callback)\
-  api.Authenticity.getUserID(username, callback)
+  NoService.Authenticity.createUser(username, displayname, password, privilege, detail, firstname, lastname, callback)\
+  NoService.Authenticity.deleteUser(username, callback)\
+  NoService.Authenticity.updatePassword(username, newpassword, callback)\
+  NoService.Authenticity.updateToken(username, callback)\
+  NoService.Authenticity.updatePrivilege(username, privilege, callback)\
+  NoService.Authenticity.updateName(username, privilege, callback)\
+  NoService.Authenticity.getUserMeta(username, callback)\
+  NoService.Authenticity.getUserID(username, callback)
 
   ### Connection
-  api.Connection.addServer(conn_method, ip, port)
+  NoService.Connection.addServer(conn_method, ip, port)
 
   ### Crypto
-  api.Crypto.encryptString(algo, key, toEncrypt, callback)\
-  api.Crypto.decryptString(algo, key, toDecrypt, callback)
+  NoService.Crypto.encryptString(algo, key, toEncrypt, callback)\
+  NoService.Crypto.decryptString(algo, key, toDecrypt, callback)
 
   ### Database
-  api.Database.Databse.query(sql, values, callback);
+  NoService.Database.Databse.query(sql, values, callback);
 
   ### Database Model
-  api.Database.Model.define(model_name, model_structure, callback)\
-  api.Database.Model.get(model_name, callback)\
-  api.Database.Model.exist(model_name, callback)\
-  api.Database.Model.remove(model_name, callback)\
-  api.Database.RAWModel.define(model_name, model_structure, callback)\
-  api.Database.RAWModel.get(model_name, callback)\
-  api.Database.RAWModel.exist(model_name, callback)\
-  api.Database.RAWModel.remove(model_name, callback)\
-  api.Database.RAWModel.getModelsDict(model_name, callback)
+  NoService.Database.Model.define(model_name, model_structure, callback)\
+  NoService.Database.Model.get(model_name, callback)\
+  NoService.Database.Model.exist(model_name, callback)\
+  NoService.Database.Model.remove(model_name, callback)\
+  NoService.Database.RAWModel.define(model_name, model_structure, callback)\
+  NoService.Database.RAWModel.get(model_name, callback)\
+  NoService.Database.RAWModel.exist(model_name, callback)\
+  NoService.Database.RAWModel.remove(model_name, callback)\
+  NoService.Database.RAWModel.getModelsDict(model_name, callback)
   ```
   model_structure
   ObjectModel example:
@@ -570,23 +572,23 @@ api.Database.Model.define('IndexedListTest', {
 
 
   ### ServiceSocket
-  api.Serivce.ServiceSocket.def(name, callback)\
-  api.Serivce.ServiceSocket.sdef(name, callback, failopearation)\
-  api.Serivce.ServiceSocket.sendData(entityID, data)\
-  api.Serivce.ServiceSocket.broadcastData(data)\
-  api.Serivce.ServiceSocket.sendDataToUsername(username, data)\
-  api.Serivce.ServiceSocket.emit(entityID, event, data)\
-  api.Serivce.ServiceSocket.semit(entityID, event, data)\
-  api.Serivce.ServiceSocket.emitToUsername(username, event, data)\
-  api.Serivce.ServiceSocket.emitToGroups(groups, event, data)\
-  api.Serivce.ServiceSocket.emitToIncludingGroups(groups, event, data)\
-  api.Serivce.ServiceSocket.broadcastEvent(event, data)\
-  api.Serivce.ServiceSocket.sendDataToUsername(username, data)\
-  api.Serivce.ServiceSocket.sendDataToGroups(groups, data)\
-  api.Serivce.ServiceSocket.sendDataToIncludingGroups(groups, data)\
-  api.Serivce.ServiceSocket.broadcastData(data)\
-  api.Serivce.ServiceSocket.on(type, callback)\
-  api.Serivce.ServiceSocket.close(entityId)
+  NoService.Serivce.ServiceSocket.def(name, callback)\
+  NoService.Serivce.ServiceSocket.sdef(name, callback, failopearation)\
+  NoService.Serivce.ServiceSocket.sendData(entityID, data)\
+  NoService.Serivce.ServiceSocket.broadcastData(data)\
+  NoService.Serivce.ServiceSocket.sendDataToUsername(username, data)\
+  NoService.Serivce.ServiceSocket.emit(entityID, event, data)\
+  NoService.Serivce.ServiceSocket.semit(entityID, event, data)\
+  NoService.Serivce.ServiceSocket.emitToUsername(username, event, data)\
+  NoService.Serivce.ServiceSocket.emitToGroups(groups, event, data)\
+  NoService.Serivce.ServiceSocket.emitToIncludingGroups(groups, event, data)\
+  NoService.Serivce.ServiceSocket.broadcastEvent(event, data)\
+  NoService.Serivce.ServiceSocket.sendDataToUsername(username, data)\
+  NoService.Serivce.ServiceSocket.sendDataToGroups(groups, data)\
+  NoService.Serivce.ServiceSocket.sendDataToIncludingGroups(groups, data)\
+  NoService.Serivce.ServiceSocket.broadcastData(data)\
+  NoService.Serivce.ServiceSocket.on(type, callback)\
+  NoService.Serivce.ServiceSocket.close(entityId)
 
   ### Me
   Me.Settings\

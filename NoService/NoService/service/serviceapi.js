@@ -919,7 +919,9 @@ function ServiceAPI() {
         }
       },
 
-      close: ()=>{_coregateway.Daemon.close()}
+      close: ()=>{_coregateway.Daemon.close()},
+
+      relaunch: ()=>{_coregateway.Daemon.relaunch()},
     };
 
     _api.Authenticity = {

@@ -133,6 +133,14 @@ function NoUser() {
     }
   };
 
+  this.sendNotification = ()=> {
+
+  };
+
+  this.sendMail = ()=> {
+    
+  };
+
   this.deleteUser = (userid, callback) => {
     _user_model.remove(userid, callback);
   };

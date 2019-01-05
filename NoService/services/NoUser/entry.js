@@ -7,15 +7,15 @@
 let NoUser = require('./NoUser');
 let fs = require('fs');
 
-function Service(Me, api) {
+function Service(Me, NoService) {
   // Your service entry point
   // Get the service socket of your service
-  let ss = api.Service.ServiceSocket;
+  let ss = NoService.Service.ServiceSocket;
   // BEWARE! To prevent callback error crash the system.
   // If you call an callback function which is not API provided. Such as setTimeout(callback, timeout).
-  // You need to wrap the callback funciton by api.SafeCallback.
-  // E.g. setTimeout(api.SafeCallback(callback), timeout)
-  let safec = api.SafeCallback;
+  // You need to wrap the callback funciton by NoService.SafeCallback.
+  // E.g. setTimeout(NoService.SafeCallback(callback), timeout)
+  let safec = NoService.SafeCallback;
   // Your settings in manifest file.
   let settings = Me.Settings;
 
@@ -23,7 +23,7 @@ function Service(Me, api) {
   let nouser = new NoUser();
 
 
-  nouser.importUtils(api.Utils);
+  nouser.importUtils(NoService.Utils);
   nouser.importCountries(country_list);
 
   // JSONfunction is a function that can be defined, which others entities can call.
@@ -41,7 +41,7 @@ function Service(Me, api) {
       returnJSON(false, json_be_returned);
     }
     else {
-      api.Authenticity.createUser(json.un, json.dn, json.pw, 1, json.dt, json.fn, json.ln, (err)=>{
+      NoService.Authenticity.createUser(json.un, json.dn, json.pw, 1, json.dt, json.fn, json.ln, (err)=>{
         if(err) {
           json_be_returned.e = true;
           json_be_returned.s = err.toString();
@@ -52,11 +52,11 @@ function Service(Me, api) {
   });
 
   ss.def('returnUserMeta', (json, entityID, returnJSON)=>{
-    api.Service.Entity.getEntityOwner(entityID, (err, username)=> {
-      api.Authorization.Authby.Token(entityID, (err, valid)=>{
+    NoService.Service.Entity.getEntityOwner(entityID, (err, username)=> {
+      NoService.Authorization.Authby.Token(entityID, (err, valid)=>{
         if(valid) {
-          api.Authenticity.getUserMeta(username, (err, meta1)=>{
-            api.Authenticity.getUserID(username, (err, userid) => {
+          NoService.Authenticity.getUserMeta(username, (err, meta1)=>{
+            NoService.Authenticity.getUserID(username, (err, userid) => {
               nouser.getUserMeta(userid, (err, meta2)=>{
                 returnJSON(false, Object.assign({}, meta1, meta2));
               })
@@ -77,18 +77,18 @@ function Service(Me, api) {
 
   // Your service entry point
   this.start = ()=> {
-    nouser.importModel(api.Database.Model, (err)=> {
-      api.Daemon.getSettings((err, DaemonSettings)=>{
+    nouser.importModel(NoService.Database.Model, (err)=> {
+      NoService.Daemon.getSettings((err, DaemonSettings)=>{
         // Access another service on this daemon
-        api.Service.ActivitySocket.createDefaultAdminDeamonSocket('NoMailer', (err, NoMailersocket)=> {
+        NoService.Service.ActivitySocket.createDefaultAdminDeamonSocket('NoMailer', (err, NoMailersocket)=> {
           // JSONfunction is a function that can be defined, which others entities can call.
           // It is a NOOXY Service Framework Standard
           ss.def('updateUser', (json, entityID, returnJSON)=>{
-            api.Service.Entity.getEntityOwner(entityID, (err, username)=> {
+            NoService.Service.Entity.getEntityOwner(entityID, (err, username)=> {
               let json_be_returned = {
                 s: 'Succeessfully updated.'
               }
-              api.Authorization.Authby.Password(entityID, (err, valid)=>{
+              NoService.Authorization.Authby.Password(entityID, (err, valid)=>{
                 if(valid) {
 
                   for(let i in json) {
@@ -103,7 +103,7 @@ function Service(Me, api) {
                     returnJSON(false, json_be_returned);
                   }
                   else {
-                    api.Authenticity.updatePassword(username, json.pw, (err)=>{
+                    NoService.Authenticity.updatePassword(username, json.pw, (err)=>{
                       if(err&&json.pw!=null) {
                         json_be_returned.e = true;
                         json_be_returned.s = err.toString();
@@ -111,21 +111,21 @@ function Service(Me, api) {
                       }
                       else {
                         if(json.firstname != null && json.lastname!= null) {
-                          api.Authenticity.updateName(username, json.firstname, json.lastname, (err)=>{
+                          NoService.Authenticity.updateName(username, json.firstname, json.lastname, (err)=>{
                             if(err) {
                               json_be_returned.e = true;
                               json_be_returned.s = err.toString();
                               returnJSON(false, json_be_returned);
                             }
                             else {
-                              api.Authenticity.getUserID(username, (err, userid) => {
+                              NoService.Authenticity.getUserID(username, (err, userid) => {
                                 nouser.updateUser(userid, json, (err)=>{
                                   if(err) {
                                     json_be_returned.e = true;
                                     json_be_returned.s = err.toString();
                                   }
                                   else {
-                                    api.Service.Entity.getEntityMetaData(entityID, (err, emeta)=>{
+                                    NoService.Service.Entity.getEntityMetaData(entityID, (err, emeta)=>{
                                       // accessing other service
                                       NoMailersocket.call('sendMail', {
                                         to: json.email,
@@ -155,7 +155,7 @@ function Service(Me, api) {
                   }
                 }
                 else {
-                  api.Service.Entity.getEntityMetaData(entityID, (err, emeta)=>{
+                  NoService.Service.Entity.getEntityMetaData(entityID, (err, emeta)=>{
                     // accessing other service
                     NoMailersocket.call('sendMail', {
                       to: json.email,
@@ -173,10 +173,8 @@ function Service(Me, api) {
                 }
               });
             });
-
           });
         });
-
       });
     });
   }

@@ -14,7 +14,6 @@
 // 99 close
 'use strict';
 
-const fork = require('child_process').fork;
 const Utils = require('../library').Utilities;
 // For injecting database to api
 const Database = require('../database').Database;

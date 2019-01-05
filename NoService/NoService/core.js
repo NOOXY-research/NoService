@@ -143,6 +143,7 @@ function Core(settings) {
           Settings: settings,
           close: () => {
             if(!_daemon.close_emmited) {
+              process.send({t:0});
               _daemon.close_emmited = true;
               _connection.close();
               _router.close();
@@ -160,8 +161,24 @@ function Core(settings) {
               setTimeout(process.exit, settings.kill_daemon_timeout);
             }
           },
-          restart: ()=> {
-            _daemon.close();
+          relaunch: ()=> {
+            if(!_daemon.close_emmited) {
+              _daemon.close_emmited = true;
+              _connection.close();
+              _router.close();
+              _service.close();
+              _authorization.close();
+              _authorizationhandler.close();
+              _authenticity.close();
+              _entity.close();
+              _serviceAPI.close();
+              _implementation.close();
+              _nocrypto.close();
+              _nsps.close();
+              _workerd.close();
+              verbose('Daemon', 'Relaunching daemon in '+settings.kill_daemon_timeout+'ms.');
+              setTimeout(process.exit, settings.kill_daemon_timeout);
+            }
           },
           Variables: Constants
         }
@@ -320,7 +337,11 @@ function Core(settings) {
 
             // launch services
             verbose('Daemon', 'Launching services...');
-            _service.launch();
+            _service.launch((err)=> {
+              if(err) {
+                _daemon.close();
+              }
+            });
             verbose('Daemon', 'Launching services done.');
             //
             verbose('Daemon', 'NOOXY Service Framework successfully started.');
@@ -425,5 +446,11 @@ function Core(settings) {
   }
 }
 
+process.on('message', (msg)=> {
+  if(msg.t == 0) {
+    let _core = new Core(msg.settings);
+    _core.checkandlaunch();
+  }
+});
 
 module.exports = Core;

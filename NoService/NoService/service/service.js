@@ -654,28 +654,36 @@ function Service() {
         if(err) {
           Utils.TagLog('*ERR*', 'Error occured while initializing debug service "'+_debug_service+'".');
           Utils.TagLog('*ERR*', err.toString());
+          callback(new Error('Error occured while initializing debug service "'+_debug_service+'".'));
         }
         else {
           _local_services[_debug_service].launch((err)=> {
             if(err) {
               Utils.TagLog('*ERR*', 'Error occured while launching debug service "'+_debug_service+'".');
               Utils.TagLog('*ERR*', err.toString());
+              callback(new Error('Error occured while launching debug service "'+_debug_service+'".'));
+
             }
             else {
               Utils.TagLog('Service', 'Debug Service "'+_debug_service+'" launched.');
               _local_services[_master_service].init((err)=> {
                 if(err) {
-                  Utils.TagLog('*ERR*', 'Error occured while initializing debug service "'+_debug_service+'".');
+                  Utils.TagLog('*ERR*', 'Error occured while initializing master service "'+_master_service+'".');
                   console.log(err);
+                  callback(new Error('Error occured while initializing master service "'+_master_service+'".'));
+
                 }
                 else {
                   _local_services[_master_service].launch((err)=> {
                     if(err) {
                       Utils.TagLog('*ERR*', 'Error occured while launching master service "'+_master_service+'".');
                       console.log(err);
+                      callback(new Error('Error occured while launching master service "'+_master_service+'".'));
+
                     }
                     else {
                       Utils.TagLog('Service', 'Master Service "'+_master_service+'" launched.');
+                      callback(false);
                     }
                   });
                 }
@@ -689,17 +697,21 @@ function Service() {
     else {
       _local_services[_master_service].init((err)=> {
         if(err) {
-          Utils.TagLog('*ERR*', 'Error occured while initializing master service "'+_debug_service+'".');
+          Utils.TagLog('*ERR*', 'Error occured while initializing master service "'+_master_service+'".');
           Utils.TagLog('*ERR*', err.toString());
+          callback(new Error('Error occured while initializing master service "'+_master_service+'".'));
         }
         else {
           _local_services[_master_service].launch((err)=> {
             if(err) {
-              Utils.TagLog('*ERR*', 'Error occured while launching master service "'+_debug_service+'".');
+              Utils.TagLog('*ERR*', 'Error occured while launching master service "'+_master_service+'".');
               Utils.TagLog('*ERR*', err.toString());
+              callback(new Error('Error occured while launching master service "'+_master_service+'".'));
+
             }
             else {
               Utils.TagLog('Service', 'Master Service "'+_master_service+'" launched.');
+              callback(false);
             }
           });
         }
