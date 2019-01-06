@@ -879,20 +879,44 @@ function Service() {
   };
 
   // service module close
-  this.close = () => {
+  this.close = (callback) => {
+    // move debug service and master back
+    let _debug_service_obj = _local_services[_debug_service];
+    let _master_service_obj = _local_services[_master_service];
+    delete _local_services[_debug_service];
+    delete _local_services[_master_service];
 
-    for(let i in _local_services) {
+    _local_services[_master_service] = _master_service_obj;
+    _local_services[_debug_service] = _debug_service_obj;
 
+    let max = Object.keys(_local_services).length;
+    let i=0;
+    let _close_next =()=> {
       try{
-        _local_services[i].close(()=> {
-          // closed
+        _local_services[Object.keys(_local_services)[i]].close(()=> {
+          i++;
+          if(i<max){
+            _close_next();
+          }
+          else {
+            callback(false);
+          }
         });
       }
       catch(e) {
-        Utils.TagLog('*ERR*', 'An error occured on closing service "'+i+'"');
+        Utils.TagLog('*ERR*', 'An error occured on closing service "'+Object.keys(_local_services)[i]+'"');
         console.log(e);
+        i++;
+        if(i<max){
+          _close_next();
+        }
+        else {
+          callback(false);
+        }
       }
-    }
+    };
+
+    _close_next();
   };
 }
 

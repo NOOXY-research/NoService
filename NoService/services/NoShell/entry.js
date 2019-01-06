@@ -139,7 +139,7 @@ function Service(Me, NoService) {
               help: (t0, c0) =>{
                 c0(false, {r:
                   '[daemon]\n'+
-                  '  daemon [settings|stop|memuse|upgrade]\n'+
+                  '  daemon [settings|stop|memuse|upgrade|relaunch]\n'+
                   '\n'+
                   '[service]\n'+
                   '  service [list|cbo|memuse|dependstack]\n'+
@@ -726,6 +726,10 @@ function Service(Me, NoService) {
                     stop: (t1, c1) => {
                       c1(false, {r: 'Stopping daemon...'});
                       NoService.Daemon.close();
+                    },
+                    relaunch: (t1, c1) => {
+                      c1(false, {r: 'relaunch daemon...'});
+                      NoService.Daemon.relaunch();
                     }
                   }, c0);
                 }

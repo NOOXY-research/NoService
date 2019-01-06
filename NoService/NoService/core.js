@@ -147,18 +147,19 @@ function Core(settings) {
               _daemon.close_emmited = true;
               _connection.close();
               _router.close();
-              _service.close();
-              _authorization.close();
-              _authorizationhandler.close();
-              _authenticity.close();
-              _entity.close();
-              _serviceAPI.close();
-              _implementation.close();
-              _nocrypto.close();
-              _nsps.close();
-              _workerd.close();
-              verbose('Daemon', 'Stopping daemon in '+settings.kill_daemon_timeout+'ms.');
-              setTimeout(process.exit, settings.kill_daemon_timeout);
+              _service.close(()=> {
+                _authorization.close();
+                _authorizationhandler.close();
+                _authenticity.close();
+                _entity.close();
+                _serviceAPI.close();
+                _implementation.close();
+                _nocrypto.close();
+                _nsps.close();
+                _workerd.close();
+                verbose('Daemon', 'Stopping daemon in '+settings.kill_daemon_timeout+'ms.');
+                setTimeout(process.exit, settings.kill_daemon_timeout);
+              });
             }
           },
           relaunch: ()=> {
@@ -166,18 +167,19 @@ function Core(settings) {
               _daemon.close_emmited = true;
               _connection.close();
               _router.close();
-              _service.close();
-              _authorization.close();
-              _authorizationhandler.close();
-              _authenticity.close();
-              _entity.close();
-              _serviceAPI.close();
-              _implementation.close();
-              _nocrypto.close();
-              _nsps.close();
-              _workerd.close();
-              verbose('Daemon', 'Relaunching daemon in '+settings.kill_daemon_timeout+'ms.');
-              setTimeout(process.exit, settings.kill_daemon_timeout);
+              _service.close(()=> {
+                _authorization.close();
+                _authorizationhandler.close();
+                _authenticity.close();
+                _entity.close();
+                _serviceAPI.close();
+                _implementation.close();
+                _nocrypto.close();
+                _nsps.close();
+                _workerd.close();
+                verbose('Daemon', 'Relaunching daemon in '+settings.kill_daemon_timeout+'ms.');
+                setTimeout(process.exit, settings.kill_daemon_timeout);
+              });
             }
           },
           Variables: Constants
