@@ -76,8 +76,10 @@ function Authorization() {
   this.RsRouter = (connprofile, data) => {
     try {
       let op = _queue_operation[data.d.t];
-      op(connprofile, data);
-      delete _queue_operation[data.d.t];
+      if(op) {
+        op(connprofile, data);
+        delete _queue_operation[data.d.t];
+      }
     }
     catch (e) {
       console.log(e);
