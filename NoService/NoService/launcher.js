@@ -17,6 +17,8 @@ module.exports.launch = (path, settingspath)=> {
   settings["path"] = path+'/';
 
   let launchCore = ()=> {
+    settings = JSON.parse(fs.readFileSync(settingspath, 'utf8'));
+    settings["path"] = path+'/';
     _child  = fork(require.resolve('./core'), {stdio: [process.stdin, process.stdout, process.stderr, 'ipc']});
     _child.send({t:0, settings: settings});
     _child.on('exit', (code)=> {

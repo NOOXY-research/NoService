@@ -4,7 +4,7 @@
   "displayname": "Service fullname",
   "description": "Service description",
   "Authors": [],
-  "git_url": null,
+  "git_url": "https://github.com/NOOXY-Research/NoMailer",
   "upgrade_branch": "master",
   "implementation_api": false,
   "LibraryAPI": true,
