@@ -1,0 +1,45 @@
+{
+  "name": "NoMailer",
+  "version": "0.0.0",
+  "displayname": "Service fullname",
+  "description": "Service description",
+  "Authors": [],
+  "git_url": null,
+  "upgrade_branch": "master",
+  "implementation_api": false,
+  "LibraryAPI": true,
+  "DatabaseAPI": true,
+  "dependencies": {
+    "node_packages": {
+      "nodemailer": "^0.0.0"
+    },
+    "services": {}
+  },
+  "JSONfunciton_prototypes": {
+    "sendMail": {
+      "displayname": "Send a Mail",
+      "description": "Send a mail to target.",
+      "secure": true,
+      "protocol": {
+        "JSON_call": {
+          "to": "target@email.com",
+          "subject": "Title",
+          "text": "whatever",
+          "html": "whatever"
+        },
+        "JSON_return": {
+          "s": "Status."
+        }
+      }
+    }
+  },
+  "settings": {
+    "transporter_settings": {
+      "service": "gmail",
+      "auth": {
+        "user": "youremail@gmail.com",
+        "pass": "yourpassword"
+      }
+    }
+  }
+}
