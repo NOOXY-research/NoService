@@ -5,13 +5,16 @@
 
 'use strict';
 const fork = require('child_process').fork;
+const fs = require('fs');
 
 process.title = 'NoServiceMaster';
 
-module.exports.launch = (settings)=> {
+module.exports.launch = (path, settingspath)=> {
   let _child;
   let relaunch = true;
   let retry = 0;
+  let settings = JSON.parse(fs.readFileSync(settingspath, 'utf8'));
+  settings["path"] = path+'/';
 
   let launchCore = ()=> {
     _child  = fork(require.resolve('./core'), {stdio: [process.stdin, process.stdout, process.stderr, 'ipc']});
@@ -26,6 +29,7 @@ module.exports.launch = (settings)=> {
         }
         retry +=1;
       }
+
       if(relaunch) {
         console.log('NoServiceMaster is relauching NoService.');
         launchCore();

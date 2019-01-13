@@ -8,12 +8,18 @@ const fs = require('fs');
 
 // Checking dependencies
 let Constants = require('./constants');
+
+let terminateNoService = ()=> {
+  process.send({t:0});
+  process.exit();
+};
+
 for(let pkg in Constants.dependencies) {
   try {
     require.resolve(Constants.dependencies[pkg]);
   } catch (e) {
     console.log('Please install package "'+Constants.dependencies[pkg]+'".');
-    process.exit();
+    terminateNoService();
   }
 }
 
@@ -84,11 +90,11 @@ function Core(settings) {
         if(err) {
           verbose('*ERR*', 'Error occured during initializing.');
           console.log(err);
-          process.exit();
+          terminateNoService();
         }
         else {
           Utils.TagLog('OKAY', 'Initialized. Please restart!');
-          process.exit();
+          terminateNoService();
         }
       });
     }
@@ -380,7 +386,7 @@ function Core(settings) {
         Utils.TagLog('*ERR*', '$ openssl genrsa -des3 -out private.pem 2048');
         Utils.TagLog('*ERR*', '$ openssl rsa -in private.pem -outform PEM -pubout -out public.pem');
         Utils.TagLog('*ERR*', '$ openssl rsa -in private.pem -out private.pem -outform PEM');
-        process.exit()
+        terminateNoService();
         return false;
       }
     }
