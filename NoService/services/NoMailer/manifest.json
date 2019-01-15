@@ -4,7 +4,7 @@
   "displayname": "Service fullname",
   "description": "Service description",
   "Authors": [],
-  "git_url": null,
+  "git_url": "https://github.com/NOOXY-Research/NoMailer",
   "upgrade_branch": "master",
   "implementation_api": false,
   "LibraryAPI": true,
@@ -15,19 +15,19 @@
     },
     "services": {}
   },
-  "JSONfunciton_prototypes": {
+  "socketfunctions": {
     "sendMail": {
       "displayname": "Send a Mail",
       "description": "Send a mail to target.",
       "secure": true,
       "protocol": {
-        "JSON_call": {
+        "call": {
           "to": "target@email.com",
           "subject": "Title",
           "text": "whatever",
           "html": "whatever"
         },
-        "JSON_return": {
+        "return": {
           "s": "Status."
         }
       }

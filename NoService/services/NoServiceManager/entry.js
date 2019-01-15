@@ -4,26 +4,26 @@
 // Copyright 2018 NOOXY. All Rights Reserved.
 let NoServiceManager = new (require('./NoServiceManager'))()
 // Service entry point
-function Service(Me, API) {
+function Service(Me, NoService) {
   // Your service entry point
   // Get the service socket of your service
-  let ss = API.Service.ServiceSocket;
-  let Utils = API.Library.Utilities;
+  let ss = NoService.Service.ServiceSocket;
+  let Utils = NoService.Library.Utilities;
   // BEWARE! To prevent callback error crash the system.
   // If you call an callback function which is not API provided. Such as setTimeout(callback, timeout).
-  // You need to wrap the callback funciton by API.SafeCallback.
-  // E.g. setTimeout(API.SafeCallback(callback), timeout)
-  let safec = API.SafeCallback;
+  // You need to wrap the callback funciton by NoService.SafeCallback.
+  // E.g. setTimeout(NoService.SafeCallback(callback), timeout)
+  let safec = NoService.SafeCallback;
   // Your settings in manifest file.
   let settings = Me.Settings;
   let services_path = __dirname.split('/'+Me.Manifest.name)[0];
-  let ServiceAPI = API.Service;
+  let ServiceAPI = NoService.Service;
 
   // import API to NoServiceManager module
-  NoServiceManager.importModel(API.Database.Model);
-  NoServiceManager.importLibrary(API.Library);
+  NoServiceManager.importModel(NoService.Database.Model);
+  NoServiceManager.importLibrary(NoService.Library);
   NoServiceManager.importMe(Me);
-  NoServiceManager.importDaemon(API.Daemon);
+  NoServiceManager.importDaemon(NoService.Daemon);
   NoServiceManager.importServiceAPI(ServiceAPI);
 
   ss.sdef('createService', (json, entityID, returnJSON)=>{
@@ -77,7 +77,7 @@ function Service(Me, API) {
   });
 
   ss.sdef('installService', (json, entityID, returnJSON)=> {
-    API.Authorization.Authby.Password(entityID, (err, valid)=> {
+    NoService.Authorization.Authby.Password(entityID, (err, valid)=> {
       let method = json.m; // git
       let source = json.s; // github gitlab
       let repo =json.r;
@@ -128,11 +128,11 @@ function Service(Me, API) {
     // memoryUsage limit control
     setInterval(()=> {
       if(settings.reach_memory_limit_relaunch) {
-        API.Service.getWorkerMemoryUsage((err, servicememuse)=> {
+        NoService.Service.getWorkerMemoryUsage((err, servicememuse)=> {
           for(let service in servicememuse) {
             if(servicememuse[service].rss > settings.max_memory_per_service_MB*1024*1024) {
               console.log('Service "'+service+'" reached memoryUsage limit "'+servicememuse[service].rss/(1024*1024)+'/'+settings.max_memory_per_service_MB+'" MB.');
-              API.Service.relaunch(service);
+              NoService.Service.relaunch(service);
             }
           }
         });

@@ -22,13 +22,13 @@
     }
   },
 
-  "JSONfunciton_prototypes": {
+  "servicefunctions": {
     "createUser": {
       "displayname": "Create a User.",
       "description": "Create a NoService user. And create database for NoUser service.",
       "secure": false,
       "protocol": {
-        "JSON_call": {
+        "call": {
           "un": "Username.",
           "dn": "Displayname.",
           "pw": "Password.",
@@ -37,7 +37,7 @@
           "fn": "Firstname.",
           "ln": "Lastname."
         },
-        "JSON_return": {
+        "return": {
           "s": "Status.",
           "e": "Error status."
         }
@@ -49,9 +49,9 @@
       "description": "Create a NoService user. And create database for NoUser service.",
       "secure": false,
       "protocol": {
-        "JSON_call": {
+        "call": {
         },
-        "JSON_return": "User's metadata."
+        "return": "User's metadata."
       }
     },
 
@@ -60,8 +60,8 @@
       "description": "Update a NoService user.",
       "secure": false,
       "protocol": {
-        "JSON_call": "A json datastructure for NoUser.",
-        "JSON_return": {
+        "call": "A json datastructure for NoUser.",
+        "return": {
           "s": "Status.",
           "e": "Error status."
         }

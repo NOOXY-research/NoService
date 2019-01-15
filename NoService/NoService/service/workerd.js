@@ -2,7 +2,7 @@
 // Description:
 // "workerd.js" is a service worker daemon for NOOXY service framework. With workers the
 // services is multithreaded.
-// Copyright 2018 NOOXY. All Rights Reserved.
+// Copyright 2018-2019 NOOXY. All Rights Reserved.
 
 // NOOXY Service WorkerClient protocol
 // message.t

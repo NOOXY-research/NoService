@@ -7,15 +7,15 @@
 
 const readline = require('readline');
 var Writable = require('stream').Writable;
-function Service(Me, api) {
+function Service(Me, NoService) {
   // Your service entry point
   // Get the service socket of your service
-  let ss = api.Service.ServiceSocket;
+  let ss = NoService.Service.ServiceSocket;
   // BEWARE! To prevent callback error crash the system.
   // If you call an callback function which is not API provided. Such as setTimeout(callback, timeout).
-  // You need to wrap the callback funciton by api.SafeCallback.
-  // E.g. setTimeout(api.SafeCallback(callback), timeout)
-  let safec = api.SafeCallback;
+  // You need to wrap the callback funciton by NoService.SafeCallback.
+  // E.g. setTimeout(NoService.SafeCallback(callback), timeout)
+  let safec = NoService.SafeCallback;
   // Your settings in manifest file.
   let settings = Me.Settings;
 
@@ -35,7 +35,7 @@ function Service(Me, api) {
 
 
   this.start = ()=> {
-    let utils = api.Utils;
+    let utils = NoService.Utils;
     let _username = null;
     let _password = null;
     let _token = null;
@@ -44,7 +44,7 @@ function Service(Me, api) {
     let wait_auth;
     let _as;
 
-    api.Daemon.getSettings((err, daemon_setting)=>{
+    NoService.Daemon.getSettings((err, daemon_setting)=>{
       // setup up remote shell service by daemon default connciton
       let DEFAULT_SERVER = daemon_setting.default_server;
       let DAEMONTYPE = daemon_setting.connection_servers[DEFAULT_SERVER].type;
@@ -85,7 +85,7 @@ function Service(Me, api) {
           callback(false, p);
         });
       }
-      api.getImplementation((err, Implementation)=>{
+      NoService.getImplementation((err, Implementation)=>{
         // setup NoService Auth implementation
         Implementation.setImplement('signin', (connprofile, data, data_sender)=>{
           console.log('Please signin your account.');
@@ -97,12 +97,6 @@ function Service(Me, api) {
             _username = _data.u;
             Implementation.emitRouter(connprofile, 'GT', _data);
             commandread();
-            // setTimeout(()=> {
-            //   // _as.call('welcome', null, (err, msg) => {
-            //     // console.log(msg);
-            //     commandread();
-            //   // });
-            // }, 100)
           });
 
         });
@@ -176,7 +170,7 @@ function Service(Me, api) {
             rl.question('Login as: ', (uname)=> {
               console.log('You are now "'+uname+'". Type "exit" to end this session.');
               _username = uname;
-              api.Service.ActivitySocket.createSocket(DAEMONTYPE, DAEMONIP, DAEMONPORT, 'NoShell', _username, (err, as) => {
+              NoService.Service.ActivitySocket.createSocket(DAEMONTYPE, DAEMONIP, DAEMONPORT, 'NoShell', _username, (err, as) => {
                 as.onEvent('welcome', (err, msg) => {
                   console.log(msg);
                   commandread();

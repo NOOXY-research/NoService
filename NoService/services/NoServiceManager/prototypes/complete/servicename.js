@@ -5,7 +5,7 @@
 
 'use strict';
 
-function {{ servicename }}(Me, API) {
+function {{ servicename }}(Me, NoService) {
   let Settings = Me.Settings;
 
   let _on_handler = {};

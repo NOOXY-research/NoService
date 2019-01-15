@@ -1,7 +1,7 @@
 // NoService/NoService/serviceservices.js
 // Description:
 // "services.js" provide functions of services stuff.
-// Copyright 2018 NOOXY. All Rights Reserved.
+// Copyright 2018-2019 NOOXY. All Rights Reserved.
 'use strict';
 
 const fs = require('fs');
@@ -510,7 +510,7 @@ function Service() {
         _entity_id = entity_id;
       });
 
-      _service_socket = new SocketPair.ServiceSocket(_service_name, _service_manifest.JSONfunciton_prototypes, _emitRouter, _debug, _entity_module, _authorization_module); // _onJFCAll = on JSONfunction call
+      _service_socket = new SocketPair.ServiceSocket(_service_name, _service_manifest.servicefunctions, _emitRouter, _debug, _entity_module, _authorization_module); // _onJFCAll = on JSONfunction call
 
       // create the service for module.
       try {
@@ -574,12 +574,12 @@ function Service() {
       }
     };
 
-    this.returnJSONfuncList = () => {
-      return _service_socket.returnJSONfuncList();
+    this.returnServiceFunctionList = () => {
+      return _service_socket.returnServiceFunctionList();
     };
 
-    this.returnJSONfuncDict = () => {
-      return _service_socket.returnJSONfuncDict();
+    this.returnServiceFunctionDict = () => {
+      return _service_socket.returnServiceFunctionDict();
     };
 
     this.setupPath = (path) => {
@@ -654,28 +654,36 @@ function Service() {
         if(err) {
           Utils.TagLog('*ERR*', 'Error occured while initializing debug service "'+_debug_service+'".');
           Utils.TagLog('*ERR*', err.toString());
+          callback(new Error('Error occured while initializing debug service "'+_debug_service+'".'));
         }
         else {
           _local_services[_debug_service].launch((err)=> {
             if(err) {
               Utils.TagLog('*ERR*', 'Error occured while launching debug service "'+_debug_service+'".');
               Utils.TagLog('*ERR*', err.toString());
+              callback(new Error('Error occured while launching debug service "'+_debug_service+'".'));
+
             }
             else {
               Utils.TagLog('Service', 'Debug Service "'+_debug_service+'" launched.');
               _local_services[_master_service].init((err)=> {
                 if(err) {
-                  Utils.TagLog('*ERR*', 'Error occured while initializing debug service "'+_debug_service+'".');
+                  Utils.TagLog('*ERR*', 'Error occured while initializing master service "'+_master_service+'".');
                   console.log(err);
+                  callback(new Error('Error occured while initializing master service "'+_master_service+'".'));
+
                 }
                 else {
                   _local_services[_master_service].launch((err)=> {
                     if(err) {
                       Utils.TagLog('*ERR*', 'Error occured while launching master service "'+_master_service+'".');
                       console.log(err);
+                      callback(new Error('Error occured while launching master service "'+_master_service+'".'));
+
                     }
                     else {
                       Utils.TagLog('Service', 'Master Service "'+_master_service+'" launched.');
+                      callback(false);
                     }
                   });
                 }
@@ -689,17 +697,21 @@ function Service() {
     else {
       _local_services[_master_service].init((err)=> {
         if(err) {
-          Utils.TagLog('*ERR*', 'Error occured while initializing master service "'+_debug_service+'".');
+          Utils.TagLog('*ERR*', 'Error occured while initializing master service "'+_master_service+'".');
           Utils.TagLog('*ERR*', err.toString());
+          callback(new Error('Error occured while initializing master service "'+_master_service+'".'));
         }
         else {
           _local_services[_master_service].launch((err)=> {
             if(err) {
-              Utils.TagLog('*ERR*', 'Error occured while launching master service "'+_debug_service+'".');
+              Utils.TagLog('*ERR*', 'Error occured while launching master service "'+_master_service+'".');
               Utils.TagLog('*ERR*', err.toString());
+              callback(new Error('Error occured while launching master service "'+_master_service+'".'));
+
             }
             else {
               Utils.TagLog('Service', 'Master Service "'+_master_service+'" launched.');
+              callback(false);
             }
           });
         }
@@ -800,16 +812,22 @@ function Service() {
     return _local_services[service_name].returnManifest();
   };
 
-  this.returnJSONfuncList = (service_name) => {
-    return _local_services[service_name].returnJSONfuncList();
+  this.returnServiceFunctionList = (service_name) => {
+    if(_local_services[service_name])
+      return _local_services[service_name].returnServiceFunctionList();
+    return null;
   };
 
-  this.returnJSONfuncDict = (service_name) => {
-    return _local_services[service_name].returnJSONfuncDict();
+  this.returnServiceFunctionDict = (service_name) => {
+    if(_local_services[service_name])
+      return _local_services[service_name].returnServiceFunctionDict();
+    return null;
   };
 
-  this.returnJSONfuncDict = (service_name) => {
-    return _local_services[service_name].returnJSONfuncDict();
+  this.returnServiceFunctionDict = (service_name) => {
+    if(_local_services[service_name])
+      return _local_services[service_name].returnServiceFunctionDict();
+    return null;
   };
 
 // -------------------------- Service update
@@ -867,20 +885,44 @@ function Service() {
   };
 
   // service module close
-  this.close = () => {
+  this.close = (callback) => {
+    // move debug service and master back
+    let _debug_service_obj = _local_services[_debug_service];
+    let _master_service_obj = _local_services[_master_service];
+    delete _local_services[_debug_service];
+    delete _local_services[_master_service];
 
-    for(let i in _local_services) {
+    _local_services[_master_service] = _master_service_obj;
+    _local_services[_debug_service] = _debug_service_obj;
 
+    let max = Object.keys(_local_services).length;
+    let i=0;
+    let _close_next =()=> {
       try{
-        _local_services[i].close(()=> {
-          // closed
+        _local_services[Object.keys(_local_services)[i]].close(()=> {
+          i++;
+          if(i<max){
+            _close_next();
+          }
+          else {
+            callback(false);
+          }
         });
       }
       catch(e) {
-        Utils.TagLog('*ERR*', 'An error occured on closing service "'+i+'"');
+        Utils.TagLog('*ERR*', 'An error occured on closing service "'+Object.keys(_local_services)[i]+'"');
         console.log(e);
+        i++;
+        if(i<max){
+          _close_next();
+        }
+        else {
+          callback(false);
+        }
       }
-    }
+    };
+
+    _close_next();
   };
 }
 

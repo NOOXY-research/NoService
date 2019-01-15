@@ -1,7 +1,7 @@
-// NoService/NoService/serviceworker.js
+// NoService/NoService/worker.js
 // Description:
 // "worker.js" is service worker client for NOOXY service framework.
-// Copyright 2018 NOOXY. All Rights Reserved.
+// Copyright 2018-2019 NOOXY. All Rights Reserved.
 
 // NOOXY Service WorkerDaemon protocol
 // message.t
@@ -14,7 +14,6 @@
 // 99 close
 'use strict';
 
-const fork = require('child_process').fork;
 const Utils = require('../library').Utilities;
 // For injecting database to api
 const Database = require('../database').Database;
@@ -285,5 +284,10 @@ let w = new WorkerClient();
 // prevent exit
 process.on('SIGINT', () => {
 
+});
+
+process.on('disconnect', ()=> {
+  console.log('Disconnect from NoService Core. "'+process.title+'" forced to exit. Your state may not be saved!');
+  process.exit();
 });
 w.established();

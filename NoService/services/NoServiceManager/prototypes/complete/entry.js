@@ -4,19 +4,19 @@
 // Copyright 2018 NOOXY. All Rights Reserved.
 'use strict';
 
-function Service(Me, API) {
+function Service(Me, NoService) {
   // Initialize your service here synchronous. Do not use async here!
 
   // Get the service socket of your service
-  let ss = API.Service.ServiceSocket;
+  let ss = NoService.Service.ServiceSocket;
   // BEWARE! To prevent callback error crash the system.
-  // If you call an callback function which is not API provided. Such as setTimeout(callback, timeout).
-  // You need to wrap the callback funciton by API.SafeCallback.
-  // E.g. setTimeout(API.SafeCallback(callback), timeout)
-  let safec = API.SafeCallback;
+  // If you call an callback function which is not NoService provided. Such as setTimeout(callback, timeout).
+  // You need to wrap the callback funciton by NoService.SafeCallback.
+  // E.g. setTimeout(NoService.SafeCallback(callback), timeout)
+  let safec = NoService.SafeCallback;
 
-  // import API to {{ servicename }} module
-  const {{ servicename }} = new (require('./{{ servicename }}'))(Me, API);
+  // import NoService to {{ servicename }} module
+  const {{ servicename }} = new (require('./{{ servicename }}'))(Me, NoService);
 
   // JSONfunction is a function that can be defined, which others entities can call.
   // It is a NOOXY Service Framework Standard
@@ -52,12 +52,12 @@ function Service(Me, API) {
   // You will need entityID to Authorize remote user. And identify remote.
   ss.on('data', (entityID, data) => {
     // Get Username and process your work.
-    API.Service.Entity.getEntityOwner(entityID, (err, username)=> {
+    NoService.Service.Entity.getEntityOwner(entityID, (err, username)=> {
       // To store your data and associated with userid INSEAD OF USERNAME!!!
       // Since userid can be promised as a unique identifer!!!
       let userid = null;
-      // Get userid from API
-      API.Authenticity.getUserID(username, (err, id) => {
+      // Get userid from NoService
+      NoService.Authenticity.getUserID(username, (err, id) => {
         userid = id;
       });
       // process you operation here
@@ -76,12 +76,12 @@ function Service(Me, API) {
   // ServiceSocket.onClose, in case connection close.
   ss.on('close', (entityID, callback) => {
     // Get Username and process your work.
-    API.Service.Entity.getEntityOwner(entityID, (err, username)=> {
+    NoService.Service.Entity.getEntityOwner(entityID, (err, username)=> {
       // To store your data and associated with userid INSEAD OF USERNAME!!!
       // Since userid can be promised as a unique identifer!!!
       let userid = null;
-      // Get userid from API
-      API.Authenticity.getUserID(username, (err, id) => {
+      // Get userid from NoService
+      NoService.Authenticity.getUserID(username, (err, id) => {
         userid = id;
       });
       // process you operation here
@@ -95,7 +95,7 @@ function Service(Me, API) {
   this.start = ()=> {
     {{ servicename }}.launch();
     // Access another service on this daemon
-    API.Service.ActivitySocket.createDefaultAdminDeamonSocket('Another Service', (err, activitysocket)=> {
+    NoService.Service.ActivitySocket.createDefaultAdminDeamonSocket('Another Service', (err, activitysocket)=> {
       // accessing other service
     });
 

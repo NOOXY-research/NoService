@@ -3,7 +3,7 @@
 // sql statements are supposed to stay only this file.
 // "database.js" provides interface to manage database stuff.
 // Here are standardized functions for calling wrapped sql statement.
-// Copyright 2018 NOOXY. All Rights Reserved.
+// Copyright 2018-2019 NOOXY. All Rights Reserved.
 
 // Functions to be implemented
 // connect

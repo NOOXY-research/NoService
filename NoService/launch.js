@@ -3,15 +3,7 @@
 // "launch.js" launch NOOXY Service deamon.
 // Copyright 2018 NOOXY. All Rights Reserved.
 
-let Core = require('./NoService/core');
-var Path = require("path");
-var fs = require('fs');
+const Launcher = require('./NoService/launcher');
+const Path = require("path");
 
-
-let _path = Path.resolve("./");
-var _setting = JSON.parse(fs.readFileSync('setting.json', 'utf8'));
-_setting["path"] = _path+'/';
-
-let _core = new Core(_setting);
-
-_core.checkandlaunch();
+Launcher.launch(Path.resolve("./"), Path.resolve("./")+'/setting.json');

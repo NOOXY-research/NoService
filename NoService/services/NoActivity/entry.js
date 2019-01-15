@@ -7,15 +7,15 @@
 
 const fs = require('fs');
 
-function Service(Me, api) {
+function Service(Me, NoService) {
   // Your service entry point
   // Get the service socket of your service
-  let ss = api.Service.ServiceSocket;
+  let ss = NoService.Service.ServiceSocket;
   // BEWARE! To prevent callback error crash the system.
   // If you call an callback function which is not API provided. Such as setTimeout(callback, timeout).
-  // You need to wrap the callback funciton by api.SafeCallback.
-  // E.g. setTimeout(api.SafeCallback(callback), timeout)
-  let safec = api.SafeCallback;
+  // You need to wrap the callback funciton by NoService.SafeCallback.
+  // E.g. setTimeout(NoService.SafeCallback(callback), timeout)
+  let safec = NoService.SafeCallback;
   // Your settings in manifest file.
   let settings = Me.Settings;
 
@@ -23,19 +23,27 @@ function Service(Me, api) {
   this.start = ()=> {
     let user_entities = {};
     // Access another service on this daemon
-    // let admin_daemon_asock = api.Service.ActivitySocket.createDefaultAdminDeamonSocket('Another Service', (err, activitysocket)=> {
+    // let admin_daemon_asock = NoService.Service.ActivitySocket.createDefaultAdminDeamonSocket('Another Service', (err, activitysocket)=> {
     //   // accessing other service
     // });
-    api.Daemon.getSettings((err, daemon_setting)=>{
+    let now = new Date();
+    now = now.toISOString().replace(/T/, ' ').replace(/\..+/, '') ;
+    if(settings.entity_log)
+      fs.appendFileSync('entity.log', '['+now+'] '+Me.Manifest.name+' started. Start recording.\n');
+    if(settings.protocol_log)
+      fs.appendFileSync('protocol.log', '['+now+'] '+Me.Manifest.name+' started. Start recording.\n');
+
+
+    NoService.Daemon.getSettings((err, daemon_setting)=>{
       if(daemon_setting.debug) {
-        api.Sniffer.onRouterJSON((err, Json)=>{
-          api.Utils.TagLog('DEGUG', 'Received a Json.');
-          api.Utils.TagLog('DEGUG', Json);
+        NoService.Sniffer.onRouterJSON((err, Json)=>{
+          NoService.Utils.TagLog('DEGUG', 'Received a Json.');
+          NoService.Utils.TagLog('DEGUG', Json);
         })
       }
     });
     if(settings.protocol_log) {
-      api.Sniffer.onRouterJSON((err, Json)=>{
+      NoService.Sniffer.onRouterJSON((err, Json)=>{
         let date = new Date();
         date = date.toISOString().replace(/T/, ' ').replace(/\..+/, '') ;
         fs.appendFile('protocol.log', '['+date+'] '+JSON.stringify(Json, null, 0)+'\n', safec((err)=> {
@@ -44,7 +52,7 @@ function Service(Me, api) {
       });
     }
 
-    api.Service.Entity.on('EntityCreated', (entityID, entitymeta)=>{
+    NoService.Service.Entity.on('EntityCreated', (entityID, entitymeta)=>{
       // record user
       if(user_entities[entitymeta.owner]==null) {
         user_entities[entitymeta.owner] = {};
@@ -72,13 +80,15 @@ function Service(Me, api) {
         else {
           meta = entitymeta;
         }
-        fs.appendFile('entity.log', '['+date+'] '+entityID+' '+JSON.stringify(meta, null, 0)+'\n', safec((err)=> {
-          if (err) throw err;
-        }));
+        if(entitymeta.mode == 'normal') {
+          fs.appendFile('entity.log', '['+date+'] '+entityID+' '+JSON.stringify(meta, null, 0)+'\n', safec((err)=> {
+            if (err) throw err;
+          }));
+        }
       };
     });
 
-    api.Service.Entity.on('EntityDeleted', (entityID, entitymeta)=>{
+    NoService.Service.Entity.on('EntityDeleted', (entityID, entitymeta)=>{
       user_entities[entitymeta.owner].c = user_entities[entitymeta.owner].c-1;
       delete user_entities[entitymeta.owner][entitymeta.service][entityID];
       if(Object.keys(user_entities[entitymeta.owner][entitymeta.service]).length==0) {
@@ -90,9 +100,11 @@ function Service(Me, api) {
       if(settings.entity_log) {
         let date = new Date();
         date = date.toISOString().replace(/T/, ' ').replace(/\..+/, '') ;
-        fs.appendFile('entity.log', '['+date+'] '+entityID+' closed\n', safec((err)=> {
-          if (err) throw err;
-        }));
+        if(entitymeta.mode == 'normal') {
+          fs.appendFile('entity.log', '['+date+'] '+entityID+' closed\n', safec((err)=> {
+            if (err) throw err;
+          }));
+        }
       }
     });
 
@@ -158,12 +170,12 @@ function Service(Me, api) {
     // You will need entityID to Authorize remote user. And identify remote.
     ss.onData = (entityID, data) => {
       // Get Username and process your work.
-      let username = api.Service.Entity.returnEntityOwner(entityID);
+      let username = NoService.Service.Entity.returnEntityOwner(entityID);
       // To store your data and associated with userid INSEAD OF USERNAME!!!
       // Since userid can be promised as a unique identifer!!!
       let userid = null;
       // Get userid from API
-      api.Authenticity.getUserID(username, (err, id) => {
+      NoService.Authenticity.getUserID(username, (err, id) => {
         userid = id;
       });
       // process you operation here
@@ -181,12 +193,12 @@ function Service(Me, api) {
     // ServiceSocket.onClose, in case connection close.
     ss.onClose = (entityID, callback) => {
       // Get Username and process your work.
-      let username = api.Service.Entity.returnEntityOwner(entityID);
+      let username = NoService.Service.Entity.returnEntityOwner(entityID);
       // To store your data and associated with userid INSEAD OF USERNAME!!!
       // Since userid can be promised as a unique identifer!!!
       let userid = null;
       // Get userid from API
-      api.Authenticity.getUserID(username, (err, id) => {
+      NoService.Authenticity.getUserID(username, (err, id) => {
         userid = id;
       });
       // process you operation here
@@ -197,6 +209,12 @@ function Service(Me, api) {
 
   // If the daemon stop, your service recieve close signal here.
   this.close = ()=> {
+      let now = new Date();
+      now = now.toISOString().replace(/T/, ' ').replace(/\..+/, '') ;
+      if(settings.entity_log)
+        fs.appendFileSync('entity.log', '['+now+'] '+Me.Manifest.name+' started. Stop recording.\n');
+      if(settings.protocol_log)
+        fs.appendFileSync('protocol.log', '['+now+'] '+Me.Manifest.name+' started. Stop recording.\n');
     // Saving state of you service.
     // Please save and manipulate your files in this directory
   }

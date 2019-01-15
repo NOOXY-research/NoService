@@ -1,7 +1,7 @@
 // NoService/NoService/authenticity.js
 // Description:
 // "authenticity.js" provide users authenticity base on sqldatabase.
-// Copyright 2018 NOOXY. All Rights Reserved.
+// Copyright 2018-2019 NOOXY. All Rights Reserved.
 'use strict';
 
 const crypto = require('crypto');

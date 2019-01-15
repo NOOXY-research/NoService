@@ -13,16 +13,16 @@
     "node_packages": {},
     "services": {}
   },
-  "JSONfunciton_prototypes": {
+  "servicefunctions": {
     "getActivity": {
       "displayname": "Get activity",
       "description": "Get activity of specified user.",
       "secure": true,
       "protocol": {
-        "JSON_call": {
+        "call": {
           "u": "username"
         },
-        "JSON_return": {
+        "return": {
           "c": "active entity count",
           "d": {
             "entityid1": "metadata1"
@@ -36,9 +36,9 @@
       "description": "Get online users list.",
       "secure": true,
       "protocol": {
-        "JSON_call": {
+        "call": {
         },
-        "JSON_return": {
+        "return": {
           "d": "list"
         }
       }

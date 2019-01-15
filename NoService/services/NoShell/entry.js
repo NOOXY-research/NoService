@@ -4,29 +4,29 @@
 // Copyright 2018 NOOXY. All Rights Reserved.
 'use strict';
 
-function Service(Me, api) {
+function Service(Me, NoService) {
   // Your service entry point
   // Get the service socket of your service
-  let ss = api.Service.ServiceSocket;
+  let ss = NoService.Service.ServiceSocket;
   // BEWARE! To prevent callback error crash the system.
   // If you call an callback function which is not API provided. Such as setTimeout(callback, timeout).
-  // You need to wrap the callback funciton by api.SafeCallback.
-  // E.g. setTimeout(api.SafeCallback(callback), timeout)
-  let safec = api.SafeCallback;
+  // You need to wrap the callback funciton by NoService.SafeCallback.
+  // E.g. setTimeout(NoService.SafeCallback(callback), timeout)
+  let safec = NoService.SafeCallback;
   // Your settings in manifest file.
   let settings = Me.Settings;
 
   this.start = ()=> {
     let sniffonJSON = false;
     let sniffonRAW = false;
-    api.Daemon.getSettings((err, DaemonSettings)=>{
-      api.Daemon.getVariables((err, DaemonVars)=>{
+    NoService.Daemon.getSettings((err, DaemonSettings)=>{
+      NoService.Daemon.getVariables((err, DaemonVars)=>{
 
-        api.Sniffer.onRouterJSON((err, json)=> {
+        NoService.Sniffer.onRouterJSON((err, json)=> {
           let j = JSON.stringify(json, null, 2);
           if(sniffonJSON) {
             try {
-              api.Service.Entity.getfliteredEntitiesList("service=NoShell", (err, list)=>{
+              NoService.Service.Entity.getfliteredEntitiesList("service=NoShell", (err, list)=>{
                 if(!list.includes(json.d.d.i)) {
                   ss.broadcastData({t:'stream', d:'Sniffer catch JSON on '+DaemonSettings.daemon_name+'" :\n'+j});
                 }
@@ -41,10 +41,10 @@ function Service(Me, api) {
           }
         });
 
-        api.Sniffer.onRouterRawData((err, data)=>{
+        NoService.Sniffer.onRouterRawData((err, data)=>{
           if(sniffonRAW) {
             try {
-              api.Service.Entity.getfliteredEntitiesList("service=NoShell", (err, list)=>{
+              NoService.Service.Entity.getfliteredEntitiesList("service=NoShell", (err, list)=>{
                 if(!list.includes(json.d.d.i)) {
                   ss.broadcastData({t:'stream', d:'Sniffer catch RAW on '+DaemonSettings.daemon_name+'" :\n'+data});
                 }
@@ -60,12 +60,12 @@ function Service(Me, api) {
         })
 
         ss.on('connect', (entityID, callback)=>{
-          api.Authorization.Authby.isSuperUser(entityID, (err, pass)=> {
+          NoService.Authorization.Authby.isSuperUser(entityID, (err, pass)=> {
             if(pass) {
-              api.Service.Entity.getEntityMetaData(entityID, (err, emeta)=>{
+              NoService.Service.Entity.getEntityMetaData(entityID, (err, emeta)=>{
                 let msg = '\nHello. '+emeta.owner+'(as entity '+entityID+').\n  Welcome accessing NoShell service of Daemon "'+DaemonSettings.daemon_name+'".\n';
                 msg = msg + '  Daemon description: \n  ' + DaemonSettings.description+'\n'+'NoService Daemon Version: '+DaemonVars.version+'\n';
-                api.Authorization.Authby.Token(entityID, (err, pass)=> {
+                NoService.Authorization.Authby.Token(entityID, (err, pass)=> {
                   if(pass) {
                     ss.semit(entityID, 'welcome', msg);
                   }
@@ -73,15 +73,15 @@ function Service(Me, api) {
 
                   }
                 });
-                // api.Authorization.emitSignin(entityID);
+                // NoService.Authorization.emitSignin(entityID);
                 callback(false);
               });
             }
             else {
-              api.Service.Entity.getEntityMetaData(entityID, (err, emeta)=>{
+              NoService.Service.Entity.getEntityMetaData(entityID, (err, emeta)=>{
                 let msg = '\nHello. '+emeta.owner+'(as entity '+entityID+').\n  You have no NoShell access to "'+DaemonSettings.daemon_name+'".\n';
                 ss.semit(entityID, 'welcome', msg);
-                // api.Authorization.emitSignin(entityID);
+                // NoService.Authorization.emitSignin(entityID);
 
                 callback(false);
               });
@@ -133,19 +133,19 @@ function Service(Me, api) {
         ss.sdef('sendC', (json, entityID, returnJSON)=>{
           let settings = DaemonSettings;
           let cmd = json.c.split(spliter);
-          api.Service.Entity.getEntityMetaData(entityID, (err, emeta)=>{
+          NoService.Service.Entity.getEntityMetaData(entityID, (err, emeta)=>{
             // commands dict
             let c_dict = {
               help: (t0, c0) =>{
                 c0(false, {r:
                   '[daemon]\n'+
-                  '  daemon [settings|stop|memuse|upgrade]\n'+
+                  '  daemon [settings|stop|memuse|upgrade|relaunch]\n'+
                   '\n'+
                   '[service]\n'+
                   '  service [list|cbo|memuse|dependstack]\n'+
                   '  service [manifest|create|relaunch] {service name}\n'+
-                  '  service [jfunclist|jfuncdict|jfuncshow] {target service}\n'+
-                  '  service jfunc {target service} {target username} {target jfunc} {JSON} ---Call a JSONfunction as target user.\n'+
+                  '  service [funclist|funcdict|funcshow] {target service}\n'+
+                  '  service func {target service} {target username} {target service function} {JSON} ---Call a Service function as target user.\n'+
                   '  service entity [show {entityID}|list|count|showuser {username}]\n'+
                   '  service git install {repos/service} {gitsource} \n'+
                   '  service git [upgrade|bind|unbind] {service name}\n'+
@@ -155,8 +155,8 @@ function Service(Me, api) {
                   '  activity [listuser|showuser {username}]\n'+
                   '\n'+
                   // '  log [entity|protocol] {last N line of log}\n'+
-                  '[jfunc]\n'+
-                  '  jfunc {target service} {target jfunc} {JSON} ---Call a JSONfunction as admin.\n'+
+                  '[serfunc]\n'+
+                  '  serfunc {target service} {target service function} {JSON} ---Call a Service function as admin.\n'+
                   '\n'+
                   '[auth]\n'+
                   '  auth emit [password|token] {entityID}  ---Emit authorization proccess to targeted entity.\n'+
@@ -197,7 +197,7 @@ function Service(Me, api) {
                       query += ' '+t1[i];
                     }
                     query = query.trim();
-                    api.Database.Database.query(query, (err, r)=>{
+                    NoService.Database.Database.query(query, (err, r)=>{
                       c1(false, {r:JSON.stringify({
                         query: query,
                         err: err,
@@ -208,25 +208,25 @@ function Service(Me, api) {
                   model: (t1, c1) => {
                     _(t1, {
                       list: (t2, c2) => {
-                        api.Database.RAWModel.getModelsDict((err, dict)=>{
+                        NoService.Database.RAWModel.getModelsDict((err, dict)=>{
                           c2(false, {r:JSON.stringify(Object.keys(dict), null, 2)});
                         });
                       },
 
                       remove: (t2, c2) => {
-                        api.Database.RAWModel.remove(t2[0], (err)=>{
+                        NoService.Database.RAWModel.remove(t2[0], (err)=>{
                           c2(false, {r:JSON.stringify({err: err}, null, 2)});
                         });
                       },
 
                       show: (t2, c2) => {
-                        api.Database.RAWModel.getModelsDict((err, dict)=>{
+                        NoService.Database.RAWModel.getModelsDict((err, dict)=>{
                           c2(false, {r:JSON.stringify(dict[t2[0]], null, 2)});
                         });
                       },
 
                       get: (t2, c2) => {
-                        api.Database.RAWModel.get(t2[0], (err, model)=>{
+                        NoService.Database.RAWModel.get(t2[0], (err, model)=>{
                           if(model.modeltype == 'GroupIndexedList') {
                             c2(false, {r: "ModelType \"GroupIndexedList\" not support yet."});
                           }
@@ -244,7 +244,7 @@ function Service(Me, api) {
                       },
 
                       exist: (t2, c2)=> {
-                        api.Database.RAWModel.exist(t2[0], (err, exist)=> {
+                        NoService.Database.RAWModel.exist(t2[0], (err, exist)=> {
                           c1(false, {r:exist});
                         });
                       }
@@ -257,7 +257,7 @@ function Service(Me, api) {
                   git: (t1, c1) => {
                     return _(t1, {
                       install: (t2, c2)=>{
-                        api.Service.ActivitySocket.createDefaultAdminDeamonSocket('NoServiceManager', (err, as)=> {
+                        NoService.Service.ActivitySocket.createDefaultAdminDeamonSocket('NoServiceManager', (err, as)=> {
                           if(err) {
                             c2(false, {r:'Failed'});
                           }
@@ -270,7 +270,7 @@ function Service(Me, api) {
                         });
                       },
                       bind: (t2, c2)=>{
-                        api.Service.ActivitySocket.createDefaultAdminDeamonSocket('NoServiceManager', (err, as)=> {
+                        NoService.Service.ActivitySocket.createDefaultAdminDeamonSocket('NoServiceManager', (err, as)=> {
                           if(err) {
                             c2(false, {r:'Failed'});
                           }
@@ -283,7 +283,7 @@ function Service(Me, api) {
                         });
                       },
                       unbind: (t2, c2)=>{
-                        api.Service.ActivitySocket.createDefaultAdminDeamonSocket('NoServiceManager', (err, as)=> {
+                        NoService.Service.ActivitySocket.createDefaultAdminDeamonSocket('NoServiceManager', (err, as)=> {
                           if(err) {
                             c2(false, {r:'Failed'});
                           }
@@ -296,7 +296,7 @@ function Service(Me, api) {
                         });
                       },
                       upgrade: (t2, c2)=>{
-                        api.Service.ActivitySocket.createDefaultAdminDeamonSocket('NoServiceManager', (err, as)=> {
+                        NoService.Service.ActivitySocket.createDefaultAdminDeamonSocket('NoServiceManager', (err, as)=> {
                           if(err) {
                             c2(false, {r:'Failed'});
                           }
@@ -309,7 +309,7 @@ function Service(Me, api) {
                         });
                       },
                       upgradeall: (t2, c2)=>{
-                        api.Service.ActivitySocket.createDefaultAdminDeamonSocket('NoServiceManager', (err, as)=> {
+                        NoService.Service.ActivitySocket.createDefaultAdminDeamonSocket('NoServiceManager', (err, as)=> {
                           if(err) {
                             c2(false, {r:'Failed'});
                           }
@@ -322,7 +322,7 @@ function Service(Me, api) {
                         });
                       },
                       bindall: (t2, c2)=>{
-                        api.Service.ActivitySocket.createDefaultAdminDeamonSocket('NoServiceManager', (err, as)=> {
+                        NoService.Service.ActivitySocket.createDefaultAdminDeamonSocket('NoServiceManager', (err, as)=> {
                           if(err) {
                             c2(false, {r:'Failed'});
                           }
@@ -335,7 +335,7 @@ function Service(Me, api) {
                         });
                       },
                       unbindall: (t2, c2)=>{
-                        api.Service.ActivitySocket.createDefaultAdminDeamonSocket('NoServiceManager', (err, as)=> {
+                        NoService.Service.ActivitySocket.createDefaultAdminDeamonSocket('NoServiceManager', (err, as)=> {
                           if(err) {
                             c2(false, {r:'Failed'});
                           }
@@ -348,7 +348,7 @@ function Service(Me, api) {
                         });
                       },
                       list: (t2, c2)=>{
-                        api.Service.ActivitySocket.createDefaultAdminDeamonSocket('NoServiceManager', (err, as)=> {
+                        NoService.Service.ActivitySocket.createDefaultAdminDeamonSocket('NoServiceManager', (err, as)=> {
                           if(err) {
                             c2(false, {r:'Failed'});
                           }
@@ -363,29 +363,29 @@ function Service(Me, api) {
                     }, c1)
                   },
                   entity: (t1, c1) => {
-                    api.Authorization.Authby.Token(entityID, (err, pass)=>{
+                    NoService.Authorization.Authby.Token(entityID, (err, pass)=>{
                       if(pass) {
                         _(t1, {
                           show: (t2, c2) => {
-                            api.Service.Entity.getEntityMetaData(t2[0], (err, r)=>{
+                            NoService.Service.Entity.getEntityMetaData(t2[0], (err, r)=>{
                               c2(false, {r:JSON.stringify(r, null, 2)});
                             });
                           },
 
                           list: (t2, c2) => {
-                            api.Service.Entity.getEntitiesId((err, r)=>{
+                            NoService.Service.Entity.getEntitiesId((err, r)=>{
                               c2(false, {r: JSON.stringify(r, null, 2)});
                             });
                           },
 
                           count: (t2, c2)=> {
-                            api.Service.Entity.getCount((err, count)=> {
+                            NoService.Service.Entity.getCount((err, count)=> {
                               c1(false, {r:JSON.stringify(count, null, 2)});
                             });
                           },
 
                           showuser: (t2, c2) => {
-                            api.Service.ActivitySocket.createDefaultAdminDeamonSocket('NoActivity', (err, as)=> {
+                            NoService.Service.ActivitySocket.createDefaultAdminDeamonSocket('NoActivity', (err, as)=> {
                               if(err) {
                                 c2(false, {r:'Failed'});
                               }
@@ -407,7 +407,7 @@ function Service(Me, api) {
                   },
 
                   create: (t1, c1) => {
-                    api.Service.ActivitySocket.createDefaultAdminDeamonSocket('NoServiceManager', (err, as)=> {
+                    NoService.Service.ActivitySocket.createDefaultAdminDeamonSocket('NoServiceManager', (err, as)=> {
                       if(err) {
                         c1(false, {r:'Failed'});
                       }
@@ -425,18 +425,18 @@ function Service(Me, api) {
                   },
 
                   relaunch: (t1, c1) => {
-                    api.Service.relaunch(t1[0]);
+                    NoService.Service.relaunch(t1[0]);
                     c1(false, {r: "Emitted relaunch signal."});
                   },
 
                   list: (t1, c1) => {
-                    api.Service.getList((err, list)=> {
+                    NoService.Service.getList((err, list)=> {
                       c1(false, {r:JSON.stringify(list, null, 2)});
                     });
                   },
 
                   dependstack:(t1, c1)=> {
-                    api.Service.ActivitySocket.createDefaultAdminDeamonSocket('NoServiceManager', (err, as)=> {
+                    NoService.Service.ActivitySocket.createDefaultAdminDeamonSocket('NoServiceManager', (err, as)=> {
                       if(err) {
                         c1(false, {r:'Failed'});
                       }
@@ -450,48 +450,48 @@ function Service(Me, api) {
                   },
 
                   cbo: (t1, c1) => {
-                    api.Service.getCBOCount((err, count)=> {
+                    NoService.Service.getCBOCount((err, count)=> {
                       c1(false, {r:JSON.stringify(count, null, 2)});
                     });
                   },
 
                   memuse: (t1, c1) => {
-                    api.Service.getWorkerMemoryUsage((err, usage)=> {
+                    NoService.Service.getWorkerMemoryUsage((err, usage)=> {
                       c1(false, {r:JSON.stringify(usage, null, 2)});
                     });
                   },
 
                   manifest: (t1, c1) => {
-                    api.Service.getServiceManifest(t1[0], (err, m)=> {
+                    NoService.Service.getServiceManifest(t1[0], (err, m)=> {
                       c1(false, {r:JSON.stringify(m, null, 2)});
                     })
                   },
 
-                  jfunclist: (t1, c1) => {
-                    api.Service.getJSONfuncList(t1[0],(err, list)=> {
+                  funclist: (t1, c1) => {
+                    NoService.Service.getServiceFunctionList(t1[0],(err, list)=> {
                       c1(false, {r:JSON.stringify(list, null, 2)});
                     });
                   },
 
-                  jfuncdict: (t1, c1) => {
-                    api.Service.getJSONfuncDict(t1[0], (err, dict)=> {
+                  funcdict: (t1, c1) => {
+                    NoService.Service.getServiceFunctionDict(t1[0], (err, dict)=> {
                       c1(false, {r:JSON.stringify(dict, null, 2)});
                     });
                   },
 
-                  jfuncshow: (t1, c1) => {
-                    api.Service.getJSONfuncDict(t1[0], (err, dict)=> {
+                  funcshow: (t1, c1) => {
+                    NoService.Service.getServiceFunctionDict(t1[0], (err, dict)=> {
                       c1(false, {r:JSON.stringify(dict[t1[1]], null, 2)});
                     });
                   },
 
 
-                  jfunc: (t1, c1) => {
+                  func: (t1, c1) => {
                     if(t1[0].length && t1[1].length && t1[3].length) {
-                      api.Service.ActivitySocket.createDefaultDeamonSocket(t1[0], t1[1], (err, as)=> {
-                        let jfuncd = {};
+                      NoService.Service.ActivitySocket.createDefaultDeamonSocket(t1[0], t1[1], (err, as)=> {
+                        let funcd = {};
                         as.on('data', (data) => {
-                          jfuncd['onData no.'+Object.keys(jfuncd).length] = data;
+                          funcd['onData no.'+Object.keys(funcd).length] = data;
                         });
                         let json_string = "";
                         for(let i=3; i<t1.length; i++) {
@@ -500,17 +500,17 @@ function Service(Me, api) {
                         try {
                           as.call(t1[2], JSON.parse(json_string), (err, msg)=>{
                             as.close();
-                            c1(false, {r:'jfunc onData: \n'+ JSON.stringify(jfuncd==null?'{}':jfuncd, null, 2)+'\njfunc returnValue: '+JSON.stringify(msg, null, 2)});
+                            c1(false, {r:'func onData: \n'+ JSON.stringify(funcd==null?'{}':funcd, null, 2)+'\nfunc returnValue: '+JSON.stringify(msg, null, 2)});
                           });
                         }
                         catch(e) {
-                          c1(false, {r:'jfunc error.\n'+e.toString()});
+                          c1(false, {r:'func error.\n'+e.toString()});
                           console.log(e);
                         }
                       });
                     }
                     else {
-                      c1(false, {r:'usage: jfunc {service} {jfunc} {json}'});
+                      c1(false, {r:'usage: func {service} {function name} {json}'});
                     }
                   }
 
@@ -520,7 +520,7 @@ function Service(Me, api) {
               activity: (t0, c0) => {
                 return _(t0, {
                   showuser: (t1, c1) => {
-                    api.Service.ActivitySocket.createDefaultAdminDeamonSocket('NoActivity', (err, as)=> {
+                    NoService.Service.ActivitySocket.createDefaultAdminDeamonSocket('NoActivity', (err, as)=> {
                       if(err) {
                         c1(false, {r:'Failed'});
                       }
@@ -534,7 +534,7 @@ function Service(Me, api) {
                   },
 
                   listuser: (t1, c1) => {
-                    api.Service.ActivitySocket.createDefaultAdminDeamonSocket('NoActivity', (err, as)=> {
+                    NoService.Service.ActivitySocket.createDefaultAdminDeamonSocket('NoActivity', (err, as)=> {
                       if(err) {
                         c1(false, {r:'Failed'});
                       }
@@ -562,11 +562,11 @@ function Service(Me, api) {
                 }, c0)
               },
 
-              jfunc: (t0, c0) => {
-                api.Service.ActivitySocket.createDefaultDeamonSocket(t0[0], 'admin', (err, as)=> {
-                  let jfuncd = {};
+              serfunc: (t0, c0) => {
+                NoService.Service.ActivitySocket.createDefaultDeamonSocket(t0[0], 'admin', (err, as)=> {
+                  let funcd = {};
                   as.onData = (data) => {
-                    jfuncd['onData no.'+Object.keys(jfuncd).length] = data;
+                    funcd['onData no.'+Object.keys(funcd).length] = data;
                   }
                   let json_string = "";
                   for(let i=2; i<t0.length; i++) {
@@ -575,11 +575,11 @@ function Service(Me, api) {
                   try {
                     as.call(t0[1], JSON.parse(json_string), (err, msg)=>{
                       as.close();
-                      c0(false, {r:'jfunc onData: \n'+ JSON.stringify(jfuncd==null?'{}':jfuncd, null, 2)+'\njfunc returnValue: '+JSON.stringify(msg, null, 2)});
+                      c0(false, {r:'ActivitySocket onData: \n'+ JSON.stringify(funcd==null?'{}':funcd, null, 2)+'\service function returnValue: '+JSON.stringify(msg, null, 2)});
                     });
                   }
                   catch(e) {
-                    c0(false, {r:'jfunc error.\n'+e.toString()});
+                    c0(false, {r:'service function error.\n'+e.toString()});
                     console.log(e);
                   }
                 });
@@ -588,7 +588,7 @@ function Service(Me, api) {
               user: (t0, c0) => {
                 _(t0, {
                   meta: (t1, c1) => {
-                    api.Service.ActivitySocket.createDefaultDeamonSocket('NoUser', t1[0], (err, as)=> {
+                    NoService.Service.ActivitySocket.createDefaultDeamonSocket('NoUser', t1[0], (err, as)=> {
                       if(err) {
                         c1(false, {r:err});
                       }
@@ -605,19 +605,19 @@ function Service(Me, api) {
                         });
                       }
                     });
-                    // api.Authenticity.getUserMeta(t1[0], (err, meta)=>{
+                    // NoService.Authenticity.getUserMeta(t1[0], (err, meta)=>{
                     //   c1(false, {r:JSON.stringify(meta, null, 2)});
                     // });
                   },
 
                   chpasswd: (t1, c1) => {
-                    api.Authenticity.updatePassword(t1[0], t1[1],(err)=>{
+                    NoService.Authenticity.updatePassword(t1[0], t1[1],(err)=>{
                       c1(false, {r:'Error->'+err});
                     })
                   },
 
                   create: (t1, c1) => {
-                    api.Service.ActivitySocket.createDefaultAdminDeamonSocket('NoUser', (err, as)=> {
+                    NoService.Service.ActivitySocket.createDefaultAdminDeamonSocket('NoUser', (err, as)=> {
                       if(err) {
                         c1(false, {r:'Failed'});
                       }
@@ -635,13 +635,13 @@ function Service(Me, api) {
               auth: (t0, c0) => {
                 _(t0, {
                   updateprivilege: (t1, c1) => {
-                    if(t1[0] == api.Variables.default_user.username) {
-                      c1(false, {r:'You should not change "'+api.Variables.default_user.username+'"\'s privilege.'});
+                    if(t1[0] == NoService.Variables.default_user.username) {
+                      c1(false, {r:'You should not change "'+NoService.Variables.default_user.username+'"\'s privilege.'});
                     }
                     else {
-                      api.Authorization.Authby.Password(entityID, (err, pass)=>{
+                      NoService.Authorization.Authby.Password(entityID, (err, pass)=>{
                         if(pass) {
-                          api.Authenticity.updatePrivilege(t1[0], t1[1], (err)=>{
+                          NoService.Authenticity.updatePrivilege(t1[0], t1[1], (err)=>{
                             c1(false, {r:'Error->'+err});
                           })
                         }
@@ -653,19 +653,19 @@ function Service(Me, api) {
 
                   },
                   updatetoken: (t1, c1) => {
-                    api.Authenticity.updateToken(t1[0], (err)=>{
+                    NoService.Authenticity.updateToken(t1[0], (err)=>{
                       c1(false, {r:'Error->'+err});
                     })
                   },
                   emit: (t1, c1) => {
                     _(t1, {
                       password: (t2, c2) => {
-                        api.Authorization.Authby.Password(t2[0], (err, pass)=>{
+                        NoService.Authorization.Authby.Password(t2[0], (err, pass)=>{
                           c2(false, {r: pass});
                         });
                       },
                       token: (t2, c2) => {
-                        api.Authorization.Authby.Token(t2[0], (err, pass)=>{
+                        NoService.Authorization.Authby.Token(t2[0], (err, pass)=>{
                           c2(false, {r: pass});
                         });
                       }
@@ -681,28 +681,28 @@ function Service(Me, api) {
                 else {
                   _(t0, {
                     chpasswd: (t1, c1) => {
-                      api.Service.Entity.getEntityOwner(entityID, (err, r)=>{
-                        api.Authenticity.updatePassword(r, t1[0],(err)=>{
+                      NoService.Service.Entity.getEntityOwner(entityID, (err, r)=>{
+                        NoService.Authenticity.updatePassword(r, t1[0],(err)=>{
                           c1(false, {r:'Error->'+err});
                         })
                       });
                     },
                     entitymeta: (t1, c1) => {
-                      api.Service.Entity.getEntityMetaData(entityID, (err, r)=>{
+                      NoService.Service.Entity.getEntityMetaData(entityID, (err, r)=>{
                         c1(false, {r: JSON.stringify(r, null, 2)});
                       });
                     },
                     usermeta: (t1, c1) => {
-                      api.Service.Entity.getEntityOwner(entityID, (err, r)=>{
-                        api.Authenticity.getUserMeta(r, (err, meta)=>{
+                      NoService.Service.Entity.getEntityOwner(entityID, (err, r)=>{
+                        NoService.Authenticity.getUserMeta(r, (err, meta)=>{
                           c1(false, {r:JSON.stringify(meta, null, 2)});
                         });
                       });
 
                     },
                     updatetoken: (t1, c1) => {
-                      api.Service.Entity.getEntityOwner(entityID, (err, r)=>{
-                        api.Authenticity.updateToken(r, (err)=>{
+                      NoService.Service.Entity.getEntityOwner(entityID, (err, r)=>{
+                        NoService.Authenticity.updateToken(r, (err)=>{
                           c1(false, {r:'Error->'+err});
                         })
                       });
@@ -725,7 +725,11 @@ function Service(Me, api) {
                     },
                     stop: (t1, c1) => {
                       c1(false, {r: 'Stopping daemon...'});
-                      api.Daemon.close();
+                      NoService.Daemon.close();
+                    },
+                    relaunch: (t1, c1) => {
+                      c1(false, {r: 'relaunch daemon...'});
+                      NoService.Daemon.relaunch();
                     }
                   }, c0);
                 }
@@ -738,7 +742,7 @@ function Service(Me, api) {
               sniffer: (t0, c0) => {
                 return _(t0, {
                   router: (t1, c1) => {
-                    api.Authorization.Authby.Token(entityID, (err, pass)=>{
+                    NoService.Authorization.Authby.Token(entityID, (err, pass)=>{
                       if(pass) {
                         r = _(t1, {
                           json: (t2, c2) => {
@@ -785,14 +789,14 @@ function Service(Me, api) {
 
         // welcome msg
         ss.sdef('welcome', (json, entityID, returnJSON)=>{
-          api.Service.Entity.getEntityMetaData(entityID, (err, emeta)=>{
+          NoService.Service.Entity.getEntityMetaData(entityID, (err, emeta)=>{
             let msg = '\nHello. '+emeta.owner+'(as entity '+entityID+').\n  Welcome accessing NoShell service of Daemon "'+DaemonSettings.daemon_name+'".\n';
             msg = msg + '  Daemon description: \n  ' + DaemonSettings.description+'\n'+'NoService Daemon Version: '+DaemonVars.version+'\n';
             returnJSON(false, msg);
           });
         },
         (json, entityID, returnJSON)=>{
-          api.Service.Entity.getEntityMetaData(entityID, (err, emeta)=>{
+          NoService.Service.Entity.getEntityMetaData(entityID, (err, emeta)=>{
             let msg = '\nHello. '+emeta.owner+'(as entity '+entityID+').\n  You have no NoShell access to "'+DaemonSettings.daemon_name+'".\n';
             returnJSON(false, msg);
           });
