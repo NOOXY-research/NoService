@@ -222,12 +222,12 @@ let _NSc = new NSc();
   });
 ```
 
-#### JSON function(recommended)
-JSON function is a framework for self-defined protocol that with "json datastructure" and "request, response" style. It is included by NOOXY service framework. And with JSON function NOOXY shell service can natively support the command that call your service.
+#### Service function(recommended)
+Service function is a framework for self-defined protocol that with "json datastructure" and "request, response" style. It is included by NOOXY service framework. And with Service function NOOXY shell service can natively support the command that call your service.
 Note that the function name should be short as possible. Since it will be sent in NSP(NOOXY service protocol).
 
 In client(browser)
-JSON function called by client
+Service function called by client
 ``` javascript
 // In your browser
 let _NSc = new NSc();
@@ -256,7 +256,7 @@ let _NSc = new NSc();
 
 ```
 
-JSON function defined in service
+Service function defined in service
 ``` javascript
 // Your service's entry.js
 this.start = ()=> {
@@ -276,7 +276,7 @@ this.start = ()=> {
     let json_be_returned = {
       d: 'Hello! NoService Framework! Secured.'
     }
-    // First parameter for error, next is JSON to be returned.
+    // First parameter for error, next is Service Function to be returned.
     returnJSON(false, json_be_returned);
   },
   // In case fail.
@@ -290,16 +290,16 @@ In order to well defined your protocol. It's sugesst to defined your protocol in
 
 in your manifest.json:
 ```JSON
-"JSONfunciton_prototypes": {
+"servicefunctions": {
     "Hello": {
       "displayname": "Hello",
       "description": "Hello description.",
       "secure": false,
       "protocol": {
-        "JSON_call": {
+        "call": {
           "d": "data from client"
         },
-        "JSON_return": {
+        "return": {
           "d": "data from service"
         }
       }
@@ -310,10 +310,10 @@ in your manifest.json:
       "description": "HelloSecured description.",
       "secure": true,
       "protocol": {
-        "JSON_call": {
+        "call": {
           "d": "data from client"
         },
-        "JSON_return": {
+        "return": {
           "d": "data from service"
         }
       }
