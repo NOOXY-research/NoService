@@ -30,16 +30,16 @@
 
   },
 
-  "JSONfunciton_prototypes": {
+  "servicefunctions": {
     "createService": {
       "displayname": "Create service.",
       "description": "Create a service by default template.",
       "secure": true,
       "protocol": {
-        "JSON_call": {
+        "call": {
           "name": "Service's name."
         },
-        "JSON_return": {
+        "return": {
           "s": "Status."
         }
       }

@@ -6,7 +6,7 @@
 const Utils = require('../library').Utilities;
 
 function ServiceSocket(service_name, prototype, emitRouter, debug, entity_module, authorization_module) {
-  let _jsonfunctions = prototype==null?{}:prototype;
+  let _socketfunctions = prototype==null?{}:prototype;
   let _holding_entities = [];
   // as on data callback
   let _emitasdata = (conn_profile, i, d) => {
@@ -64,17 +64,17 @@ function ServiceSocket(service_name, prototype, emitRouter, debug, entity_module
     }
   }
 
-  this.returnJSONfuncList = () => {
-    return Object.keys(_jsonfunctions);
+  this.returnServiceFunctionList = () => {
+    return Object.keys(_socketfunctions);
   };
 
-  this.returnJSONfuncDict = () => {
-    return _jsonfunctions;
+  this.returnServiceFunctionDict = () => {
+    return _socketfunctions;
   };
 
   this.def = (name, callback) => {
-    _jsonfunctions[name] = _jsonfunctions[name] == null?{}:_jsonfunctions[name];
-    _jsonfunctions[name].obj = callback;
+    _socketfunctions[name] = _socketfunctions[name] == null?{}:_socketfunctions[name];
+    _socketfunctions[name].obj = callback;
   };
 
   // securly define
@@ -283,8 +283,8 @@ function ServiceSocket(service_name, prototype, emitRouter, debug, entity_module
 
   this._emitFunctionCall = (entityID, JFname, jsons, callback) => {
     try {
-      if(_jsonfunctions[JFname]) {
-        _jsonfunctions[JFname].obj(JSON.parse(jsons==null?'{}':jsons), entityID, (err, returnVal)=> {
+      if(_socketfunctions[JFname]) {
+        _socketfunctions[JFname].obj(JSON.parse(jsons==null?'{}':jsons), entityID, (err, returnVal)=> {
           callback(err, returnVal);
         });
       }

@@ -144,8 +144,8 @@ function Service(Me, NoService) {
                   '[service]\n'+
                   '  service [list|cbo|memuse|dependstack]\n'+
                   '  service [manifest|create|relaunch] {service name}\n'+
-                  '  service [jfunclist|jfuncdict|jfuncshow] {target service}\n'+
-                  '  service jfunc {target service} {target username} {target jfunc} {JSON} ---Call a JSONfunction as target user.\n'+
+                  '  service [funclist|funcdict|funcshow] {target service}\n'+
+                  '  service func {target service} {target username} {target service function} {JSON} ---Call a Service function as target user.\n'+
                   '  service entity [show {entityID}|list|count|showuser {username}]\n'+
                   '  service git install {repos/service} {gitsource} \n'+
                   '  service git [upgrade|bind|unbind] {service name}\n'+
@@ -155,8 +155,8 @@ function Service(Me, NoService) {
                   '  activity [listuser|showuser {username}]\n'+
                   '\n'+
                   // '  log [entity|protocol] {last N line of log}\n'+
-                  '[jfunc]\n'+
-                  '  jfunc {target service} {target jfunc} {JSON} ---Call a JSONfunction as admin.\n'+
+                  '[serfunc]\n'+
+                  '  serfunc {target service} {target service function} {JSON} ---Call a Service function as admin.\n'+
                   '\n'+
                   '[auth]\n'+
                   '  auth emit [password|token] {entityID}  ---Emit authorization proccess to targeted entity.\n'+
@@ -467,31 +467,31 @@ function Service(Me, NoService) {
                     })
                   },
 
-                  jfunclist: (t1, c1) => {
-                    NoService.Service.getJSONfuncList(t1[0],(err, list)=> {
+                  funclist: (t1, c1) => {
+                    NoService.Service.getServiceFunctionList(t1[0],(err, list)=> {
                       c1(false, {r:JSON.stringify(list, null, 2)});
                     });
                   },
 
-                  jfuncdict: (t1, c1) => {
-                    NoService.Service.getJSONfuncDict(t1[0], (err, dict)=> {
+                  funcdict: (t1, c1) => {
+                    NoService.Service.getServiceFunctionDict(t1[0], (err, dict)=> {
                       c1(false, {r:JSON.stringify(dict, null, 2)});
                     });
                   },
 
-                  jfuncshow: (t1, c1) => {
-                    NoService.Service.getJSONfuncDict(t1[0], (err, dict)=> {
+                  funcshow: (t1, c1) => {
+                    NoService.Service.getServiceFunctionDict(t1[0], (err, dict)=> {
                       c1(false, {r:JSON.stringify(dict[t1[1]], null, 2)});
                     });
                   },
 
 
-                  jfunc: (t1, c1) => {
+                  func: (t1, c1) => {
                     if(t1[0].length && t1[1].length && t1[3].length) {
                       NoService.Service.ActivitySocket.createDefaultDeamonSocket(t1[0], t1[1], (err, as)=> {
-                        let jfuncd = {};
+                        let funcd = {};
                         as.on('data', (data) => {
-                          jfuncd['onData no.'+Object.keys(jfuncd).length] = data;
+                          funcd['onData no.'+Object.keys(funcd).length] = data;
                         });
                         let json_string = "";
                         for(let i=3; i<t1.length; i++) {
@@ -500,17 +500,17 @@ function Service(Me, NoService) {
                         try {
                           as.call(t1[2], JSON.parse(json_string), (err, msg)=>{
                             as.close();
-                            c1(false, {r:'jfunc onData: \n'+ JSON.stringify(jfuncd==null?'{}':jfuncd, null, 2)+'\njfunc returnValue: '+JSON.stringify(msg, null, 2)});
+                            c1(false, {r:'func onData: \n'+ JSON.stringify(funcd==null?'{}':funcd, null, 2)+'\nfunc returnValue: '+JSON.stringify(msg, null, 2)});
                           });
                         }
                         catch(e) {
-                          c1(false, {r:'jfunc error.\n'+e.toString()});
+                          c1(false, {r:'func error.\n'+e.toString()});
                           console.log(e);
                         }
                       });
                     }
                     else {
-                      c1(false, {r:'usage: jfunc {service} {jfunc} {json}'});
+                      c1(false, {r:'usage: func {service} {function name} {json}'});
                     }
                   }
 
@@ -562,11 +562,11 @@ function Service(Me, NoService) {
                 }, c0)
               },
 
-              jfunc: (t0, c0) => {
+              serfunc: (t0, c0) => {
                 NoService.Service.ActivitySocket.createDefaultDeamonSocket(t0[0], 'admin', (err, as)=> {
-                  let jfuncd = {};
+                  let funcd = {};
                   as.onData = (data) => {
-                    jfuncd['onData no.'+Object.keys(jfuncd).length] = data;
+                    funcd['onData no.'+Object.keys(funcd).length] = data;
                   }
                   let json_string = "";
                   for(let i=2; i<t0.length; i++) {
@@ -575,11 +575,11 @@ function Service(Me, NoService) {
                   try {
                     as.call(t0[1], JSON.parse(json_string), (err, msg)=>{
                       as.close();
-                      c0(false, {r:'jfunc onData: \n'+ JSON.stringify(jfuncd==null?'{}':jfuncd, null, 2)+'\njfunc returnValue: '+JSON.stringify(msg, null, 2)});
+                      c0(false, {r:'ActivitySocket onData: \n'+ JSON.stringify(funcd==null?'{}':funcd, null, 2)+'\service function returnValue: '+JSON.stringify(msg, null, 2)});
                     });
                   }
                   catch(e) {
-                    c0(false, {r:'jfunc error.\n'+e.toString()});
+                    c0(false, {r:'service function error.\n'+e.toString()});
                     console.log(e);
                   }
                 });

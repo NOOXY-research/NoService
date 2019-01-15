@@ -15,19 +15,19 @@
     },
     "services": {}
   },
-  "JSONfunciton_prototypes": {
+  "socketfunctions": {
     "sendMail": {
       "displayname": "Send a Mail",
       "description": "Send a mail to target.",
       "secure": true,
       "protocol": {
-        "JSON_call": {
+        "call": {
           "to": "target@email.com",
           "subject": "Title",
           "text": "whatever",
           "html": "whatever"
         },
-        "JSON_return": {
+        "return": {
           "s": "Status."
         }
       }

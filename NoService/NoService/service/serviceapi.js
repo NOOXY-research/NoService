@@ -759,16 +759,16 @@ function ServiceAPI() {
         });
       },
 
-      getJSONfuncList: (service_name, remote_callback_obj)=> {
+      getServiceFunctionList: (service_name, remote_callback_obj)=> {
         if(remote_callback_obj) {
-          remote_callback_obj.run([], [false, _coregateway.Service.returnJSONfuncList(service_name)]);
+          remote_callback_obj.run([], [false, _coregateway.Service.returnServiceFunctionList(service_name)]);
           remote_callback_obj.unbindRemote();
         }
       },
 
-      getJSONfuncDict: (service_name, remote_callback_obj)=> {
+      getServiceFunctionDict: (service_name, remote_callback_obj)=> {
         if(remote_callback_obj) {
-          remote_callback_obj.run([], [false, _coregateway.Service.returnJSONfuncDict(service_name)]);
+          remote_callback_obj.run([], [false, _coregateway.Service.returnServiceFunctionDict(service_name)]);
           remote_callback_obj.unbindRemote();
         }
       },

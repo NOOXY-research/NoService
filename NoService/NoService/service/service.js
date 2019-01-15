@@ -510,7 +510,7 @@ function Service() {
         _entity_id = entity_id;
       });
 
-      _service_socket = new SocketPair.ServiceSocket(_service_name, _service_manifest.JSONfunciton_prototypes, _emitRouter, _debug, _entity_module, _authorization_module); // _onJFCAll = on JSONfunction call
+      _service_socket = new SocketPair.ServiceSocket(_service_name, _service_manifest.servicefunctions, _emitRouter, _debug, _entity_module, _authorization_module); // _onJFCAll = on JSONfunction call
 
       // create the service for module.
       try {
@@ -574,12 +574,12 @@ function Service() {
       }
     };
 
-    this.returnJSONfuncList = () => {
-      return _service_socket.returnJSONfuncList();
+    this.returnServiceFunctionList = () => {
+      return _service_socket.returnServiceFunctionList();
     };
 
-    this.returnJSONfuncDict = () => {
-      return _service_socket.returnJSONfuncDict();
+    this.returnServiceFunctionDict = () => {
+      return _service_socket.returnServiceFunctionDict();
     };
 
     this.setupPath = (path) => {
@@ -812,16 +812,22 @@ function Service() {
     return _local_services[service_name].returnManifest();
   };
 
-  this.returnJSONfuncList = (service_name) => {
-    return _local_services[service_name].returnJSONfuncList();
+  this.returnServiceFunctionList = (service_name) => {
+    if(_local_services[service_name])
+      return _local_services[service_name].returnServiceFunctionList();
+    return null;
   };
 
-  this.returnJSONfuncDict = (service_name) => {
-    return _local_services[service_name].returnJSONfuncDict();
+  this.returnServiceFunctionDict = (service_name) => {
+    if(_local_services[service_name])
+      return _local_services[service_name].returnServiceFunctionDict();
+    return null;
   };
 
-  this.returnJSONfuncDict = (service_name) => {
-    return _local_services[service_name].returnJSONfuncDict();
+  this.returnServiceFunctionDict = (service_name) => {
+    if(_local_services[service_name])
+      return _local_services[service_name].returnServiceFunctionDict();
+    return null;
   };
 
 // -------------------------- Service update

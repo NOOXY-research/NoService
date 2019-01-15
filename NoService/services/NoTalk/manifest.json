@@ -16,19 +16,19 @@
     "services": {}
   },
 
-  "JSONfunciton_prototypes": {
+  "servicefunctions": {
     "createCh": {
       "displayname": "Create a channel.",
       "description": "Create a NoTalk channel.",
       "secure": false,
       "protocol": {
-        "JSON_call": {
+        "call": {
           "t": "Type of channel for example 'live' or 'normal'",
           "p": "Privaty of channel for example 'public', 'locked' or 'private'",
           "n": "Channel's name.",
           "d": "Channel's discribtion."
         },
-        "JSON_return": {
+        "return": {
           "s": "Status.",
           "e": "Error status."
         }
@@ -40,10 +40,10 @@
       "description": "Keep in touch in specified channel. Then will recieve new messages from activitysocket.",
       "secure": false,
       "protocol": {
-        "JSON_call": {
+        "call": {
           "c": "Channel's ID."
         },
-        "JSON_return": {
+        "return": {
           "s": "Status.",
           "e": "Error status."
         }
@@ -55,12 +55,12 @@
       "description": "Get history from a existed channel.",
       "secure": false,
       "protocol": {
-        "JSON_call": {
+        "call": {
           "c": "Channel's ID.",
           "s": "Start row of data from the channel.",
           "e": "End row of data from the channel."
         },
-        "JSON_return": {
+        "return": {
           "s": "Status.",
           "e": "Error status.",
           "r": ["row number", "type", "data"]
@@ -73,12 +73,12 @@
       "description": "Get history from a existed channel.",
       "secure": false,
       "protocol": {
-        "JSON_call": {
+        "call": {
           "c": "Channel's ID.",
           "t": "Type of operation. 'del' or 'edit'",
           "n": "New contain."
         },
-        "JSON_return": {
+        "return": {
           "s": "Status.",
           "e": "Error status."
         }
@@ -90,8 +90,8 @@
       "description": "List channels of the user have.",
       "secure": false,
       "protocol": {
-        "JSON_call": null,
-        "JSON_return": {
+        "call": null,
+        "return": {
           "s": "Status.",
           "e": "Error status."
         }
@@ -103,10 +103,10 @@
       "description": "Recieve user's metadata from server.",
       "secure": false,
       "protocol": {
-        "JSON_call": {
+        "call": {
           "u": "user Id."
         },
-        "JSON_return": {
+        "return": {
           "n": "username",
           "b": "bio",
           "l": "latestonline"
@@ -119,10 +119,10 @@
       "description": "Recieve user's metadata from server.",
       "secure": false,
       "protocol": {
-        "JSON_call": {
+        "call": {
           "u": "user Id."
         },
-        "JSON_return": {
+        "return": {
           "n": "username",
           "j": "joindate",
           "b": "bio",
@@ -137,10 +137,10 @@
       "description": "Recieve channel's metadata from server.",
       "secure": false,
       "protocol": {
-        "JSON_call": {
+        "call": {
           "c": "Channel's ID."
         },
-        "JSON_return": {
+        "return": {
           "o": "owners",
           "n": "displayname",
           "d": "discription",
@@ -156,10 +156,10 @@
       "description": "Recieve channel's metadata from server.",
       "secure": false,
       "protocol": {
-        "JSON_call": {
+        "call": {
           "c": "Channel's ID."
         },
-        "JSON_return": {
+        "return": {
           "s": "Status.",
           "e": "Error status.",
           "d": [
@@ -174,13 +174,13 @@
       "description": "Add NoTalk users into a channel.",
       "secure": false,
       "protocol": {
-        "JSON_call": {
+        "call": {
           "c": "Channel's ID.",
           "u":[
             ["username", "isadmin"]
           ]
         },
-        "JSON_return": {
+        "return": {
           "s": "Status.",
           "e": "Error status."
         }
@@ -192,13 +192,13 @@
       "description": "Edit NoTalk users in a channel.",
       "secure": false,
       "protocol": {
-        "JSON_call": {
+        "call": {
           "c": "Channel's ID.",
           "u":[
             ["username", "new isadmin"]
           ]
         },
-        "JSON_return": {
+        "return": {
           "s": "Status.",
           "e": "Error status."
         }
@@ -210,11 +210,11 @@
       "description": "Update channel's metadata of server.",
       "secure": false,
       "protocol": {
-        "JSON_call": {
+        "call": {
           "c": "Channel's ID.",
           "d": "Displayname."
         },
-        "JSON_return": {
+        "return": {
           "o": "owners",
           "n": "displayname",
           "d": "discription",
