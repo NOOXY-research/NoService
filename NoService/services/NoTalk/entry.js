@@ -20,18 +20,14 @@ function Service(Me, api) {
   // Your settings in manifest file.
   let settings = Me.Settings;
 
-  let notalk = new NoTalk();
+  let notalk = new NoTalk(Me, api);
+
 
   // Your service entry point
   this.start = ()=> {
-    // initialization
-    if (fs.existsSync(files_path+'NoTalk.sqlite3')) {
-      notalk.importDatabase(files_path+'NoTalk.sqlite3');
-    }
-    else {
-      notalk.createDatabase(files_path+'NoTalk.sqlite3');
-    }
+    notalk.launch((err)=> {
 
+    });
     ss.def('getMyMeta', (json, entityId, returnJSON)=> {
       api.Authorization.Authby.Token(entityId, (err, valid)=> {
         if(valid) {

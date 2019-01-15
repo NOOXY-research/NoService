@@ -69,3 +69,42 @@ module.exports.MatchRoom = function() {
 module.exports.GroupMatchRoom = function() {
 
 };
+
+module.exports.BatchSetupModel = (model_module, models_dict, callback) => {
+  let models_list = Object.keys(models_dict);
+  let result = {};
+  let index = 0;
+  let op = ()=> {
+
+    model_module.exist(models_list[index], (err, has_model)=> {
+      if(err) {
+        callback(err);
+      }
+      else if(!has_model) {
+        model_module.define(models_list[index], models_dict[models_list[index]], (err, model)=> {
+          result[models_list[index]] = model;
+          index++;
+          if(index<models_list.length) {
+            op();
+          }
+          else {
+            callback(false, result);
+          }
+        });
+      }
+      else {
+        model_module.get(models_list[index], (err, model)=> {
+          result[models_list[index]] = model;
+          index++;
+          if(index<models_list.length) {
+            op();
+          }
+          else {
+            callback(false, result);
+          }
+        });
+      }
+    });
+  }
+  op();
+}
