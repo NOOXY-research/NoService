@@ -32,13 +32,12 @@ module.exports.launch = (path, settingspath)=> {
           console.log('Server has retried launching '+retry+' times. Aborted.');
           process.exit();
         }
-        else
         retry +=1;
       }
 
       if(relaunch) {
         console.log('NoServiceMaster is relauching NoService.');
-        setTimeout(launchCore, 3000);
+        setTimeout(launchCore, 1000);
       }
       else {
         process.exit();
