@@ -24,17 +24,21 @@ module.exports.launch = (path, settingspath)=> {
     _child.on('exit', (code)=> {
 
       if(code !=0 ) {
-        if(retry=3) {
+        if(relaunch==false) {
+         console.log('Server has recieve close signal from core.');
+         process.exit();
+        }
+        if(retry==3) {
           console.log('Server has retried launching '+retry+' times. Aborted.');
-
           process.exit();
         }
+        else
         retry +=1;
       }
 
       if(relaunch) {
         console.log('NoServiceMaster is relauching NoService.');
-        launchCore();
+        setTimeout(launchCore, 3000);
       }
       else {
         process.exit();
