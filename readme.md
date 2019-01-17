@@ -433,13 +433,20 @@ NoService.Database.Model.define('IndexedListTest', {
 
   ### Authenticity
   NoService.Authenticity.createUser(username, displayname, password, privilege, detail, firstname, lastname, callback)\
-  NoService.Authenticity.deleteUser(username, callback)\
-  NoService.Authenticity.updatePassword(username, newpassword, callback)\
-  NoService.Authenticity.updateToken(username, callback)\
-  NoService.Authenticity.updatePrivilege(username, privilege, callback)\
-  NoService.Authenticity.updateName(username, privilege, callback)\
-  NoService.Authenticity.getUserMeta(username, callback)\
-  NoService.Authenticity.getUserID(username, callback)
+  NoService.Authenticity.deleteUserByUsername(username, callback)\
+  NoService.Authenticity.updatePasswordByUsername(username, newpassword, callback)\
+  NoService.Authenticity.updateTokenByUsername(username, callback)\
+  NoService.Authenticity.updatePrivilegeByUsername(username, privilege, callback)\
+  NoService.Authenticity.updateNameByUsername(username, privilege, callback)\
+  NoService.Authenticity.getUserMetaByUsername(username, callback)\
+  NoService.Authenticity.getUserIdByUsername(username, callback)\
+  NoService.Authenticity.deleteUserByUserId(username, callback)\
+  NoService.Authenticity.updatePasswordByUserId(username, newpassword, callback)\
+  NoService.Authenticity.updateTokenByUserId(username, callback)\
+  NoService.Authenticity.updatePrivilegeByUserId(username, privilege, callback)\
+  NoService.Authenticity.updateNameByUserId(username, privilege, callback)\
+  NoService.Authenticity.getUserMetaByUserId(username, callback)\
+  NoService.Authenticity.getUserIdByUserId(username, callback)
 
   ### Connection
   NoService.Connection.addServer(conn_method, ip, port)
