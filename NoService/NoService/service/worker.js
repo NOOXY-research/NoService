@@ -158,7 +158,13 @@ function WorkerClient() {
                     for(let model_name in models_dict) {
                       _new_model_dict[_service_name+'_'+model_name] = models_dict[model_name];
                     }
-                    _model.doBatchSetup(_new_model_dict, _api.SafeCallback(callback));
+                    _model.doBatchSetup(_new_model_dict, (err, models)=> {
+                      let new_models = {};
+                      for(let model_name in models) {
+                        new_models[model_name.split(_service_name+'_')[1]] = models[model_name];
+                      }
+                      callback(err, new_models);
+                    });
                   };
 
                   _api.Database.RAWModel.remove = (model_name, callback)=>{
