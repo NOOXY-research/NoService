@@ -126,7 +126,7 @@ function Authorization() {
           }
           _entity_module.getEntityConnProfile(entityID, (err, connprofile) => {
             let op = (connprofile, data) => {
-                _authe_module.PasswordisValid(user, data.d.v, (err, isValid) => {
+                _authe_module.checkPasswordisValidByUsername(user, data.d.v, (err, isValid) => {
                   if(isValid) {
                     callback(false, true);
                   }
@@ -171,7 +171,7 @@ function Authorization() {
           _entity_module.getEntityConnProfile(entityID, (err, connprofile) => {
             let _authonline = ()=> {
               let op = (connprofile, data) => {
-                _authe_module.TokenisValid(user, data.d.v, (err, isValid) => {
+                _authe_module.checkTokenisValidByUsername(user, data.d.v, (err, isValid) => {
                   if(isValid) {
                     connprofile.setBundle('NSToken', data.d.v);
                     callback(false, true);
@@ -190,7 +190,7 @@ function Authorization() {
 
             connprofile.getBundle('NSToken', (err, tk)=>{
               if(tk != null) {
-                _authe_module.TokenisValid(user, tk, (err, isValid) => {
+                _authe_module.checkTokenisValidByUsername(user, tk, (err, isValid) => {
                   if(isValid) {
                     callback(false, true);
                   }
@@ -222,7 +222,7 @@ function Authorization() {
     isSuperUser : (entityID, callback) =>{
       _checkhaveusername(entityID, callback, ()=>{
         let _owner = _entity_module.returnEntityOwner(entityID);
-        _authe_module.getUserPrivilege(_owner, (err, level) => {
+        _authe_module.getUserPrivilegeByUsername(_owner, (err, level) => {
           if(level == 0) {
             // isSuperUser
             callback(false, true);

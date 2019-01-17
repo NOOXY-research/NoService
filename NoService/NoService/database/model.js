@@ -433,28 +433,28 @@ function Model() {
     };
 
     // return list
-    this.getbyPair = (pair, callback)=> {
+    this.getByPair = (pair, callback)=> {
       _db.getRows(MODEL_TABLE_PREFIX+table_name, model_key[0]+'= ? AND '+model_key[1]+'= ?', pair, (err, results)=> {
         callback(err, results);
       });
     };
 
     // return list
-    this.getbyBoth = (both, callback)=> {
+    this.getByBoth = (both, callback)=> {
       _db.getRows(MODEL_TABLE_PREFIX+table_name, model_key[0]+'= ? OR '+model_key[1]+'= ?', [both, both], (err, results)=> {
         callback(err, results);
       });
     };
 
     // return list
-    this.getbyFirst = (first, callback)=> {
+    this.getByFirst = (first, callback)=> {
       _db.getRows(MODEL_TABLE_PREFIX+table_name, model_key[0]+'= ?', [first], (err, results)=> {
         callback(err, results);
       });
     };
 
     // return list
-    this.getbySecond = (second, callback)=> {
+    this.getBySecond = (second, callback)=> {
       _db.getRows(MODEL_TABLE_PREFIX+table_name, model_key[1]+'= ?', [second], (err, results)=> {
         callback(err, results);
       });
@@ -492,19 +492,19 @@ function Model() {
       }
     };
 
-    this.removebyPair = (pair, callback)=> {
+    this.removeByPair = (pair, callback)=> {
       _db.deleteRows(MODEL_TABLE_PREFIX+table_name, model_key[0]+'= ? AND '+model_key[1]+'= ?', pair, callback);
     };
 
-    this.removebyBoth = (both, callback)=> {
+    this.removeByBoth = (both, callback)=> {
       _db.deleteRows(MODEL_TABLE_PREFIX+table_name, model_key[0]+'= ? OR '+model_key[1]+'= ?', [both, both], callback);
     };
 
-    this.removebyFirst = (first, callback)=> {
+    this.removeByFirst = (first, callback)=> {
       _db.deleteRows(MODEL_TABLE_PREFIX+table_name, model_key[0]+'= ?', [first], callback);
     };
 
-    this.removebySecond = (second, callback)=> {
+    this.removeBySecond = (second, callback)=> {
       _db.deleteRows(MODEL_TABLE_PREFIX+table_name, model_key[1]+'= ?', [second], callback);
     };
 

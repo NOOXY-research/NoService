@@ -60,25 +60,9 @@ function Authenticity() {
   };
 
 
-  this.getUserMeta = (username, callback) => {
+  this.getUserIdByUsername = (username, callback) => {
     try {
-      _user_model.getbyFirst(username.toLowerCase(), (err, [user_meta]) => {
-        if(user_meta) {
-          callback(false, user_meta);
-        }
-        else {
-          callback(new Error('User not exist.'));
-        }
-      });
-    }
-    catch(e) {
-      callback(e);
-    }
-  };
-
-  this.getUserID = (username, callback) => {
-    try {
-      _user_model.getbyFirst(username.toLowerCase(), (err, [user_meta]) => {
+      _user_model.getByFirst(username, (err, [user_meta]) => {
         if(user_meta) {
           callback(err, user_meta.userid);
         }
@@ -93,9 +77,9 @@ function Authenticity() {
 
   };
 
-  this.getUsernamebyId = (userid, callback) => {
+  this.getUsernameByUserId = (userid, callback) => {
     try {
-      _user_model.getbySecond(userid, (err, [user_meta]) => {
+      _user_model.getBySecond(userid, (err, [user_meta]) => {
         if(user_meta) {
           callback(false,  user_meta.username);
         }
@@ -109,21 +93,10 @@ function Authenticity() {
     }
   };
 
-  this.getUserExistence = (username, callback) => {
-    _user_model.getbyFirst(username.toLowerCase(), (err, [user_meta]) => {
-      if(user_meta != null) {
-        callback(false, true);
-      }
-      else {
-        callback(false, false);
-      }
-    });
-  };
-
   this.createUser = (username, displayname, password, privilege, detail, firstname, lastname, callback) => {
     let pwdhash = null;
     username = username.toLowerCase();
-    _user_model.getbyFirst(username, (err, list)=> {
+    _user_model.getByFirst(username, (err, list)=> {
       let user_meta = list[0];
       if(user_meta) {
         let err = new Error("User existed.");
@@ -172,18 +145,47 @@ function Authenticity() {
     });
   };
 
-  this.deleteUser = (username, callback) => {
-    if(Constants.default_user.username != username) {
-      _user_model.removebyFirst(username.toLowerCase(), (err) => {
-        callback(err);
+  // By Username
+  this.getUserMetaByUsername = (username, callback) => {
+    try {
+      _user_model.getByFirst(username.toLowerCase(), (err, [user_meta]) => {
+        if(user_meta) {
+          callback(false, user_meta);
+        }
+        else {
+          callback(new Error('User not exist.'));
+        }
       });
     }
-    else {
-      callback(true);
+    catch(e) {
+      callback(e);
     }
   };
 
-  this.updatePassword = (username, newpassword, callback) => {
+  this.getUserExistenceByUsername = (username, callback) => {
+    _user_model.getByFirst(username.toLowerCase(), (err, [user_meta]) => {
+      if(user_meta != null) {
+        callback(false, true);
+      }
+      else {
+        callback(false, false);
+      }
+    });
+  };
+
+  this.deleteUserByUsername = (username, callback) => {
+    if(username == Constants.default_user.username) {
+      let err = new Error("Default user should not be deleted.");
+      callback(err);
+    }
+    else {
+      _user_model.removeByFirst(username.toLowerCase(), (err) => {
+        callback(err);
+      });
+    }
+  };
+
+  this.updatePasswordByUsername = (username, newpassword, callback) => {
     if(newpassword != null && newpassword.length >= 5) {
       _user_model.update({
         username: username.toLowerCase(),
@@ -204,23 +206,29 @@ function Authenticity() {
     }
   };
 
-  this.updatePrivilege = (username, privilege, callback) => {
-    if(Number.isInteger(parseInt(privilege))) {
-      _user_model.update({
-        username: username.toLowerCase(),
-        privilege: parseInt(privilege)
-      },
-      (err)=> {
-        callback(err);
-      });
+  this.updatePrivilegeByUsername = (username, privilege, callback) => {
+    if(username == Constants.default_user.username) {
+      let err = new Error("Default user should not change it's privilege.");
+      callback(err);
     }
     else {
-      let err = new Error("Privilege level is not a Int.");
-      callback(err);
+      if(Number.isInteger(parseInt(privilege))) {
+        _user_model.update({
+          username: username.toLowerCase(),
+          privilege: parseInt(privilege)
+        },
+        (err)=> {
+          callback(err);
+        });
+      }
+      else {
+        let err = new Error("Privilege level is not a Int.");
+        callback(err);
+      }
     }
   };
 
-  this.updateName = (username, firstname, lastname, callback) => {
+  this.updateNameByUsername = (username, firstname, lastname, callback) => {
     if(firstname == null || /\d/.test(firstname)) {
       let err = new Error(firstname+"First name invalid.");
       callback(err);
@@ -238,9 +246,9 @@ function Authenticity() {
     }
   };
 
-  this.PasswordisValid = (username, password, callback) => {
+  this.checkPasswordisValidByUsername = (username, password, callback) => {
     let isValid = false;
-    _user_model.getbyFirst(username.toLowerCase(), (err, [user_meta])=> {
+    _user_model.getByFirst(username.toLowerCase(), (err, [user_meta])=> {
       if(user_meta) {
         let pwdhash = user_meta.pwdhash;
         let pwdhashalpha = crypto.createHmac('sha256', SHA256KEY).update(password).digest('hex');
@@ -255,11 +263,11 @@ function Authenticity() {
     });
   };
 
-  this.TokenisValid = (username, token, callback) => {
+  this.checkTokenisValidByUsername = (username, token, callback) => {
     if(token != null && username!=null && token.length > 10) {
       let err = false;
       let isValid = false;
-      _user_model.getbyFirst(username.toLowerCase(), (err, [user_meta])=> {
+      _user_model.getByFirst(username.toLowerCase(), (err, [user_meta])=> {
         if(user_meta) {
           let now = new Date();
           let expiredate = Utils.SQLtoDate(user_meta.tokenexpire);
@@ -280,7 +288,7 @@ function Authenticity() {
     }
   };
 
-  this.updateToken = (username, callback) => {
+  this.updateTokenByUsername = (username, callback) => {
     let token = Utils.generateGUID();
     let expiredate = new Date();
     expiredate = Utils.addDays(expiredate, this.TokenExpirePeriod);
@@ -298,10 +306,10 @@ function Authenticity() {
     });
   }
 
-  this.getUserToken = (username, password, callback) => {
-    this.PasswordisValid(username, password, (err, valid) => {
+  this.getUserTokenByUsername = (username, password, callback) => {
+    this.checkPasswordisValidByUsername(username, password, (err, valid) => {
       if(valid) {
-        _user_model.getbyFirst(username.toLowerCase(), (err, [user_meta])=>{
+        _user_model.getByFirst(username.toLowerCase(), (err, [user_meta])=>{
           if(user_meta) {
             let now = new Date();
             let expiredate = Utils.SQLtoDate(user_meta.tokenexpire);
@@ -326,8 +334,226 @@ function Authenticity() {
 
   };
 
-  this.getUserPrivilege = (username, callback) => {
-    _user_model.getbyFirst(username.toLowerCase(), (err, [user_meta]) => {
+  this.getUserPrivilegeByUsername = (username, callback) => {
+    _user_model.getByFirst(username.toLowerCase(), (err, [user_meta]) => {
+      if(user_meta) {
+        callback(err, user_meta.privilege);
+      }
+      else {
+        callback(new Error('User not exist.'));
+      }
+    });
+  };
+
+  // By UserId
+  this.getUserMetaByUserId = (userid, callback) => {
+    try {
+      _user_model.getBySecond(userid, (err, [user_meta]) => {
+        if(user_meta) {
+          callback(false, user_meta);
+        }
+        else {
+          callback(new Error('User not exist.'));
+        }
+      });
+    }
+    catch(e) {
+      callback(e);
+    }
+  };
+
+  this.getUserExistenceByUserId = (userid, callback) => {
+    _user_model.getBySecond(userid, (err, [user_meta]) => {
+      if(user_meta != null) {
+        callback(false, true);
+      }
+      else {
+        callback(false, false);
+      }
+    });
+  };
+
+  this.deleteUserByUserId = (userid, callback) => {
+    _user_model.getBySecond(userid, (err, [user_meta]) => {
+      if(user_meta) {
+        username = user_meta.username;
+        if(username == Constants.default_user.username) {
+          let err = new Error("Default user should not be deleted.");
+          callback(err);
+        }
+        else {
+          _user_model.removeBySecond(userid, (err) => {
+            callback(err);
+          });
+        }
+      }
+      else {
+        let err = new Error("User not exist.");
+        callback(err);
+      }
+    });
+  };
+
+  this.updatePasswordByUserId = (userid, newpassword, callback) => {
+    if(newpassword != null && newpassword.length >= 5) {
+      _user_model.update({
+        userid: userid,
+        pwdhash: crypto.createHmac('sha256', SHA256KEY).update(newpassword).digest('hex')
+      },
+      (err)=> {
+        if(err) {
+          callback(err);
+        }
+        else {
+          this.updateToken(username, callback);
+        }
+      });
+    }
+    else {
+      let err = new Error("Password must be longer then or equal to 5.");
+      callback(err);
+    }
+  };
+
+  this.updatePrivilegeByUserId = (userid, privilege, callback) => {
+    _user_model.getBySecond(userid, (err, [user_meta]) => {
+      if(user_meta) {
+        username = user_meta.username;
+        if(username == Constants.default_user.username) {
+          let err = new Error("Default user should not change it's privilege.");
+          callback(err);
+        }
+        else {
+          if(Number.isInteger(parseInt(privilege))) {
+            _user_model.update({
+              username: username.toLowerCase(),
+              privilege: parseInt(privilege)
+            },
+            (err)=> {
+              callback(err);
+            });
+          }
+          else {
+            let err = new Error("Privilege level is not a Int.");
+            callback(err);
+          }
+        }
+      }
+      else {
+        let err = new Error("User not exist.");
+        callback(err);
+      }
+    });
+  };
+
+  this.updateNameByUserId = (userid, firstname, lastname, callback) => {
+    if(firstname == null || /\d/.test(firstname)) {
+      let err = new Error(firstname+"First name invalid.");
+      callback(err);
+    }
+    else if(lastname == null || /\d/.test(lastname)) {
+      let err = new Error("Last name invalid.");
+      callback(err);
+    }
+    else {
+      _user_model.update({
+        userid: userid,
+        firstname: firstname,
+        lastname: lastname
+      }, callback);
+    }
+  };
+
+  this.checkPasswordisValidByUserId = (userid, password, callback) => {
+    let isValid = false;
+    _user_model.getBySecond(userid, (err, [user_meta])=> {
+      if(user_meta) {
+        let pwdhash = user_meta.pwdhash;
+        let pwdhashalpha = crypto.createHmac('sha256', SHA256KEY).update(password).digest('hex');
+        if(pwdhash == pwdhashalpha) {
+          isValid = true;
+        }
+        callback(false, isValid);
+      }
+      else {
+        callback(new Error('User not exist.'));
+      }
+    });
+  };
+
+  this.checkTokenisValidByUserId = (userid, token, callback) => {
+    if(token != null && username!=null && token.length > 10) {
+      let err = false;
+      let isValid = false;
+      _user_model.getBySecond(userid, (err, [user_meta])=> {
+        if(user_meta) {
+          let now = new Date();
+          let expiredate = Utils.SQLtoDate(user_meta.tokenexpire);
+          if(now > expiredate|| token != user_meta.token) {
+            callback(err, false);
+          }
+          else {
+            callback(err, true);
+          }
+        }
+        else {
+          callback(new Error('User not exist.'));
+        }
+      });
+    }
+    else {
+      callback(false, false);
+    }
+  };
+
+  this.updateTokenByUserId = (userid, callback) => {
+    let token = Utils.generateGUID();
+    let expiredate = new Date();
+    expiredate = Utils.addDays(expiredate, this.TokenExpirePeriod);
+    _user_model.update({
+      userid: userid,
+      token: token,
+      tokenexpire: Utils.DatetoSQL(expiredate)
+    }, (err)=> {
+      if(!err) {
+        callback(err, token);
+      }
+      else {
+        callback(err);
+      }
+    });
+  }
+
+  this.getUserTokenByUserId = (userid, password, callback) => {
+    this.checkPasswordisValidByUserId(username, password, (err, valid) => {
+      if(valid) {
+        _user_model.getBySecond(userid, (err, [user_meta])=>{
+          if(user_meta) {
+            let now = new Date();
+            let expiredate = Utils.SQLtoDate(user_meta.tokenexpire);
+            if(now > expiredate) {
+              this.updateToken(username, (err, token) => {
+                callback(err, token);
+              });
+            }
+            else {
+              callback(false, user_meta.token);
+            }
+          }
+          else {
+            callback(new Error('User not exist.'));
+          }
+        });
+      }
+      else {
+        callback(true);
+      }
+    })
+
+  };
+
+  this.getUserPrivilegeByUserId = (userid, callback) => {
+    _user_model.getBySecond(userid, (err, [user_meta]) => {
       if(user_meta) {
         callback(err, user_meta.privilege);
       }
