@@ -3,44 +3,26 @@
 // "NoTalk.js" NOOXY Talk Service.
 // Copyright 2018 NOOXY. All Rights Reserved.
 
-const USER_MODEL_NAME = 'User';
+'use strict';
+let models_dict = require('./models.json')
 
 function NoTalk(Me, NoService) {
-  let _notalk_user_model;
+  let _models;
+
+
 
   this.launch = (callback)=> {
-    NoService.Database.Model.exist(USER_MODEL_NAME, (err, has_model)=> {
-      if(err) {
+    NoService.Database.Model.doBatchSetup(models_dict, (err, models)=> {
+      _models = models;
+      if(callback)
         callback(err);
-      }
-      else if(!has_model) {
-        NoService.Database.Model.define(USER_MODEL_NAME, {
-          model_type: "Object",
-          do_timestamp: true,
-          model_key: "UserId",
-          structure: {
-            UserId : 'VARCHAR(255)',
-            Bio : 'VARCHAR(320)',
-            ShowActive : 'INTEGER',
-            LatestOnline : 'DATE'
-          }
-        }, (err, notalk_user_model)=> {
-          _notalk_user_model = notalk_user_model;
-          callback(err);
-        });
-      }
-      else {
-        NoService.Database.Model.get(USER_MODEL_NAME, (err, notalk_user_model)=> {
-          _notalk_user_model = notalk_user_model;
-          callback(err);
-        });
-      }
     });
   };
 
   // create a channel
   this.createChannel = (meta, callback)=> {
     let uuid = NoService.Library.Utilities.generateGUID();
+
     // update channel metatdata
     // _notalk_user_model.getChannelbyId(uuid, (err, channel)=> {
     //   channel.ChId = uuid;
@@ -71,7 +53,7 @@ function NoTalk(Me, NoService) {
 
   // get NoUserdb's meta data.
   this.getUserMeta = (userid, callback)=> {
-    _notalk_user_model.get(userid, (err, user) => {
+    _models.User.get(userid, (err, user) => {
       if(user) {
         let user_meta = {
           i: user.UserId,
@@ -90,7 +72,7 @@ function NoTalk(Me, NoService) {
 
   // get NoUserdb's meta data.
   this.updateUserMeta = (userid, meta, callback)=> {
-    _notalk_user_model.update({
+    _models.User.update({
       UserId: userid,
       Bio: meta.b
     }, callback);

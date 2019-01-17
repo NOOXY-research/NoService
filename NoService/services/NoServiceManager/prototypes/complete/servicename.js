@@ -4,10 +4,11 @@
 // Copyright 2018 NOOXY. All Rights Reserved.
 
 'use strict';
+let models_dict = require('./models.json')
 
 function {{ servicename }}(Me, NoService) {
   let Settings = Me.Settings;
-
+  let _models;
   let _on_handler = {};
 
   // define you own funciton to be called in entry.js
@@ -24,8 +25,12 @@ function {{ servicename }}(Me, NoService) {
     _on_handler[event] = callback;
   };
 
-  this.launch = ()=> {
-
+  this.launch = (callback)=> {
+    NoService.Database.Model.doBatchSetup(models_dict, (err, models)=> {
+      _models = models;
+      if(callback)
+        callback(err);
+    });
   };
 
   this.close = ()=> {

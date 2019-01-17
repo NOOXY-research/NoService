@@ -50,7 +50,7 @@ function Database(meta) {
   };
 
   this.deleteRows = (...args)=> {
-    _dialect.getRows.apply(null, args);
+    _dialect.deleteRows.apply(null, args);
   };
 
   this.getAllRows = (...args)=> {

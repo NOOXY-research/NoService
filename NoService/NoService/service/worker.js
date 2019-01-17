@@ -153,6 +153,14 @@ function WorkerClient() {
                     _model.define(_service_name+'_'+model_name, model_structure, _api.SafeCallback(callback));
                   };
 
+                  _api.Database.Model.doBatchSetup= (models_dict, callback)=>{
+                    let _new_model_dict = {};
+                    for(let model_name in models_dict) {
+                      _new_model_dict[_service_name+'_'+model_name] = models_dict[model_name];
+                    }
+                    _model.doBatchSetup(_new_model_dict, _api.SafeCallback(callback));
+                  };
+
                   _api.Database.RAWModel.remove = (model_name, callback)=>{
                     _model.remove(model_name, _api.SafeCallback(callback));
                   };

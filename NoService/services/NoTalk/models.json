@@ -1,0 +1,46 @@
+{
+  "User": {
+    "model_type": "Object",
+    "do_timestamp": true,
+    "model_key": "UserId",
+    "structure": {
+      "UserId" : "VARCHAR(255)",
+      "Bio" : "VARCHAR(320)",
+      "ShowActive" : "INTEGER",
+      "LatestOnline" : "DATE"
+    }
+  },
+
+  "ChMeta": {
+    "model_type": "Object",
+    "do_timestamp": true,
+    "model_key": "ChId",
+    "structure": {
+      "ChId" : "VARCHAR(255)",
+      "Type" : "INTEGER",
+      "Description" : "VARCHAR(320)",
+      "Visability" : "INTEGER",
+      "Displayname": "VARCHAR(255)",
+      "Status": "INTEGER",
+      "Thumbnail": "TEXT",
+      "Lines": "INTEGER",
+      "CreatorId": "VARCHAR(255)"
+    }
+  },
+
+  "Message": {
+    "model_type": "GroupIndexedList",
+    "do_timestamp": true,
+    "structure": {
+      "ChId" : "VARCHAR(255)",
+      "Type" : "INTEGER",
+      "Description" : "VARCHAR(320)",
+      "Visability" : "INTEGER",
+      "Displayname": "VARCHAR(255)",
+      "Status": "INTEGER",
+      "Thumbnail": "TEXT",
+      "Lines": "INTEGER",
+      "CreatorId": "VARCHAR(255)"
+    }
+  }
+}

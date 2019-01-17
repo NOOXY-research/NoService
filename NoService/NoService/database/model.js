@@ -790,6 +790,45 @@ function Model() {
     });
   };
 
+  this.doBatchSetup = (models_dict, callback) => {
+    let models_list = Object.keys(models_dict);
+    let result = {};
+    let index = 0;
+    let op = ()=> {
+
+      this.exist(models_list[index], (err, has_model)=> {
+        if(err) {
+          callback(err);
+        }
+        else if(!has_model) {
+          this.define(models_list[index], models_dict[models_list[index]], (err, model)=> {
+            result[models_list[index]] = model;
+            index++;
+            if(index<models_list.length) {
+              op();
+            }
+            else {
+              callback(false, result);
+            }
+          });
+        }
+        else {
+          this.get(models_list[index], (err, model)=> {
+            result[models_list[index]] = model;
+            index++;
+            if(index<models_list.length) {
+              op();
+            }
+            else {
+              callback(false, result);
+            }
+          });
+        }
+      });
+    }
+    op();
+  }
+
   this.importDatabase = (db, callback)=> {
     _db = db;
     _db.existTable(MODEL_TABLE_NAME, (err, exist)=> {
