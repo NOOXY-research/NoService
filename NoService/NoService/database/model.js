@@ -136,7 +136,7 @@ function Model() {
     };
 
     this.getLatestNRows = (group_name, n, callback)=> {
-      _db.getRows(MODEL_TABLE_PREFIX+table_name, model_group_key+'=? AND '+MODEL_INDEXKEY+' > ((SELECT max('+MODEL_INDEXKEY+') FROM '+MODEL_TABLE_PREFIX+table_name+') - ?)', [group_name, n], callback);
+      _db.getRows(MODEL_TABLE_PREFIX+table_name, model_group_key+'=? AND '+MODEL_INDEXKEY+' > ((SELECT max('+MODEL_INDEXKEY+') FROM '+MODEL_TABLE_PREFIX+table_name+' WHERE '+model_group_key+'=?)- ?)', [group_name, group_name, n], callback);
     };
 
     this.getRowsFromTo = (group_name, begin, end, callback)=> {
