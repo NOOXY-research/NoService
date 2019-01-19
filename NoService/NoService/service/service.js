@@ -269,7 +269,7 @@ function Service() {
           if(_entity_json.ownerdomain == null) {
             _entity_json.ownerdomain == connprofile.returnHostIP();
           }
-          _authenticity_module.getUserIdByUsername(_local_services_owner, (err, ownerid)=> {
+          _authenticity_module.getUserIdByUsername(data.o, (err, ownerid)=> {
             _entity_json.ownerid = ownerid;
             _entity_module.registerEntity(_entity_json, connprofile, (err, id) => {
                 let _data = {
