@@ -62,8 +62,8 @@
       "protocol": {
         "call": {
           "i": "Channel's ID.",
-          "s": "Start row of data from the channel.",
-          "e": "End row of data from the channel."
+          "b": "Begin row of data from the channel.",
+          "r": "Number of rows from begin."
         },
         "return": {
           "s": "Status.",
@@ -106,13 +106,14 @@
       }
     },
 
-    "listChs": {
-      "displayname": "List channels",
+    "getMyChs": {
+      "displayname": "Getmy channels",
       "description": "List channels of the user have.",
       "secure": false,
       "protocol": {
         "call": null,
         "return": {
+          "c": "channels",
           "s": "Status.",
           "e": "Error status."
         }

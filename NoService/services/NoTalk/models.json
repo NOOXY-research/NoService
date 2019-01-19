@@ -24,7 +24,6 @@
       "Displayname": "VARCHAR(255)",
       "Status": "INTEGER",
       "Thumbnail": "TEXT",
-      "Lines": "INTEGER",
       "CreatorId": "VARCHAR(255)"
     }
   },

@@ -51,18 +51,16 @@ function NoTalk(Me, NoService) {
 
   // create a channel
   this.createChannel = (meta, callback)=> {
-    console.log(meta);
     let uuid = NoService.Library.Utilities.generateGUID();
     if(meta.n!=null&&meta.t!=null&&meta.v!=null&&meta.c!=null) {
       let new_meta = {
         ChId: uuid,
         Type: meta.t,
         Description: meta.d,
-        Visability: meta.v,
+        AccessLevel: meta.v,
         Displayname: meta.n,
         Status: 0,
         Thumbnail: meta.p, // abrev photo
-        Lines: 0,
         CreatorId: meta.c
       };
       // update metatdata
@@ -74,8 +72,9 @@ function NoTalk(Me, NoService) {
             _models.ChUserPair.create({
               UserId: meta.c,
               ChId: uuid,
-              Permition: 0,
+              Role: 0,
               LatestRLn: 0,
+              Addedby: meta.c,
               mute: 0
             }, (err)=> {
               if(!err) {
@@ -83,7 +82,7 @@ function NoTalk(Me, NoService) {
                 callback(err);
               }
               else {
-                _models.ChMeta.remove(uuid, (err)=> {
+                _models.ChMeta.remove(uuid, (e)=> {
                   callback(err);
                 });
               }
@@ -100,17 +99,87 @@ function NoTalk(Me, NoService) {
 
   };
 
-  this.sendMessage = (senderId, channelid, meta, callback)=> {
-    let _send = ()=> {
-      _models.Message.appendRows(channelid, [{Type:meta[0], Contain:meta[1], Detail:meta[2], UserId: senderId}]);
-      callback(false);
+  this.getMessages = (userid, channelid, meta, callback)=> {
+    let _get = ()=> {
+      if(meta.b) {
+        _models.Message.getRowsFromTo(channelid, meta.b, meta.b+meta.r-1, (err, rows)=> {
+          let result = {};
+          for(let i in rows) {
+            result[rows[i].Idx] = [rows[i].UserId, rows[i].Type, rows[i].Contain, rows[i].Detail];
+          }
+          callback(false, result);
+        })
+      }
+      else {
+        _models.Message.getLatestNRows(channelid, meta.r, (err, rows)=> {
+          let result = {};
+          for(let i in rows) {
+            result[rows[i].Idx] = [rows[i].UserId, rows[i].Type, rows[i].Contain, rows[i].Detail];
+          }
+          callback(false, result);
+        })
+      }
     };
-    if(senderId) {
-      _models.ChUserPair.getByBoth([meta.i, senderId], (err, [pair])=> {
 
-        if(pair == null|| pair.Role>1) {
+    if(userid) {
+      _models.ChUserPair.getByPair([channelid, userid], (err, [pair])=> {
+        if(pair == null || pair.Role == null ||pair.Role>1) {
           _models.ChMeta.get(channelid, (err, chmeta)=> {
-            if(chmeta.AccessLevel>=4) {
+            if(chmeta) {
+              if(chmeta.AccessLevel>=4) {
+                _get();
+              }
+              else {
+                callback(new Error("You have no getMessages permition."));
+              }
+            }
+            else {
+              callback(new Error("You have no getMessages permition."));
+            }
+          });
+        }
+        else if(pair.Role==0) {
+          _get();
+        }
+        else if(pair.Role==1){
+          _get();
+        }
+      });
+    }
+    else {
+      _models.ChMeta.get(channelid, (err, chmeta)=> {
+        if(chmeta) {
+          if(chmeta.AccessLevel>=5) {
+            _get();
+          }
+          else {
+            callback(new Error("You have no getMessages permition."));
+          }
+        }
+        else {
+          callback(new Error("You have no getMessages permition."));
+        }
+      });
+    }
+  };
+
+  this.sendMessage = (userid, channelid, meta, callback)=> {
+    let _send = ()=> {
+      _models.Message.appendRows(channelid, [{Type:meta[0], Contain:meta[1], Detail:meta[2], UserId: userid}], (err)=> {
+        if(err) {
+          callback(err);
+        }
+        else {
+          _on['message'](err, channelid, [userid, meta[0], meta[1], meta[2]]);
+          callback(err);
+        }
+      });
+    };
+    if(userid) {
+      _models.ChUserPair.getByPair([channelid, userid], (err, [pair])=> {
+        if(pair == null || pair.Role == null ||pair.Role>1) {
+          _models.ChMeta.get(channelid, (err, chmeta)=> {
+            if(chmeta&&chmeta.AccessLevel>=4) {
               _send();
             }
             else {
@@ -123,7 +192,7 @@ function NoTalk(Me, NoService) {
         }
         else if(pair.Role==1){
           _models.ChMeta.get(channelid, (err, chmeta)=> {
-            if(chmeta.AccessLevel>=1) {
+            if(chmeta&&chmeta.AccessLevel>=1) {
               _send();
             }
             else {
@@ -131,11 +200,14 @@ function NoTalk(Me, NoService) {
             }
           });
         }
+        else {
+
+        }
       });
     }
     else {
       _models.ChMeta.get(channelid, (err, chmeta)=> {
-        if(chmeta.AccessLevel>=5) {
+        if(chmeta&&chmeta.AccessLevel>=5) {
           _send();
         }
         else {

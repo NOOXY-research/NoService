@@ -26,8 +26,8 @@ function Service(Me, NoService) {
 
   // Your service entry point
   this.start = ()=> {
-    NoTalk.on('message', ()=> {
-
+    NoTalk.on('message', (err, channelid, meta)=> {
+      ss.emitToGroups([CHID_PREFIX+channelid], 'message', {i:channelid, r:meta});
     });
 
     NoTalk.on('channelcreated', ()=> {
@@ -80,22 +80,53 @@ function Service(Me, NoService) {
           });
         });
 
-        ss.def('bindCh', (json, entityId, returnJSON)=> {
+        ss.def('getMsgs', (json, entityId, returnJSON)=> {
           NoService.Authorization.Authby.Token(entityId, (err, valid)=> {
             if(valid) {
-              let index = 0;
-              op = ()=> {
-                NoService.Service.Entity.addEntityToGroups(entityId, [CHID_PREFIX+json.i[index]], (err)=> {
-                  index++;
-                  if(index<json.i.length) {
-                    op();
+              NoService.Service.Entity.getEntityOwnerId(entityId, (err, id)=>{
+                NoTalk.getMessages(id, json.i, json, (err, result)=> {
+                  if(err) {
+                    returnJSON(false, {e: err.stack, s:err.toString()});
+                  }
+                  else {
+                    returnJSON(false, {s: "OK", r:result});
+                  }
+                });
+              });
+            }
+            else {
+              returnJSON(false, {s: "Auth failed"});
+            }
+          });
+        });
+
+        ss.def('sendMsg', (json, entityId, returnJSON)=> {
+          NoService.Authorization.Authby.Token(entityId, (err, valid)=> {
+            if(valid) {
+              NoService.Service.Entity.getEntityOwnerId(entityId, (err, id)=>{
+                // console.log(json);
+                NoTalk.sendMessage(id, json.i, json.c, (err)=> {
+                  if(err) {
+                    returnJSON(false, {e: err.stack, s:err.toString()});
                   }
                   else {
                     returnJSON(false, {s: "OK"});
                   }
                 });
-              };
-              op();
+              });
+            }
+            else {
+              returnJSON(false, {s: "Auth failed"});
+            }
+          });
+        });
+
+        ss.def('bindChs', (json, entityId, returnJSON)=> {
+          NoService.Authorization.Authby.Token(entityId, (err, valid)=> {
+            if(valid) {
+              NoService.Service.Entity.addEntityToGroups(entityId, json.i.map(id=>{return(CHID_PREFIX+id)}), (err)=> {
+                  returnJSON(false, {s: "OK"});
+              });
             }
             else {
               returnJSON(false, {e:true, s: "Auth failed"});

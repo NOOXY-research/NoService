@@ -76,6 +76,31 @@ function Service(Me, NoService) {
     })
   });
 
+  ss.def('getUserMetaByUserId', (json, entityID, returnJSON)=>{
+    NoService.Authorization.Authby.Token(entityID, (err, valid)=>{
+      if(valid) {
+        NoService.Authenticity.getUserMetaByUserId(json.i, (err, meta1)=>{
+          nouser.getUserMeta(json.i, (err, meta2)=>{
+            let meta = Object.assign({}, meta1, meta2);
+            delete meta['pwdhash'];
+            delete meta['token'];
+            delete meta['tokenexpire'];
+            delete meta['privilege'];
+            delete meta['detail'];
+            delete meta['createdate'];
+            delete meta['modifydate'];
+
+            returnJSON(false, meta);
+          })
+        });
+
+      }
+      else {
+        returnJSON(false, {});
+      }
+    });
+  });
+
 
 
   ss.on('close', (entityID, callback) => {callback(false)});
