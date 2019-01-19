@@ -260,7 +260,7 @@ function NoServiceManager() {
           });
         });
       }
-      if(Settings.startup_auto_upgrade) {
+      if(Settings.startup_auto_upgrade&&!dsettings.debug) {
         Utils.TagLog('Service', 'Upgrading service...');
         this.bindAllServiceToRepository((err)=> {
           this.upgradeAllService(launch);

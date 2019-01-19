@@ -28,9 +28,10 @@
       "protocol": {
         "call": {
           "t": "Type of channel for example 'live' or 'normal'",
-          "p": "Privaty of channel for example 'public', 'locked' or 'private'",
+          "p": "Thumbnail",
           "n": "Channel's name.",
-          "d": "Channel's discribtion."
+          "a": "Access level.",
+          "d": "Channel's describtion."
         },
         "return": {
           "s": "Status.",
@@ -39,13 +40,13 @@
       }
     },
 
-    "bindCh": {
-      "displayname": "Bind a channel.",
-      "description": "Keep in touch in specified channel. Then will recieve new messages from activitysocket.",
+    "bindChs": {
+      "displayname": "Bind channels.",
+      "description": "Keep in touch in specified channels. Then will recieve new messages from activitysocket.",
       "secure": false,
       "protocol": {
         "call": {
-          "c": "Channel's ID."
+          "i": "Channel's ID. Array."
         },
         "return": {
           "s": "Status.",
@@ -54,33 +55,49 @@
       }
     },
 
-    "getChRows": {
-      "displayname": "Get history",
-      "description": "Get history from a existed channel.",
+    "getMsgs": {
+      "displayname": "Get channels messages",
+      "description": "Get messages history from a existed channel.",
       "secure": false,
       "protocol": {
         "call": {
-          "c": "Channel's ID.",
+          "i": "Channel's ID.",
           "s": "Start row of data from the channel.",
           "e": "End row of data from the channel."
         },
         "return": {
           "s": "Status.",
           "e": "Error status.",
-          "r": ["row number", "type", "data"]
+          "r": {"row number": ["UserId", "Type", "Contain", "Detail"]}
         }
       }
     },
 
-    "editChRow": {
+    "sendMsg": {
+      "displayname": "Send message",
+      "description": "Send a new message.",
+      "secure": false,
+      "protocol": {
+        "call": {
+          "i": "Channel's ID.",
+          "c": ["Type", "Contain", "Detail"]
+        },
+        "return": {
+          "s": "Status.",
+          "e": "Error status."
+        }
+      }
+    },
+
+    "editMsg": {
       "displayname": "Get history",
       "description": "Get history from a existed channel.",
       "secure": false,
       "protocol": {
         "call": {
-          "c": "Channel's ID.",
+          "i": "Channel's ID.",
           "t": "Type of operation. 'del' or 'edit'",
-          "n": "New contain."
+          "c": "New contain."
         },
         "return": {
           "s": "Status.",
@@ -127,6 +144,7 @@
           "u": "user Id."
         },
         "return": {
+          "i": "userid",
           "n": "username",
           "j": "joindate",
           "b": "bio",

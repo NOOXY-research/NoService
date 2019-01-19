@@ -65,7 +65,7 @@ function Service(Me, api) {
         // Since userid can be promised as a unique identifer!!!
         let userid = null;
         // Get userid from API
-        api.Authenticity.getUserID(username, (err, id) => {
+        api.Authenticity.getUserIdByUsername(username, (err, id) => {
           userid = id;
         });
         // process you operation here
@@ -111,7 +111,7 @@ function Service(Me, api) {
         // Since userid can be promised as a unique identifer!!!
         let userid = null;
         // Get userid from API
-        api.Authenticity.getUserID(username, (err, id) => {
+        api.Authenticity.getUserIdByUsername(username, (err, id) => {
           userid = id;
         });
         // process you operation here

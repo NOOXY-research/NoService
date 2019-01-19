@@ -55,10 +55,16 @@ function Service(Me, NoService) {
     NoService.Service.Entity.getEntityOwner(entityID, (err, username)=> {
       NoService.Authorization.Authby.Token(entityID, (err, valid)=>{
         if(valid) {
-          NoService.Authenticity.getUserMeta(username, (err, meta1)=>{
-            NoService.Authenticity.getUserID(username, (err, userid) => {
+          NoService.Authenticity.getUserMetaByUsername(username, (err, meta1)=>{
+            NoService.Authenticity.getUserIdByUsername(username, (err, userid) => {
               nouser.getUserMeta(userid, (err, meta2)=>{
-                returnJSON(false, Object.assign({}, meta1, meta2));
+                let meta = Object.assign({}, meta1, meta2);
+                delete meta['pwdhash'];
+                delete meta['token'];
+                delete meta['tokenexpire'];
+                delete meta['privilege'];
+
+                returnJSON(false, meta);
               })
             });
           })
@@ -103,7 +109,7 @@ function Service(Me, NoService) {
                     returnJSON(false, json_be_returned);
                   }
                   else {
-                    NoService.Authenticity.updatePassword(username, json.pw, (err)=>{
+                    NoService.Authenticity.updatePasswordByUsername(username, json.pw, (err)=>{
                       if(err&&json.pw!=null) {
                         json_be_returned.e = true;
                         json_be_returned.s = err.toString();
@@ -111,14 +117,14 @@ function Service(Me, NoService) {
                       }
                       else {
                         if(json.firstname != null && json.lastname!= null) {
-                          NoService.Authenticity.updateName(username, json.firstname, json.lastname, (err)=>{
+                          NoService.Authenticity.updateNameByUsername(username, json.firstname, json.lastname, (err)=>{
                             if(err) {
                               json_be_returned.e = true;
                               json_be_returned.s = err.toString();
                               returnJSON(false, json_be_returned);
                             }
                             else {
-                              NoService.Authenticity.getUserID(username, (err, userid) => {
+                              NoService.Authenticity.getUserIdByUsername(username, (err, userid) => {
                                 nouser.updateUser(userid, json, (err)=>{
                                   if(err) {
                                     json_be_returned.e = true;

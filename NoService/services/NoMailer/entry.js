@@ -21,7 +21,7 @@ function Service(Me, NoService) {
   // You will need entityID to Authorize remote user. And identify remote.
   ss.on('data', (entityID, data) => {
     // Get Username and process your work.
-    NoService.Service.Entity.getEntityOwner(entityID, (err, username)=> {
+    NoService.Service.Entity.getEntityOwnerId(entityID, (err, username)=> {
       // To store your data and associated with userid INSEAD OF USERNAME!!!
       // Since userid can be promised as a unique identifer!!!
       let userid = null;
@@ -48,7 +48,7 @@ function Service(Me, NoService) {
       // Since userid can be promised as a unique identifer!!!
       let userid = null;
       // Get userid from NoService
-      NoService.Authenticity.getUserID(username, (err, id) => {
+      NoService.Authenticity.getUserIdByUsername(username, (err, id) => {
         userid = id;
       });
       // process you operation here

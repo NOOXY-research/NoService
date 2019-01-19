@@ -8,8 +8,15 @@ let models_dict = require('./models.json')
 
 function NoTalk(Me, NoService) {
   let _models;
+  let _on = {
+    "message": ()=> {},
+    "channelcreated": ()=> {},
+    "channelmemberadded": ()=> {},
+  };
 
-
+  this.on = (event, callback) => {
+    _on[event] = callback;
+  };
 
   this.launch = (callback)=> {
     NoService.Database.Model.doBatchSetup(models_dict, (err, models)=> {
@@ -19,37 +26,125 @@ function NoTalk(Me, NoService) {
     });
   };
 
+  this.getUserChannels = (userid, callback)=> {
+    let channels = {};
+    _models.ChUserPair.getBySecond(userid, (err, pairs)=> {
+      let chs = pairs.map((pair) => {
+        return pair.ChId
+      });
+      let index = 0;
+      let op = ()=> {
+        _models.ChMeta.get(chs[index], (err, meta)=> {
+          channels[chs[index]] = meta;
+          index++;
+          if(index<chs.length) {
+            op();
+          }
+          else {
+            callback(err, channels);
+          }
+        });
+      };
+      op();
+    });
+  };
+
   // create a channel
   this.createChannel = (meta, callback)=> {
+    console.log(meta);
     let uuid = NoService.Library.Utilities.generateGUID();
+    if(meta.n!=null&&meta.t!=null&&meta.v!=null&&meta.c!=null) {
+      let new_meta = {
+        ChId: uuid,
+        Type: meta.t,
+        Description: meta.d,
+        Visability: meta.v,
+        Displayname: meta.n,
+        Status: 0,
+        Thumbnail: meta.p, // abrev photo
+        Lines: 0,
+        CreatorId: meta.c
+      };
+      // update metatdata
+      _models.ChMeta.create(new_meta, (err)=> {
+          if(err) {
+            callback(err);
+          }
+          else {
+            _models.ChUserPair.create({
+              UserId: meta.c,
+              ChId: uuid,
+              Permition: 0,
+              LatestRLn: 0,
+              mute: 0
+            }, (err)=> {
+              if(!err) {
+                _on['channelcreated'](err, new_meta);
+                callback(err);
+              }
+              else {
+                _models.ChMeta.remove(uuid, (err)=> {
+                  callback(err);
+                });
+              }
+            });
+          }
+      });
+    }
+    else {
+      callback(new Error('Channel metadata is not complete.'));
+    }
+  };
 
-    // update channel metatdata
-    // _notalk_user_model.getChannelbyId(uuid, (err, channel)=> {
-    //   channel.ChId = uuid;
-    //   channel.Type = meta.t;
-    //   channel.Description = meta.d;
-    //   channel.Visability = meta.v;
-    //   channel.Displayname = meta.n;
-    //   channel.Status = 0;
-    //   channel.Thumbnail = meta.p; // abrev photo
-    //   channel.Lines = 0;
-    //   channel.CreatorId = meta.c;
-    //   channel.updatesql((err)=> {
-    //     if(err) {
-    //       callback(err);
-    //     }
-    //     else {
-    //       // add user into channel
-    //       let chuserspair = [[meta.c, uuid, 0, 0, meta.c, false]];
-    //       for(let key in meta.u) {
-    //         // userid, chid, permition, latestrln, addedby, mute
-    //         chuserspair.push([meta.u[key], uuid, 1, 0, meta.c, false]);
-    //       }
-    //       _notalk_user_model.updateChUserPairs(chuserspair, callback);
-    //     }
-    //   });
-    // });
-  }
+  this.addUsersToChannel = (adderId, usersId, callback)=> {
+
+  };
+
+  this.sendMessage = (senderId, channelid, meta, callback)=> {
+    let _send = ()=> {
+      _models.Message.appendRows(channelid, [{Type:meta[0], Contain:meta[1], Detail:meta[2], UserId: senderId}]);
+      callback(false);
+    };
+    if(senderId) {
+      _models.ChUserPair.getByBoth([meta.i, senderId], (err, [pair])=> {
+
+        if(pair == null|| pair.Role>1) {
+          _models.ChMeta.get(channelid, (err, chmeta)=> {
+            if(chmeta.AccessLevel>=4) {
+              _send();
+            }
+            else {
+              callback(new Error("You have no sendMessage permition."));
+            }
+          });
+        }
+        else if(pair.Role==0) {
+          _send();
+        }
+        else if(pair.Role==1){
+          _models.ChMeta.get(channelid, (err, chmeta)=> {
+            if(chmeta.AccessLevel>=1) {
+              _send();
+            }
+            else {
+              callback(new Error("You have no sendMessage permition."));
+            }
+          });
+        }
+      });
+    }
+    else {
+      _models.ChMeta.get(channelid, (err, chmeta)=> {
+        if(chmeta.AccessLevel>=5) {
+          _send();
+        }
+        else {
+          callback(new Error("You have no sendMessage permition."));
+        }
+      });
+    }
+
+  };
 
   // get NoUserdb's meta data.
   this.getUserMeta = (userid, callback)=> {
@@ -72,10 +167,16 @@ function NoTalk(Me, NoService) {
 
   // get NoUserdb's meta data.
   this.updateUserMeta = (userid, meta, callback)=> {
-    _models.User.update({
-      UserId: userid,
-      Bio: meta.b
-    }, callback);
+    let new_meta = {UserId: userid};
+    for(let key in meta) {
+      if(key=='b') {
+        new_meta.Bio = meta.b;
+      }
+      else if(key=='a') {
+        new_meta.ShowActive = meta.a;
+      }
+    }
+    _models.User.update(new_meta, callback);
   }
 };
 
