@@ -196,7 +196,7 @@ function Authenticity() {
           callback(err);
         }
         else {
-          this.updateToken(username, callback);
+          this.updateTokenByUsername(username, callback);
         }
       });
     }
@@ -314,7 +314,7 @@ function Authenticity() {
             let now = new Date();
             let expiredate = Utils.SQLtoDate(user_meta.tokenexpire);
             if(now > expiredate) {
-              this.updateToken(username, (err, token) => {
+              this.updateTokenByUsername(username, (err, token) => {
                 callback(err, token);
               });
             }
@@ -405,7 +405,7 @@ function Authenticity() {
           callback(err);
         }
         else {
-          this.updateToken(username, callback);
+          this.updateTokenByUserId(userid, callback);
         }
       });
     }
@@ -532,7 +532,7 @@ function Authenticity() {
             let now = new Date();
             let expiredate = Utils.SQLtoDate(user_meta.tokenexpire);
             if(now > expiredate) {
-              this.updateToken(username, (err, token) => {
+              this.updateTokenByUserId(useid, (err, token) => {
                 callback(err, token);
               });
             }
