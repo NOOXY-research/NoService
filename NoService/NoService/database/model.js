@@ -42,7 +42,7 @@ function Model() {
     };
 
     this.existGroup = (group_name, callback)=> {
-      _db.getRows(MODEL_TABLE_PREFIX+table_name, model_group_key+'=?', [group_name], (err, results)=> {
+      _db.getRows(MODEL_TABLE_PREFIX+table_name, model_group_key+' LIKE ?', [group_name], (err, results)=> {
         if(results) {
           callback(err, results[0]?true: false);
         }
@@ -54,7 +54,7 @@ function Model() {
 
     // get an instense
     this.get = (group_name, index_value, callback)=> {
-      _db.getRows(MODEL_TABLE_PREFIX+table_name, model_group_key+'=? AND '+model_key+'= ?', [group_name, index_value], (err, results)=> {
+      _db.getRows(MODEL_TABLE_PREFIX+table_name, model_group_key+' LIKE ? AND '+model_key+' LIKE ?', [group_name, index_value], (err, results)=> {
         if(results) {
           callback(err, results[0]);
         }
@@ -111,7 +111,7 @@ function Model() {
             properties_dict['modifydate'] = datenow;
             properties_dict[model_group_key] = group_name;
           }
-          _db.updateRows(MODEL_TABLE_PREFIX+table_name, model_group_key+'=? AND '+model_key+'=?', [group_name, properties_dict[model_key]], properties_dict, call_callback);
+          _db.updateRows(MODEL_TABLE_PREFIX+table_name, model_group_key+' LIKE ? AND '+model_key+' LIKE ?', [group_name, properties_dict[model_key]], properties_dict, call_callback);
         }
         else {
           call_callback(new Error('Key "'+model_key+'" is required.'));
@@ -120,7 +120,7 @@ function Model() {
     };
 
     this.deleteRows = (group_name, begin, end, callback)=> {
-      _db.deleteRows(MODEL_TABLE_PREFIX+table_name, model_group_key+'=? AND '+model_key+' >= ? AND '+model_key+' <= ?', [group_name, begin, end], callback);
+      _db.deleteRows(MODEL_TABLE_PREFIX+table_name, model_group_key+' LIKE ? AND '+model_key+' >= ? AND '+model_key+' <= ?', [group_name, begin, end], callback);
     };
 
     this.appendRows = (group_name, rows, callback)=> {
@@ -148,19 +148,19 @@ function Model() {
     };
 
     this.getLatestNRows = (group_name, n, callback)=> {
-      _db.getRows(MODEL_TABLE_PREFIX+table_name, model_group_key+'=? AND '+MODEL_INDEXKEY+' > ((SELECT max('+MODEL_INDEXKEY+') FROM '+MODEL_TABLE_PREFIX+table_name+' WHERE '+model_group_key+'=?)- ?)', [group_name, group_name, n], callback);
+      _db.getRows(MODEL_TABLE_PREFIX+table_name, model_group_key+' LIKE ? AND '+MODEL_INDEXKEY+' > ((SELECT max('+MODEL_INDEXKEY+') FROM '+MODEL_TABLE_PREFIX+table_name+' WHERE '+model_group_key+' LIKE ?)- ?)', [group_name, group_name, n], callback);
     };
 
     this.getRowsFromTo = (group_name, begin, end, callback)=> {
-      _db.getRows(MODEL_TABLE_PREFIX+table_name, model_group_key+'=? AND '+MODEL_INDEXKEY+' >= ? AND '+ MODEL_INDEXKEY+' <= ?', [group_name, begin, end], callback);
+      _db.getRows(MODEL_TABLE_PREFIX+table_name, model_group_key+' LIKE ? AND '+MODEL_INDEXKEY+' >= ? AND '+ MODEL_INDEXKEY+' <= ?', [group_name, begin, end], callback);
     };
 
     this.getAllRows = (group_name, callback)=> {
-      _db.getRows(MODEL_TABLE_PREFIX+table_name, model_group_key+'=?', [group_name], callback);
+      _db.getRows(MODEL_TABLE_PREFIX+table_name, model_group_key+' LIKE ?', [group_name], callback);
     };
 
     this.getLatestIndex = (group_name, callback)=> {
-      _db.getRows(MODEL_TABLE_PREFIX+table_name, model_group_key+'=? AND '+MODEL_INDEXKEY+' = (SELECT max('+MODEL_INDEXKEY+') FROM '+MODEL_TABLE_PREFIX+table_name+' WHERE '+model_group_key+'=?)', [group_name, group_name], (err, results)=> {
+      _db.getRows(MODEL_TABLE_PREFIX+table_name, model_group_key+' LIKE ? AND '+MODEL_INDEXKEY+' = (SELECT max('+MODEL_INDEXKEY+') FROM '+MODEL_TABLE_PREFIX+table_name+' WHERE '+model_group_key+' LIKE ?)', [group_name, group_name], (err, results)=> {
         if(err) {
           callback(err);
         }
@@ -211,7 +211,7 @@ function Model() {
 
     // get an instense
     this.get = (key_value, callback)=> {
-      _db.getRows(MODEL_TABLE_PREFIX+table_name, model_key+'= ?', [key_value], (err, results)=> {
+      _db.getRows(MODEL_TABLE_PREFIX+table_name, model_key+' LIKE ?', [key_value], (err, results)=> {
         if(results) {
           callback(err, results[0]);
         }
@@ -261,7 +261,7 @@ function Model() {
           if(do_timestamp) {
             properties_dict['modifydate'] = datenow;
           }
-          _db.updateRows(MODEL_TABLE_PREFIX+table_name, model_key+'=?', [properties_dict[model_key]], properties_dict, call_callback);
+          _db.updateRows(MODEL_TABLE_PREFIX+table_name, model_key+' LIKE ?', [properties_dict[model_key]], properties_dict, call_callback);
         }
         else {
           call_callback(new Error('Key "'+model_key+'" is required.'));
@@ -335,7 +335,7 @@ function Model() {
     this.modeltype = 'Object';
     // get an instense
     this.get = (key_value, callback)=> {
-      _db.getRows(MODEL_TABLE_PREFIX+table_name, model_key+'= ?', [key_value], (err, results)=> {
+      _db.getRows(MODEL_TABLE_PREFIX+table_name, model_key+' LIKE ?', [key_value], (err, results)=> {
         if(results) {
           callback(err, results[0]);
         }
@@ -396,7 +396,7 @@ function Model() {
             properties_dict['modifydate'] = Utils.DatetoSQL(new Date());
           }
           if(properties_dict[model_key]) {
-            _db.updateRows(MODEL_TABLE_PREFIX+table_name, model_key+'=?', [properties_dict[model_key]], properties_dict, callback);
+            _db.updateRows(MODEL_TABLE_PREFIX+table_name, model_key+' LIKE ?', [properties_dict[model_key]], properties_dict, callback);
           }
           else {
             callback(new Error('Key "'+model_key+'" is required.'));
@@ -425,7 +425,7 @@ function Model() {
     };
 
     this.remove = (key, callback)=> {
-      _db.deleteRows(MODEL_TABLE_PREFIX+table_name, model_key+'= ?', [key], callback);
+      _db.deleteRows(MODEL_TABLE_PREFIX+table_name, model_key+' LIKE ?', [key], callback);
     };
   };
 
@@ -470,28 +470,28 @@ function Model() {
 
     // return list
     this.getByPair = (pair, callback)=> {
-      _db.getRows(MODEL_TABLE_PREFIX+table_name, model_key[0]+'= ? AND '+model_key[1]+'= ?', pair, (err, results)=> {
+      _db.getRows(MODEL_TABLE_PREFIX+table_name, model_key[0]+' LIKE ? AND '+model_key[1]+' LIKE ?', pair, (err, results)=> {
         callback(err, results);
       });
     };
 
     // return list
     this.getByBoth = (both, callback)=> {
-      _db.getRows(MODEL_TABLE_PREFIX+table_name, model_key[0]+'= ? OR '+model_key[1]+'= ?', [both, both], (err, results)=> {
+      _db.getRows(MODEL_TABLE_PREFIX+table_name, model_key[0]+' LIKE ? OR '+model_key[1]+' LIKE ?', [both, both], (err, results)=> {
         callback(err, results);
       });
     };
 
     // return list
     this.getByFirst = (first, callback)=> {
-      _db.getRows(MODEL_TABLE_PREFIX+table_name, model_key[0]+'= ?', [first], (err, results)=> {
+      _db.getRows(MODEL_TABLE_PREFIX+table_name, model_key[0]+' LIKE ?', [first], (err, results)=> {
         callback(err, results);
       });
     };
 
     // return list
     this.getBySecond = (second, callback)=> {
-      _db.getRows(MODEL_TABLE_PREFIX+table_name, model_key[1]+'= ?', [second], (err, results)=> {
+      _db.getRows(MODEL_TABLE_PREFIX+table_name, model_key[1]+' LIKE ?', [second], (err, results)=> {
         callback(err, results);
       });
     };
@@ -515,13 +515,13 @@ function Model() {
         properties_dict['modifydate'] = Utils.DatetoSQL(new Date());
       }
       if(properties_dict[model_key[0]]&&properties_dict[model_key[1]]) {
-        _db.updateRows(MODEL_TABLE_PREFIX+table_name, model_key[0]+'=? AND '+model_key[1]+'=?', [properties_dict[model_key[0]], properties_dict[model_key[1]]], properties_dict, callback);
+        _db.updateRows(MODEL_TABLE_PREFIX+table_name, model_key[0]+' LIKE ? AND '+model_key[1]+' LIKE ?', [properties_dict[model_key[0]], properties_dict[model_key[1]]], properties_dict, callback);
       }
       else if(properties_dict[model_key[0]]){
-        _db.updateRows(MODEL_TABLE_PREFIX+table_name, model_key[0]+'=?', [properties_dict[model_key[0]]], properties_dict, callback);
+        _db.updateRows(MODEL_TABLE_PREFIX+table_name, model_key[0]+' LIKE ?', [properties_dict[model_key[0]]], properties_dict, callback);
       }
       else if(properties_dict[model_key[1]]) {
-        _db.updateRows(MODEL_TABLE_PREFIX+table_name, model_key[1]+'=?', [properties_dict[model_key[1]]], properties_dict, callback);
+        _db.updateRows(MODEL_TABLE_PREFIX+table_name, model_key[1]+' LIKE ?', [properties_dict[model_key[1]]], properties_dict, callback);
       }
       else {
         callback(new Error('Either property "'+model_key[0]+'" or "'+model_key[1]+'" should be specified.'));
@@ -529,19 +529,19 @@ function Model() {
     };
 
     this.removeByPair = (pair, callback)=> {
-      _db.deleteRows(MODEL_TABLE_PREFIX+table_name, model_key[0]+'= ? AND '+model_key[1]+'= ?', pair, callback);
+      _db.deleteRows(MODEL_TABLE_PREFIX+table_name, model_key[0]+' LIKE ? AND '+model_key[1]+' LIKE ?', pair, callback);
     };
 
     this.removeByBoth = (both, callback)=> {
-      _db.deleteRows(MODEL_TABLE_PREFIX+table_name, model_key[0]+'= ? OR '+model_key[1]+'= ?', [both, both], callback);
+      _db.deleteRows(MODEL_TABLE_PREFIX+table_name, model_key[0]+' LIKE ? OR '+model_key[1]+' LIKE ?', [both, both], callback);
     };
 
     this.removeByFirst = (first, callback)=> {
-      _db.deleteRows(MODEL_TABLE_PREFIX+table_name, model_key[0]+'= ?', [first], callback);
+      _db.deleteRows(MODEL_TABLE_PREFIX+table_name, model_key[0]+' LIKE ?', [first], callback);
     };
 
     this.removeBySecond = (second, callback)=> {
-      _db.deleteRows(MODEL_TABLE_PREFIX+table_name, model_key[1]+'= ?', [second], callback);
+      _db.deleteRows(MODEL_TABLE_PREFIX+table_name, model_key[1]+' LIKE ?', [second], callback);
     };
 
     this.addProperties = (properties_dict, callback)=> {
@@ -567,7 +567,7 @@ function Model() {
         callback(err);
       }
       else {
-        _db.deleteRows(MODEL_TABLE_NAME, 'name=?', [model_name], (err)=> {
+        _db.deleteRows(MODEL_TABLE_NAME, 'name LIKE ?', [model_name], (err)=> {
           callback(err);
         });
       }
