@@ -33,6 +33,7 @@ function Sqlite3(meta) {
   let _db;
   this.connect = (callback)=> {
     _db = new (require('sqlite3').Database)(meta.storage);
+    // console.log("You are using sqlite3, to enable regex functions. Please install pcre.");
     callback(false);
   };
 

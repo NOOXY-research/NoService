@@ -22,11 +22,23 @@ function Model() {
     let model_key = MODEL_INDEXKEY;
     let model_group_key = MODEL_GROUPKEY;
 
-    this.search = (group_name, keyword, callback)=> {
-      let sql = '';
-      sql = Objects.keys(structure).join(' LIKE '+keyword+' OR ');
-      sql = sql + ' LIKE ' + keyword;
-      _db.getRows(MODEL_TABLE_PREFIX+table_name, [sql, null], callback);
+    this.searchAll = (group_name, keyword, callback)=> {
+      let sql = '(';
+      let column_list = Object.keys(structure);
+      sql = sql + column_list.join(' LIKE ? OR ');
+      sql = sql + ' LIKE ? ) AND ('+model_group_key+' LIKE ?)';
+      let values = column_list.map(v=>{return keyword});
+      values.push(group_name);
+      _db.getRows(MODEL_TABLE_PREFIX+table_name, sql, values, callback);
+    };
+
+    this.searchColumns = (group_name, column_list, keyword, callback)=> {
+      let sql = '(';
+      sql = sql + column_list.join(' LIKE ? OR ');
+      sql = sql + ' LIKE ? ) AND ('+model_group_key+' LIKE ?)';
+      let values = column_list.map(v=>{return keyword});
+      values.push(group_name);
+      _db.getRows(MODEL_TABLE_PREFIX+table_name, sql, values, callback);
     };
 
     this.existGroup = (group_name, callback)=> {
@@ -42,7 +54,7 @@ function Model() {
 
     // get an instense
     this.get = (group_name, index_value, callback)=> {
-      _db.getRows(MODEL_TABLE_PREFIX+table_name, model_group_key+'=? AND'+model_key+'= ?', [group_name, index_value], (err, results)=> {
+      _db.getRows(MODEL_TABLE_PREFIX+table_name, model_group_key+'=? AND '+model_key+'= ?', [group_name, index_value], (err, results)=> {
         if(results) {
           callback(err, results[0]);
         }
@@ -182,11 +194,19 @@ function Model() {
     this.modeltype = 'IndexedList';
     let model_key = MODEL_INDEXKEY;
 
-    this.search = (keyword, callback)=> {
+    this.searchAll = (keyword, callback)=> {
       let sql = '';
-      sql = Objects.keys(structure).join(' LIKE '+keyword+' OR ');
-      sql = sql + ' LIKE ' + keyword;
-      _db.getRows(MODEL_TABLE_PREFIX+table_name, [sql, null], callback);
+      let column_list = Object.keys(structure);
+      sql = column_list.join(' LIKE ? OR ');
+      sql = sql + ' LIKE ?';
+      _db.getRows(MODEL_TABLE_PREFIX+table_name, sql, column_list.map(v=>{return keyword}), callback);
+    };
+
+    this.searchColumns = (column_list, keyword, callback)=> {
+      let sql = '';
+      sql = column_list.join(' LIKE ? OR ');
+      sql = sql + ' LIKE ?';
+      _db.getRows(MODEL_TABLE_PREFIX+table_name, sql, column_list.map(v=>{return keyword}), callback);
     };
 
     // get an instense
@@ -336,11 +356,19 @@ function Model() {
       });
     };
 
-    this.search = (keyword, callback)=> {
+    this.searchAll = (keyword, callback)=> {
       let sql = '';
-      sql = Objects.keys(structure).join(' LIKE '+keyword+' OR ');
-      sql = sql + ' LIKE ' + keyword;
-      _db.getRows(MODEL_TABLE_PREFIX+table_name, [sql, null], callback);
+      let column_list = Object.keys(structure);
+      sql = column_list.join(' LIKE ? OR ');
+      sql = sql + ' LIKE ?';
+      _db.getRows(MODEL_TABLE_PREFIX+table_name, sql, column_list.map(v=>{return keyword}), callback);
+    };
+
+    this.searchColumns = (column_list, keyword, callback)=> {
+      let sql = '';
+      sql = column_list.join(' LIKE ? OR ');
+      sql = sql + ' LIKE ?';
+      _db.getRows(MODEL_TABLE_PREFIX+table_name, sql, column_list.map(v=>{return keyword}), callback);
     };
 
     this.create = (properties_dict, callback)=> {
@@ -414,11 +442,19 @@ function Model() {
       _db.appendRows(MODEL_TABLE_PREFIX+table_name, [properties_dict], callback);
     };
 
-    this.search = (phrase, callback)=> {
+    this.searchAll = (keyword, callback)=> {
       let sql = '';
-      sql = Objects.keys(structure).join(' LIKE '+keyword+' OR ');
-      sql = sql + ' LIKE ' + keyword;
-      _db.getRows(MODEL_TABLE_PREFIX+table_name, [sql, null], callback);
+      let column_list = Object.keys(structure);
+      sql = column_list.join(' LIKE ? OR ');
+      sql = sql + ' LIKE ?';
+      _db.getRows(MODEL_TABLE_PREFIX+table_name, sql, column_list.map(v=>{return keyword}), callback);
+    };
+
+    this.searchColumns = (column_list, keyword, callback)=> {
+      let sql = '';
+      sql = column_list.join(' LIKE ? OR ');
+      sql = sql + ' LIKE ?';
+      _db.getRows(MODEL_TABLE_PREFIX+table_name, sql, column_list.map(v=>{return keyword}), callback);
     };
 
     this.getWhere = (where, query_values, callback)=> {

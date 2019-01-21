@@ -27,15 +27,15 @@ function Service(Me, NoService) {
   // Your service entry point
   this.start = ()=> {
     NoTalk.on('message', (err, channelid, meta)=> {
-      ss.emitToGroups([CHID_PREFIX+channelid], 'message', {i:channelid, r:meta});
+      ss.emitToGroups([CHID_PREFIX+channelid], 'Message', {i:channelid, r:meta});
     });
 
     NoTalk.on('channelcreated', ()=> {
 
     });
 
-    NoTalk.on('channelmemberadded', ()=> {
-
+    NoTalk.on('addedtochannel', (err, userid, meta)=> {
+      ss.emitToGroups([USERID_PREFIX+userid], 'AddedToChannel', {i:meta.ChId, r:meta});
     });
 
     NoTalk.launch((err)=> {
@@ -63,12 +63,12 @@ function Service(Me, NoService) {
             if(valid) {
               NoService.Service.Entity.getEntityOwnerId(entityId, (err, id)=>{
                 json.c = id;
-                NoTalk.createChannel(json, (err)=> {
+                NoTalk.createChannel(json, (err, chid)=> {
                   if(err) {
                     returnJSON(false, {e: err.stack, s:err.toString()});
                   }
                   else {
-                    returnJSON(false, {s: "OK"});
+                    returnJSON(false, {s: "OK", i:chid});
                   }
 
                 });

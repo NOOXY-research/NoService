@@ -91,13 +91,13 @@ function Service(Me, api) {
         ss.emitToIncludingGroups(['superuser', 'good'], 'event1', 'Event msg. SHOULD APPEAR(3/3)');
         ss.emitToIncludingGroups(['superuser', 'good', 'excluded'], 'event1', 'Event msg. SHOULD NOT APPEAR');
         log('Starting stress test on emiting event. In 5 sec.');
-        setTimeout(()=> {
-          for(let i=0; i< 20000; i++) {
-            ss.emitToGroups(['superuser', 'good', 'excluded'], 'stress', 'Event msg. SHOULD NOT APPEAR');
-            ss.emitToGroups(['superuser', 'good'], 'stress', 'Event msg. SHOULD APPEAR(2/3)');
-          };
-          ss.emit(entityID, 'stressOK');
-        }, 5000);
+        // setTimeout(()=> {
+        //   for(let i=0; i< 20000; i++) {
+        //     ss.emitToGroups(['superuser', 'good', 'excluded'], 'stress', 'Event msg. SHOULD NOT APPEAR');
+        //     ss.emitToGroups(['superuser', 'good'], 'stress', 'Event msg. SHOULD APPEAR(2/3)');
+        //   };
+        //   ss.emit(entityID, 'stressOK');
+        // }, 5000);
       });
       // Do something.
       // report error;
@@ -377,16 +377,27 @@ function Service(Me, api) {
                         log(err);
                       }
                       else {
+                        log('GroupIndexedList Model getRowsFromTo Test.');
                         model.getRowsFromTo('Group2' ,1, 2, (err, instance)=> {
                           log(instance);
-                          api.Database.Model.remove('GroupIndexedList', (err)=>{
+                          log('GroupIndexedList Model searchAll Test.');
+                          model.searchAll('Group2', 'A2', (err, rows)=> {
+                            log(rows);
                             if(err) {
                               log(err);
                             }
                             else {
-                              log('GroupIndexedList Model PASS.');
+                              api.Database.Model.remove('GroupIndexedList', (err)=>{
+                                if(err) {
+                                  log(err);
+                                }
+                                else {
+                                  log('GroupIndexedList Model PASS.');
+                                }
+                              });
                             }
                           });
+
                         });
                       };
                     });

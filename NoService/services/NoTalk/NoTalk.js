@@ -11,7 +11,7 @@ function NoTalk(Me, NoService) {
   let _on = {
     "message": ()=> {},
     "channelcreated": ()=> {},
-    "channelmemberadded": ()=> {},
+    "addedtochannel": ()=> {},
   };
 
   this.on = (event, callback) => {
@@ -79,7 +79,8 @@ function NoTalk(Me, NoService) {
             }, (err)=> {
               if(!err) {
                 _on['channelcreated'](err, new_meta);
-                callback(err);
+                _on['addedtochannel'](err, meta.c, new_meta);
+                callback(err, uuid);
               }
               else {
                 _models.ChMeta.remove(uuid, (e)=> {
@@ -236,6 +237,17 @@ function NoTalk(Me, NoService) {
       }
     });
   }
+
+  this.initUserMeta = (userid, callback)=> {
+    this.getUserMeta(userid, (err, meta)=> {
+      if(meta.i) {
+        callback(false);
+      }
+      else {
+        this.updateUserMeta(userid, {a:0}, callback);
+      }
+    });
+  };
 
   // get NoUserdb's meta data.
   this.updateUserMeta = (userid, meta, callback)=> {

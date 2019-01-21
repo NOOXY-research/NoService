@@ -45,8 +45,10 @@ function Database(meta) {
     _dialect.removerRows.apply(null, args);
   };
 
-  this.getRows = (...args)=> {
-    _dialect.getRows.apply(null, args);
+  this.getRows = (table_name, select_query, select_query_values, callback)=> {
+    _dialect.getRows(table_name, select_query, select_query_values, (err, rows)=> {
+      callback(err, rows?rows:[]);
+    });
   };
 
   this.deleteRows = (...args)=> {
@@ -88,6 +90,11 @@ function Database(meta) {
   this.createreplaceRow = (...args)=> {
     _dialect.createreplaceRow.apply(null, args);
   };
+
+  //table_name, N, column_list, Regex, callback
+  // this.getRowsColumnRegex = (...args)=> {
+  //   _dialect.getNRowsColumnRegex.apply(null, args);
+  // };
 
   this.query = (...args)=> {
     _dialect.query.apply(null, args);
