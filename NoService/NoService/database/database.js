@@ -51,6 +51,12 @@ function Database(meta) {
     });
   };
 
+  this.getRowsTopNRows = (table_name, select_query, select_query_values, N, callback)=> {
+    _dialect.getRowsTopNRows(table_name, select_query, select_query_values, N, (err, rows)=> {
+      callback(err, rows?rows:[]);
+    });
+  }
+
   this.deleteRows = (...args)=> {
     _dialect.deleteRows.apply(null, args);
   };

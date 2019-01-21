@@ -94,7 +94,7 @@ function Core(settings) {
         }
         else {
           Utils.TagLog('OKAY', 'Initialized. Please restart!');
-          terminateNoService();
+          process.exit();
         }
       });
     }

@@ -41,6 +41,25 @@ function Model() {
       _db.getRows(MODEL_TABLE_PREFIX+table_name, sql, values, callback);
     };
 
+    this.searchAllNRows = (group_name, keyword, N, callback)=> {
+      let sql = '(';
+      let column_list = Object.keys(structure);
+      sql = sql + column_list.join(' LIKE ? OR ');
+      sql = sql + ' LIKE ? ) AND ('+model_group_key+' LIKE ?)';
+      let values = column_list.map(v=>{return keyword});
+      values.push(group_name);
+      _db.getRowsTopNRows(MODEL_TABLE_PREFIX+table_name, sql, values, N, callback);
+    };
+
+    this.searchColumnsNRows = (group_name, column_list, keyword, N, callback)=> {
+      let sql = '(';
+      sql = sql + column_list.join(' LIKE ? OR ');
+      sql = sql + ' LIKE ? ) AND ('+model_group_key+' LIKE ?)';
+      let values = column_list.map(v=>{return keyword});
+      values.push(group_name);
+      _db.getRowsTopNRows(MODEL_TABLE_PREFIX+table_name, sql, values, N, callback);
+    };
+
     this.existGroup = (group_name, callback)=> {
       _db.getRows(MODEL_TABLE_PREFIX+table_name, model_group_key+' LIKE ?', [group_name], (err, results)=> {
         if(results) {

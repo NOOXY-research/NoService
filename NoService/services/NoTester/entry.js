@@ -342,19 +342,19 @@ function Service(Me, api) {
                 log('GroupIndexedList Model append Test.');
                 model.appendRows('Group2' ,[
                   {
-                    property1: 'A2',
+                    property1: 'AA2',
                     property2: 0
                   },
                   {
-                    property1: 'B2',
+                    property1: 'BB2',
                     property2: 1
                   },
                   {
-                    property1: 'C2',
+                    property1: 'CC2',
                     property2: 2
                   },
                   {
-                    property1: 'D2',
+                    property1: 'DD2',
                     property2: 3
                   }
                 ], (err)=> {
@@ -381,7 +381,7 @@ function Service(Me, api) {
                         model.getRowsFromTo('Group2' ,1, 2, (err, instance)=> {
                           log(instance);
                           log('GroupIndexedList Model searchAll Test.');
-                          model.searchAll('Group2', 'A2', (err, rows)=> {
+                          model.searchAllNRows('Group2', '%2', 3, (err, rows)=> {
                             log(rows);
                             if(err) {
                               log(err);
