@@ -334,6 +334,17 @@ function Authenticity() {
 
   };
 
+  this.searchUsersByUsernameNRows = (username, N, callback) => {
+    _user_model.searchColumnsNRows(['username'], username, N, (err, users) => {
+      if(users) {
+        callback(err, users);
+      }
+      else {
+        callback(new Error('User not exist.'));
+      }
+    });
+  };
+
   this.getUserPrivilegeByUsername = (username, callback) => {
     _user_model.getByFirst(username?username.toLowerCase():''(), (err, [user_meta]) => {
       if(user_meta) {

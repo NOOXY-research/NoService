@@ -1,18 +1,18 @@
 // NoService/services/youservice/entry.js
 // Description:
 // "youservice/entry.js" description.
-// Copyright 2018 NOOXY. All Rights Reserved.
+// Copyright 2018-2019 NOOXY. All Rights Reserved.
 'use strict';
 
-function Service(Me, api) {
+function Service(Me, NoService) {
   // Your service entry point
   // Get the service socket of your service
-  let ss = api.Service.ServiceSocket;
+  let ss = NoService.Service.ServiceSocket;
   // BEWARE! To prevent callback error crash the system.
   // If you call an callback function which is not API provided. Such as setTimeout(callback, timeout).
-  // You need to wrap the callback funciton by api.SafeCallback.
-  // E.g. setTimeout(api.SafeCallback(callback), timeout)
-  let safec = api.SafeCallback;
+  // You need to wrap the callback funciton by NoService.SafeCallback.
+  // E.g. setTimeout(NoService.SafeCallback(callback), timeout)
+  let safec = NoService.SafeCallback;
   // Your settings in manifest file.
   let settings = Me.Settings;
 
@@ -24,11 +24,16 @@ function Service(Me, api) {
   this.start = ()=> {
     log(Me);
 
+    NoService.Authenticity.searchUsersByUsernameNRows('ad%', 1, (err, rows)=> {
+      log('searchUsersByUsernameNRows Test');
+      log(rows);
+    });
+
     // JSONfunction is a function that can be defined, which others entities can call.
     // It is a NOOXY Service Framework Standard
     log('ServiceSocket Test');
     ss.def('jfunc1', (json, entityID, returnJSON)=>{
-      api.Authorization.Authby.Token(entityID, (err, pass)=>{
+      NoService.Authorization.Authby.Token(entityID, (err, pass)=>{
         log('Auth status: '+pass)
         log(json);
         // Code here for JSONfunciton
@@ -60,12 +65,12 @@ function Service(Me, api) {
     // You will need entityID to Authorize remote user. And identify remote.
     ss.on('data', (entityID, data) => {
       // Get Username and process your work.
-      api.Service.Entity.getEntityOwner(entityID, (err, username)=>{
+      NoService.Service.Entity.getEntityOwner(entityID, (err, username)=>{
         // To store your data and associated with userid INSEAD OF USERNAME!!!
         // Since userid can be promised as a unique identifer!!!
         let userid = null;
         // Get userid from API
-        api.Authenticity.getUserIdByUsername(username, (err, id) => {
+        NoService.Authenticity.getUserIdByUsername(username, (err, id) => {
           userid = id;
         });
         // process you operation here
@@ -82,7 +87,7 @@ function Service(Me, api) {
       ss.emit(entityID, 'event1', 'Event msg. SHOULD APPEAR(1/3)');
       ss.emit(entityID, 'event2', 'Event msg. SHOULD NOT APPEAR.');
 
-      api.Service.Entity.addEntityToGroups(entityID, ['superuser', 'whatever', 'good'], (err)=> {
+      NoService.Service.Entity.addEntityToGroups(entityID, ['superuser', 'whatever', 'good'], (err)=> {
         ss.sendDataToIncludingGroups(['superuser', 'good', 'excluded'], 'Superuser entity group msg. SHOULD NOT APPEAR');
         ss.sendDataToIncludingGroups(['superuser', 'good'], 'Superuser entity group msg. SHOULD APPEAR(1/2)');
         ss.sendDataToGroups(['superuser', 'good'], 'Superuser entity group msg. SHOULD APPEAR(2/2)');
@@ -106,12 +111,12 @@ function Service(Me, api) {
     // ServiceSocket.onClose, in case connection close.
     ss.on('close', (entityID, callback) => {
       // Get Username and process your work.
-      api.Service.Entity.getEntityOwner(entityID, (err, username)=>{
+      NoService.Service.Entity.getEntityOwner(entityID, (err, username)=>{
         // To store your data and associated with userid INSEAD OF USERNAME!!!
         // Since userid can be promised as a unique identifer!!!
         let userid = null;
         // Get userid from API
-        api.Authenticity.getUserIdByUsername(username, (err, id) => {
+        NoService.Authenticity.getUserIdByUsername(username, (err, id) => {
           userid = id;
         });
         // process you operation here
@@ -122,7 +127,7 @@ function Service(Me, api) {
     });
 
     // Access another service on this daemon
-    api.Service.ActivitySocket.createDefaultAdminDeamonSocket('NoTester', (err, activitysocket)=> {
+    NoService.Service.ActivitySocket.createDefaultAdminDeamonSocket('NoTester', (err, activitysocket)=> {
       activitysocket.on('data', (err, data)=> {
         log('Received data from service.')
         log(data);
@@ -154,7 +159,7 @@ function Service(Me, api) {
 
     // Test Object Model
     log('Object Model Test.');
-    api.Database.Model.define('ObjectTest', {
+    NoService.Database.Model.define('ObjectTest', {
       model_type: "Object",
       do_timestamp: true,
       model_key: "objkey",
@@ -197,7 +202,7 @@ function Service(Me, api) {
                   else {
                     model.get(0, (err, instance)=> {
                       log(instance);
-                      api.Database.Model.remove('ObjectTest', (err)=>{
+                      NoService.Database.Model.remove('ObjectTest', (err)=>{
                         if(err) {
                           log(err);
                         }
@@ -218,7 +223,7 @@ function Service(Me, api) {
 
     // Test IndexedList Model
     log('IndexedList Model Test.');
-    api.Database.Model.define('IndexedListTest', {
+    NoService.Database.Model.define('IndexedListTest', {
       model_type: "IndexedList",
       do_timestamp: true,
       structure: {
@@ -277,7 +282,7 @@ function Service(Me, api) {
                   else {
                     model.getRowsFromTo(1, 2, (err, instance)=> {
                       log(instance);
-                      api.Database.Model.remove('IndexedListTest', (err)=>{
+                      NoService.Database.Model.remove('IndexedListTest', (err)=>{
                         if(err) {
                           log(err);
                         }
@@ -297,7 +302,7 @@ function Service(Me, api) {
 
     // Test GroupIndexedList Model
     log('GroupIndexedList Model Test.');
-    api.Database.Model.define('GroupIndexedList', {
+    NoService.Database.Model.define('GroupIndexedList', {
       model_type: "GroupIndexedList",
       do_timestamp: true,
       structure: {
@@ -387,7 +392,7 @@ function Service(Me, api) {
                               log(err);
                             }
                             else {
-                              api.Database.Model.remove('GroupIndexedList', (err)=>{
+                              NoService.Database.Model.remove('GroupIndexedList', (err)=>{
                                 if(err) {
                                   log(err);
                                 }

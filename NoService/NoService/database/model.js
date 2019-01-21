@@ -228,6 +228,21 @@ function Model() {
       _db.getRows(MODEL_TABLE_PREFIX+table_name, sql, column_list.map(v=>{return keyword}), callback);
     };
 
+    this.searchAllNRows = (keyword, N, callback)=> {
+      let sql = '';
+      let column_list = Object.keys(structure);
+      sql = column_list.join(' LIKE ? OR ');
+      sql = sql + ' LIKE ?';
+      _db.getRowsTopNRows(MODEL_TABLE_PREFIX+table_name, sql, column_list.map(v=>{return keyword}), N, callback);
+    };
+
+    this.searchColumnsNRows = (column_list, keyword, N, callback)=> {
+      let sql = '';
+      sql = column_list.join(' LIKE ? OR ');
+      sql = sql + ' LIKE ?';
+      _db.getRowsTopNRows(MODEL_TABLE_PREFIX+table_name, sql, column_list.map(v=>{return keyword}), N, callback);
+    };
+
     // get an instense
     this.get = (key_value, callback)=> {
       _db.getRows(MODEL_TABLE_PREFIX+table_name, model_key+' LIKE ?', [key_value], (err, results)=> {
@@ -390,6 +405,21 @@ function Model() {
       _db.getRows(MODEL_TABLE_PREFIX+table_name, sql, column_list.map(v=>{return keyword}), callback);
     };
 
+    this.searchAllNRows = (keyword, N, callback)=> {
+      let sql = '';
+      let column_list = Object.keys(structure);
+      sql = column_list.join(' LIKE ? OR ');
+      sql = sql + ' LIKE ?';
+      _db.getRowsTopNRows(MODEL_TABLE_PREFIX+table_name, sql, column_list.map(v=>{return keyword}), N, callback);
+    };
+
+    this.searchColumnsNRows = (column_list, keyword, N, callback)=> {
+      let sql = '';
+      sql = column_list.join(' LIKE ? OR ');
+      sql = sql + ' LIKE ?';
+      _db.getRowsTopNRows(MODEL_TABLE_PREFIX+table_name, sql, column_list.map(v=>{return keyword}), N, callback);
+    };
+
     this.create = (properties_dict, callback)=> {
       if(do_timestamp) {
         properties_dict['createdate'] = Utils.DatetoSQL(new Date());
@@ -474,6 +504,21 @@ function Model() {
       sql = column_list.join(' LIKE ? OR ');
       sql = sql + ' LIKE ?';
       _db.getRows(MODEL_TABLE_PREFIX+table_name, sql, column_list.map(v=>{return keyword}), callback);
+    };
+
+    this.searchAllNRows = (keyword, N, callback)=> {
+      let sql = '';
+      let column_list = Object.keys(structure);
+      sql = column_list.join(' LIKE ? OR ');
+      sql = sql + ' LIKE ?';
+      _db.getRowsTopNRows(MODEL_TABLE_PREFIX+table_name, sql, column_list.map(v=>{return keyword}), N, callback);
+    };
+
+    this.searchColumnsNRows = (column_list, keyword, N, callback)=> {
+      let sql = '';
+      sql = column_list.join(' LIKE ? OR ');
+      sql = sql + ' LIKE ?';
+      _db.getRowsTopNRows(MODEL_TABLE_PREFIX+table_name, sql, column_list.map(v=>{return keyword}), N, callback);
     };
 
     this.getWhere = (where, query_values, callback)=> {

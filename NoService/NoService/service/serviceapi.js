@@ -1021,6 +1021,33 @@ function ServiceAPI() {
         });
       },
 
+      getUserTokenByUsername: (username, remote_callback_obj)=>{
+        _coregateway.Authenticity.getUserTokenByUsername(username, (err, token)=> {
+          if(remote_callback_obj) {
+            remote_callback_obj.run([], [err, token]);
+            remote_callback_obj.unbindRemote();
+          }
+        });
+      },
+
+      getUserPrivilegeByUsername: (username, remote_callback_obj)=>{
+        _coregateway.Authenticity.getUserPrivilegeByUsername(username, (err, privilege)=> {
+          if(remote_callback_obj) {
+            remote_callback_obj.run([], [err, privilege]);
+            remote_callback_obj.unbindRemote();
+          }
+        });
+      },
+
+      searchUsersByUsernameNRows: (username, N, remote_callback_obj)=>{
+        _coregateway.Authenticity.searchUsersByUsernameNRows(username, N, (err, rows)=> {
+          if(remote_callback_obj) {
+            remote_callback_obj.run([], [err, rows]);
+            remote_callback_obj.unbindRemote();
+          }
+        });
+      },
+
 
       // By Id
       deleteUserByUserId: (userid, remote_callback_obj) => {
@@ -1090,6 +1117,24 @@ function ServiceAPI() {
         _coregateway.Authenticity.getUserExistenceByUserId(userid, (err, exisitence)=> {
           if(remote_callback_obj) {
             remote_callback_obj.run([], [err, exisitence]);
+            remote_callback_obj.unbindRemote();
+          }
+        });
+      },
+
+      getUserTokenByUserId: (username, remote_callback_obj)=>{
+        _coregateway.Authenticity.getUserTokenByUsername(username, (err, token)=> {
+          if(remote_callback_obj) {
+            remote_callback_obj.run([], [err, token]);
+            remote_callback_obj.unbindRemote();
+          }
+        });
+      },
+
+      getUserPrivilegeByUserId: (username, remote_callback_obj)=>{
+        _coregateway.Authenticity.getUserPrivilegeByUsername(username, (err, privilege)=> {
+          if(remote_callback_obj) {
+            remote_callback_obj.run([], [err, privilege]);
             remote_callback_obj.unbindRemote();
           }
         });
