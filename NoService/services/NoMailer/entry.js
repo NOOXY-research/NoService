@@ -20,19 +20,7 @@ function Service(Me, NoService) {
   // ServiceSocket.onData, in case client send data to this Service.
   // You will need entityID to Authorize remote user. And identify remote.
   ss.on('data', (entityID, data) => {
-    // Get Username and process your work.
-    NoService.Service.Entity.getEntityOwnerId(entityID, (err, username)=> {
-      // To store your data and associated with userid INSEAD OF USERNAME!!!
-      // Since userid can be promised as a unique identifer!!!
-      let userid = null;
-      // Get userid from NoService
-      NoService.Authenticity.getUserID(username, (err, id) => {
-        userid = id;
-      });
-      // process you operation here
-      console.log('recieved a data');
-      console.log(data);
-    });
+
   });
   // ServiceSocket.onConnect, in case on new connection.
   ss.on('connect', (entityID, callback) => {
@@ -42,20 +30,6 @@ function Service(Me, NoService) {
   });
   // ServiceSocket.onClose, in case connection close.
   ss.on('close', (entityID, callback) => {
-    // Get Username and process your work.
-    NoService.Service.Entity.getEntityOwner(entityID, (err, username)=> {
-      // To store your data and associated with userid INSEAD OF USERNAME!!!
-      // Since userid can be promised as a unique identifer!!!
-      let userid = null;
-      // Get userid from NoService
-      NoService.Authenticity.getUserIdByUsername(username, (err, id) => {
-        userid = id;
-      });
-      // process you operation here
-      // console.log('ServiceSocket closed');
-      // report error;
-      callback(false);
-    });
   });
 
   // Here is where your service start

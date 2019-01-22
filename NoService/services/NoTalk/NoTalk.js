@@ -49,6 +49,60 @@ function NoTalk(Me, NoService) {
     });
   };
 
+  this.addContacts = (meta, callback)=> {
+    let index = 0;
+    let result = [];
+    let op = ()=> {
+      if(index<meta.c.length) {
+        if(meta.i&&meta.c[index]) {
+          result.push({UserId: meta.i, ToUserId: meta.c[index], Type: 0});
+          _models.UserRel.getByPair([meta.i, meta.c[index]], (err, [row])=> {
+            if(row) {
+              _models.UserRel.update({UserId: meta.i, ToUserId: meta.c[index], Type: 0}, (err)=> {
+                if(err) {
+                  callback(err);
+                }
+                else {
+                  index++;
+                  op();
+                }
+              });
+            }
+            else {
+              _models.UserRel.create({UserId: meta.i, ToUserId: meta.c[index], Type: 0}, (err)=> {
+                if(err) {
+                  callback(err);
+                }
+                else {
+                  index++;
+                  op();
+                }
+              });
+            }
+          });
+        }
+        else {
+          index++;
+          op();
+        }
+      }
+      else {
+        callback(false);
+        _on['addedcontacts'](false, meta.i, result);
+      }
+    }
+    if(meta&&meta.i&&meta.c) {
+      op();
+    }
+    else {
+      callback(true);
+    }
+  }
+
+  this.getContacts = (userid, callback)=> {
+    _models.UserRel.getByFirst(userid, callback);
+  }
+
   // create a channel
   this.createChannel = (meta, callback)=> {
     let uuid = NoService.Library.Utilities.generateGUID();
@@ -96,7 +150,35 @@ function NoTalk(Me, NoService) {
     }
   };
 
-  this.addUsersToChannel = (adderId, usersId, callback)=> {
+  this.addUsersToChannel = (adderId, channelid, usersId, callback)=> {
+    _models.ChMeta.get(channelid, (err, chmeta)=> {
+      let index = 0;
+      let op=()=>{
+        if(index<usersId.length) {
+          _models.ChUserPair.create({
+            UserId: usersId[index],
+            ChId: channelid,
+            Role: 1,
+            LatestRLn: 0,
+            Addedby: adderId,
+            mute: 0
+          }, (err)=> {
+            if(!err) {
+              _on['addedtochannel'](err, usersId[index], chmeta);
+              index++;
+              op();
+            }
+            else {
+              callback(err);
+            }
+          });
+        }
+        else {
+          callback(false);
+        }
+      }
+      op();
+    });
 
   };
 

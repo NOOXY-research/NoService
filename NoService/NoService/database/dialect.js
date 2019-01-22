@@ -114,7 +114,6 @@ function Sqlite3(meta) {
       try {
         let TopN = parseInt(N);
         if(select_query_values) {
-          console.log([N].concat(select_query_values));
           _db.all('SELECT * FROM '+table_name+' WHERE '+select_query+' LIMIT '+TopN, select_query_values, callback);
         }
         else {
@@ -422,7 +421,6 @@ function Mariadb(meta) {
       try {
         let TopN = parseInt(N);
         if(select_query_values) {
-          console.log([N].concat(select_query_values));
           _db.query('SELECT '+TopN+' * FROM '+table_name+' WHERE '+select_query, select_query_values, callback);
         }
         else {

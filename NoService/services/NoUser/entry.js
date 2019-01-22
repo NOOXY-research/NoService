@@ -6,6 +6,7 @@
 
 let NoUser = require('./NoUser');
 let fs = require('fs');
+const MAX_USERNAME = 10;
 
 function Service(Me, NoService) {
   // Your service entry point
@@ -94,6 +95,36 @@ function Service(Me, NoService) {
           })
         });
 
+      }
+      else {
+        returnJSON(false, {});
+      }
+    });
+  });
+
+  ss.def('searchUsersByUsername', (json, entityID, returnJSON)=>{
+    NoService.Authorization.Authby.Token(entityID, (err, valid)=>{
+      if(valid) {
+        if(json.n&&json.n.length>0) {
+          NoService.Authenticity.searchUsersByUsernameNRows(json.n+'%', MAX_USERNAME,(err, rows)=>{
+              let list = [];
+              for(let i in rows) {
+                let meta = rows[i];
+                delete meta['pwdhash'];
+                delete meta['token'];
+                delete meta['tokenexpire'];
+                delete meta['privilege'];
+                delete meta['detail'];
+                delete meta['createdate'];
+                delete meta['modifydate'];
+                list.push(meta);
+              }
+              returnJSON(false, {e: err, r:list});
+          });
+        }
+        else {
+          returnJSON(false, {e: err, r:[]});
+        }
       }
       else {
         returnJSON(false, {});
