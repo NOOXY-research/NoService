@@ -55,10 +55,10 @@ function NoTalk(Me, NoService) {
     let op = ()=> {
       if(index<meta.c.length) {
         if(meta.i&&meta.c[index]) {
-          result.push({UserId: meta.i, ToUserId: meta.c[index], Type: 0});
+          result.push({UserId: meta.i, ToUserId: meta.c[index], Type: meta.t});
           _models.UserRel.getByPair([meta.i, meta.c[index]], (err, [row])=> {
             if(row) {
-              _models.UserRel.update({UserId: meta.i, ToUserId: meta.c[index], Type: 0}, (err)=> {
+              _models.UserRel.update({UserId: meta.i, ToUserId: meta.c[index], Type: meta.t}, (err)=> {
                 if(err) {
                   callback(err);
                 }
@@ -69,7 +69,7 @@ function NoTalk(Me, NoService) {
               });
             }
             else {
-              _models.UserRel.create({UserId: meta.i, ToUserId: meta.c[index], Type: 0}, (err)=> {
+              _models.UserRel.create({UserId: meta.i, ToUserId: meta.c[index], Type: meta.t}, (err)=> {
                 if(err) {
                   callback(err);
                 }

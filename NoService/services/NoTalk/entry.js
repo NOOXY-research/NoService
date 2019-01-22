@@ -31,9 +31,9 @@ function Service(Me, NoService) {
         ss.emitToGroups([CHID_PREFIX+channelid], 'Message', {i:channelid, r:meta});
       });
 
-      NoTalk.on('channelcreated', ()=> {
-
-      });
+      // NoTalk.on('channelcreated', (err, new_meta)=> {
+      //   ss.emitToGroups([USERID_PREFIX+userid], 'AddedToChannel', {i:meta.ChId, r:meta});
+      // });
 
       NoTalk.on('addedtochannel', (err, userid, meta)=> {
         ss.emitToGroups([USERID_PREFIX+userid], 'AddedToChannel', {i:meta.ChId, r:meta});
