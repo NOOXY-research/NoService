@@ -260,7 +260,7 @@ function NoServiceManager() {
           });
         });
       }
-      if(Settings.startup_auto_upgrade) {
+      if(Settings.startup_auto_upgrade&&!dsettings.debug) {
         Utils.TagLog('Service', 'Upgrading service...');
         this.bindAllServiceToRepository((err)=> {
           this.upgradeAllService(launch);
@@ -307,22 +307,19 @@ function NoServiceManager() {
           let manifest = JSON.parse(fs.readFileSync(commons_path+'manifest.json', 'utf8'));
           manifest.name = service_name;
           if(type == "complete") {
-            manifest.JSONfunciton_prototypes['JSONfunciton1'] = {
-              "displayname": "JSONfunction",
-              "description": "JSONfunction description.",
-              "secure": true,
-              "protocol": {
-                "JSON_call": {
-                  "a": "return a related stuff."
-                },
-                "JSON_return": {
-                  "c": "return c related stuff.",
-                  "d": {
-                    "e": "return c related stuff."
+            manifest.servicefunctions['func1'] = {
+                  "displayname": "servicefunction 1",
+                  "description": "ServiceFunciton description.",
+                  "secure": false,
+                  "protocol": {
+                    "call": {
+                      "p1": "Hello from activity!"
+                    },
+                    "return": {
+                      "p1": "Hello from service!"
+                    }
                   }
                 }
-              }
-            }
           }
 
           fs.writeFileSync(services_path+service_name+'/manifest.json', JSON.stringify(manifest, null, 2));

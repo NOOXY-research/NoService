@@ -18,6 +18,7 @@ function Service() {
   let _entity_module = null;
   let _serviceapi_module = null;
   let _authorization_module = null;
+  let _authenticity_module = null;
   let _ActivityRsCEcallbacks = {};
   let _daemon_auth_key = null;
   let _ASockets = {};
@@ -50,8 +51,12 @@ function Service() {
     _daemon_auth_key = key;
   };
 
-  this.importAuthorization = (authorization_module) => {
-    _authorization_module = authorization_module
+  this.importAuthorization = (mod) => {
+    _authorization_module = mod;
+  };
+
+  this.importAuthenticity = (mod) => {
+    _authenticity_module = mod;
   };
 
   this.importOwner = (owner) => {
@@ -264,24 +269,26 @@ function Service() {
           if(_entity_json.ownerdomain == null) {
             _entity_json.ownerdomain == connprofile.returnHostIP();
           }
-
-          _entity_module.registerEntity(_entity_json, connprofile, (err, id) => {
-              let _data = {
-                "m": "CE",
-                "d": {
-                  // temp id
-                  "t": data.t,
-                  "i": id
+          _authenticity_module.getUserIdByUsername(data.o, (err, ownerid)=> {
+            _entity_json.ownerid = ownerid;
+            _entity_module.registerEntity(_entity_json, connprofile, (err, id) => {
+                let _data = {
+                  "m": "CE",
+                  "d": {
+                    // temp id
+                    "t": data.t,
+                    "i": id
+                  }
+                };
+                let entities_prev = connprofile.returnBundle('bundle_entities');
+                if(entities_prev != null) {
+                  connprofile.setBundle('bundle_entities', [id].concat(entities_prev));
                 }
-              };
-              let entities_prev = connprofile.returnBundle('bundle_entities');
-              if(entities_prev != null) {
-                connprofile.setBundle('bundle_entities', [id].concat(entities_prev));
-              }
-              else {
-                connprofile.setBundle('bundle_entities', [id]);
-              }
-              response_emit(connprofile, 'CS', 'rs', _data);
+                else {
+                  connprofile.setBundle('bundle_entities', [id]);
+                }
+                response_emit(connprofile, 'CS', 'rs', _data);
+            });
           });
         }
         else {
@@ -492,86 +499,88 @@ function Service() {
 
       _worker = _workerd.returnWorker(_service_path+'/entry');
       // load module from local service directory
+      _authenticity_module.getUserIdByUsername(_local_services_owner, (err, ownerid)=> {
+        // create a description of this service entity.
+        let _entity_json = {
+          serverid: "Local",
+          service: _service_name,
+          type: "Service",
+          spwandomain: "Local",
+          owner: _local_services_owner,
+          ownerid: ownerid,
+          ownerdomain: "Local",
+          connectiontype: null,
+          description: "A Serverside Entity. Service Entity"
+        };
 
-      // create a description of this service entity.
-      let _entity_json = {
-        serverid: "Local",
-        service: _service_name,
-        type: "Service",
-        spwandomain: "Local",
-        owner: _local_services_owner,
-        ownerdomain: "Local",
-        connectiontype: null,
-        description: "A Serverside Entity. Service Entity"
-      };
+        // register this service to entity system
+        _entity_module.registerEntity(_entity_json, null, (entity_id) => {
+          _entity_id = entity_id;
+        });
 
-      // register this service to entity system
-      _entity_module.registerEntity(_entity_json, null, (entity_id) => {
-        _entity_id = entity_id;
-      });
+        _service_socket = new SocketPair.ServiceSocket(_service_name, _service_manifest.servicefunctions, _emitRouter, _debug, _entity_module, _authorization_module); // _onJFCAll = on JSONfunction call
 
-      _service_socket = new SocketPair.ServiceSocket(_service_name, _service_manifest.servicefunctions, _emitRouter, _debug, _entity_module, _authorization_module); // _onJFCAll = on JSONfunction call
-
-      // create the service for module.
-      try {
-        if(_service_manifest.name != _service_name) {
-          erreport = new Error('Service name in manifest must fit with name "'+_service_name+'". Please check manifest file.\n');
+        // create the service for module.
+        try {
+          if(_service_manifest.name != _service_name) {
+            erreport = new Error('Service name in manifest must fit with name "'+_service_name+'". Please check manifest file.\n');
+            callback(erreport);
+            return err;
+          }
+          else if(!fs.existsSync(_service_files_path)) {
+            fs.mkdirSync(_service_files_path);
+            if(_debug) {
+              Utils.TagLog('Service', 'Created service files folder at '+_service_files_path);
+            }
+          }
+          if(!fs.existsSync(_service_files_path+'/settings.json')) {
+            if(typeof(_service_manifest.settings) != 'undefined') {
+              fs.writeFileSync(_service_files_path+'/settings.json', JSON.stringify(_service_manifest.settings, null, 2));
+              Utils.TagLog('Service', 'Settings file not exist. Created service settings at "'+_service_files_path+'/settings.json"');
+            }
+          }
+          else {
+            try {
+              let real_settings = JSON.parse(fs.readFileSync(_service_files_path+'/settings.json', 'utf8'));
+              for(let item in real_settings) {
+                (_service_manifest.settings)[item] = real_settings[item];
+              }
+              fs.writeFileSync(_service_files_path+'/settings.json', JSON.stringify(_service_manifest.settings, null, 2));
+            }
+            catch (err) {
+              Utils.TagLog('*ERR*', 'Settings file corrupted. FilesPath "'+_service_files_path+'/settings.json"');
+              callback(err);
+            }
+          }
+          if(_service_manifest.implementation_api == false) {
+            _serviceapi_module.createServiceAPI(_service_socket, _service_manifest, (err, api) => {
+              _worker.importAPI(api);
+              _worker.init((err)=> {
+                if(!err) {
+                  _isInitialized = true;
+                }
+                callback(err);
+              });
+            });
+          }
+          else {
+            _serviceapi_module.createServiceAPIwithImplementaion(_service_socket, _service_manifest, (err, api) => {
+              _worker.importAPI(api);
+              _worker.init((err)=> {
+                if(!err) {
+                  _isInitialized = true;
+                }
+                callback(err);
+              });
+            });
+          }
+        }
+        catch(err) {
+          erreport = new Error('Launching service "'+_service_name+'" ended with failure.');
           callback(erreport);
           return err;
         }
-        else if(!fs.existsSync(_service_files_path)) {
-          fs.mkdirSync(_service_files_path);
-          if(_debug) {
-            Utils.TagLog('Service', 'Created service files folder at '+_service_files_path);
-          }
-        }
-        if(!fs.existsSync(_service_files_path+'/settings.json')) {
-          if(typeof(_service_manifest.settings) != 'undefined') {
-            fs.writeFileSync(_service_files_path+'/settings.json', JSON.stringify(_service_manifest.settings, null, 2));
-            Utils.TagLog('Service', 'Settings file not exist. Created service settings at "'+_service_files_path+'/settings.json"');
-          }
-        }
-        else {
-          try {
-            let real_settings = JSON.parse(fs.readFileSync(_service_files_path+'/settings.json', 'utf8'));
-            for(let item in real_settings) {
-              (_service_manifest.settings)[item] = real_settings[item];
-            }
-            fs.writeFileSync(_service_files_path+'/settings.json', JSON.stringify(_service_manifest.settings, null, 2));
-          }
-          catch (err) {
-            Utils.TagLog('*ERR*', 'Settings file corrupted. FilesPath "'+_service_files_path+'/settings.json"');
-            callback(err);
-          }
-        }
-        if(_service_manifest.implementation_api == false) {
-          _serviceapi_module.createServiceAPI(_service_socket, _service_manifest, (err, api) => {
-            _worker.importAPI(api);
-            _worker.init((err)=> {
-              if(!err) {
-                _isInitialized = true;
-              }
-              callback(err);
-            });
-          });
-        }
-        else {
-          _serviceapi_module.createServiceAPIwithImplementaion(_service_socket, _service_manifest, (err, api) => {
-            _worker.importAPI(api);
-            _worker.init((err)=> {
-              if(!err) {
-                _isInitialized = true;
-              }
-              callback(err);
-            });
-          });
-        }
-      }
-      catch(err) {
-        erreport = new Error('Launching service "'+_service_name+'" ended with failure.');
-        callback(erreport);
-        return err;
-      }
+      });
     };
 
     this.returnServiceFunctionList = () => {

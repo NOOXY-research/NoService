@@ -1,6 +1,6 @@
 {
   "name": "noservice",
-  "version": "0.0.11",
+  "version": "0.0.13",
   "description": "NOOXY Service Framework. NoService is a high level framework for services that provide you nodejs environment and eliminate service designer to care about low level part of your project. Such as connection, authorization, user system, database, protocol and so on. It also run multiple services intergrated and we also provide a manager and shell to manipulate all of them.",
   "main": "NoService/index.js",
   "directories": {
@@ -30,7 +30,8 @@
     "ORM",
     "Authorization",
     "Model",
-    "Lightweight"
+    "Lightweight",
+    "MicroService"
   ],
   "author": "noowyee magneticchen NOOXY",
   "license": "Apache-2.0",

@@ -94,7 +94,7 @@ function Core(settings) {
         }
         else {
           Utils.TagLog('OKAY', 'Initialized. Please restart!');
-          terminateNoService();
+          process.exit();
         }
       });
     }
@@ -305,6 +305,7 @@ function Core(settings) {
             _service.setupServicesPath(settings.services_path);
             _service.setupServicesFilesPath(settings.services_files_path);
             _service.importAuthorization(_authorization);
+            _service.importAuthenticity(_authenticity);
             // add shell related service to List.
             if(settings.shell_service != null) {
               let index = settings.services.indexOf(settings.shell_service);

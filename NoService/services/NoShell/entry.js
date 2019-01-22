@@ -611,7 +611,7 @@ function Service(Me, NoService) {
                   },
 
                   chpasswd: (t1, c1) => {
-                    NoService.Authenticity.updatePassword(t1[0], t1[1],(err)=>{
+                    NoService.Authenticity.updatePasswordByUsername(t1[0], t1[1],(err)=>{
                       c1(false, {r:'Error->'+err});
                     })
                   },
@@ -635,25 +635,19 @@ function Service(Me, NoService) {
               auth: (t0, c0) => {
                 _(t0, {
                   updateprivilege: (t1, c1) => {
-                    if(t1[0] == NoService.Variables.default_user.username) {
-                      c1(false, {r:'You should not change "'+NoService.Variables.default_user.username+'"\'s privilege.'});
-                    }
-                    else {
-                      NoService.Authorization.Authby.Password(entityID, (err, pass)=>{
-                        if(pass) {
-                          NoService.Authenticity.updatePrivilege(t1[0], t1[1], (err)=>{
-                            c1(false, {r:'Error->'+err});
-                          })
-                        }
-                        else {
-                          c1(false, {r:'Auth failed.'});
-                        }
-                      });
-                    }
-
+                    NoService.Authorization.Authby.Password(entityID, (err, pass)=>{
+                      if(pass) {
+                        NoService.Authenticity.updatePrivilegeByUsername(t1[0], t1[1], (err)=>{
+                          c1(false, {r:'Error->'+err});
+                        })
+                      }
+                      else {
+                        c1(false, {r:'Auth failed.'});
+                      }
+                    });
                   },
                   updatetoken: (t1, c1) => {
-                    NoService.Authenticity.updateToken(t1[0], (err)=>{
+                    NoService.Authenticity.updateTokenByUsername(t1[0], (err)=>{
                       c1(false, {r:'Error->'+err});
                     })
                   },
@@ -682,7 +676,7 @@ function Service(Me, NoService) {
                   _(t0, {
                     chpasswd: (t1, c1) => {
                       NoService.Service.Entity.getEntityOwner(entityID, (err, r)=>{
-                        NoService.Authenticity.updatePassword(r, t1[0],(err)=>{
+                        NoService.Authenticity.updatePasswordByUsername(r, t1[0],(err)=>{
                           c1(false, {r:'Error->'+err});
                         })
                       });
@@ -694,7 +688,7 @@ function Service(Me, NoService) {
                     },
                     usermeta: (t1, c1) => {
                       NoService.Service.Entity.getEntityOwner(entityID, (err, r)=>{
-                        NoService.Authenticity.getUserMeta(r, (err, meta)=>{
+                        NoService.Authenticity.updatePasswordByUsername(r, (err, meta)=>{
                           c1(false, {r:JSON.stringify(meta, null, 2)});
                         });
                       });
@@ -702,7 +696,7 @@ function Service(Me, NoService) {
                     },
                     updatetoken: (t1, c1) => {
                       NoService.Service.Entity.getEntityOwner(entityID, (err, r)=>{
-                        NoService.Authenticity.updateToken(r, (err)=>{
+                        NoService.Authenticity.updatePasswordByUsername(r, (err)=>{
                           c1(false, {r:'Error->'+err});
                         })
                       });

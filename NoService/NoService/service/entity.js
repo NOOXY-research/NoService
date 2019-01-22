@@ -13,7 +13,7 @@ function Entity() {
 
   function EntityJson(entityID, Json, conn_profile) {
     let _conn_profile = conn_profile;
-
+    
     let _meta = {
       id: entityID,
       mode: Json.mode, // normal or service
@@ -23,6 +23,7 @@ function Entity() {
       type: Json.type,
       spwandomain: Json.spwandomain,
       owner: Json.owner,
+      ownerid: Json.ownerid,
       ownerdomain: Json.ownerdomain,
       connectiontype: Json.connectiontype,
       description: Json.description,
@@ -119,6 +120,10 @@ function Entity() {
 
   this.returnEntityOwner = (entityID) => {
     return this.returnEntityValue(entityID, 'owner');
+  };
+
+  this.returnEntityOwnerId = (entityID) => {
+    return this.returnEntityValue(entityID, 'ownerid');
   };
 
   this.returnIsEntityExist = (entityID)=> {

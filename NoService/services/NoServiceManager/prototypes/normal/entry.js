@@ -53,7 +53,7 @@ function Service(Me, NoService) {
       // Since userid can be promised as a unique identifer!!!
       let userid = null;
       // Get userid from NoService
-      NoService.Authenticity.getUserID(username, (err, id) => {
+      NoService.Authenticity.getUserIdByUsername(username, (err, id) => {
         userid = id;
       });
       // process you operation here
@@ -77,7 +77,7 @@ function Service(Me, NoService) {
       // Since userid can be promised as a unique identifer!!!
       let userid = null;
       // Get userid from NoService
-      NoService.Authenticity.getUserID(username, (err, id) => {
+      NoService.Authenticity.getUserIdByUsername(username, (err, id) => {
         userid = id;
       });
       // process you operation here

@@ -543,6 +543,12 @@ function ServiceAPI() {
             remote_callback_obj.unbindRemote();
           }
         },
+        getEntityOwnerId: (entityID, remote_callback_obj) => {
+          if(remote_callback_obj) {
+            remote_callback_obj.run([], [false, _coregateway.Entity.returnEntityOwnerId(entityID)])
+            remote_callback_obj.unbindRemote();
+          }
+        },
         getEntitiesMetaData: (remote_callback_obj) => {
           _coregateway.Entity.getEntitiesMeta((err, metatdata)=> {
             if(remote_callback_obj) {
@@ -925,6 +931,15 @@ function ServiceAPI() {
     };
 
     _api.Authenticity = {
+      getUsernameByUserId: (userid, remote_callback_obj) => {
+        _coregateway.Authenticity.getUsernameByUserId(userid, (err, username)=> {
+          if(remote_callback_obj) {
+            remote_callback_obj.run([], [err, username]);
+            remote_callback_obj.unbindRemote();
+          }
+        });
+      },
+
       createUser: (username, displayname, password, privilege, detail, firstname, lastname, remote_callback_obj) => {
         _coregateway.Authenticity.createUser(username, displayname, password, privilege, detail, firstname, lastname, (err)=> {
           if(remote_callback_obj) {
@@ -934,8 +949,8 @@ function ServiceAPI() {
         });
       },
 
-      deleteUser: (username, remote_callback_obj) => {
-        _coregateway.Authenticity.deleteUser(username, (err)=> {
+      deleteUserByUsername: (username, remote_callback_obj) => {
+        _coregateway.Authenticity.deleteUserByUsername(username, (err)=> {
           if(remote_callback_obj) {
             remote_callback_obj.run([], [err]);
             remote_callback_obj.unbindRemote();
@@ -943,8 +958,8 @@ function ServiceAPI() {
         });
       },
 
-      updatePassword: (username, newpassword, remote_callback_obj) => {
-        _coregateway.Authenticity.updatePassword(username, newpassword, (err)=> {
+      updatePasswordByUsername: (username, newpassword, remote_callback_obj) => {
+        _coregateway.Authenticity.updatePasswordByUsername(username, newpassword, (err)=> {
           if(remote_callback_obj) {
             remote_callback_obj.run([], [err]);
             remote_callback_obj.unbindRemote();
@@ -952,8 +967,8 @@ function ServiceAPI() {
         });
       },
 
-      updateToken: (username, remote_callback_obj) => {
-        _coregateway.Authenticity.updateToken(username, (err)=> {
+      updateTokenByUsername: (username, remote_callback_obj) => {
+        _coregateway.Authenticity.updateTokenByUsername(username, (err)=> {
           if(remote_callback_obj) {
             remote_callback_obj.run([], [err]);
             remote_callback_obj.unbindRemote();
@@ -961,8 +976,8 @@ function ServiceAPI() {
         });
       },
 
-      updatePrivilege: (username, privilege, remote_callback_obj) => {
-        _coregateway.Authenticity.updatePrivilege(username, privilege, (err)=> {
+      updatePrivilegeByUsername: (username, privilege, remote_callback_obj) => {
+        _coregateway.Authenticity.updatePrivilegeByUsername(username, privilege, (err)=> {
           if(remote_callback_obj) {
             remote_callback_obj.run([], [err]);
             remote_callback_obj.unbindRemote();
@@ -970,8 +985,8 @@ function ServiceAPI() {
         });
       },
 
-      updateName: (username, firstname, lastname, remote_callback_obj) => {
-        _coregateway.Authenticity.updateName(username, firstname, lastname, (err)=> {
+      updateNameByUsername: (username, firstname, lastname, remote_callback_obj) => {
+        _coregateway.Authenticity.updateNameByUsername(username, firstname, lastname, (err)=> {
           if(remote_callback_obj) {
             remote_callback_obj.run([], [err]);
             remote_callback_obj.unbindRemote();
@@ -979,8 +994,8 @@ function ServiceAPI() {
         });
       },
 
-      getUserMeta: (username, remote_callback_obj) => {
-        _coregateway.Authenticity.getUserMeta(username, (err, usermeta)=> {
+      getUserMetaByUsername: (username, remote_callback_obj) => {
+        _coregateway.Authenticity.getUserMetaByUsername(username, (err, usermeta)=> {
           if(remote_callback_obj) {
             remote_callback_obj.run([], [err, usermeta]);
             remote_callback_obj.unbindRemote();
@@ -988,8 +1003,8 @@ function ServiceAPI() {
         });
       },
 
-      getUserID: (username, remote_callback_obj) => {
-        _coregateway.Authenticity.getUserID(username, (err, userid)=> {
+      getUserIdByUsername: (username, remote_callback_obj) => {
+        _coregateway.Authenticity.getUserIdByUsername(username, (err, userid)=> {
           if(remote_callback_obj) {
             remote_callback_obj.run([], [err, userid]);
             remote_callback_obj.unbindRemote();
@@ -997,19 +1012,129 @@ function ServiceAPI() {
         });
       },
 
-      getUsernamebyId: (userid, remote_callback_obj) => {
-        _coregateway.Authenticity.getUsernamebyId(userid, (err, username)=> {
+      getUserExistenceByUsername: (username, remote_callback_obj)=>{
+        _coregateway.Authenticity.getUserExistenceByUsername(username, (err, exisitence)=> {
           if(remote_callback_obj) {
-            remote_callback_obj.run([], [err, username]);
+            remote_callback_obj.run([], [err, exisitence]);
             remote_callback_obj.unbindRemote();
           }
         });
       },
 
-      getUserExistence: (username, remote_callback_obj)=>{
-        _coregateway.Authenticity.getUserExistence(username, (err, exisitence)=> {
+      getUserTokenByUsername: (username, remote_callback_obj)=>{
+        _coregateway.Authenticity.getUserTokenByUsername(username, (err, token)=> {
+          if(remote_callback_obj) {
+            remote_callback_obj.run([], [err, token]);
+            remote_callback_obj.unbindRemote();
+          }
+        });
+      },
+
+      getUserPrivilegeByUsername: (username, remote_callback_obj)=>{
+        _coregateway.Authenticity.getUserPrivilegeByUsername(username, (err, privilege)=> {
+          if(remote_callback_obj) {
+            remote_callback_obj.run([], [err, privilege]);
+            remote_callback_obj.unbindRemote();
+          }
+        });
+      },
+
+      searchUsersByUsernameNRows: (username, N, remote_callback_obj)=>{
+        _coregateway.Authenticity.searchUsersByUsernameNRows(username, N, (err, rows)=> {
+          if(remote_callback_obj) {
+            remote_callback_obj.run([], [err, rows]);
+            remote_callback_obj.unbindRemote();
+          }
+        });
+      },
+
+
+      // By Id
+      deleteUserByUserId: (userid, remote_callback_obj) => {
+        _coregateway.Authenticity.deleteUserByUserId(userid, (err)=> {
+          if(remote_callback_obj) {
+            remote_callback_obj.run([], [err]);
+            remote_callback_obj.unbindRemote();
+          }
+        });
+      },
+
+      updatePasswordByUserId: (userid, newpassword, remote_callback_obj) => {
+        _coregateway.Authenticity.updatePasswordByUserId(userid, newpassword, (err)=> {
+          if(remote_callback_obj) {
+            remote_callback_obj.run([], [err]);
+            remote_callback_obj.unbindRemote();
+          }
+        });
+      },
+
+      updateTokenByUserId: (userid, remote_callback_obj) => {
+        _coregateway.Authenticity.updateTokenByUserId(userid, (err)=> {
+          if(remote_callback_obj) {
+            remote_callback_obj.run([], [err]);
+            remote_callback_obj.unbindRemote();
+          }
+        });
+      },
+
+      updatePrivilegeByUserId: (userid, privilege, remote_callback_obj) => {
+        _coregateway.Authenticity.updatePrivilegeByUserId(userid, privilege, (err)=> {
+          if(remote_callback_obj) {
+            remote_callback_obj.run([], [err]);
+            remote_callback_obj.unbindRemote();
+          }
+        });
+      },
+
+      updateNameByUserId: (userid, firstname, lastname, remote_callback_obj) => {
+        _coregateway.Authenticity.updateNameByUserId(userid, firstname, lastname, (err)=> {
+          if(remote_callback_obj) {
+            remote_callback_obj.run([], [err]);
+            remote_callback_obj.unbindRemote();
+          }
+        });
+      },
+
+      getUserMetaByUserId: (userid, remote_callback_obj) => {
+        _coregateway.Authenticity.getUserMetaByUserId(userid, (err, usermeta)=> {
+          if(remote_callback_obj) {
+            remote_callback_obj.run([], [err, usermeta]);
+            remote_callback_obj.unbindRemote();
+          }
+        });
+      },
+
+      getUserIdByUserId: (userid, remote_callback_obj) => {
+        _coregateway.Authenticity.getUserIdByUserId(userid, (err, userid)=> {
+          if(remote_callback_obj) {
+            remote_callback_obj.run([], [err, userid]);
+            remote_callback_obj.unbindRemote();
+          }
+        });
+      },
+
+      getUserExistenceByUserId: (userid, remote_callback_obj)=>{
+        _coregateway.Authenticity.getUserExistenceByUserId(userid, (err, exisitence)=> {
           if(remote_callback_obj) {
             remote_callback_obj.run([], [err, exisitence]);
+            remote_callback_obj.unbindRemote();
+          }
+        });
+      },
+
+      getUserTokenByUserId: (username, remote_callback_obj)=>{
+        _coregateway.Authenticity.getUserTokenByUsername(username, (err, token)=> {
+          if(remote_callback_obj) {
+            remote_callback_obj.run([], [err, token]);
+            remote_callback_obj.unbindRemote();
+          }
+        });
+      },
+
+      getUserPrivilegeByUserId: (username, remote_callback_obj)=>{
+        _coregateway.Authenticity.getUserPrivilegeByUsername(username, (err, privilege)=> {
+          if(remote_callback_obj) {
+            remote_callback_obj.run([], [err, privilege]);
             remote_callback_obj.unbindRemote();
           }
         });

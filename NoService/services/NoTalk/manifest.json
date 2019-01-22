@@ -1,6 +1,6 @@
 {
   "name": "NoTalk",
-  "version": "0.0.0",
+  "version": "0.0.1",
   "displayname": "NOOXY Chat Service",
   "description": "A service that provide live chat, channel and other features.",
   "git_url": "https://github.com/NOOXY-Research/NoTalk",
@@ -11,9 +11,15 @@
 
   "implementation_api": false,
 
+  "DatabaseAPI": true,
+
+  "LibraryAPI": true,
+
   "dependencies": {
     "node_packages": {},
-    "services": {}
+    "services": {
+      "NoUser": "0.0.0"
+    }
   },
 
   "servicefunctions": {
@@ -24,9 +30,10 @@
       "protocol": {
         "call": {
           "t": "Type of channel for example 'live' or 'normal'",
-          "p": "Privaty of channel for example 'public', 'locked' or 'private'",
+          "p": "Thumbnail",
           "n": "Channel's name.",
-          "d": "Channel's discribtion."
+          "a": "Access level.",
+          "d": "Channel's describtion."
         },
         "return": {
           "s": "Status.",
@@ -35,13 +42,13 @@
       }
     },
 
-    "bindCh": {
-      "displayname": "Bind a channel.",
-      "description": "Keep in touch in specified channel. Then will recieve new messages from activitysocket.",
+    "bindChs": {
+      "displayname": "Bind channels.",
+      "description": "Keep in touch in specified channels. Then will recieve new messages from activitysocket.",
       "secure": false,
       "protocol": {
         "call": {
-          "c": "Channel's ID."
+          "i": "Channel's ID. Array."
         },
         "return": {
           "s": "Status.",
@@ -50,33 +57,32 @@
       }
     },
 
-    "getChRows": {
-      "displayname": "Get history",
-      "description": "Get history from a existed channel.",
+    "getMsgs": {
+      "displayname": "Get channels messages",
+      "description": "Get messages history from a existed channel.",
       "secure": false,
       "protocol": {
         "call": {
-          "c": "Channel's ID.",
-          "s": "Start row of data from the channel.",
-          "e": "End row of data from the channel."
+          "i": "Channel's ID.",
+          "b": "Begin row of data from the channel.",
+          "r": "Number of rows from begin."
         },
         "return": {
           "s": "Status.",
           "e": "Error status.",
-          "r": ["row number", "type", "data"]
+          "r": {"row number": ["UserId", "Type", "Contain", "Detail"]}
         }
       }
     },
 
-    "editChRow": {
-      "displayname": "Get history",
-      "description": "Get history from a existed channel.",
+    "sendMsg": {
+      "displayname": "Send message",
+      "description": "Send a new message.",
       "secure": false,
       "protocol": {
         "call": {
-          "c": "Channel's ID.",
-          "t": "Type of operation. 'del' or 'edit'",
-          "n": "New contain."
+          "i": "Channel's ID.",
+          "c": ["Type", "Contain", "Detail"]
         },
         "return": {
           "s": "Status.",
@@ -85,13 +91,31 @@
       }
     },
 
-    "listChs": {
-      "displayname": "List channels",
+    "editMsg": {
+      "displayname": "Get history",
+      "description": "Get history from a existed channel.",
+      "secure": false,
+      "protocol": {
+        "call": {
+          "i": "Channel's ID.",
+          "t": "Type of operation. 'del' or 'edit'",
+          "c": "New contain."
+        },
+        "return": {
+          "s": "Status.",
+          "e": "Error status."
+        }
+      }
+    },
+
+    "getMyChs": {
+      "displayname": "Getmy channels",
       "description": "List channels of the user have.",
       "secure": false,
       "protocol": {
         "call": null,
         "return": {
+          "c": "channels",
           "s": "Status.",
           "e": "Error status."
         }
@@ -123,6 +147,7 @@
           "u": "user Id."
         },
         "return": {
+          "i": "userid",
           "n": "username",
           "j": "joindate",
           "b": "bio",

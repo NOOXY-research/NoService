@@ -12,6 +12,7 @@
 // existField
 // deleteRows
 // getRows
+// getRowsTopNRows
 // getAllRows
 // replaceRows
 // updateRows
@@ -33,6 +34,7 @@ function Sqlite3(meta) {
   let _db;
   this.connect = (callback)=> {
     _db = new (require('sqlite3').Database)(meta.storage);
+    // console.log("You are using sqlite3, to enable regex functions. Please install pcre.");
     callback(false);
   };
 
@@ -100,6 +102,26 @@ function Sqlite3(meta) {
       }
       else {
         _db.all('SELECT * FROM '+table_name+' WHERE '+select_query, callback);
+      }
+    }
+  };
+
+  this.getRowsTopNRows = (table_name, select_query, select_query_values, N, callback)=> {
+    if(weird_chars.exec(table_name)) {
+      callback(new Error('Special characters are not allowed.'));
+    }
+    else {
+      try {
+        let TopN = parseInt(N);
+        if(select_query_values) {
+          _db.all('SELECT * FROM '+table_name+' WHERE '+select_query+' LIMIT '+TopN, select_query_values, callback);
+        }
+        else {
+          _db.all('SELECT * FROM '+table_name+' WHERE '+select_query+' LIMIT '+TopN, callback);
+        }
+      }
+      catch (e) {
+        callback(e);
       }
     }
   };
@@ -387,6 +409,26 @@ function Mariadb(meta) {
       }
       else {
         _db.query('SELECT * FROM '+table_name+' WHERE '+select_query, callback);
+      }
+    }
+  };
+
+  this.getRowsTopNRows = (table_name, select_query, select_query_values, N, callback)=> {
+    if(weird_chars.exec(table_name)) {
+      callback(new Error('Special characters are not allowed.'));
+    }
+    else {
+      try {
+        let TopN = parseInt(N);
+        if(select_query_values) {
+          _db.query('SELECT '+TopN+' * FROM '+table_name+' WHERE '+select_query, select_query_values, callback);
+        }
+        else {
+          _db.query('SELECT '+TopN+' * FROM '+table_name+' WHERE '+select_query, callback);
+        }
+      }
+      catch (e) {
+        callback(e);
       }
     }
   };

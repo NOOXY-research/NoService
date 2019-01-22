@@ -1,0 +1,13 @@
+{
+  "Example": {
+    "model_type": "Object",
+    "do_timestamp": true,
+    "model_key": "property1",
+    "structure": {
+      "property1" : "VARCHAR(255)",
+      "property2" : "VARCHAR(320)",
+      "property3" : "INTEGER",
+      "property4" : "DATE"
+    }
+  },
+}

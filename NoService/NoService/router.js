@@ -113,7 +113,7 @@ function Router() {
         let actions = {
           rq : (connprofile, data) => {
               let responsedata = {};
-              _coregateway.Authenticity.getUserToken(data.u, data.p, (err, token)=>{
+              _coregateway.Authenticity.getUserTokenByUsername(data.u, data.p, (err, token)=>{
                 responsedata['t'] = token;
                 if(err) {
                   responsedata['s'] = 'Fail';

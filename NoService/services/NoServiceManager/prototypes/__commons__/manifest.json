@@ -31,19 +31,7 @@
   },
 
   "servicefunctions": {
-    "jfunc1": {
-      "displayname": "servicefunction 1",
-      "description": "ServiceFunciton description.",
-      "secure": false,
-      "protocol": {
-        "call": {
-          "p1": "Hello from activity!"
-        },
-        "return": {
-          "p1": "Hello from service!"
-        }
-      }
-    }
+
   },
 
   "settings": {

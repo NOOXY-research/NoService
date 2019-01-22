@@ -3,297 +3,346 @@
 // "NoTalk.js" NOOXY Talk Service.
 // Copyright 2018 NOOXY. All Rights Reserved.
 
+'use strict';
+let models_dict = require('./models.json')
 
-let sqlite3 = require('sqlite3');
-let Utils = require('./utilities');
-
-function NoTalkDB() {
-  let _database = null;
-
-  function User() {
-
-    this.loadbyUserIdsql = (userid, next) => {
-      // sql statement
-      let sql = 'SELECT UserId, Bio, ShowActive, LatestOnline, Joindate FROM User WHERE UserId = ?';
-
-      _database.get(sql, [userid], (err, row) => {
-        if(err || typeof(row) == 'undefined') {
-          this.UserId = userid;
-          this.exisitence = false;
-        }
-        else {
-          this.exisitence = true;
-          this.UserId = row.UserId;
-          this.Bio = row.Bio;
-          this.ShowActive = row.ShowActive;
-          this.LatestOnline = row.LatestOnline;
-          this.JoinDate = row.JoinDate;
-        }
-        next(false);
-      })
-
-    };
-
-    // write newest information of user to database.
-    this.updatesql = (callback) => {
-      let sql = null;
-      let err = null;
-      if(typeof(this.UserId)=='undefined') {
-        callback(new Error('userid undefined.'));
-      }
-      else {
-        let datenow = Utils.DatetoSQL(new Date());
-        if(this.exisitence) {
-          sql = 'UPDATE User SET Bio=?, ShowActive=?, LatestOnline=? WHERE UserId=?';
-          _database.run(sql, [this.Bio, this.ShowActive, this.LatestOnline, this.UserId], (err) => {
-            if(err) {
-              callback(err);
-            }
-            else {
-              this.exisitence = true;
-              callback(false);
-            }
-          });
-        }
-        else {
-          sql = 'INSERT INTO User(UserId, Bio, ShowActive, LatestOnline, JoinDate) VALUES (?, ?, ?, ?, ?);'
-          _database.run(sql, [this.UserId, this.Bio, this.ShowActive, this.LatestOnline, datenow], (err) => {
-            if(err) {
-              callback(err);
-            }
-            else {
-              this.exisitence = true;
-              callback(false);
-            }
-          });
-        }
-      }
-    };
-
-    // delete the user from database.
-    this.delete = (callback) => {
-      _database.run('DELETE FROM User WHERE UserId=?;', [this.UserId], callback)
-      this.exisitence = false;
-    };
-  }
-
-  function Channel() {
-
-    this.loadbyChIdsql = (ChId, next) => {
-      // sql statement
-      let sql = 'SELECT ChId, Type, Description, Visability,'+
-      ' CreateDate, ModifyDate, Displayname, Status,'+
-      ' Thumbnail, Lines, CreatorId FROM ChMeta WHERE ChId = ?';
-
-      _database.get(sql, [userid], (err, row) => {
-        if(err || typeof(row) == 'undefined') {
-          this.ChId = ChId;
-          this.exisitence = false;
-        }
-        else {
-          this.exisitence = true;
-          this.ChId = row.ChId;
-          this.Type = row.Bio;
-          this.Description = row.ShowActive;
-          this.Visability = row.LatestOnline;
-          this.CreateDate = row.JoinDate;
-          this.ModifyDate = row.ModifyDate;
-          this.Displayname = row.Displayname;
-          this.Status = row.Status;
-          this.Thumbnail = row.Thumbnail;
-          this.Lines = row.Lines;
-          this.CreatorId = row.CreatorId;
-        }
-        next(false);
-      })
-
-    };
-
-    // write newest information of user to database.
-    this.updatesql = (callback) => {
-      let sql = null;
-      let err = null;
-      if(typeof(this.UserId)=='undefined') {
-        callback(new Error('userid undefined.'));
-      }
-      else {
-        let datenow = Utils.DatetoSQL(new Date());
-        if(this.exisitence) {
-          let sql = 'UPDATE ChMeta SET Type=? Description=? Visability=?'+
-          ' CreateDate=? ModifyDate=? Displayname=? Status=?'+
-          ' Thumbnail=? Lines=? CreatorId=?  WHERE ChId = ?';
-          _database.run(sql, [this.Type, this.Description, this.Visability,
-             this.CreateDate, datenow, this.Displayname, this.Status,
-           this.Thumbnail, this.Lines, this.CreatorId, this.ChId], (err) => {
-            if(err) {
-              callback(err);
-            }
-            else {
-              this.exisitence = true;
-              callback(false);
-            }
-          });
-        }
-        else {
-          sql = 'INSERT INTO User(ChId, Type, Description, Visability,'+
-          ' CreateDate, ModifyDate, Displayname, Status,'+
-          ' Thumbnail, Lines, CreatorId) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);'
-          _database.run(sql, [this.ChId, this.Type, this.Description,
-             this.Visability, datenow, datenow, this.Displayname, this.Status,
-           this.Thumbnail, this.Lines, this.CreatorId], (err) => {
-            if(err) {
-              callback(err);
-            }
-            else {
-              this.exisitence = true;
-              callback(false);
-            }
-          });
-        }
-      }
-    };
-
-    // delete the user from database.
-    this.delete = (callback) => {
-      _database.run('DELETE FROM User WHERE UserId=?;', [this.UserId], callback)
-      this.exisitence = false;
-    };
-  }
-
-  this.createDatabase = (path) => {
-    _database = new sqlite3.Database(path);
-    // Main (Main)
-    _database.run('CREATE TABLE Main(LatestChId INT)');
-    // User relation (UserRel)
-    _database.run('CREATE TABLE UserRel(UserId TEXT, ToUserId TEXT, Type INT)');
-    // Channel/user pair (ChUserPair)
-    _database.run('CREATE TABLE ChUserPair(UserId TEXT, ChId INT, Permition INT, LatestRLn INT, JoinDate DATE, Addedby TEXT, Mute INT)');
-    // Channel meta (ChMeta)
-    _database.run('CREATE TABLE ChMeta(ChId INT, Type INT, Description TEXT, Visability INT,'+
-    ' CreateDate DATE, ModifyDate DATE, Displayname TEXT, Status INT,'+
-    ' Thumbnail TEXT, Lines INT, CreatorId TEXT)');
-    // User (User)
-    _database.run('CREATE TABLE User(UserId TEXT, JoinDate DATE, Bio TEXT, ShowActive INT, ClientPreference TEXT, LatestOnline DATE)');
-    // Messege(Messege)
-    _database.run('CREATE TABLE Messege(ChId INT, Line INT, UserId TEXT, Type INT, Contain TEXT, TimeStamp DATE, Detail TEXT)');
+function NoTalk(Me, NoService) {
+  let _models;
+  let _on = {
+    "message": ()=> {},
+    "channelcreated": ()=> {},
+    "addedtochannel": ()=> {},
   };
 
-  this.importDatabase = (path) => {
-    _database = new sqlite3.Database(path);
+  this.on = (event, callback) => {
+    _on[event] = callback;
   };
 
-  this.close = ()=>{
-    _database.close();
-    _database = null;
-  };
-
-  this.getUserbyId = (userid, callback) => {
-    let user = new User();
-    user.loadbyUserIdsql(userid, (err)=>{
-      callback(err, user);
+  this.launch = (callback)=> {
+    NoService.Database.Model.doBatchSetup(models_dict, (err, models)=> {
+      _models = models;
+      if(callback)
+        callback(err);
     });
   };
 
-  this.getChannelbyId = (userid, callback) => {
-    let ch = new Channel();
-    ch.loadbyChIdsql(userid, (err)=>{
-      callback(err, user);
+  this.getUserChannels = (userid, callback)=> {
+    let channels = {};
+    _models.ChUserPair.getBySecond(userid, (err, pairs)=> {
+      let chs = pairs.map((pair) => {
+        return pair.ChId
+      });
+      let index = 0;
+      let op = ()=> {
+        _models.ChMeta.get(chs[index], (err, meta)=> {
+          channels[chs[index]] = meta;
+          index++;
+          if(index<chs.length) {
+            op();
+          }
+          else {
+            callback(err, channels);
+          }
+        });
+      };
+      op();
     });
   };
 
-  this.getMessegesbyChIdnLn = ()=> {
-
-  };
-
-  this.getChUserPairsbyUserId = ()=> {
-
-  };
-
-  this.getChUserPairsbyChId = ()=> {
-
-  };
-
-  this.updateChUserPairs = (pairs, callback)=> {
-    let key = 0;
-    let loop = ()=> {
-      let sql = "INSERT OR IGNORE INTO ChUserPair(UserId, ChId) VALUES();"+
-      "UPDATE ChUserPair SET =? WHERE UserId=? AND ChId=?";
+  this.addContacts = (meta, callback)=> {
+    let index = 0;
+    let result = [];
+    let op = ()=> {
+      if(index<meta.c.length) {
+        if(meta.i&&meta.c[index]) {
+          result.push({UserId: meta.i, ToUserId: meta.c[index], Type: 0});
+          _models.UserRel.getByPair([meta.i, meta.c[index]], (err, [row])=> {
+            if(row) {
+              _models.UserRel.update({UserId: meta.i, ToUserId: meta.c[index], Type: 0}, (err)=> {
+                if(err) {
+                  callback(err);
+                }
+                else {
+                  index++;
+                  op();
+                }
+              });
+            }
+            else {
+              _models.UserRel.create({UserId: meta.i, ToUserId: meta.c[index], Type: 0}, (err)=> {
+                if(err) {
+                  callback(err);
+                }
+                else {
+                  index++;
+                  op();
+                }
+              });
+            }
+          });
+        }
+        else {
+          index++;
+          op();
+        }
+      }
+      else {
+        callback(false);
+        _on['addedcontacts'](false, meta.i, result);
+      }
     }
-    loop();
-  };
-
-  this.deleteChUserPairbyChId = ()=> {
-
-  };
-
-  this.deleteChUserPairbyUserIdandChId = ()=> {
-
+    if(meta&&meta.i&&meta.c) {
+      op();
+    }
+    else {
+      callback(true);
+    }
   }
-};
 
-function NoTalk() {
-  const _nouserdb = new NoTalkDB();
-  // import database from specified path
-  this.importDatabase = (path) => {
-    _nouserdb.importDatabase(path);
-  };
-
-  // create a new database for nouser.
-  this.createDatabase = (path) => {
-    _nouserdb.createDatabase(path);
-  };
+  this.getContacts = (userid, callback)=> {
+    _models.UserRel.getByFirst(userid, callback);
+  }
 
   // create a channel
   this.createChannel = (meta, callback)=> {
-    let uuid = Utils.generateGUID();
-    // update channel metatdata
-    _nouserdb.getChannelbyId(uuid, (err, channel)=> {
-      channel.ChId = uuid;
-      channel.Type = meta.t;
-      channel.Description = meta.d;
-      channel.Visability = meta.v;
-      channel.Displayname = meta.n;
-      channel.Status = 0;
-      channel.Thumbnail = meta.p; // abrev photo
-      channel.Lines = 0;
-      channel.CreatorId = meta.c;
-      channel.updatesql((err)=> {
+    let uuid = NoService.Library.Utilities.generateGUID();
+    if(meta.n!=null&&meta.t!=null&&meta.v!=null&&meta.c!=null) {
+      let new_meta = {
+        ChId: uuid,
+        Type: meta.t,
+        Description: meta.d,
+        AccessLevel: meta.v,
+        Displayname: meta.n,
+        Status: 0,
+        Thumbnail: meta.p, // abrev photo
+        CreatorId: meta.c
+      };
+      // update metatdata
+      _models.ChMeta.create(new_meta, (err)=> {
+          if(err) {
+            callback(err);
+          }
+          else {
+            _models.ChUserPair.create({
+              UserId: meta.c,
+              ChId: uuid,
+              Role: 0,
+              LatestRLn: 0,
+              Addedby: meta.c,
+              mute: 0
+            }, (err)=> {
+              if(!err) {
+                _on['channelcreated'](err, new_meta);
+                _on['addedtochannel'](err, meta.c, new_meta);
+                callback(err, uuid);
+              }
+              else {
+                _models.ChMeta.remove(uuid, (e)=> {
+                  callback(err);
+                });
+              }
+            });
+          }
+      });
+    }
+    else {
+      callback(new Error('Channel metadata is not complete.'));
+    }
+  };
+
+  this.addUsersToChannel = (adderId, channelid, usersId, callback)=> {
+    _models.ChMeta.get(channelid, (err, chmeta)=> {
+      let index = 0;
+      let op=()=>{
+        if(index<usersId.length) {
+          _models.ChUserPair.create({
+            UserId: usersId[index],
+            ChId: channelid,
+            Role: 1,
+            LatestRLn: 0,
+            Addedby: adderId,
+            mute: 0
+          }, (err)=> {
+            if(!err) {
+              _on['addedtochannel'](err, usersId[index], chmeta);
+              index++;
+              op();
+            }
+            else {
+              callback(err);
+            }
+          });
+        }
+        else {
+          callback(false);
+        }
+      }
+      op();
+    });
+
+  };
+
+  this.getMessages = (userid, channelid, meta, callback)=> {
+    let _get = ()=> {
+      if(meta.b) {
+        _models.Message.getRowsFromTo(channelid, meta.b, meta.b+meta.r-1, (err, rows)=> {
+          let result = {};
+          for(let i in rows) {
+            result[rows[i].Idx] = [rows[i].UserId, rows[i].Type, rows[i].Contain, rows[i].Detail];
+          }
+          callback(false, result);
+        })
+      }
+      else {
+        _models.Message.getLatestNRows(channelid, meta.r, (err, rows)=> {
+          let result = {};
+          for(let i in rows) {
+            result[rows[i].Idx] = [rows[i].UserId, rows[i].Type, rows[i].Contain, rows[i].Detail];
+          }
+          callback(false, result);
+        })
+      }
+    };
+
+    if(userid) {
+      _models.ChUserPair.getByPair([channelid, userid], (err, [pair])=> {
+        if(pair == null || pair.Role == null ||pair.Role>1) {
+          _models.ChMeta.get(channelid, (err, chmeta)=> {
+            if(chmeta) {
+              if(chmeta.AccessLevel>=4) {
+                _get();
+              }
+              else {
+                callback(new Error("You have no getMessages permition."));
+              }
+            }
+            else {
+              callback(new Error("You have no getMessages permition."));
+            }
+          });
+        }
+        else if(pair.Role==0) {
+          _get();
+        }
+        else if(pair.Role==1){
+          _get();
+        }
+      });
+    }
+    else {
+      _models.ChMeta.get(channelid, (err, chmeta)=> {
+        if(chmeta) {
+          if(chmeta.AccessLevel>=5) {
+            _get();
+          }
+          else {
+            callback(new Error("You have no getMessages permition."));
+          }
+        }
+        else {
+          callback(new Error("You have no getMessages permition."));
+        }
+      });
+    }
+  };
+
+  this.sendMessage = (userid, channelid, meta, callback)=> {
+    let _send = ()=> {
+      _models.Message.appendRows(channelid, [{Type:meta[0], Contain:meta[1], Detail:meta[2], UserId: userid}], (err)=> {
         if(err) {
           callback(err);
         }
         else {
-          // add user into channel
-          let chuserspair = [[meta.c, uuid, 0, 0, meta.c, false]];
-          for(let key in meta.u) {
-            // userid, chid, permition, latestrln, addedby, mute
-            chuserspair.push([meta.u[key], uuid, 1, 0, meta.c, false]);
-          }
-          _nouserdb.updateChUserPairs(chuserspair, callback);
+          _on['message'](err, channelid, [userid, meta[0], meta[1], meta[2]]);
+          callback(err);
         }
       });
-    });
-  }
+    };
+    if(userid) {
+      _models.ChUserPair.getByPair([channelid, userid], (err, [pair])=> {
+        if(pair == null || pair.Role == null ||pair.Role>1) {
+          _models.ChMeta.get(channelid, (err, chmeta)=> {
+            if(chmeta&&chmeta.AccessLevel>=4) {
+              _send();
+            }
+            else {
+              callback(new Error("You have no sendMessage permition."));
+            }
+          });
+        }
+        else if(pair.Role==0) {
+          _send();
+        }
+        else if(pair.Role==1){
+          _models.ChMeta.get(channelid, (err, chmeta)=> {
+            if(chmeta&&chmeta.AccessLevel>=1) {
+              _send();
+            }
+            else {
+              callback(new Error("You have no sendMessage permition."));
+            }
+          });
+        }
+        else {
+
+        }
+      });
+    }
+    else {
+      _models.ChMeta.get(channelid, (err, chmeta)=> {
+        if(chmeta&&chmeta.AccessLevel>=5) {
+          _send();
+        }
+        else {
+          callback(new Error("You have no sendMessage permition."));
+        }
+      });
+    }
+
+  };
 
   // get NoUserdb's meta data.
   this.getUserMeta = (userid, callback)=> {
-    _nouserdb.getUserbyId(userid, (err, user) => {
-      let user_meta = {
-        i: user.UserId,
-        b: user.Bio,
-        a: user.ShowActive,
-        l: user.LatestOnline,
-        j: user.JoinDate
+    _models.User.get(userid, (err, user) => {
+      if(user) {
+        let user_meta = {
+          i: user.UserId,
+          b: user.Bio,
+          a: user.ShowActive,
+          l: user.LatestOnline,
+          j: user.createdate
+        }
+        callback(false, user_meta);
       }
-      callback(false, user_meta);
+      else {
+        callback(false, {});
+      }
     });
   }
 
+  this.initUserMeta = (userid, callback)=> {
+    this.getUserMeta(userid, (err, meta)=> {
+      if(meta.i) {
+        callback(false);
+      }
+      else {
+        this.updateUserMeta(userid, {a:0}, callback);
+      }
+    });
+  };
+
   // get NoUserdb's meta data.
   this.updateUserMeta = (userid, meta, callback)=> {
-    _nouserdb.getUserbyId(userid, (err, user) => {
-      user.Bio = meta.b;
-      user.updatesql(callback);
-    });
+    let new_meta = {UserId: userid};
+    for(let key in meta) {
+      if(key=='b') {
+        new_meta.Bio = meta.b;
+      }
+      else if(key=='a') {
+        new_meta.ShowActive = meta.a;
+      }
+    }
+    _models.User.update(new_meta, callback);
   }
 };
 
