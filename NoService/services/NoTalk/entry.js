@@ -31,9 +31,9 @@ function Service(Me, NoService) {
         ss.emitToGroups([CHID_PREFIX+channelid], 'Message', {i:channelid, r:meta});
       });
 
-      // NoTalk.on('channelcreated', (err, new_meta)=> {
-      //   ss.emitToGroups([USERID_PREFIX+userid], 'AddedToChannel', {i:meta.ChId, r:meta});
-      // });
+      NoTalk.on('channelupdated', (err, meta)=> {
+        ss.emitToGroups([CHID_PREFIX+meta.ChId], 'ChannelUpdated', {i:meta.ChId, r:meta});
+      });
 
       NoTalk.on('addedtochannel', (err, userid, meta)=> {
         ss.emitToGroups([USERID_PREFIX+userid], 'AddedToChannel', {i:meta.ChId, r:meta});
@@ -59,6 +59,27 @@ function Service(Me, NoService) {
               }
               else {
                 callback(false);
+              }
+            });
+          });
+
+          ss.def('updateCh', (json, entityId, returnJSON)=> {
+            NoService.Authorization.Authby.Token(entityId, (err, valid)=> {
+              if(valid) {
+                NoService.Service.Entity.getEntityOwnerId(entityId, (err, id)=>{
+                  NoTalk.updateChannel(id, json, (err)=> {
+                    if(err) {
+                      returnJSON(false, {e: err.stack, s:err.toString()});
+                    }
+                    else {
+                      returnJSON(false, {s: "OK"});
+                    }
+
+                  });
+                });
+              }
+              else {
+                returnJSON(false, {s: "Auth failed"});
               }
             });
           });

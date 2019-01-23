@@ -106,12 +106,12 @@ function NoTalk(Me, NoService) {
   // create a channel
   this.createChannel = (meta, callback)=> {
     let uuid = NoService.Library.Utilities.generateGUID();
-    if(meta.n!=null&&meta.t!=null&&meta.v!=null&&meta.c!=null) {
+    if(meta.n!=null&&meta.t!=null&&meta.a!=null&&meta.c!=null) {
       let new_meta = {
         ChId: uuid,
         Type: meta.t,
         Description: meta.d,
-        AccessLevel: meta.v,
+        AccessLevel: meta.a,
         Displayname: meta.n,
         Status: 0,
         Thumbnail: meta.p, // abrev photo
@@ -143,6 +143,46 @@ function NoTalk(Me, NoService) {
               }
             });
           }
+      });
+    }
+    else {
+      callback(new Error('Channel metadata is not complete.'));
+    }
+  };
+
+  // update a channel
+  this.updateChannel = (modifyerId, meta, callback)=> {
+
+    if(meta.i!=null) {
+      _models.ChUserPair.getByPair([meta.i, modifyerId], (err, [pair])=> {
+        if(pair&&pair.Role==0) {
+          let new_meta = {
+            ChId: meta.i,
+            Type: meta.t,
+            Description: meta.d,
+            AccessLevel: meta.a,
+            Displayname: meta.n,
+            Thumbnail: meta.p, // abrev photo
+          };
+          for(let key in new_meta) {
+            if(new_meta[key]==null) {
+              delete new_meta[key];
+            }
+          }
+          // update metatdata
+          _models.ChMeta.update(new_meta, (err)=> {
+            if(err) {
+              callback(err);
+            }
+            else {
+              callback(err);
+              _on["channelupdated"](err, new_meta);
+            }
+          });
+        }
+        else {
+          callback(new Error('You have no permission to edit this channel.'));
+        }
       });
     }
     else {
@@ -188,7 +228,7 @@ function NoTalk(Me, NoService) {
         _models.Message.getRowsFromTo(channelid, meta.b, meta.b+meta.r-1, (err, rows)=> {
           let result = {};
           for(let i in rows) {
-            result[rows[i].Idx] = [rows[i].UserId, rows[i].Type, rows[i].Contain, rows[i].Detail];
+            result[rows[i].Idx] = [rows[i].UserId, rows[i].Type, rows[i].Contain, rows[i].Detail, row[i].modifydate];
           }
           callback(false, result);
         })
@@ -197,7 +237,7 @@ function NoTalk(Me, NoService) {
         _models.Message.getLatestNRows(channelid, meta.r, (err, rows)=> {
           let result = {};
           for(let i in rows) {
-            result[rows[i].Idx] = [rows[i].UserId, rows[i].Type, rows[i].Contain, rows[i].Detail];
+            result[rows[i].Idx] = [rows[i].UserId, rows[i].Type, rows[i].Contain, rows[i].Detail, rows[i].modifydate];
           }
           callback(false, result);
         })
@@ -253,7 +293,7 @@ function NoTalk(Me, NoService) {
           callback(err);
         }
         else {
-          _on['message'](err, channelid, [userid, meta[0], meta[1], meta[2]]);
+          _on['message'](err, channelid, [userid, meta[0], meta[1], meta[2], (new Date()).toString()]);
           callback(err);
         }
       });
