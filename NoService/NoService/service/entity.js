@@ -13,7 +13,7 @@ function Entity() {
 
   function EntityJson(entityID, Json, conn_profile) {
     let _conn_profile = conn_profile;
-    
+
     let _meta = {
       id: entityID,
       mode: Json.mode, // normal or service
@@ -159,7 +159,7 @@ function Entity() {
     return Object.keys(_entities);
   }
 
-  this.getfliteredEntitiesMetaData = (key, value, callback) => {
+  this.getFilteredEntitiesMetaData = (key, value, callback) => {
     let _e = {};
     for(let k in _entities) {
       let _meta = _entities[k].returnMeta();
@@ -170,7 +170,7 @@ function Entity() {
     callback(false, _e);
   };
 
-  this.getfliteredEntitiesList = (query, callback) => {
+  this.getFilteredEntitiesList = (query, callback) => {
     let _e = [];
     let qs = query.split(',');
     for(let k in _entities) {
