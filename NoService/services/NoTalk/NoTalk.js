@@ -12,6 +12,7 @@ function NoTalk(Me, NoService) {
     "message": ()=> {},
     "channelcreated": ()=> {},
     "addedtochannel": ()=> {},
+    "channeldeleted": ()=> {},
   };
 
   this.on = (event, callback) => {
@@ -26,16 +27,17 @@ function NoTalk(Me, NoService) {
     });
   };
 
-  this.getUserChannels = (userid, callback)=> {
+  this.getUserChannels = (userId, callback)=> {
     let channels = {};
-    _models.ChUserPair.getBySecond(userid, (err, pairs)=> {
+    _models.ChUserPair.getBySecond(userId, (err, pairs)=> {
       let chs = pairs.map((pair) => {
         return pair.ChId
       });
       let index = 0;
       let op = ()=> {
         _models.ChMeta.get(chs[index], (err, meta)=> {
-          channels[chs[index]] = meta;
+          if(meta.Status==0)
+            channels[chs[index]] = meta;
           index++;
           if(index<chs.length) {
             op();
@@ -99,8 +101,8 @@ function NoTalk(Me, NoService) {
     }
   }
 
-  this.getContacts = (userid, callback)=> {
-    _models.UserRel.getByFirst(userid, callback);
+  this.getContacts = (userId, callback)=> {
+    _models.UserRel.getByFirst(userId, callback);
   }
 
   // create a channel
@@ -150,9 +152,27 @@ function NoTalk(Me, NoService) {
     }
   };
 
+  this.deleteChannel = (userId, channelId, callback)=> {
+    _models.ChUserPair.getByPair([channelId, userId], (err, [pair])=> {
+      if(pair&&pair.Role==0) {
+        _models.ChMeta.update({ChId: channelId, Status: 2}, (err)=> {
+          if(err) {
+            callback(err);
+          }
+          else {
+            callback(err);
+            _on["channeldeleted"](err, channelId);
+          }
+        });
+      }
+      else {
+        callback(new Error('You have no permission to edit this channel.'));
+      }
+    });
+  }
+
   // update a channel
   this.updateChannel = (modifyerId, meta, callback)=> {
-
     if(meta.i!=null) {
       _models.ChUserPair.getByPair([meta.i, modifyerId], (err, [pair])=> {
         if(pair&&pair.Role==0) {
@@ -190,14 +210,14 @@ function NoTalk(Me, NoService) {
     }
   };
 
-  this.addUsersToChannel = (adderId, channelid, usersId, callback)=> {
-    _models.ChMeta.get(channelid, (err, chmeta)=> {
+  this.addUsersToChannel = (adderId, channelId, usersId, callback)=> {
+    _models.ChMeta.get(channelId, (err, chmeta)=> {
       let index = 0;
       let op=()=>{
         if(index<usersId.length) {
           _models.ChUserPair.create({
             UserId: usersId[index],
-            ChId: channelid,
+            ChId: channelId,
             Role: 1,
             LatestRLn: 0,
             Addedby: adderId,
@@ -219,38 +239,25 @@ function NoTalk(Me, NoService) {
       }
       op();
     });
-
   };
 
-  this.getMessages = (userid, channelid, meta, callback)=> {
-    let _get = ()=> {
-      if(meta.b) {
-        _models.Message.getRowsFromTo(channelid, meta.b, meta.b+meta.r-1, (err, rows)=> {
-          let result = {};
-          for(let i in rows) {
-            result[rows[i].Idx] = [rows[i].UserId, rows[i].Type, rows[i].Contain, rows[i].Detail, row[i].modifydate];
-          }
-          callback(false, result);
-        })
-      }
-      else {
-        _models.Message.getLatestNRows(channelid, meta.r, (err, rows)=> {
-          let result = {};
-          for(let i in rows) {
-            result[rows[i].Idx] = [rows[i].UserId, rows[i].Type, rows[i].Contain, rows[i].Detail, rows[i].modifydate];
-          }
-          callback(false, result);
-        })
-      }
-    };
+  this.readChannelLine = (userId, channelId, line, callback)=> {
+    _models.ChUserPair.update({
+      ChId: channelId,
+      UserId: userId,
+      LatestRLn: line
+    }, callback);
+  };
 
-    if(userid) {
-      _models.ChUserPair.getByPair([channelid, userid], (err, [pair])=> {
+  this.canViewCh = (userId, channelId, callback)=> {
+    let _access_role = 0;
+    if(userId) {
+      _models.ChUserPair.getByPair([channelId, userId], (err, [pair])=> {
         if(pair == null || pair.Role == null ||pair.Role>1) {
-          _models.ChMeta.get(channelid, (err, chmeta)=> {
+          _models.ChMeta.get(channelId, (err, chmeta)=> {
             if(chmeta) {
               if(chmeta.AccessLevel>=4) {
-                _get();
+                callback(null, 2, pair?pair.LatestRLn:null);
               }
               else {
                 callback(new Error("You have no getMessages permition."));
@@ -262,18 +269,18 @@ function NoTalk(Me, NoService) {
           });
         }
         else if(pair.Role==0) {
-          _get();
+          callback(null, 0, pair.LatestRLn);
         }
         else if(pair.Role==1){
-          _get();
+          callback(null, 1, pair.LatestRLn);
         }
       });
     }
     else {
-      _models.ChMeta.get(channelid, (err, chmeta)=> {
+      _models.ChMeta.get(channelId, (err, chmeta)=> {
         if(chmeta) {
           if(chmeta.AccessLevel>=5) {
-            _get();
+            callback(null, null);
           }
           else {
             callback(new Error("You have no getMessages permition."));
@@ -286,24 +293,45 @@ function NoTalk(Me, NoService) {
     }
   };
 
-  this.sendMessage = (userid, channelid, meta, callback)=> {
-    let _send = ()=> {
-      _models.Message.appendRows(channelid, [{Type:meta[0], Contain:meta[1], Detail:meta[2], UserId: userid}], (err)=> {
-        if(err) {
-          callback(err);
+  this.getMessages = (channelId, meta, callback)=> {
+    _models.ChMeta.get(channelId, (err, chmeta)=> {
+      if(!chmeta) {
+        callback(new Error('Channel not exist!'));
+      }
+      else if(chmeta.Status==0) {
+        if(meta.b!=null) {
+          _models.Message.getRowsFromTo(channelId, meta.b, meta.b+meta.r-1, (err, rows)=> {
+            let result = {};
+            for(let i in rows) {
+              result[rows[i].Idx] = [rows[i].UserId, rows[i].Type, rows[i].Contain, rows[i].Detail, rows[i].modifydate];
+            }
+            callback(false, result);
+          })
         }
         else {
-          _on['message'](err, channelid, [userid, meta[0], meta[1], meta[2], (new Date()).toString()]);
-          callback(err);
+          _models.Message.getLatestNRows(channelId, meta.r, (err, rows)=> {
+            let result = {};
+            for(let i in rows) {
+              result[rows[i].Idx] = [rows[i].UserId, rows[i].Type, rows[i].Contain, rows[i].Detail, rows[i].modifydate];
+            }
+            callback(false, result);
+          })
         }
-      });
-    };
-    if(userid) {
-      _models.ChUserPair.getByPair([channelid, userid], (err, [pair])=> {
+      }
+      else {
+        callback(new Error('Channel deleted!'));
+      }
+    });
+
+  };
+
+  this.canSendCh = (userId, channelId, callback)=> {
+    if(userId) {
+      _models.ChUserPair.getByPair([channelId, userId], (err, [pair])=> {
         if(pair == null || pair.Role == null ||pair.Role>1) {
-          _models.ChMeta.get(channelid, (err, chmeta)=> {
+          _models.ChMeta.get(channelId, (err, chmeta)=> {
             if(chmeta&&chmeta.AccessLevel>=4) {
-              _send();
+              callback(false, 2);
             }
             else {
               callback(new Error("You have no sendMessage permition."));
@@ -311,39 +339,47 @@ function NoTalk(Me, NoService) {
           });
         }
         else if(pair.Role==0) {
-          _send();
+          callback(false, 0);
         }
         else if(pair.Role==1){
-          _models.ChMeta.get(channelid, (err, chmeta)=> {
+          _models.ChMeta.get(channelId, (err, chmeta)=> {
             if(chmeta&&chmeta.AccessLevel>=1) {
-              _send();
+              callback(false, 1);
             }
             else {
               callback(new Error("You have no sendMessage permition."));
             }
           });
         }
-        else {
-
-        }
       });
     }
     else {
-      _models.ChMeta.get(channelid, (err, chmeta)=> {
+      _models.ChMeta.get(channelId, (err, chmeta)=> {
         if(chmeta&&chmeta.AccessLevel>=5) {
-          _send();
+          callback(false, null);
         }
         else {
           callback(new Error("You have no sendMessage permition."));
         }
       });
     }
+  };
 
+  this.sendMessage = (userId, channelId, meta, callback)=> {
+    _models.Message.appendRows(channelId, [{Type:meta[0], Contain:meta[1], Detail:meta[2], UserId: userId}], (err)=> {
+      if(err) {
+        callback(err);
+      }
+      else {
+        _on['message'](err, channelId, [userId, meta[0], meta[1], meta[2], (new Date()).toString()]);
+        callback(err);
+      }
+    });
   };
 
   // get NoUserdb's meta data.
-  this.getUserMeta = (userid, callback)=> {
-    _models.User.get(userid, (err, user) => {
+  this.getUserMeta = (userId, callback)=> {
+    _models.User.get(userId, (err, user) => {
       if(user) {
         let user_meta = {
           i: user.UserId,
@@ -360,26 +396,29 @@ function NoTalk(Me, NoService) {
     });
   }
 
-  this.initUserMeta = (userid, callback)=> {
-    this.getUserMeta(userid, (err, meta)=> {
+  this.initUserMeta = (userId, callback)=> {
+    this.getUserMeta(userId, (err, meta)=> {
       if(meta.i) {
         callback(false);
       }
       else {
-        this.updateUserMeta(userid, {a:0}, callback);
+        this.updateUserMeta(userId, {a:0}, callback);
       }
     });
   };
 
   // get NoUserdb's meta data.
-  this.updateUserMeta = (userid, meta, callback)=> {
-    let new_meta = {UserId: userid};
+  this.updateUserMeta = (userId, meta, callback)=> {
+    let new_meta = {UserId: userId};
     for(let key in meta) {
       if(key=='b') {
         new_meta.Bio = meta.b;
       }
       else if(key=='a') {
         new_meta.ShowActive = meta.a;
+      }
+      else if(key=='l') {
+        new_meta.LatestOnline = meta.l;
       }
     }
     _models.User.update(new_meta, callback);
