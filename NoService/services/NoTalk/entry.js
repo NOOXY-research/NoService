@@ -27,13 +27,23 @@ function Service(Me, NoService) {
   // Your service entry point
   this.start = ()=> {
     NoService.Service.ActivitySocket.createDefaultAdminDeamonSocket('NoUser', (err, NoUser)=> {
+      ss.on('close', (entityId, callback)=> {
+        NoService.Service.Entity.getEntityOwnerId(entityId, (err, id)=>{
+          NoTalk.updateUserMeta(id, {l:NoService.Library.Utilities.DatetoSQL(new Date())}, callback);
+        });
+      });
+
       NoTalk.on('message', (err, channelid, meta)=> {
         ss.emitToGroups([CHID_PREFIX+channelid], 'Message', {i:channelid, r:meta});
       });
 
-      // NoTalk.on('channelcreated', (err, new_meta)=> {
-      //   ss.emitToGroups([USERID_PREFIX+userid], 'AddedToChannel', {i:meta.ChId, r:meta});
-      // });
+      NoTalk.on('channelupdated', (err, meta)=> {
+        ss.emitToGroups([CHID_PREFIX+meta.ChId], 'ChannelUpdated', {i:meta.ChId, r:meta});
+      });
+
+      NoTalk.on('channeldeleted', (err, chid)=> {
+        ss.emitToGroups([CHID_PREFIX+chid], 'ChannelDeleted', {i:chid});
+      });
 
       NoTalk.on('addedtochannel', (err, userid, meta)=> {
         ss.emitToGroups([USERID_PREFIX+userid], 'AddedToChannel', {i:meta.ChId, r:meta});
@@ -59,6 +69,27 @@ function Service(Me, NoService) {
               }
               else {
                 callback(false);
+              }
+            });
+          });
+
+          ss.def('updateCh', (json, entityId, returnJSON)=> {
+            NoService.Authorization.Authby.Token(entityId, (err, valid)=> {
+              if(valid) {
+                NoService.Service.Entity.getEntityOwnerId(entityId, (err, id)=>{
+                  NoTalk.updateChannel(id, json, (err)=> {
+                    if(err) {
+                      returnJSON(false, {e: err.stack, s:err.toString()});
+                    }
+                    else {
+                      returnJSON(false, {s: "OK"});
+                    }
+
+                  });
+                });
+              }
+              else {
+                returnJSON(false, {s: "Auth failed"});
               }
             });
           });
@@ -148,30 +179,49 @@ function Service(Me, NoService) {
           });
 
           ss.def('getMsgs', (json, entityId, returnJSON)=> {
-            NoService.Authorization.Authby.Token(entityId, (err, valid)=> {
-              if(valid) {
-                NoService.Service.Entity.getEntityOwnerId(entityId, (err, id)=>{
-                  NoTalk.getMessages(id, json.i, json, (err, result)=> {
+            NoService.Service.Entity.getEntityOwnerId(entityId, (err, id)=>{
+              NoTalk.canViewCh(id, json.i, (err, role, latestreadline)=> {
+                if(err) {
+                  returnJSON(false, {e: err.stack, s:err.toString()});
+                }
+                else if(role==null) {
+                  NoTalk.getMessages(json.i, json, (err, result)=> {
                     if(err) {
                       returnJSON(false, {e: err.stack, s:err.toString()});
                     }
                     else {
-                      returnJSON(false, {s: "OK", r:result});
+                      returnJSON(false, {s: "OK", l: latestreadline, r:result});
                     }
                   });
-                });
-              }
-              else {
-                returnJSON(false, {s: "Auth failed"});
-              }
+                }
+                else {
+                  NoService.Authorization.Authby.Token(entityId, (err, valid)=> {
+                    if(valid) {
+                      NoTalk.getMessages(json.i, json, (err, result)=> {
+                        if(err) {
+                          returnJSON(false, {e: err.stack, s:err.toString()});
+                        }
+                        else {
+                          returnJSON(false, {s: "OK", l: latestreadline, r:result});
+                        }
+                      });
+                    }
+                    else {
+                      returnJSON(false, {s: "Auth failed"});
+                    }
+                  });
+                }
+              });
             });
           });
 
           ss.def('sendMsg', (json, entityId, returnJSON)=> {
-            NoService.Authorization.Authby.Token(entityId, (err, valid)=> {
-              if(valid) {
-                NoService.Service.Entity.getEntityOwnerId(entityId, (err, id)=>{
-                  // console.log(json);
+            NoService.Service.Entity.getEntityOwnerId(entityId, (err, id)=>{
+              NoTalk.canSendCh(id, json.i, (err, role)=> {
+                if(err) {
+                  returnJSON(false, {e: err.stack, s:err.toString()});
+                }
+                else if(role==null) {
                   NoTalk.sendMessage(id, json.i, json.c, (err)=> {
                     if(err) {
                       returnJSON(false, {e: err.stack, s:err.toString()});
@@ -180,11 +230,26 @@ function Service(Me, NoService) {
                       returnJSON(false, {s: "OK"});
                     }
                   });
-                });
-              }
-              else {
-                returnJSON(false, {s: "Auth failed"});
-              }
+                }
+                else {
+                  NoService.Authorization.Authby.Token(entityId, (err, valid)=> {
+                    if(valid) {
+                      NoTalk.sendMessage(id, json.i, json.c, (err)=> {
+                        if(err) {
+                          returnJSON(false, {e: err.stack, s:err.toString()});
+                        }
+                        else {
+                          returnJSON(false, {s: "OK"});
+                        }
+                      });
+                    }
+                    else {
+                      returnJSON(false, {s: "Auth failed"});
+                    }
+                  });
+                }
+              });
+              // console.log(json);
             });
           });
 
@@ -239,6 +304,32 @@ function Service(Me, NoService) {
             });
           });
 
+          ss.def('getUserAct', (json, entityId, returnJSON)=> {
+            NoService.Authorization.Authby.Token(entityId, (err, valid)=> {
+              if(valid) {
+                NoTalk.getUserMeta(json.i, (err, meta)=> {
+                  if(meta.a == 1) {
+                    returnJSON(false, {});
+                  }
+                  else {
+                    NoService.Service.Entity.getFilteredEntitiesList("mode=normal,service=NoTalk,ownerid="+json.i, (err, list)=>{
+                      if(list.length) {
+                        returnJSON(false, {r: true});
+                      }
+                      else {
+                        returnJSON(false, {r: meta.l});
+                      }
+                    });
+                  }
+                });
+
+              }
+              else {
+                returnJSON(false, {});
+              }
+            });
+          });
+
           ss.def('getMyMeta', (json, entityId, returnJSON)=> {
             NoService.Authorization.Authby.Token(entityId, (err, valid)=> {
               if(valid) {
@@ -263,10 +354,55 @@ function Service(Me, NoService) {
                 NoService.Service.Entity.getEntityOwnerId(entityId, (err, id)=>{
                   NoTalk.updateUserMeta(id, json, (err)=> {
                     if(err) {
-                      returnJSON(false, {s:err});
+                      returnJSON(false, {e: err.stack, s:err.toString()});
                     }
                     else {
                       ss.emitToGroups([USERID_PREFIX+id], 'MyMetaUpdated', json);
+                      returnJSON(false, {s:'OK'});
+                    }
+                  });
+                });
+              }
+              else {
+                returnJSON(false, {s: 'Auth failed'});
+              }
+            });
+          });
+
+          ss.def('readChLine', (json, entityId, returnJSON)=> {
+            NoService.Authorization.Authby.Token(entityId, (err, valid)=> {
+              if(valid) {
+                NoService.Service.Entity.getEntityOwnerId(entityId, (err, id)=>{
+                  NoTalk.readChannelLine(id, json.i, json.l, (err)=> {
+                    if(err) {
+                      returnJSON(false, {e: err.stack, s:err.toString()});
+                    }
+                    else {
+                      ss.emitToGroups([CHID_PREFIX+json.i], 'UserReadChLine', json);
+                      returnJSON(false, {s:'OK'});
+                    }
+                  });
+                });
+              }
+              else {
+                returnJSON(false, {s: 'Auth failed'});
+              }
+            });
+          });
+
+          ss.def('getChMeta', (json, entityId, returnJSON)=> {
+
+          });
+
+          ss.def('delCh', (json, entityId, returnJSON)=> {
+            NoService.Authorization.Authby.Token(entityId, (err, valid)=> {
+              if(valid) {
+                NoService.Service.Entity.getEntityOwnerId(entityId, (err, id)=>{
+                  NoTalk.deleteChannel(id, json.i, (err)=> {
+                    if(err) {
+                      returnJSON(false, {e: err.stack, s:err.toString()});
+                    }
+                    else {
                       returnJSON(false, {s:'OK'});
                     }
                   });

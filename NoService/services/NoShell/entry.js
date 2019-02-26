@@ -26,7 +26,7 @@ function Service(Me, NoService) {
           let j = JSON.stringify(json, null, 2);
           if(sniffonJSON) {
             try {
-              NoService.Service.Entity.getfliteredEntitiesList("service=NoShell", (err, list)=>{
+              NoService.Service.Entity.getFilteredEntitiesList("service=NoShell", (err, list)=>{
                 if(!list.includes(json.d.d.i)) {
                   ss.broadcastData({t:'stream', d:'Sniffer catch JSON on '+DaemonSettings.daemon_name+'" :\n'+j});
                 }
@@ -44,7 +44,7 @@ function Service(Me, NoService) {
         NoService.Sniffer.onRouterRawData((err, data)=>{
           if(sniffonRAW) {
             try {
-              NoService.Service.Entity.getfliteredEntitiesList("service=NoShell", (err, list)=>{
+              NoService.Service.Entity.getFilteredEntitiesList("service=NoShell", (err, list)=>{
                 if(!list.includes(json.d.d.i)) {
                   ss.broadcastData({t:'stream', d:'Sniffer catch RAW on '+DaemonSettings.daemon_name+'" :\n'+data});
                 }

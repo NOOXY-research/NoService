@@ -111,7 +111,7 @@ function ServiceSocket(service_name, prototype, emitRouter, debug, entity_module
 
   this.emitToUsername = (username, event, data)=> {
     let query = 'owner='+username+',service='+service_name+',type=Activity';
-    entity_module.getfliteredEntitiesList(query, (err, entitiesID)=>{
+    entity_module.getFilteredEntitiesList(query, (err, entitiesID)=>{
       for(let i in entitiesID) {
         authorization_module.Authby.Token(entitiesID[i], (err, pass)=>{
           if(pass&&!err) {
@@ -127,7 +127,7 @@ function ServiceSocket(service_name, prototype, emitRouter, debug, entity_module
   this.emitToGroups = (groups, event, data)=> {
     // console.log('f');
     let query = 'service='+service_name+',type=Activity';
-    entity_module.getfliteredEntitiesList(query, (err, entitiesID)=>{
+    entity_module.getFilteredEntitiesList(query, (err, entitiesID)=>{
       for(let i in entitiesID) {
         let j = groups.length-1;
         let op = ()=> {
@@ -159,7 +159,7 @@ function ServiceSocket(service_name, prototype, emitRouter, debug, entity_module
   this.emitToIncludingGroups = (groups, event, data)=> {
     // console.log('f');
     let query = 'service='+service_name+',type=Activity';
-    entity_module.getfliteredEntitiesList(query, (err, entitiesID)=>{
+    entity_module.getFilteredEntitiesList(query, (err, entitiesID)=>{
       for(let i in entitiesID) {
         entity_module.isEntityIncludingGroups(entitiesID[i], groups, (err, pass) => {
           if(pass&&!err)
@@ -173,7 +173,7 @@ function ServiceSocket(service_name, prototype, emitRouter, debug, entity_module
 
   this.broadcastEvent = (event, data)=> {
     let query = 'service='+service_name+',type=Activity';
-    entity_module.getfliteredEntitiesList(query, (err, entitiesID)=>{
+    entity_module.getFilteredEntitiesList(query, (err, entitiesID)=>{
       for(let i in entitiesID) {
         entity_module.getEntityConnProfile(entitiesID[i], (err, connprofile) => {
           _emitasevent(connprofile, entitiesID[i], event, data);
@@ -191,7 +191,7 @@ function ServiceSocket(service_name, prototype, emitRouter, debug, entity_module
   this.sendDataToUsername = (username, data) => {
     // console.log('f');
     let query = 'owner='+username+',service='+service_name+',type=Activity';
-    entity_module.getfliteredEntitiesList(query, (err, entitiesID)=>{
+    entity_module.getFilteredEntitiesList(query, (err, entitiesID)=>{
       for(let i in entitiesID) {
         authorization_module.Authby.Token(entitiesID[i], (err, pass)=>{
           if(pass&&!err) {
@@ -207,7 +207,7 @@ function ServiceSocket(service_name, prototype, emitRouter, debug, entity_module
   this.sendDataToGroups = (groups, data)=> {
     // console.log('f');
     let query = 'service='+service_name+',type=Activity';
-    entity_module.getfliteredEntitiesList(query, (err, entitiesID)=>{
+    entity_module.getFilteredEntitiesList(query, (err, entitiesID)=>{
       for(let i in entitiesID) {
         let j = groups.length-1;
         let op = ()=> {
@@ -238,7 +238,7 @@ function ServiceSocket(service_name, prototype, emitRouter, debug, entity_module
   this.sendDataToIncludingGroups = (groups, data)=> {
     // console.log('f');
     let query = 'service='+service_name+',type=Activity';
-    entity_module.getfliteredEntitiesList(query, (err, entitiesID)=>{
+    entity_module.getFilteredEntitiesList(query, (err, entitiesID)=>{
       for(let i in entitiesID) {
         entity_module.isEntityIncludingGroups(entitiesID[i], groups, (err, pass) => {
           if(pass&&!err)
@@ -253,7 +253,7 @@ function ServiceSocket(service_name, prototype, emitRouter, debug, entity_module
   this.broadcastData = (data) => {
     // console.log('f');
     let query = 'service='+service_name+',type=Activity';
-    entity_module.getfliteredEntitiesList(query, (err, entitiesID)=>{
+    entity_module.getFilteredEntitiesList(query, (err, entitiesID)=>{
       for(let i in entitiesID) {
         entity_module.getEntityConnProfile(entitiesID[i], (err, connprofile) => {
           _emitasdata(connprofile, entitiesID[i], data);
@@ -265,7 +265,7 @@ function ServiceSocket(service_name, prototype, emitRouter, debug, entity_module
   this.closeAll = (callback)=>{
     // console.log('f');
     let query = 'service='+service_name+',type=Activity';
-    entity_module.getfliteredEntitiesList(query, (err, entitiesID)=>{
+    entity_module.getFilteredEntitiesList(query, (err, entitiesID)=>{
       for(let i in entitiesID) {
         this._closeSocket(entitiesID[i]);
       }

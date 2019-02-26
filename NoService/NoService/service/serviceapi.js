@@ -515,16 +515,16 @@ function ServiceAPI() {
       },
 
       Entity: {
-        getfliteredEntitiesMetaData: (key, value, remote_callback_obj) => {
-          _coregateway.Entity.getfliteredEntitiesMetaData(key, value, (err, metatdata)=> {
+        getFilteredEntitiesMetaData: (key, value, remote_callback_obj) => {
+          _coregateway.Entity.getFilteredEntitiesMetaData(key, value, (err, metatdata)=> {
             if(remote_callback_obj) {
               remote_callback_obj.run([], [err, metatdata])
               remote_callback_obj.unbindRemote();
             }
           });
         },
-        getfliteredEntitiesList: (query, remote_callback_obj) => {
-          _coregateway.Entity.getfliteredEntitiesList(query, (err, list)=> {
+        getFilteredEntitiesList: (query, remote_callback_obj) => {
+          _coregateway.Entity.getFilteredEntitiesList(query, (err, list)=> {
             if(remote_callback_obj) {
               remote_callback_obj.run([], [err, list])
               remote_callback_obj.unbindRemote();
