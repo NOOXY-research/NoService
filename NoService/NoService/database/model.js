@@ -379,6 +379,10 @@ function Model() {
       });
     };
 
+    this.getAll = (callback)=> {
+      _db.getAllRows(MODEL_TABLE_PREFIX+table_name, callback);
+    };
+
     this.getWhere = (where, query_values, callback)=> {
       _db.getRows(MODEL_TABLE_PREFIX+table_name, where, query_values, (err, results)=> {
         if(results) {
@@ -530,6 +534,10 @@ function Model() {
           callback(err);
         }
       });
+    };
+
+    this.getAll = (callback)=> {
+      _db.getAllRows(MODEL_TABLE_PREFIX+table_name, callback);
     };
 
     // return list
