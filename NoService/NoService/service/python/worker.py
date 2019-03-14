@@ -1,4 +1,4 @@
-# NoService/NoService/worker.py
+# NoService/NoService/service/python/worker.py
 # Description:
 # "worker.py" is service worker client python version for NOOXY service framework.
 # Copyright 2018-2019 NOOXY. All Rights Reserved.
@@ -13,50 +13,13 @@
 # 5 getMemoryUsage
 # 99 close
 
-import sys, functools, asyncio, socket, json, re, random, os, psutil
+import sys, asyncio, socket, json, re, random, os, psutil
+from .api_prototype import *
 
 UNIX_Sock_Path = sys.argv[1]
 IPC_MSG_SIZE_PREFIX_SIZE = 16
 MSG_READ_SIZE = 2**16
 
-# dynamic nested setattr
-def rsetattr(obj, attr, val):
-    pre, _, post = attr.rpartition('.')
-    return setattr(rgetattr(obj, pre) if pre else obj, post, val)
-
-# dynamic nested getattr
-def rgetattr(obj, attr, *args):
-    def _getattr(obj, attr):
-        return getattr(obj, attr, *args)
-    return functools.reduce(_getattr, [obj] + attr.split('.'))
-
-# NoService API prototype
-class NoService:
-    def __init__(self, value, **attrs):
-        self._value = value
-        self._attrs = attrs
-
-    def __getattr__(self, name):
-        if name in self._attrs:
-            return self._attrs[name]
-        return getattr(self._value, name)
-
-    def __setattr__(self, name, value):
-        if name in {'_value', '_attrs'}:
-            return super().__setattr__(name, value)
-        self._attrs[name] = ShadowAttrs(value)
-
-    def __repr__(self):
-        return repr(self._value)
-#
-def generateObjCallbacksTree():
-    pass
-
-def generateObjCallbacks(callback_id, api_tree, callparent):
-    pass
-
-def callObjCallback():
-    pass
 # main class of the NoService python worker
 class WorkerClient:
     def __init__(self, loop, reader, writer):
@@ -123,7 +86,7 @@ class WorkerClient:
 
     def established(self):
         self.send({'t':0})
-        
+
 # readOneMessege from reader and follows the NoService TCP protocol
 async def readOneMessege(reader):
     msg_string = ""
