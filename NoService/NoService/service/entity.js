@@ -11,11 +11,11 @@ function Entity() {
   let _on_callbacks = {};
   let _entities = {};
 
-  function EntityJson(entityID, Json, conn_profile) {
+  function EntityJson(entityId, Json, conn_profile) {
     let _conn_profile = conn_profile;
 
     let _meta = {
-      id: entityID,
+      id: entityId,
       mode: Json.mode, // normal or service
       daemonauthkey: Json.daemonauthkey, // for daemon activity call
       serverid: Json.serverid,
@@ -94,48 +94,48 @@ function Entity() {
 
   this.registerEntity = (entityJson, conn_profile, callback) => {
     let err = false;
-    let entityID = Utils.generateUniqueID();
-    _entities[entityID] = new EntityJson(entityID, entityJson, conn_profile);
+    let entityId = Utils.generateUniqueId();
+    _entities[entityId] = new EntityJson(entityId, entityJson, conn_profile);
     for(let i in _on_callbacks['EntityCreated']) {
-      (_on_callbacks['EntityCreated'])[i](entityID, entityJson);
+      (_on_callbacks['EntityCreated'])[i](entityId, entityJson);
     }
-    callback(err, entityID);
+    callback(err, entityId);
   };
 
-  this.modifyEntityValue = (entityID, key, value) => {
-    _entities[entityID].modify(key, value);
+  this.modifyEntityValue = (entityId, key, value) => {
+    _entities[entityId].modify(key, value);
   };
 
-  this.getEntityMetaData = (entityID, callback) => {
-    callback(false, _entities[entityID].returnMeta());
+  this.getEntityMetaData = (entityId, callback) => {
+    callback(false, _entities[entityId].returnMeta());
   };
 
-  this.returnEntityValue = (entityID, key) => {
-    let entity = _entities[entityID];
+  this.returnEntityValue = (entityId, key) => {
+    let entity = _entities[entityId];
     if(entity != null) {
        return entity.returnVal(key);
     }
      return null;
   };
 
-  this.returnEntityOwner = (entityID) => {
-    return this.returnEntityValue(entityID, 'owner');
+  this.returnEntityOwner = (entityId) => {
+    return this.returnEntityValue(entityId, 'owner');
   };
 
-  this.returnEntityOwnerId = (entityID) => {
-    return this.returnEntityValue(entityID, 'ownerid');
+  this.returnEntityOwnerId = (entityId) => {
+    return this.returnEntityValue(entityId, 'ownerid');
   };
 
-  this.returnIsEntityExist = (entityID)=> {
-    return _entities[entityID]?true:false;
+  this.returnIsEntityExist = (entityId)=> {
+    return _entities[entityId]?true:false;
   };
 
-  this.getEntityConnProfile = (entityID, callback) => {
+  this.getEntityConnProfile = (entityId, callback) => {
     try {
-      _entities[entityID].getConnProfile(callback);
+      _entities[entityId].getConnProfile(callback);
     }
     catch {
-      callback(new Error('Entity not existed with this ID('+entityID+').'));
+      callback(new Error('Entity not existed with this Id('+entityId+').'));
     }
   };
 
@@ -151,21 +151,27 @@ function Entity() {
     callback(false, _e);
   };
 
-  this.returnEntityMetaData = (entityID) => {
-    return _entities[entityID].returnMeta();
+  this.returnEntityMetaData = (entityId) => {
+    return _entities[entityId].returnMeta();
   };
 
-  this.returnEntitiesID = () => {
+  this.returnEntitiesId = () => {
     return Object.keys(_entities);
   }
 
-  this.getFilteredEntitiesMetaData = (key, value, callback) => {
+  this.getFilteredEntitiesMetaData = (query, callback) => {
     let _e = {};
+    let qs = query.split(',');
     for(let k in _entities) {
       let _meta = _entities[k].returnMeta();
-      if(_meta[key] == value) {
-        _e[k] = _meta;
-      }
+      let pass = true;
+      for(let i in qs) {
+        let key = qs[i].split('=')[0];
+        let value = qs[i].split('=')[1];
+        if(_meta[key] == value) {
+          _e[k] = _meta;
+        }
+      };
     }
     callback(false, _e);
   };
@@ -191,86 +197,86 @@ function Entity() {
     callback(false, _e);
   };
 
-  this.deleteEntity = (entityID, callback) => {
-    let et = _entities[entityID];
+  this.deleteEntity = (entityId, callback) => {
+    let et = _entities[entityId];
     if(et) {
       for(let i in _on_callbacks['EntityDeleted']) {
-        (_on_callbacks['EntityDeleted'])[i](entityID, et.returnMeta());
+        (_on_callbacks['EntityDeleted'])[i](entityId, et.returnMeta());
       }
-      delete _entities[entityID];
+      delete _entities[entityId];
       if(callback)
         callback(false);
     }
     else {
       if(callback)
-        callback(new Error('Entity "'+entityID+'" doesn\'t exist.'));
+        callback(new Error('Entity "'+entityId+'" doesn\'t exist.'));
     }
   };
 
 
-  this.addEntityToGroups = (entityID, grouplist, callback)=> {
-    let et =_entities[entityID];
+  this.addEntityToGroups = (entityId, grouplist, callback)=> {
+    let et =_entities[entityId];
     if(et) {
       et.addGroups(grouplist, callback);
     }
     else {
       if(callback)
-        callback(new Error('Entity "'+entityID+'" doesn\'t exist.'));
+        callback(new Error('Entity "'+entityId+'" doesn\'t exist.'));
     }
   };
 
-  this.deleteEntityFromGroups = (entityID, grouplist, callback)=> {
-    let et =_entities[entityID];
+  this.deleteEntityFromGroups = (entityId, grouplist, callback)=> {
+    let et =_entities[entityId];
     if(et) {
       et.deleteGroups(grouplist, callback);
     }
     else {
       if(callback)
-        callback(new Error('Entity "'+entityID+'" doesn\'t exist.'));
+        callback(new Error('Entity "'+entityId+'" doesn\'t exist.'));
     }
   };
 
-  this.clearAllGroupsOfEntity = (entityID, callback)=> {
-    let et =_entities[entityID];
+  this.clearAllGroupsOfEntity = (entityId, callback)=> {
+    let et =_entities[entityId];
     if(et) {
       et.clearGroups(callback);
     }
     else {
       if(callback)
-        callback(new Error('Entity "'+entityID+'" doesn\'t exist.'));
+        callback(new Error('Entity "'+entityId+'" doesn\'t exist.'));
     }
   };
 
-  this.isEntityIncludingGroups = (entityID, grouplist, callback)=> {
-    let et =_entities[entityID];
+  this.isEntityIncludingGroups = (entityId, grouplist, callback)=> {
+    let et =_entities[entityId];
     if(et) {
       et.includeGroups(grouplist, callback);
     }
     else {
       if(callback)
-        callback(new Error('Entity "'+entityID+'" doesn\'t exist.'));
+        callback(new Error('Entity "'+entityId+'" doesn\'t exist.'));
     }
   };
 
-  this.isEntityInGroup = (entityID, group, callback)=> {
-    let et =_entities[entityID];
+  this.isEntityInGroup = (entityId, group, callback)=> {
+    let et =_entities[entityId];
     if(et) {
       et.inGroup(group, callback);
     }
     else {
       if(callback)
-        callback(new Error('Entity "'+entityID+'" doesn\'t exist.'));
+        callback(new Error('Entity "'+entityId+'" doesn\'t exist.'));
     }
   };
 
-  this.getGroupsofEntity = (entityID, callback)=> {
-    let et =_entities[entityID];
+  this.getGroupsofEntity = (entityId, callback)=> {
+    let et =_entities[entityId];
     if(et) {
       et.getGroups(callback);
     }
     else {
       if(callback)
-        callback(new Error('Entity "'+entityID+'" doesn\'t exist.'));
+        callback(new Error('Entity "'+entityId+'" doesn\'t exist.'));
     }
   };
 

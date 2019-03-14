@@ -52,7 +52,7 @@ function ServiceAPI() {
     // Local callback object
     function LCBO(obj, obj_contructor, isOneTimeObj, isNastyCallback) {
       let _RCBOs = [];
-      let _id = Utils.generateUniqueID();
+      let _id = Utils.generateUniqueId();
       _LCBOs[_id] = this;
 
       let _syncRefer = (MyRCBO)=> {
@@ -238,11 +238,11 @@ function ServiceAPI() {
                     }
                   },
 
-                  getEntityID: (remote_callback_obj_2)=> {
+                  getEntityId: (remote_callback_obj_2)=> {
                     if(remote_callback_obj_2) {
                       syncRefer(remote_callback_obj_2);
-                      as.getEntityID((err, entityID)=>{
-                        remote_callback_obj_2.run([], [err, entityID]);
+                      as.getEntityId((err, entityId)=>{
+                        remote_callback_obj_2.run([], [err, entityId]);
                         remote_callback_obj_2.unbindRemote();
                       });
                     }
@@ -295,11 +295,11 @@ function ServiceAPI() {
                     }
                   },
 
-                  getEntityID: (remote_callback_obj_2)=> {
+                  getEntityId: (remote_callback_obj_2)=> {
                     if(remote_callback_obj_2) {
                       syncRefer(remote_callback_obj_2);
-                      as.getEntityID((err, entityID)=>{
-                        remote_callback_obj_2.run([], [err, entityID]);
+                      as.getEntityId((err, entityId)=>{
+                        remote_callback_obj_2.run([], [err, entityId]);
                         remote_callback_obj_2.unbindRemote();
                       });
                     }
@@ -353,11 +353,11 @@ function ServiceAPI() {
 
                   },
 
-                  getEntityID: (remote_callback_obj_2)=> {
+                  getEntityId: (remote_callback_obj_2)=> {
                     if(remote_callback_obj_2) {
                       syncRefer(remote_callback_obj_2);
-                      as.getEntityID((err, entityID)=>{
-                        remote_callback_obj_2.run([], [err, entityID]);
+                      as.getEntityId((err, entityId)=>{
+                        remote_callback_obj_2.run([], [err, entityId]);
                         remote_callback_obj_2.unbindRemote();
                       });
                     }
@@ -411,11 +411,11 @@ function ServiceAPI() {
                     }
                   },
 
-                  getEntityID: (remote_callback_obj_2)=> {
+                  getEntityId: (remote_callback_obj_2)=> {
                     if(remote_callback_obj_2) {
                       syncRefer(remote_callback_obj_2);
-                      as.getEntityID((err, entityID)=>{
-                        remote_callback_obj_2.run([], [err, entityID]);
+                      as.getEntityId((err, entityId)=>{
+                        remote_callback_obj_2.run([], [err, entityId]);
                         remote_callback_obj_2.unbindRemote();
                       });
                     }
@@ -469,11 +469,11 @@ function ServiceAPI() {
                     }
                   },
 
-                  getEntityID: (remote_callback_obj_2)=> {
+                  getEntityId: (remote_callback_obj_2)=> {
                     if(remote_callback_obj_2) {
                       syncRefer(remote_callback_obj_2);
-                      as.getEntityID((err, entityID)=>{
-                        remote_callback_obj_2.run([], [err, entityID]);
+                      as.getEntityId((err, entityId)=>{
+                        remote_callback_obj_2.run([], [err, entityId]);
                         remote_callback_obj_2.unbindRemote();
                       });
                     }
@@ -531,21 +531,21 @@ function ServiceAPI() {
             }
           });
         },
-        getEntityValue: (entityID, key, remote_callback_obj) => {
+        getEntityValue: (entityId, key, remote_callback_obj) => {
           if(remote_callback_obj) {
-            remote_callback_obj.run([], [false, _coregateway.Entity.returnEntityValue(entityID, key)])
+            remote_callback_obj.run([], [false, _coregateway.Entity.returnEntityValue(entityId, key)])
             remote_callback_obj.unbindRemote();
           }
         },
-        getEntityOwner: (entityID, remote_callback_obj) => {
+        getEntityOwner: (entityId, remote_callback_obj) => {
           if(remote_callback_obj) {
-            remote_callback_obj.run([], [false, _coregateway.Entity.returnEntityOwner(entityID)])
+            remote_callback_obj.run([], [false, _coregateway.Entity.returnEntityOwner(entityId)])
             remote_callback_obj.unbindRemote();
           }
         },
-        getEntityOwnerId: (entityID, remote_callback_obj) => {
+        getEntityOwnerId: (entityId, remote_callback_obj) => {
           if(remote_callback_obj) {
-            remote_callback_obj.run([], [false, _coregateway.Entity.returnEntityOwnerId(entityID)])
+            remote_callback_obj.run([], [false, _coregateway.Entity.returnEntityOwnerId(entityId)])
             remote_callback_obj.unbindRemote();
           }
         },
@@ -557,9 +557,9 @@ function ServiceAPI() {
             }
           });
         },
-        getEntityMetaData: (entityID, remote_callback_obj) => {
+        getEntityMetaData: (entityId, remote_callback_obj) => {
           if(remote_callback_obj) {
-            remote_callback_obj.run([], [false, _coregateway.Entity.returnEntityMetaData(entityID)])
+            remote_callback_obj.run([], [false, _coregateway.Entity.returnEntityMetaData(entityId)])
             remote_callback_obj.unbindRemote();
           }
         },
@@ -579,18 +579,18 @@ function ServiceAPI() {
         },
         getEntitiesId: (remote_callback_obj) => {
           if(remote_callback_obj) {
-            remote_callback_obj.run([], [false, _coregateway.Entity.returnEntitiesID()]);
+            remote_callback_obj.run([], [false, _coregateway.Entity.returnEntitiesId()]);
             remote_callback_obj.unbindRemote();
           }
         },
-        getEntityConnProfile: (entityID, remote_callback_obj)=> {
-          _coregateway.Entity.getEntityConnProfile(entityID, (err, conn_profile)=> {
+        getEntityConnProfile: (entityId, remote_callback_obj)=> {
+          _coregateway.Entity.getEntityConnProfile(entityId, (err, conn_profile)=> {
             let local_callback_obj = new LCBO(conn_profile, (conn_profile_syncRefer)=> {
               return ({
-                  getServerID: (remote_callback_obj_2)=> {
+                  getServerId: (remote_callback_obj_2)=> {
                     if(remote_callback_obj_2) {
                       conn_profile_syncRefer(remote_callback_obj_2);
-                      conn_profile.getServerID((err, serverid)=> {
+                      conn_profile.getServerId((err, serverid)=> {
                         if(remote_callback_obj_2) {}
                         remote_callback_obj_2.run([], [err, serverid]);
                         remote_callback_obj_2.unbindRemote();
@@ -679,25 +679,17 @@ function ServiceAPI() {
             }
           });
         },
+
         on: (type, remote_callback_obj)=> {
-          _coregateway.Entity.on(type, (entityID, entityJson)=> {
+          _coregateway.Entity.on(type, (entityId, entityJson)=> {
             if(remote_callback_obj) {
-              remote_callback_obj.run([], [entityID, entityJson])
+              remote_callback_obj.run([], [entityId, entityJson])
             }
           });
         },
 
-        addEntityToGroups:(entityID, grouplist, remote_callback_obj)=> {
-          _coregateway.Entity.addEntityToGroups(entityID, grouplist, (err)=> {
-            if(remote_callback_obj) {
-              remote_callback_obj.run([], [err]);
-              remote_callback_obj.unbindRemote();
-            }
-          });
-        },
-
-        deleteEntityFromGroups:(entityID, grouplist, remote_callback_obj)=> {
-          _coregateway.Entity.deleteEntityFromGroups(entityID, grouplist, (err)=> {
+        addEntityToGroups:(entityId, grouplist, remote_callback_obj)=> {
+          _coregateway.Entity.addEntityToGroups(entityId, grouplist, (err)=> {
             if(remote_callback_obj) {
               remote_callback_obj.run([], [err]);
               remote_callback_obj.unbindRemote();
@@ -705,8 +697,8 @@ function ServiceAPI() {
           });
         },
 
-        clearAllGroupsOfEntity:(entityID, remote_callback_obj)=> {
-          _coregateway.Entity.clearAllGroupsOfEntity(entityID, (err)=> {
+        deleteEntityFromGroups:(entityId, grouplist, remote_callback_obj)=> {
+          _coregateway.Entity.deleteEntityFromGroups(entityId, grouplist, (err)=> {
             if(remote_callback_obj) {
               remote_callback_obj.run([], [err]);
               remote_callback_obj.unbindRemote();
@@ -714,8 +706,8 @@ function ServiceAPI() {
           });
         },
 
-        isEntityIncludingGroups:(entityID, grouplist, remote_callback_obj)=> {
-          _coregateway.Entity.isEntityIncludingGroups(entityID, grouplist, (err)=> {
+        clearAllGroupsOfEntity:(entityId, remote_callback_obj)=> {
+          _coregateway.Entity.clearAllGroupsOfEntity(entityId, (err)=> {
             if(remote_callback_obj) {
               remote_callback_obj.run([], [err]);
               remote_callback_obj.unbindRemote();
@@ -723,8 +715,8 @@ function ServiceAPI() {
           });
         },
 
-        isEntityInGroup:(entityID, grouplist, remote_callback_obj)=> {
-          _coregateway.Entity.isEntityInGroup(entityID, grouplist, (err)=> {
+        isEntityIncludingGroups:(entityId, grouplist, remote_callback_obj)=> {
+          _coregateway.Entity.isEntityIncludingGroups(entityId, grouplist, (err)=> {
             if(remote_callback_obj) {
               remote_callback_obj.run([], [err]);
               remote_callback_obj.unbindRemote();
@@ -732,8 +724,17 @@ function ServiceAPI() {
           });
         },
 
-        getGroupsofEntity:(entityID, remote_callback_obj)=> {
-          _coregateway.Entity.getGroupsofEntity(entityID, (err, results)=> {
+        isEntityInGroup:(entityId, grouplist, remote_callback_obj)=> {
+          _coregateway.Entity.isEntityInGroup(entityId, grouplist, (err)=> {
+            if(remote_callback_obj) {
+              remote_callback_obj.run([], [err]);
+              remote_callback_obj.unbindRemote();
+            }
+          });
+        },
+
+        getGroupsofEntity:(entityId, remote_callback_obj)=> {
+          _coregateway.Entity.getGroupsofEntity(entityId, (err, results)=> {
             if(remote_callback_obj) {
               remote_callback_obj.run([], [err, results]);
               remote_callback_obj.unbindRemote();
@@ -856,43 +857,43 @@ function ServiceAPI() {
 
     _api.Authorization = {
       Authby: {
-        Token: (entityID, remote_callback_obj) => {
-          _coregateway.Authorization.Authby.Token(entityID, (err, pass)=> {
+        Token: (entityId, remote_callback_obj) => {
+          _coregateway.Authorization.Authby.Token(entityId, (err, pass)=> {
             if(remote_callback_obj) {
               remote_callback_obj.run([], [err, pass]);
               remote_callback_obj.unbindRemote();
             }
           });
         },
-        Password: (entityID, remote_callback_obj) => {
-          _coregateway.Authorization.Authby.Password(entityID, (err, pass)=> {
+        Password: (entityId, remote_callback_obj) => {
+          _coregateway.Authorization.Authby.Password(entityId, (err, pass)=> {
             if(remote_callback_obj) {
               remote_callback_obj.run([], [err, pass]);
               remote_callback_obj.unbindRemote();
             }
           });
         },
-        Action: (entityID, action_meta_data, callback)=> {
+        Action: (entityId, action_meta_data, callback)=> {
 
         },
-        isSuperUser: (entityID, remote_callback_obj) => {
-          _coregateway.Authorization.Authby.isSuperUser(entityID, (err, pass)=> {
+        isSuperUser: (entityId, remote_callback_obj) => {
+          _coregateway.Authorization.Authby.isSuperUser(entityId, (err, pass)=> {
             if(remote_callback_obj) {
               remote_callback_obj.run([], [err, pass]);
               remote_callback_obj.unbindRemote();
             }
           });
         },
-        Domain: (entityID, remote_callback_obj) => {
-          _coregateway.Authorization.Authby.Domain(entityID, (err, pass)=> {
+        Domain: (entityId, remote_callback_obj) => {
+          _coregateway.Authorization.Authby.Domain(entityId, (err, pass)=> {
             if(remote_callback_obj) {
               remote_callback_obj.run([], [err, pass]);
               remote_callback_obj.unbindRemote();
             }
           });
         },
-        DaemonAuthKey: (entityID, remote_callback_obj) => {
-          _coregateway.Authorization.Authby.DaemonAuthKey(entityID, (err, pass)=> {
+        DaemonAuthKey: (entityId, remote_callback_obj) => {
+          _coregateway.Authorization.Authby.DaemonAuthKey(entityId, (err, pass)=> {
             if(remote_callback_obj) {
               remote_callback_obj.run([], [err, pass]);
               remote_callback_obj.unbindRemote();
@@ -905,8 +906,8 @@ function ServiceAPI() {
         _coregateway.Authorization.importDaemonAuthKey(domains);
       },
 
-      emitSignin: (entityID) => {
-        _coregateway.Authorization.emitSignin(entityID);
+      emitSignin: (entityId) => {
+        _coregateway.Authorization.emitSignin(entityId);
       },
     };
 
@@ -1104,14 +1105,14 @@ function ServiceAPI() {
         });
       },
 
-      getUserIdByUserId: (userid, remote_callback_obj) => {
-        _coregateway.Authenticity.getUserIdByUserId(userid, (err, userid)=> {
-          if(remote_callback_obj) {
-            remote_callback_obj.run([], [err, userid]);
-            remote_callback_obj.unbindRemote();
-          }
-        });
-      },
+      // getUsernameByUserId: (userid, remote_callback_obj) => {
+      //   _coregateway.Authenticity.getUsernameByUserId(userid, (err, userid)=> {
+      //     if(remote_callback_obj) {
+      //       remote_callback_obj.run([], [err, userid]);
+      //       remote_callback_obj.unbindRemote();
+      //     }
+      //   });
+      // },
 
       getUserExistenceByUserId: (userid, remote_callback_obj)=>{
         _coregateway.Authenticity.getUserExistenceByUserId(userid, (err, exisitence)=> {
@@ -1209,77 +1210,77 @@ function ServiceAPI() {
       api.addAPI(['Service', 'ServiceSocket'], (LCBO)=> {
         return ({
           def: (name, remote_callback_obj)=> {
-            service_socket.def(name, (json, entityID, returnJSON)=> {
+            service_socket.def(name, (json, entityId, returnJSON)=> {
               let returnJSON_LCBO = new LCBO(returnJSON, (returnJSON_syncRefer)=> {
                 return ((err, json_be_returned)=>{
                   returnJSON(err, json_be_returned);
                 });
               }, true);
               if(remote_callback_obj) {
-                remote_callback_obj.run([], [json, entityID, returnJSON_LCBO]);
+                remote_callback_obj.run([], [json, entityId, returnJSON_LCBO]);
               }
             });
           },
 
           sdef: (name, remote_callback_obj, remote_callback_obj_2)=> {
-            service_socket.sdef(name, (json, entityID, returnJSON)=> {
+            service_socket.sdef(name, (json, entityId, returnJSON)=> {
               let returnJSON_LCBO = new LCBO(returnJSON, (returnJSON_syncRefer)=> {
                 return ((err, json_be_returned)=>{
                   returnJSON(err, json_be_returned);
                 });
               }, true);
               if(remote_callback_obj) {
-                remote_callback_obj.run([], [json, entityID, returnJSON_LCBO]);
+                remote_callback_obj.run([], [json, entityId, returnJSON_LCBO]);
               }
             },
-            (json, entityID, returnJSON)=> {
+            (json, entityId, returnJSON)=> {
               let returnJSON_LCBO = new LCBO(returnJSON, (returnJSON_syncRefer)=> {
                 return ((err, json_be_returned)=>{
                   returnJSON(err, json_be_returned);
                 });
               }, true);
               if(remote_callback_obj_2) {
-                remote_callback_obj_2.run([], [json, entityID, returnJSON_LCBO]);
+                remote_callback_obj_2.run([], [json, entityId, returnJSON_LCBO]);
               }
             });
           },
 
           on: (type, remote_callback_obj)=> {
             if(type == 'data') {
-              service_socket.on('data', (entityID, data)=> {
+              service_socket.on('data', (entityId, data)=> {
                 if(remote_callback_obj) {
-                  remote_callback_obj.run([], [entityID, data]);
+                  remote_callback_obj.run([], [entityId, data]);
                 }
               });
             }
             else {
-              service_socket.on(type, (entityID, callback)=> {
+              service_socket.on(type, (entityId, callback)=> {
                 let callback_LCBO = new LCBO(callback, (callback_syncRefer)=> {
                   return ((err)=>{
                     callback(err);
                   });
                 }, true);
                 if(remote_callback_obj) {
-                  remote_callback_obj.run([], [entityID, callback_LCBO]);
+                  remote_callback_obj.run([], [entityId, callback_LCBO]);
                 }
               });
             }
           },
 
-          sendData: (entityID, data)=> {
-            service_socket.sendData(entityID, data);
+          sendData: (entityId, data)=> {
+            service_socket.sendData(entityId, data);
           },
 
           broadcastData: (data)=> {
             service_socket.broadcastData(data);
           },
 
-          emit: (entityID, event, data)=> {
-            service_socket.emit(entityID, event, data);
+          emit: (entityId, event, data)=> {
+            service_socket.emit(entityId, event, data);
           },
 
-          semit: (entityID, event, data)=> {
-            service_socket.semit(entityID, event, data);
+          semit: (entityId, event, data)=> {
+            service_socket.semit(entityId, event, data);
           },
 
           broadcastEvent: (event, data)=> {
@@ -1332,81 +1333,81 @@ function ServiceAPI() {
       api.addAPI(['Service', 'ServiceSocket'], (LCBO)=> {
         return ({
           def: (name, remote_callback_obj)=> {
-            service_socket.def(name, (json, entityID, returnJSON)=> {
+            service_socket.def(name, (json, entityId, returnJSON)=> {
               let returnJSON_LCBO = new LCBO(returnJSON, (returnJSON_syncRefer)=> {
                 return ((err, json_be_returned)=>{
                   returnJSON(err, json_be_returned);
                 });
               }, true);
               if(remote_callback_obj) {
-                remote_callback_obj.run([], [json, entityID, returnJSON_LCBO]);
+                remote_callback_obj.run([], [json, entityId, returnJSON_LCBO]);
               }
             });
           },
 
           sdef: (name, remote_callback_obj, remote_callback_obj_2)=> {
-            service_socket.sdef(name, (json, entityID, returnJSON)=> {
+            service_socket.sdef(name, (json, entityId, returnJSON)=> {
               let returnJSON_LCBO = new LCBO(returnJSON, (returnJSON_syncRefer)=> {
                 return ((err, json_be_returned)=>{
                   returnJSON(err, json_be_returned);
                 });
               }, true);
               if(remote_callback_obj) {
-                remote_callback_obj.run([], [json, entityID, returnJSON_LCBO]);
+                remote_callback_obj.run([], [json, entityId, returnJSON_LCBO]);
               }
             },
-            (json, entityID, returnJSON)=> {
+            (json, entityId, returnJSON)=> {
               let returnJSON_LCBO = new LCBO(returnJSON, (returnJSON_syncRefer)=> {
                 return ((err, json_be_returned)=>{
                   returnJSON(err, json_be_returned);
                 });
               }, true);
               if(remote_callback_obj_2) {
-                remote_callback_obj_2.run([], [json, entityID, returnJSON_LCBO]);
+                remote_callback_obj_2.run([], [json, entityId, returnJSON_LCBO]);
               }
             });
           },
 
           on: (type, remote_callback_obj)=> {
             if(type == 'data') {
-              service_socket.on('data', (entityID, data)=> {
+              service_socket.on('data', (entityId, data)=> {
                 if(remote_callback_obj) {
-                  remote_callback_obj.run([], [entityID, data]);
+                  remote_callback_obj.run([], [entityId, data]);
                 }
               });
             }
             else {
-              service_socket.on(type, (entityID, callback)=> {
+              service_socket.on(type, (entityId, callback)=> {
                 let callback_LCBO = new LCBO(callback, (callback_syncRefer)=> {
                   return ((err)=>{
                     callback(err);
                   });
                 }, true);
                 if(remote_callback_obj) {
-                  remote_callback_obj.run([], [entityID, callback_LCBO]);
+                  remote_callback_obj.run([], [entityId, callback_LCBO]);
                 }
               });
             }
           },
 
-          sendData: (entityID, data)=> {
-            service_socket.sendData(entityID, data);
+          sendData: (entityId, data)=> {
+            service_socket.sendData(entityId, data);
           },
 
-          close: (entityID)=> {
-            service_socket.close(entityID);
+          close: (entityId)=> {
+            service_socket.close(entityId);
           },
 
           broadcastData: (data)=> {
             service_socket.broadcastData(data);
           },
 
-          emit: (entityID, event, data)=> {
-            service_socket.emit(entityID, event, data);
+          emit: (entityId, event, data)=> {
+            service_socket.emit(entityId, event, data);
           },
 
-          semit: (entityID, event, data)=> {
-            service_socket.semit(entityID, event, data);
+          semit: (entityId, event, data)=> {
+            service_socket.semit(entityId, event, data);
           },
 
           broadcastEvent: (event, data)=> {

@@ -7,18 +7,18 @@ npm install noservice -save
 npx create-noservice .
 ```
 ## What is NoService?
-NoService is a high level framework for services that provide you nodejs environment and eliminate service designer to care about low level part of your project.Such as authorization, user system, database, protocol and so on. It also run multiple services intergrated and we also provide a manager and shell to manipulate all of them.
+NoService is a high level framework for services that provide you nodejs environment and eliminate service designer to care about low level part of your project.Such as authorization, user system, database, protocol and so on. It also run multiple services integrated and we also provide a manager and shell to manipulate all of them.
 
 ## Why we build NoService? And why you should give it a try?
 
 ### All-in-one but async multithreaded
-NoService is supposed to be a all-in-one framework. But each service is managed by a worker which is seperated thread from core. And since multithread, a service's restart doesn't require restarting the whole framework and mantain connection while relauching. Which is a huge benefit in deploying on a production environment.
+NoService is supposed to be a all-in-one framework. But each service is managed by a worker which is separated thread from core. And since multithread, a service's restart doesn't require restarting the whole framework and maintain connection while relaunching. Which is a huge benefit in deploying on a production environment.
 ### Serperating backend applications from physical differences
 NoService provide a layer that handle backend designer for connection, database and authenticity. Thus other designer project can basically install on your NoService.
 ### security
-NoService has built-in sercure protocol bulit by SHA-256, AES and RSA to sercure your data. It also has authorization API, provides you ability to authorize user to protect your data. Besides, you can block IPs and domains. The operations on daemon will not be executed until the client has the right response of authorization that emited from daemon side.
-### lightweight + microcore
-NoService is superlightweight both in client and daemon. But it has lots of feature. And it's features can be expanded by services.
+NoService has built-in secure protocol built by SHA-256, AES and RSA to secure your data. It also has authorization API, provides you ability to authorize user to protect your data. Besides, you can block IPs and domains. The operations on daemon will not be executed until the client has the right response of authorization that emitted from daemon side.
+### lightweight + micro-core
+NoService is super-lightweight both in client and daemon. But it has lots of feature. And it's features can be expanded by services.
 ### communication between services
 The design of NoService sockets that we called service socket and activity socket. With the characteristic of those sockets, services can communicate each others. By this way each service don't need to sync data to promise the data is the newest.
 ### realtime
@@ -26,17 +26,17 @@ NoService is design for realtime purpose. And it's of course super responsive.
 ### deploying services
 NoService is built for service. From it's protocol to it's local structure. It also have user authorization system natively integrated with protocol and software.
 ### for general conditions
-NoService is design for any kind of condition such as game, IoT, text contain. However, we have only implemented game([reversi](https://nooxy.org/noversi)), notification([NOOXY](https://nooxy.org)), shell([NoShell](https://www.nooxy.org/static/nsf/shell.html)). Nevertheless the development of NoService is still in progress. We can fix bugs and add features to comfirm other abilities.
+NoService is design for any kind of condition such as game, IoT, text contain. However, we have only implemented game([reversi](https://nooxy.org/noversi)), notification([NOOXY](https://nooxy.org)), shell([NoShell](https://www.nooxy.org/static/nsf/shell.html)). Nevertheless the development of NoService is still in progress. We can fix bugs and add features to confirm other abilities.
 ### cross platform
 Now, NoService can run on browser(javascript) and desktop(javascript). It also supports TCP/IP, websocket connections. Other languages is still on the way.
 
 ### Socket-based+API control
-Socket base+API pattern makes the concept easy to understand. NoService wraps the native TCP/IP, websocket or even http polling mode in the future as transportation layer. Make you no need to consider about intergrating features with different connections. And with the advantage of NoService, in theory different activities(clients) can share same the socket in the same time. If the NoService Client is implemented well.
+Socket base+API pattern makes the concept easy to understand. NoService wraps the native TCP/IP, websocket or even http polling mode in the future as transportation layer. Make you no need to consider about integrating features with different connections. And with the advantage of NoService, in theory different activities(clients) can share same the socket in the same time. If the NoService Client is implemented well.
 
 ### Bundled Services
 NoService provide bundled services such as NoShell which give you access of NoService. NoUser for user system. And so on.
 
-### Intergrated ORM
+### Integrated ORM
 
 ## Target version
 * daemon: alpha 0.4.8
@@ -63,7 +63,7 @@ npm install mysql --save
 ``` sh
 npm install express multer --save
 ```
-NOOXY Http Service provide you file upload, oauth and contain control intergrated with NoService. If you don't use NoContent service there is no need to install additional packages.
+NOOXY Http Service provide you file upload, oauth and contain control integrated with NoService. If you don't use NoContent service there is no need to install additional packages.
 
 ## Document Overview
 1. Orientation
@@ -107,7 +107,7 @@ Objective: To provide function(API) to take authoritative actions. Confirming th
 Objective: To interact with Authenticity database. Providing Users  caching, Creating User Obj, User identification.
 
 ### Crypto
-Objective: Providing AES, RSA, Hasing abilities for NSPS(NoService Protocol Secured).
+Objective: Providing AES, RSA, Hashing abilities for NSPS(NoService Protocol Secured).
 
 ### Service
 Objective: Loading and managing services, and routing the messages on internet. Also provide service socket, activity socket.
@@ -170,7 +170,7 @@ function Service(Me, NoService) {
     // do your jobs here
   }
 
-  // If the daemon stop, your service recieve close signal here.
+  // If the daemon stop, your service receive close signal here.
   this.close = ()=> {
     // Saving state of you service.
     // Please save and manipulate your files in this directory
@@ -203,9 +203,9 @@ In service
 this.start = ()=> {
   // Get the service socket of your service
   let ss = NoService.Service.ServiceSocket;
-  ss.onConnect = (entityID, callback) => {
+  ss.onConnect = (entityId, callback) => {
     // Send msg on connected entity.
-    ss.sendData(entityID, 'Hello world!');
+    ss.sendData(entityId, 'Hello world!');
     callback(false);
   }
 }
@@ -223,7 +223,7 @@ let _NSc = new NSc();
 ```
 
 #### Service function(recommended)
-Service function is a framework for self-defined protocol that with "json datastructure" and "request, response" style. It is included by NOOXY service framework. And with Service function NOOXY shell service can natively support the command that call your service.
+Service function is a framework for self-defined protocol that with "json data-structure" and "request, response" style. It is included by NOOXY service framework. And with Service function NOOXY shell service can natively support the command that call your service.
 Note that the function name should be short as possible. Since it will be sent in NSP(NOOXY service protocol).
 
 In client(browser)
@@ -260,8 +260,8 @@ Service function defined in service
 ``` javascript
 // Your service's entry.js
 this.start = ()=> {
-  // Normally define a JSONfunction
-  ss.def('Hello', (json, entityID, returnJSON)=>{
+  // Normally define a ServiceFunction
+  ss.def('Hello', (json, entityId, returnJSON)=>{
     console.log(json.d); // Print "I am client.".
     let json_be_returned = {
       d: 'Hello! NoService Framework!'
@@ -270,8 +270,8 @@ this.start = ()=> {
     returnJSON(false, json_be_returned);
   });
 
-  // Safe define a JSONfunction. User should be admin.
-  ss.sdef('HelloSecured', (json, entityID, returnJSON)=>{
+  // Safe define a ServiceFunction. User should be admin.
+  ss.sdef('HelloSecured', (json, entityId, returnJSON)=>{
     console.log(json.d); // Print "I am client.".
     let json_be_returned = {
       d: 'Hello! NoService Framework! Secured.'
@@ -286,7 +286,7 @@ this.start = ()=> {
 
 }
 ```
-In order to well defined your protocol. It's sugesst to defined your protocol in manifest.json file. (optional)
+In order to well defined your protocol. It's suggest to defined your protocol in manifest.json file. (optional)
 
 in your manifest.json:
 ```JSON
@@ -326,7 +326,7 @@ In case that the service that user acesses might be sensitive. You can call many
 For example:
 ``` javascript
 // Token can vertify that the userA is that true userA.
-NoService.Authorization.Authby.Token(entityID, (err, pass)=>{
+NoService.Authorization.Authby.Token(entityId, (err, pass)=>{
   if(pass) {
       // what ever you want.
   }
@@ -392,37 +392,44 @@ NoService.Database.Model.define('IndexedListTest', {
   NoService.Service.ActivitySocket.createDefaultAdminDeamonSocket(service, callback)
 
   ### Service
-  NoService.Service.Entity.getfliteredEntitiesMetaData: (key, value, callback)\
+  NoService.Service.Entity.getfliteredEntitiesMetaData: (query, callback)\
   NoService.Service.Entity.getfliteredEntitiesList: (query, callback)\
-  NoService.Service.Entity.getEntityValue(entityID, key, callback)\
-  NoService.Service.Entity.getEntityOwner(entityID, key, callback)\
+  NoService.Service.Entity.getEntityValue(entityId, key, callback)\
+  NoService.Service.Entity.getEntityOwner(entityId, callback)\
+  NoService.Service.Entity.getEntityOwnerId(entityId, callback)\
   NoService.Service.Entity.getEntitiesMetaData(callback)\
-  NoService.Service.Entity.getEntityMetaData(entityID, callback)\
+  NoService.Service.Entity.getEntityMetaData(entityId, callback)\
   NoService.Service.Entity.getCount(callback)\
   NoService.Service.Entity.getEntities(callback)\
-  NoService.Service.Entity.getEntitiesID(callback)\
+  NoService.Service.Entity.getEntitiesId(callback)\
   NoService.Service.Entity.getEntityConnProfile(entityId, callback)\
   NoService.Service.Entity.on(type, callback)\
-  NoService.Service.Entity.addEntityToGroups(entityID, grouplist, callback)\
-  NoService.Service.Entity.deleteEntityFromGroups(entityID, grouplist, callback)\
-  NoService.Service.Entity.clearAllGroupsOfEntity(entityID, callback)\
-  NoService.Service.Entity.isEntityIncludingGroups(entityID, grouplist, callback)\
-  NoService.Service.Entity.isEntityInGroup(entityID, group, callback)\
-  NoService.Service.Entity.getGroupsofEntity(entityID, callback)\
-  NoService.Service.getList()\
-  NoService.Service.getServiceManifest(service_name)\
-  NoService.Service.getJSONfuncList(service_name)\
-  NoService.Service.getJSONfuncDict(service_name)\
-  NoService.Service.relaunch(service_name)\
-  NoService.getWorkerMemoryUsage(callback)
+  NoService.Service.Entity.addEntityToGroups(entityId, grouplist, callback)\
+  NoService.Service.Entity.deleteEntityFromGroups(entityId, grouplist, callback)\
+  NoService.Service.Entity.clearAllGroupsOfEntity(entityId, callback)\
+  NoService.Service.Entity.isEntityIncludingGroups(entityId, grouplist, callback)\
+  NoService.Service.Entity.isEntityInGroup(entityId, group, callback)\
+  NoService.Service.Entity.getGroupsofEntity(entityId, callback)\
+  NoService.Service.getList(callback)\
+  NoService.Service.getServiceManifest(service_name, callback)\
+  NoService.Service.getServiceFunctionList(service_name, callback)\
+  NoService.Service.getServiceFunctionDict(service_name, callback)\
+  NoService.Service.launch(service_name, callback)\
+  NoService.Service.initialize(service_name, callback)\
+  NoService.Service.relaunch(service_name, callback)\
+  NoService.Service.close(service_name, callback)\
+  NoService.Service.isServiceLaunched(service_name, callback)\
+  NoService.Service.isServiceInitialized(service_name, callback)\
+  NoService.Service.getCBOCount(callback)\
+  NoService.Service.getWorkerMemoryUsage(callback)\
 
   ### Authorization
-  NoService.Authorization.emitSignin: (entityID)\
-  NoService.Authorization.Authby.Token: (entityID, callback)\
-  NoService.Authorization.Authby.Password(entityID, callback)\
-  NoService.Authorization.Authby.isSuperUser(entityID, callback)\
-  NoService.Authorization.Authby.Domain(entityID, callback)\
-  NoService.Authorization.Authby.DaemonAuthKey(entityID, callback)\
+  NoService.Authorization.emitSignin: (entityId)\
+  NoService.Authorization.Authby.Token: (entityId, callback)\
+  NoService.Authorization.Authby.Password(entityId, callback)\
+  NoService.Authorization.Authby.isSuperUser(entityId, callback)\
+  NoService.Authorization.Authby.Domain(entityId, callback)\
+  NoService.Authorization.Authby.DaemonAuthKey(entityId, callback)\
   NoService.Authorization.importTrustDomains(domains)
 
   ### Daemon
@@ -432,6 +439,7 @@ NoService.Database.Model.define('IndexedListTest', {
   NoService.Daemon.getVariables(callback)
 
   ### Authenticity
+
   NoService.Authenticity.createUser(username, displayname, password, privilege, detail, firstname, lastname, callback)\
   NoService.Authenticity.deleteUserByUsername(username, callback)\
   NoService.Authenticity.updatePasswordByUsername(username, newpassword, callback)\
@@ -440,13 +448,22 @@ NoService.Database.Model.define('IndexedListTest', {
   NoService.Authenticity.updateNameByUsername(username, privilege, callback)\
   NoService.Authenticity.getUserMetaByUsername(username, callback)\
   NoService.Authenticity.getUserIdByUsername(username, callback)\
-  NoService.Authenticity.deleteUserByUserId(username, callback)\
-  NoService.Authenticity.updatePasswordByUserId(username, newpassword, callback)\
-  NoService.Authenticity.updateTokenByUserId(username, callback)\
-  NoService.Authenticity.updatePrivilegeByUserId(username, privilege, callback)\
-  NoService.Authenticity.updateNameByUserId(username, privilege, callback)\
-  NoService.Authenticity.getUserMetaByUserId(username, callback)\
-  NoService.Authenticity.getUserIdByUserId(username, callback)
+  NoService.Authenticity.getUserExistenceByUsername(username, callback)\
+  NoService.Authenticity.getUserTokenByUsername(username, callback)\
+  NoService.Authenticity.getUserPrivilegeByUsername(username, callback)\
+  NoService.Authenticity.searchUsersByUsernameNRows(username, N, callback)\
+
+  NoService.Authenticity.deleteUserByUserId(userid, callback)\
+  NoService.Authenticity.updatePasswordByUserId(userid, newpassword, callback)\
+  NoService.Authenticity.updateTokenByUserId(userid, callback)\
+  NoService.Authenticity.updatePrivilegeByUserId(userid, privilege, callback)\
+  NoService.Authenticity.updateNameByUserId(userid, privilege, callback)\
+  NoService.Authenticity.getUserMetaByUserId(userid, callback)\
+  NoService.Authenticity.getUsernameByUserId(userid, callback)\
+  NoService.Authenticity.getUserExistenceByUserId(userid, callback)\
+  NoService.Authenticity.getUserTokenByUserId(userid, callback)\
+  NoService.Authenticity.getUserPrivilegeByUserId(userid, callback)\
+  NoService.Authenticity.getUserIdByUserId(userid, callback)
 
   ### Connection
   NoService.Connection.addServer(conn_method, ip, port)
@@ -518,6 +535,12 @@ NoService.Database.Model.define('IndexedListTest', {
   ```
   #### Model(Pair)
   model.create(properties_dict, callback)\
+  model.searchAll(keyword, callback)\
+  model.searchColumns(column_list, keyword,)\
+  model.searchAllNRows(keyword, N, callback)\
+  model.searchColumnsNRows(column_list, keyword, N, callback)\
+  model.getWhere(where, query_values, callback)\
+  model.getAll(callback)\
   model.getbyPair(pair, callback)\
   model.getbyBoth(both, callback)\
   model.getbyFirst(first, callback)\
@@ -534,7 +557,12 @@ NoService.Database.Model.define('IndexedListTest', {
 
   #### Model(Object)
   model.get(where, callback)\
+  model.getAll(callback)\
   model.getWhere(key_value, callback)\
+  model.searchAll(keyword, callback)\
+  model.searchColumns(column_list, keyword, callback)\
+  model.searchAllNRows(keyword, N, callback)\
+  model.searchColumnsNRows(column_list, keyword, N, callback)\
   model.create(properties_dict, callback)\
   model.replace(properties_dict, callback)\
   model.remove(key, callback)\
@@ -543,11 +571,13 @@ NoService.Database.Model.define('IndexedListTest', {
   model.existProperty(property_name, callback)\
   model.removeProperties(properties_list, callback)
 
-
-
-
   #### Model(IndexedList)
+  model.searchAll(keyword, callback)\
+  model.searchColumns(column_list, keyword, callback)\
+  model.searchAllNRows(keyword, N, callback)\
+  model.searchColumnsNRows(column_list, keyword, N, callback)\
   model.get(index_value, callback)\
+  model.getAll(callback)\
   model.getWhere(where, callback)\
   model.replaceRows(rows, callback)\
   model.updateRows(rows, callback)\
@@ -562,6 +592,10 @@ NoService.Database.Model.define('IndexedListTest', {
   model.removeFields(fields_dict, callback)
 
   #### Model(GroupIndexedList)
+  model.searchAll(group_name, keyword, callback)\
+  model.searchColumns(group_name, column_list, keyword, callback)\
+  model.searchAllNRows(group_name, keyword, N, callback)\
+  model.searchColumnsNRows(group_name, column_list, keyword, N, callback)\
   model.existGroup(group_name, callback)\
   model.get(group_name, index_value, callback)\
   model.getWhere(where, callback)\
@@ -581,11 +615,11 @@ NoService.Database.Model.define('IndexedListTest', {
   ### ServiceSocket
   NoService.Serivce.ServiceSocket.def(name, callback)\
   NoService.Serivce.ServiceSocket.sdef(name, callback, failopearation)\
-  NoService.Serivce.ServiceSocket.sendData(entityID, data)\
+  NoService.Serivce.ServiceSocket.sendData(entityId, data)\
   NoService.Serivce.ServiceSocket.broadcastData(data)\
   NoService.Serivce.ServiceSocket.sendDataToUsername(username, data)\
-  NoService.Serivce.ServiceSocket.emit(entityID, event, data)\
-  NoService.Serivce.ServiceSocket.semit(entityID, event, data)\
+  NoService.Serivce.ServiceSocket.emit(entityId, event, data)\
+  NoService.Serivce.ServiceSocket.semit(entityId, event, data)\
   NoService.Serivce.ServiceSocket.emitToUsername(username, event, data)\
   NoService.Serivce.ServiceSocket.emitToGroups(groups, event, data)\
   NoService.Serivce.ServiceSocket.emitToIncludingGroups(groups, event, data)\
@@ -605,7 +639,7 @@ NoService.Database.Model.define('IndexedListTest', {
   ### ActivitySocket Object
   ActivitySocket.call(name, Json, callback)\
   ActivitySocket.sendData(data)\
-  ActivitySocket.returnEntityID()\
+  ActivitySocket.returnEntityId()\
   ActivitySocket.on(type, callback)\
   ActivitySocket.close()\
   ActivitySocket.onEvent(event, callback);
@@ -633,7 +667,7 @@ NoService.Database.Model.define('IndexedListTest', {
 ### Detail
 #### SP(Sercure protocol)
 ```
-"Sercure protocol"
+"Secure protocol"
 RSA_Public = text
 Request(daemon):
 {
@@ -658,7 +692,7 @@ pub_key+client_random_num with sha256 algo. And substring 32.)
         a: aes_key
 }
 
-after updraded protocol, data will be transfer as:
+after upgrading protocol, data will be transfer as:
 aes_iv(base64)+data_encrypted(base64)
 ```
 #### GT(Get token)

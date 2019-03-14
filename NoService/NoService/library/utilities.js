@@ -358,8 +358,8 @@ let TagLog = (tag, logstring) => {
   console.log('['+tag+'] '+logstring.replaceAll('\n', '\n['+tag+'] '));
 };
 
-// generateGUID
-let generateUniqueID = () => {
+// generateGUId
+let generateUniqueId = () => {
   return '_' + Math.random().toString(36).substr(2, 9);
 };
 
@@ -445,7 +445,7 @@ module.exports = {
   returnJSONfromFile: returnJSONfromFile,
   printLOGO: printLOGO,
   TagLog: TagLog,
-  generateUniqueID: generateUniqueID,
+  generateUniqueId: generateUniqueId,
   hashString: hashString,
   removeHTML: removeHTML,
   generateGUID: generateGUID,

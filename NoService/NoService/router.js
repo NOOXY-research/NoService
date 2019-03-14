@@ -8,7 +8,7 @@ const Utils = require('./library').Utilities;
 
 function Router() {
   let _coregateway = null;
-  // nooxy service protocol sercure
+  // nooxy service protocol secure
   let _json_sniffers = [];
   let _raw_sniffers = [];
   // for signup timeout
@@ -66,7 +66,7 @@ function Router() {
 
   // implementations of NOOXY Service Protocol methods
   let methods = {
-    // nooxy service protocol implementation of "sercure protocol"
+    // nooxy service protocol implementation of "secure protocol"
     SP: {
       emitter : (connprofile, data) => {
         _senddata(connprofile, 'SP', 'rq', data);

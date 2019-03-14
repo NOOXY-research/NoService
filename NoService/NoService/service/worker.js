@@ -34,7 +34,7 @@ function WorkerClient() {
     let _closed = false;
 
     let createLocalObjCallbacks = (obj)=> {
-      let _Id = Utils.generateUniqueID();
+      let _Id = Utils.generateUniqueId();
       _local_callbacks[_Id] = obj;
       return _Id;
     };
@@ -57,7 +57,7 @@ function WorkerClient() {
       };
       for(let i in args) {
         if(Utils.hasFunction(args[i])) {
-          let _Id = Utils.generateUniqueID();
+          let _Id = Utils.generateUniqueId();
           _local_obj_callbacks_dict[_Id] = args[i];
           // console.log(Object.keys(_local_obj_callbacks_dict).length);
           _data.o[i] = [_Id, Utils.generateObjCallbacksTree(args[i])];
@@ -76,7 +76,7 @@ function WorkerClient() {
 
       for(let i in args) {
         if(Utils.hasFunction(args[i])) {
-          let _Id = Utils.generateUniqueID();
+          let _Id = Utils.generateUniqueId();
           _local_obj_callbacks_dict[_Id] = args[i];
           // console.log(Object.keys(_local_obj_callbacks_dict).length);
 

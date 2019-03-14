@@ -46,18 +46,18 @@ function ServiceSocket(service_name, prototype, emitRouter, debug, entity_module
   let _send_handler = null;
   let _mode = null;
   let _on_dict = {
-    connect: (entityID, callback) => {
+    connect: (entityId, callback) => {
       if(debug)
         Utils.TagLog('*WARN*', 'onConnect of service "'+service_name+'" not implemented');
       callback(false);
     },
 
-    data: (entityID, data) => {
+    data: (entityId, data) => {
       if(debug)
         Utils.TagLog('*WARN*', 'onData of service "'+service_name+'" not implemented');
     },
 
-    close: (entityID, callback) => {
+    close: (entityId, callback) => {
       if(debug)
         Utils.TagLog('*WARN*', 'onClose of service "'+service_name+'" not implemented');
       callback(false);
@@ -79,31 +79,31 @@ function ServiceSocket(service_name, prototype, emitRouter, debug, entity_module
 
   // securly define
   this.sdef = (name, callback, fail) => {
-    this.def(name, (json, entityID, returnJSON)=>{
-      authorization_module.Authby.isSuperUserwithToken(entityID, (err, pass)=>{
+    this.def(name, (json, entityId, returnJSON)=>{
+      authorization_module.Authby.isSuperUserwithToken(entityId, (err, pass)=>{
         if(pass&&!err) {
-          callback(json, entityID, returnJSON);
+          callback(json, entityId, returnJSON);
         }
         else {
-          fail(json, entityID, returnJSON);
+          fail(json, entityId, returnJSON);
         }
       });
     });
   };
 
-  // emit event to entityID
-  this.emit = (entityID, event, data)=> {
-    entity_module.getEntityConnProfile(entityID, (err, connprofile)=>{
-      _emitasevent(connprofile, entityID, event, data);
+  // emit event to entityId
+  this.emit = (entityId, event, data)=> {
+    entity_module.getEntityConnProfile(entityId, (err, connprofile)=>{
+      _emitasevent(connprofile, entityId, event, data);
     });
   };
 
-  // emit event to entityID securly
-  this.semit = (entityID, event, data)=> {
-    authorization_module.Authby.isSuperUserwithToken(entityID, (err, pass)=>{
+  // emit event to entityId securly
+  this.semit = (entityId, event, data)=> {
+    authorization_module.Authby.isSuperUserwithToken(entityId, (err, pass)=>{
       if(pass&&!err) {
-        entity_module.getEntityConnProfile(entityID, (err, connprofile)=>{
-          _emitasevent(connprofile, entityID, event, data);
+        entity_module.getEntityConnProfile(entityId, (err, connprofile)=>{
+          _emitasevent(connprofile, entityId, event, data);
         });
       };
     });
@@ -111,12 +111,12 @@ function ServiceSocket(service_name, prototype, emitRouter, debug, entity_module
 
   this.emitToUsername = (username, event, data)=> {
     let query = 'owner='+username+',service='+service_name+',type=Activity';
-    entity_module.getFilteredEntitiesList(query, (err, entitiesID)=>{
-      for(let i in entitiesID) {
-        authorization_module.Authby.Token(entitiesID[i], (err, pass)=>{
+    entity_module.getFilteredEntitiesList(query, (err, entitiesId)=>{
+      for(let i in entitiesId) {
+        authorization_module.Authby.Token(entitiesId[i], (err, pass)=>{
           if(pass&&!err) {
-            entity_module.getEntityConnProfile(entitiesID[i], (err, connprofile) => {
-              _emitasevent(connprofile, entitiesID[i], event, data);
+            entity_module.getEntityConnProfile(entitiesId[i], (err, connprofile) => {
+              _emitasevent(connprofile, entitiesId[i], event, data);
             });
           }
         });
@@ -127,18 +127,18 @@ function ServiceSocket(service_name, prototype, emitRouter, debug, entity_module
   this.emitToGroups = (groups, event, data)=> {
     // console.log('f');
     let query = 'service='+service_name+',type=Activity';
-    entity_module.getFilteredEntitiesList(query, (err, entitiesID)=>{
-      for(let i in entitiesID) {
+    entity_module.getFilteredEntitiesList(query, (err, entitiesId)=>{
+      for(let i in entitiesId) {
         let j = groups.length-1;
         let op = ()=> {
           let sent = false;
-          entity_module.isEntityInGroup(entitiesID[i], groups[j], (err, pass) => {
+          entity_module.isEntityInGroup(entitiesId[i], groups[j], (err, pass) => {
             // console.log(pass, !sent, !err);
             // console.log(err);
             if(pass&&!sent&&!err) {
               sent = true;
-              entity_module.getEntityConnProfile(entitiesID[i], (err, connprofile) => {
-                _emitasevent(connprofile, entitiesID[i], event, data);
+              entity_module.getEntityConnProfile(entitiesId[i], (err, connprofile) => {
+                _emitasevent(connprofile, entitiesId[i], event, data);
 
               });
             }
@@ -159,12 +159,12 @@ function ServiceSocket(service_name, prototype, emitRouter, debug, entity_module
   this.emitToIncludingGroups = (groups, event, data)=> {
     // console.log('f');
     let query = 'service='+service_name+',type=Activity';
-    entity_module.getFilteredEntitiesList(query, (err, entitiesID)=>{
-      for(let i in entitiesID) {
-        entity_module.isEntityIncludingGroups(entitiesID[i], groups, (err, pass) => {
+    entity_module.getFilteredEntitiesList(query, (err, entitiesId)=>{
+      for(let i in entitiesId) {
+        entity_module.isEntityIncludingGroups(entitiesId[i], groups, (err, pass) => {
           if(pass&&!err)
-            entity_module.getEntityConnProfile(entitiesID[i], (err, connprofile) => {
-              _emitasevent(connprofile, entitiesID[i], event, data);
+            entity_module.getEntityConnProfile(entitiesId[i], (err, connprofile) => {
+              _emitasevent(connprofile, entitiesId[i], event, data);
             });
         });
       };
@@ -173,30 +173,30 @@ function ServiceSocket(service_name, prototype, emitRouter, debug, entity_module
 
   this.broadcastEvent = (event, data)=> {
     let query = 'service='+service_name+',type=Activity';
-    entity_module.getFilteredEntitiesList(query, (err, entitiesID)=>{
-      for(let i in entitiesID) {
-        entity_module.getEntityConnProfile(entitiesID[i], (err, connprofile) => {
-          _emitasevent(connprofile, entitiesID[i], event, data);
+    entity_module.getFilteredEntitiesList(query, (err, entitiesId)=>{
+      for(let i in entitiesId) {
+        entity_module.getEntityConnProfile(entitiesId[i], (err, connprofile) => {
+          _emitasevent(connprofile, entitiesId[i], event, data);
         });
       }
     });
   };
 
-  this.sendData = (entityID, data) => {
-    entity_module.getEntityConnProfile(entityID, (err, connprofile)=>{
-      _emitasdata(connprofile, entityID, data);
+  this.sendData = (entityId, data) => {
+    entity_module.getEntityConnProfile(entityId, (err, connprofile)=>{
+      _emitasdata(connprofile, entityId, data);
     });
   };
 
   this.sendDataToUsername = (username, data) => {
     // console.log('f');
     let query = 'owner='+username+',service='+service_name+',type=Activity';
-    entity_module.getFilteredEntitiesList(query, (err, entitiesID)=>{
-      for(let i in entitiesID) {
-        authorization_module.Authby.Token(entitiesID[i], (err, pass)=>{
+    entity_module.getFilteredEntitiesList(query, (err, entitiesId)=>{
+      for(let i in entitiesId) {
+        authorization_module.Authby.Token(entitiesId[i], (err, pass)=>{
           if(pass&&!err) {
-            entity_module.getEntityConnProfile(entitiesID[i], (err, connprofile) => {
-              _emitasdata(connprofile, entitiesID[i], data);
+            entity_module.getEntityConnProfile(entitiesId[i], (err, connprofile) => {
+              _emitasdata(connprofile, entitiesId[i], data);
             });
           }
         });
@@ -207,18 +207,18 @@ function ServiceSocket(service_name, prototype, emitRouter, debug, entity_module
   this.sendDataToGroups = (groups, data)=> {
     // console.log('f');
     let query = 'service='+service_name+',type=Activity';
-    entity_module.getFilteredEntitiesList(query, (err, entitiesID)=>{
-      for(let i in entitiesID) {
+    entity_module.getFilteredEntitiesList(query, (err, entitiesId)=>{
+      for(let i in entitiesId) {
         let j = groups.length-1;
         let op = ()=> {
           let sent = false;
-          entity_module.isEntityInGroup(entitiesID[i], groups[j], (err, pass) => {
+          entity_module.isEntityInGroup(entitiesId[i], groups[j], (err, pass) => {
             // console.log(pass, !sent, !err);
             // console.log(err);
             if(pass&&!sent&&!err) {
               sent = true;
-              entity_module.getEntityConnProfile(entitiesID[i], (err, connprofile) => {
-                _emitasdata(connprofile, entitiesID[i], data);
+              entity_module.getEntityConnProfile(entitiesId[i], (err, connprofile) => {
+                _emitasdata(connprofile, entitiesId[i], data);
               });
             }
             else {
@@ -238,12 +238,12 @@ function ServiceSocket(service_name, prototype, emitRouter, debug, entity_module
   this.sendDataToIncludingGroups = (groups, data)=> {
     // console.log('f');
     let query = 'service='+service_name+',type=Activity';
-    entity_module.getFilteredEntitiesList(query, (err, entitiesID)=>{
-      for(let i in entitiesID) {
-        entity_module.isEntityIncludingGroups(entitiesID[i], groups, (err, pass) => {
+    entity_module.getFilteredEntitiesList(query, (err, entitiesId)=>{
+      for(let i in entitiesId) {
+        entity_module.isEntityIncludingGroups(entitiesId[i], groups, (err, pass) => {
           if(pass&&!err)
-            entity_module.getEntityConnProfile(entitiesID[i], (err, connprofile) => {
-              _emitasdata(connprofile, entitiesID[i], data);
+            entity_module.getEntityConnProfile(entitiesId[i], (err, connprofile) => {
+              _emitasdata(connprofile, entitiesId[i], data);
             });
         });
       };
@@ -253,10 +253,10 @@ function ServiceSocket(service_name, prototype, emitRouter, debug, entity_module
   this.broadcastData = (data) => {
     // console.log('f');
     let query = 'service='+service_name+',type=Activity';
-    entity_module.getFilteredEntitiesList(query, (err, entitiesID)=>{
-      for(let i in entitiesID) {
-        entity_module.getEntityConnProfile(entitiesID[i], (err, connprofile) => {
-          _emitasdata(connprofile, entitiesID[i], data);
+    entity_module.getFilteredEntitiesList(query, (err, entitiesId)=>{
+      for(let i in entitiesId) {
+        entity_module.getEntityConnProfile(entitiesId[i], (err, connprofile) => {
+          _emitasdata(connprofile, entitiesId[i], data);
         });
       }
     });
@@ -265,26 +265,26 @@ function ServiceSocket(service_name, prototype, emitRouter, debug, entity_module
   this.closeAll = (callback)=>{
     // console.log('f');
     let query = 'service='+service_name+',type=Activity';
-    entity_module.getFilteredEntitiesList(query, (err, entitiesID)=>{
-      for(let i in entitiesID) {
-        this._closeSocket(entitiesID[i]);
+    entity_module.getFilteredEntitiesList(query, (err, entitiesId)=>{
+      for(let i in entitiesId) {
+        this._closeSocket(entitiesId[i]);
       }
       callback(false);
     });
   };
 
-  this.close = (entityID)=> {
-    this._closeSocket(entityID);
+  this.close = (entityId)=> {
+    this._closeSocket(entityId);
   };
 
   this.on = (type, callback)=> {
     _on_dict[type] = callback;
   };
 
-  this._emitFunctionCall = (entityID, JFname, jsons, callback) => {
+  this._emitFunctionCall = (entityId, JFname, jsons, callback) => {
     try {
       if(_socketfunctions[JFname]) {
-        _socketfunctions[JFname].obj(JSON.parse(jsons==null?'{}':jsons), entityID, (err, returnVal)=> {
+        _socketfunctions[JFname].obj(JSON.parse(jsons==null?'{}':jsons), entityId, (err, returnVal)=> {
           callback(err, returnVal);
         });
       }
@@ -301,13 +301,13 @@ function ServiceSocket(service_name, prototype, emitRouter, debug, entity_module
     }
   };
 
-  this._closeSocket = (entityID, remoteClosed)=> {
-    entity_module.getEntityConnProfile(entityID, (err, connprofile)=>{
+  this._closeSocket = (entityId, remoteClosed)=> {
+    entity_module.getEntityConnProfile(entityId, (err, connprofile)=>{
       if(!err) {
         if(!remoteClosed)
-          _emitasclose(connprofile, entityID);
-        this._emitClose(entityID, (err)=>{
-          entity_module.deleteEntity(entityID, (err)=> {
+          _emitasclose(connprofile, entityId);
+        this._emitClose(entityId, (err)=>{
+          entity_module.deleteEntity(entityId, (err)=> {
               if(err && debug) {
                 Utils.TagLog('*ERR*', 'Error occured at ServiceSocket close.');
                 console.log(err);
@@ -318,16 +318,16 @@ function ServiceSocket(service_name, prototype, emitRouter, debug, entity_module
     });
   };
 
-  this._emitConnect = (entityID, callback)=> {
-    _on_dict['connect'](entityID, callback);
+  this._emitConnect = (entityId, callback)=> {
+    _on_dict['connect'](entityId, callback);
   }
 
-  this._emitData = (entityID, data)=> {
-    _on_dict['data'](entityID, data);
+  this._emitData = (entityId, data)=> {
+    _on_dict['data'](entityId, data);
   }
 
-  this._emitClose = (entityID, callback)=> {
-    _on_dict['close'](entityID, callback);
+  this._emitClose = (entityId, callback)=> {
+    _on_dict['close'](entityId, callback);
   }
 
   this.returnServiceName = () => {
@@ -409,7 +409,7 @@ function ActivitySocket(conn_profile, emitRouter, unbindActivitySocketList, debu
     }
   };
 
-  this.setEntityID = (id) => {
+  this.setEntityId = (id) => {
     _entity_id = id;
     let entities_prev = conn_profile.returnBundle('bundle_entities');
     if(entities_prev != null) {
@@ -432,7 +432,7 @@ function ActivitySocket(conn_profile, emitRouter, unbindActivitySocketList, debu
   // JSONfunction call
   this.call = (name, Json, callback) => {
     let op = ()=> {
-      let tempid = Utils.generateUniqueID();
+      let tempid = Utils.generateUniqueId();
       _jfqueue[tempid] = (err, returnvalue) => {
         callback(err, returnvalue);
       };
@@ -441,7 +441,7 @@ function ActivitySocket(conn_profile, emitRouter, unbindActivitySocketList, debu
     exec(op);
   }
 
-  this.getEntityID = (callback) => {
+  this.getEntityId = (callback) => {
     callback(false, _entity_id);
   };
 

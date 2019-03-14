@@ -28,8 +28,8 @@ function Connection(options) {
 
 
   // define an profile of an connection
-  function ConnectionProfile(serverID, Rpos, connMethod, hostip, hostport, clientip, conn) {
-    let _serverID = serverID;
+  function ConnectionProfile(serverId, Rpos, connMethod, hostip, hostport, clientip, conn) {
+    let _serverId = serverId;
     let _pos = Rpos;
     let _connMethod = connMethod;
     let _bundle = {};
@@ -47,7 +47,7 @@ function Connection(options) {
       _conn.closeConnetion(_GUID);
     };
 
-    this.getServerID = (callback) => {callback(false, _serverID);}
+    this.getServerId = (callback) => {callback(false, _serverId);}
     this.getHostIP = (callback) => {callback(false, _hostip);}
     this.getHostPort = (callback) => {callback(false, _hostport);}
     this.getClientIP = (callback) => {callback(false, _clientip);}
@@ -58,7 +58,7 @@ function Connection(options) {
     this.getConn = (callback) => {callback(false, _conn)};
     this.getGUID = (callback) => {callback(false, _GUID)};
 
-    this.returnServerID = () => {return _serverID;}
+    this.returnServerId = () => {return _serverId;}
     this.returnHostIP = () => {return _hostip;}
     this.returnHostPort = () => {return _hostport;}
     this.returnClientIP = () => {return _clientip;}
@@ -224,7 +224,7 @@ function Connection(options) {
   // a wrapped WebSocket server for nooxy service framework
   function WSServer(id) {
     let _hostip = null;
-    let _serverID = id;
+    let _serverId = id;
     let _wss = null;
     let _myclients = {};
 
@@ -254,7 +254,7 @@ function Connection(options) {
 
       _wss.on('connection', (ws, req) => {
 
-        let connprofile = new ConnectionProfile(_serverID, 'Client', 'WebSocket', ip, port, req.connection.remoteAddress, this);
+        let connprofile = new ConnectionProfile(_serverId, 'Client', 'WebSocket', ip, port, req.connection.remoteAddress, this);
         _myclients[connprofile.returnGUID()] = ws;
 
         ws.on('message', (message) => {
@@ -329,7 +329,7 @@ function Connection(options) {
   // a wrapped WebSocket server for nooxy service framework
   function WSSServer(id) {
     let _hostip = null;
-    let _serverID = id;
+    let _serverId = id;
     let _wss = null;
     let _myclients = {};
 
@@ -363,7 +363,7 @@ function Connection(options) {
 
       _wss.on('connection', (ws, req) => {
 
-        let connprofile = new ConnectionProfile(_serverID, 'Client', 'WebSocketSecure', ip, port, req.connection.remoteAddress, this);
+        let connprofile = new ConnectionProfile(_serverId, 'Client', 'WebSocketSecure', ip, port, req.connection.remoteAddress, this);
         _myclients[connprofile.returnGUID()] = ws;
 
         ws.on('message', (message) => {
@@ -437,7 +437,7 @@ function Connection(options) {
 
   function TCPIPServer(id) {
     let _hostip = null;
-    let _serverID = id;
+    let _serverId = id;
     let _netserver = null;
     let _myclients = {};
 
@@ -464,7 +464,7 @@ function Connection(options) {
       // launch server
       _hostip = ip;
       _netserver = Net.createServer((socket)=>{
-        let connprofile = new ConnectionProfile(_serverID, 'Client', 'TCP/IP', ip, port, socket.remoteAddress, this);
+        let connprofile = new ConnectionProfile(_serverId, 'Client', 'TCP/IP', ip, port, socket.remoteAddress, this);
         _myclients[connprofile.returnGUID()] = socket;
 
         socket.on('data', (data) => {
@@ -545,7 +545,7 @@ function Connection(options) {
   };
 
   function LocalServer(id, virtnet) {
-    let _serverID = id;
+    let _serverId = id;
     let _vnets = null;
     let _myclients= {};
 
@@ -571,7 +571,7 @@ function Connection(options) {
     this.start = function(virtip, virtport) {
       _vnets = virtnet.createServer(virtip, virtport);
       _vnets.on('connection', (vs) => {
-          let connprofile = new ConnectionProfile(_serverID, 'Client', 'Local', virtip, virtport, vs.returnRemoteIP(), this);
+          let connprofile = new ConnectionProfile(_serverId, 'Client', 'Local', virtip, virtport, vs.returnRemoteIP(), this);
           _myclients[connprofile.returnGUID()] = vs;
 
           vs.on('message', (message) => {
@@ -642,18 +642,18 @@ function Connection(options) {
   this.addServer = (conn_method, ip, port) => {
 
     if(conn_method == 'ws' || conn_method =='WebSocket') {
-      let _serverID = Utils.generateGUID();
-      let wws = new WSServer(_serverID);
-      _servers[_serverID] = wws;
+      let _serverId = Utils.generateGUID();
+      let wws = new WSServer(_serverId);
+      _servers[_serverId] = wws;
       wws.start(ip, port);
       wws.onData = this.onData;
       wws.onClose = this.onClose;
     }
 
     else if(conn_method == 'wss' || conn_method =='WebSocketSecure') {
-      let _serverID = Utils.generateGUID();
-      let wws = new WSSServer(_serverID);
-      _servers[_serverID] = wws;
+      let _serverId = Utils.generateGUID();
+      let wws = new WSSServer(_serverId);
+      _servers[_serverId] = wws;
       wws.start(ip, port);
       wws.onData = this.onData;
       wws.onClose = this.onClose;
@@ -661,9 +661,9 @@ function Connection(options) {
 
     else if(conn_method == 'local'||conn_method =='Local') {
       if(_have_local_server == false) {
-        let _serverID = "LOCAL";
-        let locs = new LocalServer(_serverID, _virtutalnet);
-        _servers[_serverID] = locs;
+        let _serverId = "LOCAL";
+        let locs = new LocalServer(_serverId, _virtutalnet);
+        _servers[_serverId] = locs;
         locs.start('LOCALIP', 'LOCALPORT');
         locs.onData = this.onData;
         locs.onClose = this.onClose;
@@ -675,9 +675,9 @@ function Connection(options) {
     }
 
     else if(conn_method == 'TCP/IP' || conn_method =='TCP') {
-      let _serverID = Utils.generateGUID();
-      let nets = new TCPIPServer(_serverID);
-      _servers[_serverID] = nets;
+      let _serverId = Utils.generateGUID();
+      let nets = new TCPIPServer(_serverId);
+      _servers[_serverId] = nets;
       nets.start(ip, port);
       nets.onData = this.onData;
       nets.onClose = this.onClose;
@@ -714,7 +714,7 @@ function Connection(options) {
     };
 
     if(conn_method == 'ws'||conn_method =='WebSocket') {
-      let serverID = "WebSocket";
+      let serverId = "WebSocket";
       let wsc = new WSClient(_virtutalnet);
       wsc.onData = onData_wrapped;
       wsc.onClose = this.onClose;
@@ -722,7 +722,7 @@ function Connection(options) {
     }
 
     else if(conn_method == 'wss'||conn_method =='WebSocketSecure') {
-      let serverID = "WebSocket";
+      let serverId = "WebSocket";
       let wsc = new WSSClient(_virtutalnet);
       wsc.onData = onData_wrapped;
       wsc.onClose = this.onClose;
@@ -734,7 +734,7 @@ function Connection(options) {
         Utils.TagLog('*ERR*', 'Local server not started.');
       }
       else {
-        let serverID = "LOCAL";
+        let serverId = "LOCAL";
         let locc = new LocalClient(_virtutalnet);
         locc.onData = onData_wrapped;
         locc.onClose = this.onClose;
@@ -743,7 +743,7 @@ function Connection(options) {
     }
 
     else if(conn_method == 'TCP/IP'||conn_method =='TCP') {
-      let serverID = "TCP/IP";
+      let serverId = "TCP/IP";
       let netc = new TCPIPClient(_virtutalnet);
       netc.onData = onData_wrapped;
       netc.onClose = this.onClose;

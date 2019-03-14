@@ -87,20 +87,20 @@ function Service() {
 
   this.emitConnectionClose = (connprofile, callback) => {
 
-    let _entitiesID = connprofile.returnBundle('bundle_entities');
-    if(_entitiesID == null) {
+    let _entitiesId = connprofile.returnBundle('bundle_entities');
+    if(_entitiesId == null) {
       callback(true);
     }
-    else if(_entitiesID.length) {
+    else if(_entitiesId.length) {
       let Rpos = connprofile.returnRemotePosition();
       if(connprofile.returnRemotePosition() == 'Client') {
         let i = 0;
         let loop = () => {
           let nowidx = i;
-          let theservice = _local_services[_entity_module.returnEntityValue(_entitiesID[nowidx], 'service')];
+          let theservice = _local_services[_entity_module.returnEntityValue(_entitiesId[nowidx], 'service')];
           if(theservice)
-            theservice.emitSSClose(_entitiesID[nowidx], true);
-          if(i < _entitiesID.length-1) {
+            theservice.emitSSClose(_entitiesId[nowidx], true);
+          if(i < _entitiesId.length-1) {
             i++;
             loop();
           }
@@ -110,12 +110,12 @@ function Service() {
       }
       else {
 
-        for(let i in _entitiesID) {
-          _ASockets[_entitiesID[i]]._emitClose();
+        for(let i in _entitiesId) {
+          _ASockets[_entitiesId[i]]._emitClose();
           setTimeout(()=>{
             // for worker abort referance
-            _ASockets[_entitiesID[i]].worker_cancel_refer = true;
-            delete _ASockets[_entitiesID[i]];
+            _ASockets[_entitiesId[i]].worker_cancel_refer = true;
+            delete _ASockets[_entitiesId[i]];
           }, ActivitySocketDestroyTimeout);
         }
         callback(false);
@@ -135,12 +135,12 @@ function Service() {
     let methods = {
       // nooxy service protocol implementation of "Call Service: Close ServiceSocket"
       CS: (connprofile, data, response_emit) => {
-        let _entitiesID = connprofile.returnBundle('bundle_entities');
-        let index = _entitiesID.indexOf(data.i);
+        let _entitiesId = connprofile.returnBundle('bundle_entities');
+        let index = _entitiesId.indexOf(data.i);
         if (index > -1) {
-          _entitiesID.splice(index, 1);
+          _entitiesId.splice(index, 1);
         }
-        connprofile.setBundle('bundle_entities', _entitiesID);
+        connprofile.setBundle('bundle_entities', _entitiesId);
         theservice.emitSSClose(data.i, true);
       },
 
@@ -246,7 +246,7 @@ function Service() {
         if(_local_services[data.s] != null) {
           // create a description of this service entity.
           let _entity_json = {
-            serverid: connprofile.returnServerID(),
+            serverid: connprofile.returnServerId(),
             service: data.s,
             mode: data.m,
             daemonauthkey: data.k,
@@ -605,20 +605,20 @@ function Service() {
       _service_files_path = path;
     };
 
-    this.emitSSConnection = (entityID, callback) => {
-      _service_socket._emitConnect(entityID, callback);
+    this.emitSSConnection = (entityId, callback) => {
+      _service_socket._emitConnect(entityId, callback);
     };
 
-    this.emitSSClose = (entityID, remoteClosed) => {
-      _service_socket._closeSocket(entityID, remoteClosed);
+    this.emitSSClose = (entityId, remoteClosed) => {
+      _service_socket._closeSocket(entityId, remoteClosed);
     };
 
-    this.emitSSData = (entityID, data) => {
-      _service_socket._emitData(entityID, data);
+    this.emitSSData = (entityId, data) => {
+      _service_socket._emitData(entityId, data);
     };
 
-    this.emitSSJFCall = (entityID, JFname, jsons, callback) => {
-      _service_socket._emitFunctionCall(entityID, JFname, jsons, callback);
+    this.emitSSJFCall = (entityId, JFname, jsons, callback) => {
+      _service_socket._emitFunctionCall(entityId, JFname, jsons, callback);
     };
 
     this.returnManifest = () => {
@@ -764,8 +764,8 @@ function Service() {
       let _as = new SocketPair.ActivitySocket(connprofile, _emitRouter, _unbindActivitySocketList, _debug);
       _ActivityRsCEcallbacks[_data.d.t] = (connprofile, data) => {
         if(data.d.i != "FAIL") {
-          _as.setEntityID(data.d.i);
-          connprofile.setBundle('entityID', data.d.i);
+          _as.setEntityId(data.d.i);
+          connprofile.setBundle('entityId', data.d.i);
           _ASockets[data.d.i] = _as;
           callback(false, _ASockets[data.d.i]);
         }
@@ -802,8 +802,8 @@ function Service() {
       _ActivityRsCEcallbacks[_data.d.t] = (connprofile, data) => {
 
         if(data.d.i != "FAIL") {
-          _as.setEntityID(data.d.i);
-          connprofile.setBundle('entityID', data.d.i);
+          _as.setEntityId(data.d.i);
+          connprofile.setBundle('entityId', data.d.i);
           _ASockets[data.d.i] = _as;
           callback(false, _as);
         }

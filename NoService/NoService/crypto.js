@@ -5,7 +5,7 @@
 'use strict';
 
 const crypto = require('crypto');
-// NOOXY service protocol sercure
+// NOOXY service protocol secure
 function NSPS() {
   let _rsa_pub = null;
   let _rsa_priv = null;
@@ -61,7 +61,7 @@ function NSPS() {
     };
   };
 
-  // Nooxy service protocol sercure request ClientSide
+  // Nooxy service protocol secure request ClientSide
   // in client need to be in implementation module
   this.RqRouter = (connprofile, data, data_sender) => {
     let host_rsa_pub = data.p;
