@@ -1,5 +1,5 @@
 let Constant = {
-  'version': 'aphla-0.4.11',
+  'version': 'aphla-0.5.0',
   'NSP_version': 'aphla 0.4.0',
   'copyright': 'copyright(c)2018-2019 NOOXY inc.',
   'default_user': {
