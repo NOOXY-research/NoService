@@ -17,6 +17,7 @@ import sys, functools, asyncio, socket
 
 UNIX_Sock_Path = sys.argv[1]
 TCP_IP_Chunk_Token = '}{"""}<>'
+IPC_MSG_SIZE_PREFIX_SIZE = 16
 
 def rsetattr(obj, attr, val):
     pre, _, post = attr.rpartition('.')
@@ -47,16 +48,11 @@ class NoService:
     def __repr__(self):
         return repr(self._value)
 
-def process(RAWString):
-    global TCP_IP_Chunk_Token
-    result = []
-    return result
-
 async def unix_sock_client(loop):
     global UNIX_Sock_Path
     while true:
         reader, writer = await asyncio.open_unix_connection(UNIX_Sock_Path, loop=loop)
-        callbacks_to_be_called = process()
+        msg_size = int(await reader.read(IPC_MSG_SIZE_PREFIX_SIZE))
         # print('Send: %r' % message)
         # writer.write(message.encode())
         #

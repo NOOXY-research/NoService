@@ -451,12 +451,12 @@ function Connection(options) {
     this.onClose = (connprofile) => {Utils.TagLog('*ERR*', 'onClose not implemented');};
 
     this.send = function(connprofile, data) {
-      _myclients[connprofile.returnGUID()].write(('0000000000000000'+data.length).slice(-16)+data);
+      _myclients[connprofile.returnGUID()].write(('0000000000000000'+Buffer.from(data).length).slice(-16)+data);
     };
 
     this.broadcast = (data) => {
       for(let i in _myclients) {
-        _myclients[i].write(('0000000000000000'+data.length).slice(-16)+data);
+        _myclients[i].write(('0000000000000000'+Buffer.from(data).length).slice(-16)+data);
       }
     };
 
@@ -468,11 +468,10 @@ function Connection(options) {
         _myclients[connprofile.returnGUID()] = socket;
 
         socket.on('data', (data) => {
-          data = data.toString('utf8');
-          while(data != '') {
-            let chunks_size = parseInt(data.substring(0, 16));
-            this.onData(connprofile, data.substring(16, 16+chunks_size));
-            data = data.substring(16+chunks_size);
+          while(data.length) {
+            let chunks_size = parseInt(data.slice(0, 16).toString());
+            this.onData(connprofile, data.slice(16, 16+chunks_size).toString());
+            data = data.slice(16+chunks_size)
           }
         });
 
@@ -509,7 +508,7 @@ function Connection(options) {
     this.onClose = () => {Utils.TagLog('*ERR*', 'onClose not implemented');};
 
     this.send = (connprofile, data) => {
-      _netc.write(('0000000000000000'+data.length).slice(-16)+data);
+      _netc.write(('0000000000000000'+Buffer.from(data).length).slice(-16)+data);
     };
 
     this.connect = (ip, port, callback) => {
@@ -521,11 +520,10 @@ function Connection(options) {
       })
 
       _netc.on('data', (data) => {
-        data = data.toString('utf8');
-        while(data != '') {
-          let chunks_size = parseInt(data.substring(0, 16));
-          this.onData(connprofile, data.substring(16, 16+chunks_size));
-          data = data.substring(16+chunks_size)
+        while(data.length) {
+          let chunks_size = parseInt(data.slice(0, 16).toString());
+          this.onData(connprofile, data.slice(16, 16+chunks_size).toString());
+          data = data.slice(16+chunks_size);
         }
       });
 
