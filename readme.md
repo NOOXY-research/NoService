@@ -28,8 +28,10 @@ NoService is design for realtime purpose. And it's of course super responsive.
 NoService is built for service. From it's protocol to it's local structure. It also have user authorization system natively integrated with protocol and software.
 ### for general conditions
 NoService is design for any kind of condition such as game, IoT, text contain. However, we have only implemented game([reversi](https://nooxy.org/noversi)), notification([NOOXY](https://nooxy.org)), shell([NoShell](https://www.nooxy.org/static/nsf/shell.html)). Nevertheless the development of NoService is still in progress. We can fix bugs and add features to confirm other abilities.
-### cross platform
+### cross platform client
 Now, NoService can run on browser(javascript) and desktop(javascript). It also supports TCP/IP, websocket connections. Other languages is still on the way.
+### supporting python in server-side(still working with 0.5.x update)
+You can write your service in python and it's event-based asyncio module.
 
 ### Socket-based+API control
 Socket base+API pattern makes the concept easy to understand. NoService wraps the native TCP/IP, websocket or even http polling mode in the future as transportation layer. Make you no need to consider about integrating features with different connections. And with the advantage of NoService, in theory different activities(clients) can share same the socket in the same time. If the NoService Client is implemented well.

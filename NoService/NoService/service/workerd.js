@@ -325,6 +325,7 @@ function WorkerDaemon() {
         _child_alive = false;
       }
       else if(message.t == 4) {
+        // python version needs to check is it a database api!
         try {
           _serviceapi.emitAPIRq(message.p, message.a, message.o);
         }
