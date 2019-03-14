@@ -8,6 +8,7 @@ const Utils = require('./library').Utilities;
 const WebSocket = require('ws');
 const Net = require('net');
 const Https = require('https');
+const Constants = require('./constants');
 
 function Connection(options) {
   if(options.allow_ssl_self_signed)
@@ -19,7 +20,6 @@ function Connection(options) {
   let _have_local_server = false;
   let _virtutalnet = null;
   let _blocked_ip = [];
-  let _tcp_ip_chunk_token = '}{"""}<>';
   let ssl_priv_key = null;
   let ssl_cert = null;
   let heartbeat_phrase = '{m:"HB"}';
@@ -451,12 +451,12 @@ function Connection(options) {
     this.onClose = (connprofile) => {Utils.TagLog('*ERR*', 'onClose not implemented');};
 
     this.send = function(connprofile, data) {
-      _myclients[connprofile.returnGUID()].write(_tcp_ip_chunk_token+data);
+      _myclients[connprofile.returnGUID()].write(('0000000000000000'+data.length).slice(-16)+data);
     };
 
     this.broadcast = (data) => {
       for(let i in _myclients) {
-        _myclients[i].write(_tcp_ip_chunk_token+data);
+        _myclients[i].write(('0000000000000000'+data.length).slice(-16)+data);
       }
     };
 
@@ -469,9 +469,10 @@ function Connection(options) {
 
         socket.on('data', (data) => {
           data = data.toString('utf8');
-          let chunks = data.split(_tcp_ip_chunk_token);
-          for(let i =1; i<chunks.length; i++) {
-            this.onData(connprofile, chunks[i]);
+          while(data != '') {
+            let chunks_size = parseInt(data.substring(0, 16));
+            this.onData(connprofile, data.substring(16, 16+chunks_size));
+            data = data.substring(16+chunks_size);
           }
         });
 
@@ -508,7 +509,7 @@ function Connection(options) {
     this.onClose = () => {Utils.TagLog('*ERR*', 'onClose not implemented');};
 
     this.send = (connprofile, data) => {
-      _netc.write(_tcp_ip_chunk_token+data);
+      _netc.write(('0000000000000000'+data.length).slice(-16)+data);
     };
 
     this.connect = (ip, port, callback) => {
@@ -521,9 +522,10 @@ function Connection(options) {
 
       _netc.on('data', (data) => {
         data = data.toString('utf8');
-        let chunks = data.split(_tcp_ip_chunk_token);
-        for(let i =1; i<chunks.length; i++) {
-          this.onData(connprofile, chunks[i]);
+        while(data != '') {
+          let chunks_size = parseInt(data.substring(0, 16));
+          this.onData(connprofile, data.substring(16, 16+chunks_size));
+          data = data.substring(16+chunks_size)
         }
       });
 

@@ -308,4 +308,5 @@ process.on('disconnect', ()=> {
   console.log('Disconnect from NoService Core. "'+process.title+'" forced to exit. Your state may not be saved!');
   process.exit();
 });
+
 w.established();

@@ -13,8 +13,10 @@
 # 5 getMemoryUsage
 # 99 close
 
+import sys, functools, asyncio, socket
 
-import functools
+UNIX_Sock_Path = sys.argv[1]
+TCP_IP_Chunk_Token = '}{"""}<>'
 
 def rsetattr(obj, attr, val):
     pre, _, post = attr.rpartition('.')
@@ -44,3 +46,25 @@ class NoService:
 
     def __repr__(self):
         return repr(self._value)
+
+def process(RAWString):
+    global TCP_IP_Chunk_Token
+    result = []
+    return result
+
+async def unix_sock_client(loop):
+    global UNIX_Sock_Path
+    while true:
+        reader, writer = await asyncio.open_unix_connection(UNIX_Sock_Path, loop=loop)
+        callbacks_to_be_called = process()
+        # print('Send: %r' % message)
+        # writer.write(message.encode())
+        #
+        # data = await reader.read(100)
+        # print('Received: %r' % data.decode())
+        #
+        # print('Close the socket')
+        # writer.close()
+
+loop = asyncio.get_event_loop()
+loop.run_until_complete(unix_sock_client(loop))
