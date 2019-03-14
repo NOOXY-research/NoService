@@ -17,11 +17,11 @@ function Service(Me, NoService) {
   // Your settings in manifest file.
   let settings = Me.Settings;
 
-  // JSONfunction is a function that can be defined, which others entities can call.
+  // ServiceFunction is a function that can be defined, which others entities can call.
   // It is a NOOXY Service Framework Standard
-  ss.def('JSONfunction', (json, entityID, returnJSON)=> {
+  ss.def('ServiceFunction', (json, entityID, returnJSON)=> {
     // Code here for JSONfunciton
-    // Return Value for JSONfunction call. Otherwise remote will not recieve funciton return value.
+    // Return Value for ServiceFunction call. Otherwise remote will not recieve funciton return value.
     let json_be_returned = {
       d: 'Hello! NOOXY Service Framework!'
     }
@@ -29,10 +29,10 @@ function Service(Me, NoService) {
     returnJSON(false, json_be_returned);
   });
 
-  // Safe define a JSONfunction.
-  ss.sdef('SafeJSONfunction', (json, entityID, returnJSON)=> {
+  // Safe define a ServiceFunction.
+  ss.sdef('SafeServiceFunction', (json, entityID, returnJSON)=> {
     // Code here for JSONfunciton
-    // Return Value for JSONfunction call. Otherwise remote will not recieve funciton return value.
+    // Return Value for ServiceFunction call. Otherwise remote will not recieve funciton return value.
     let json_be_returned = {
       d: 'Hello! NOOXY Service Framework!'
     }

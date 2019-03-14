@@ -497,7 +497,7 @@ function Service() {
         return err;
       }
 
-      _worker = _workerd.returnWorker(_service_path+'/entry');
+      _worker = _workerd.generateWorker(_service_path+'/entry', _service_manifest.language);
       // load module from local service directory
       _authenticity_module.getUserIdByUsername(_local_services_owner, (err, ownerid)=> {
         // create a description of this service entity.

@@ -36,7 +36,7 @@ function NoTalk(Me, NoService) {
       let index = 0;
       let op = ()=> {
         _models.ChMeta.get(chs[index], (err, meta)=> {
-          if(meta.Status==0)
+          if(meta&&meta.Status==0)
             channels[chs[index]] = meta;
           index++;
           if(index<chs.length) {

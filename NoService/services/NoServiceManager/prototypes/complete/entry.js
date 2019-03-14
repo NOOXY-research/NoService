@@ -18,12 +18,12 @@ function Service(Me, NoService) {
   // import NoService to {{ servicename }} module
   const {{ servicename }} = new (require('./{{ servicename }}'))(Me, NoService);
 
-  // JSONfunction is a function that can be defined, which others entities can call.
+  // ServiceFunction is a function that can be defined, which others entities can call.
   // It is a NOOXY Service Framework Standard
-  ss.def('JSONfunction', (json, entityID, returnJSON)=> {
+  ss.def('ServiceFunction', (json, entityID, returnJSON)=> {
     {{ servicename }}.whateverfunction((err, msg)=> {
       // Code here for JSONfunciton
-      // Return Value for JSONfunction call. Otherwise remote will not recieve funciton return value.
+      // Return Value for ServiceFunction call. Otherwise remote will not recieve funciton return value.
       let json_be_returned = {
         d: 'Hello! NOOXY Service Framework!',
         msg: msg
@@ -33,10 +33,10 @@ function Service(Me, NoService) {
     });
   });
 
-  // Safe define a JSONfunction.
-  ss.sdef('SafeJSONfunction', (json, entityID, returnJSON)=> {
+  // Safe define a ServiceFunction.
+  ss.sdef('SafeServiceFunction', (json, entityID, returnJSON)=> {
     // Code here for JSONfunciton
-    // Return Value for JSONfunction call. Otherwise remote will not recieve funciton return value.
+    // Return Value for ServiceFunction call. Otherwise remote will not recieve funciton return value.
     let json_be_returned = {
       d: 'Hello! NOOXY Service Framework!'
     }

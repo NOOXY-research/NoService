@@ -13,37 +13,34 @@
 # 5 getMemoryUsage
 # 99 close
 
-from twisted.internet import reactor, protocol
 
-class NoService(self):
-    pass
+import functools
 
-class EchoClient(protocol.Protocol):
-    """Once connected, send a message, then print the result."""
+def rsetattr(obj, attr, val):
+    pre, _, post = attr.rpartition('.')
+    return setattr(rgetattr(obj, pre) if pre else obj, post, val)
 
-    def connectionMade(self):
-        self.transport.write(b"hello, world!")
+# using wonder's beautiful simplification: https://stackoverflow.com/questions/31174295/getattr-and-setattr-on-nested-objects/31174427?noredirect=1#comment86638618_31174427
 
-    def dataReceived(self, data):
-        "As soon as any data is received, write it back."
-        print("Server said:", data)
-        self.transport.loseConnection()
+def rgetattr(obj, attr, *args):
+    def _getattr(obj, attr):
+        return getattr(obj, attr, *args)
+    return functools.reduce(_getattr, [obj] + attr.split('.'))
 
-    def connectionLost(self, reason):
-        print("connection lost")
+class NoService:
+    def __init__(self, value, **attrs):
+        self._value = value
+        self._attrs = attrs
 
-class EchoFactory(protocol.ClientFactory):
-    protocol = EchoClient
+    def __getattr__(self, name):
+        if name in self._attrs:
+            return self._attrs[name]
+        return getattr(self._value, name)
 
-    def clientConnectionFailed(self, connector, reason):
-        print("Connection failed - goodbye!")
-        reactor.stop()
+    def __setattr__(self, name, value):
+        if name in {'_value', '_attrs'}:
+            return super().__setattr__(name, value)
+        self._attrs[name] = ShadowAttrs(value)
 
-    def clientConnectionLost(self, connector, reason):
-        print("Connection lost - goodbye!")
-        reactor.stop()
-
-f = EchoFactory()
-
-reactor.connectUNIX("/tmp/noservice.sock", f)
-reactor.run()
+    def __repr__(self):
+        return repr(self._value)
