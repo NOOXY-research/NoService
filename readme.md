@@ -1,5 +1,6 @@
 # NoService
 ![](https://raw.githubusercontent.com/NOOXY-inc/Art-Collection/master/NoService/NoService.png)
+Deploy services just like apps
 The project is still in alpha!
 ## Installation and Deploy
 ``` sh
@@ -39,7 +40,7 @@ NoService provide bundled services such as NoShell which give you access of NoSe
 ### Integrated ORM
 
 ## Target version
-* daemon: alpha 0.4.8
+* daemon: alpha 0.4.11
 * protocol: NSP alpha 0.4
 
 ## Dependences
