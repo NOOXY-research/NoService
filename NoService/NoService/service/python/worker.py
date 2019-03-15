@@ -4,7 +4,7 @@
 # Copyright 2018-2019 NOOXY. All Rights Reserved.
 
 # NOOXY Service WorkerDaemon protocol
-# message.t
+# message['t']
 # 0 worker established {t, a: api tree, p: service module path, c: closetimeout}
 # 1 launch
 # 2 callback {t, p: [obj_id, callback_path], a: arguments, o:{arg_index, [obj_id, callback_tree]}}
@@ -13,10 +13,11 @@
 # 5 getMemoryUsage
 # 99 close
 
-import sys, asyncio, socket, json, re, random, os, psutil
-from .api_prototype import *
+import sys, asyncio, socket, json, re, random, os
+from api_prototype import *
 
 UNIX_Sock_Path = sys.argv[1]
+Service_Name = sys.argv[2]
 IPC_MSG_SIZE_PREFIX_SIZE = 16
 MSG_READ_SIZE = 2**16
 
@@ -32,13 +33,16 @@ class WorkerClient:
 
     # send message to nodejs parent
     def send(self, message):
+        encoded = None
         if(isinstance(message, str)):
-            self.loop.create_task(writer.write(message.encode()))
+            encoded = message.encode()
         else:
-            self.loop.create_task(writer.write(json.dumps(message).encode()))
+            encoded = json.dumps(message).encode()
+        self.writer.write(str(len(encoded)).zfill(16).encode()+encoded)
 
     # parent API caller wrapper
-    def callParentAPI(self, [id, APIpath], args):
+    def callParentAPI(self, id_APIpath, args):
+        id, APIpath = id_APIpath
         _data = {"t":4, "p": APIpath, "a": args, "o": {}}
         for i, arg in args:
             if callable(arg):
@@ -48,7 +52,8 @@ class WorkerClient:
         self.send(data)
 
     # parent API caller wrapper
-    def emitParentCallback(self, [obj_id, path], args):
+    def emitParentCallback(self, id_APIpath, args):
+        id, APIpath = id_APIpath
         _data = {"t":5, "p": [obj_id, path], "a": args, "o": {}}
         for i, arg in args:
             if callable(arg):
@@ -60,48 +65,45 @@ class WorkerClient:
     # onMessage event callback
     async def onMessage(self, message):
         message = json.loads(message)
-        if message.t == 0:
+        if message['t'] == 0:
             p = re.compile('.*\/([^\/]*)\/entry')
-            self._service_name = p.match(message.p).group(1)
-            self._close_timeout = message.c;
-            self._clear_obj_garbage_timeout = message.g;
-            self._api = generateObjCallbacks('API', message.a, self.callParentAPI)
-            self._api.getMe()
+            self._service_name = p.match(message['p']).group(1)
+            self._close_timeout = message['c'];
+            self._clear_obj_garbage_timeout = message['g'];
+            self._api = generateObjCallbacks('API', message['a'], self.callParentAPI)
+            # self._api.getMe()
             # not completed
-        else if message.t == 1:
+        elif message['t'] == 1:
             _service_module.start()
-        else if message.t == 2:
+        elif message['t'] == 2:
             callObjCallback(self._local_obj_callbacks_dict[message['p'][0]], message['p'][1], message['a'], message['o'], self.emitParentCallback, generateObjCallbacks)
-        else if message.t == 3:
+        elif message['t'] == 3:
             del  _local_obj_callbacks_dict[message['i']]
-        else if message.t == 4:
+        elif message['t'] == 4:
             self.send({'t':6, 'i':message['i'], 'c': len(_local_obj_callbacks_dict)})
-        else if message.t == 5:
+        elif message['t'] == 5:
             # not implemented
             self.send({'t':7, 'i':message['i'], 'c': None})
-        else if message.t == 98:
+        elif message['t'] == 98:
             pass
-        else if message.t == 99:
+        elif message['t'] == 99:
             pass
 
     def established(self):
-        self.send({'t':0})
+        self.send({'t':0, 's': Service_Name})
 
 # readOneMessege from reader and follows the NoService TCP protocol
 async def readOneMessege(reader):
     msg_string = ""
     msg_size = int((await reader.read(IPC_MSG_SIZE_PREFIX_SIZE)).decode())
     left = msg_size
-    while(left>0) {
-        if(left>MSG_READ_SIZE) {
+    while left>0:
+        if left>MSG_READ_SIZE:
             msg_string += (await reader.read(MSG_READ_SIZE)).decode()
             left = left - MSG_READ_SIZE
-        }
-        else {
+        else:
             msg_string += (await reader.read(left)).decode()
             left = 0
-        }
-    }
     return msg_string
 
 # first layer of eventloop
@@ -110,11 +112,12 @@ async def unix_sock_client(loop):
     reader, writer = await asyncio.open_unix_connection(UNIX_Sock_Path, loop=loop)
     w = WorkerClient(loop, reader, writer)
     w.established()
-    while true:
+    while True:
         msg_string = await readOneMessege(reader)
-        loop.create_task(w.onMessage(msg_string, reader, writer))
+        print(msg_string)
+        loop.create_task(w.onMessage(msg_string))
         # print('Send: %r' % message)
-        # writer.write(message.encode())
+        # writer.write(message['encode())
         #
         # data = await reader.read(100)
         # print('Received: %r' % data.decode())

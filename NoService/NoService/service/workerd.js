@@ -23,8 +23,11 @@
 
 'use strict';
 
-const {fork} = require('child_process');
+const {fork, spawn} = require('child_process');
 const Utils = require('../library').Utilities;
+const Net = require('net');
+const Constants = require('../constants');
+const fs = require('fs');
 
 function WorkerDaemon() {
   let _worker_clients = {};
@@ -32,6 +35,71 @@ function WorkerDaemon() {
   let _clear_obj_garbage_timeout = 1000*60*10;
   // let _services_relaunch_cycle = 1000*60*60*24;
   let _serviceapi_module;
+
+  try {
+    fs.unlinkSync(Constants.UNIX_SOCK_PATH);
+  } catch(e) {}
+
+  let _unix_sock_server = Net.createServer((socket)=>{
+    let _api_sock = new APISocket(socket);
+    socket.on('data', (data)=> {
+
+      while(data.length) {
+
+        let chunks_size = parseInt(data.slice(0, 16).toString());
+        let msg = JSON.parse(data.slice(16, 16+chunks_size).toString());
+        if(msg.t == 0) {
+          _worker_clients[msg.s].pairSocket(_api_sock);
+        }
+        else {
+          _api_sock._onMessege(msg);
+        }
+        data = data.slice(16+chunks_size);
+      }
+    });
+
+    socket.on('error', (error) => {
+      Utils.TagLog('*ERR*', 'An error occured on worker daemon module.');
+      Utils.TagLog('*ERR*', error);
+      socket.destroy();
+      _api_sock._onClose();
+    });
+
+    socket.on('close', ()=> {
+      _api_sock._onClose();
+    });
+
+  }).listen(Constants.UNIX_SOCK_PATH);
+
+  function APISocket(sock) {
+    let _on_callbacks = {};
+
+    this._onClose = ()=> {
+      if(_on_callbacks['close'])
+        _on_callbacks['close'](message);
+    };
+
+    this._onMessege = (message)=> {
+      if(_on_callbacks['message'])
+        _on_callbacks['message'](message);
+    };
+
+    this.send = (data, callback)=> {
+      if(typeof(data) != 'string') {
+        data = JSON.stringify(data);
+      }
+      sock.write(('0000000000000000'+Buffer.from(data).length).slice(-16)+data);
+    }
+
+    this.on = (eventname, callback)=> {
+      _on_callbacks[eventname] = callback;
+    };
+
+    this.close = ()=> {
+      sock.destroy();
+    };
+
+  }
 
   function WorkerClient(path) {
     let _serviceapi = null;
@@ -234,6 +302,8 @@ function WorkerDaemon() {
   function PythonWorkerClient(path) {
     let _serviceapi = null;
     let _child = null;
+    let _api_sock = null;
+    let _unix_socket_path = null;
     let _service_name =  /.*\/([^\/]*)\/entry/g.exec(path)[1];
     let _InfoRq = {};
     let _init_callback;
@@ -252,7 +322,7 @@ function WorkerDaemon() {
       if(_child_alive&&_child) {
         let _rqid = Utils.generateUniqueID();
         _InfoRq[_rqid] = callback;
-        // pythonize _child.send({t: 4, i: _rqid});
+        _api_sock.send({t: 4, i: _rqid});
       }
       else {
         callback(new Error("Child is not alive."));
@@ -263,7 +333,7 @@ function WorkerDaemon() {
       if(_child_alive&&_child) {
         let _rqid = Utils.generateUniqueID();
         _InfoRq[_rqid] = callback;
-        // pythonize _child.send({t: 5, i: _rqid});
+        _api_sock.send({t: 5, i: _rqid});
       }
       else {
         callback(new Error("Child is not alive."));
@@ -271,18 +341,18 @@ function WorkerDaemon() {
     }
 
     this.emitChildClose = ()=> {
-      // pythonize if(_child_alive&&_child)
-        // pythonize _child.send({t:99});
+      if(_child_alive&&_child&&_api_sock)
+        _api_sock.send({t:99});
     }
 
     this.emitRemoteUnbind = (id)=> {
-      // pythonize if(_child_alive&&_child)
-        // pythonize _child.send({t:3, i: id}, (err)=> {
-        // pythonize   if (err) {
-        // pythonize     Utils.TagLog('*ERR*' , 'Occured error on sending data to child "'+_service_name+'".');
-        // pythonize     console.log(err);
-        // pythonize   }
-        // pythonize });
+       if(_child_alive&&_child&&_api_sock)
+         _api_sock.send({t:3, i: id}, (err)=> {
+           if (err) {
+             Utils.TagLog('*ERR*' , 'Occured error on sending data to child "'+_service_name+'".');
+             console.log(err);
+           }
+        });
     }
 
     this.emitChildCallback = ([obj_id, path], args, argsobj) => {
@@ -294,13 +364,13 @@ function WorkerDaemon() {
       }
 
       try {
-        // pythonize if(_child_alive&&_child)
-          // pythonize _child.send(_data, (err)=> {
-          // pythonize   if (err) {
-          // pythonize     Utils.TagLog('*ERR*' , 'Occured error on sending data to child "'+_service_name+'".');
-          // pythonize     console.log(err);
-          // pythonize   }
-          // pythonize });
+        if(_child_alive&&_child&&_api_sock)
+           _api_sock.send(_data, (err)=> {
+             if (err) {
+               Utils.TagLog('*ERR*' , 'Occured error on sending data to child "'+_service_name+'".');
+               console.log(err);
+             }
+          });
       }
       catch(err) {
         Utils.TagLog('*ERR*' , 'Occured error on "'+_service_name+'".');
@@ -310,7 +380,7 @@ function WorkerDaemon() {
 
     this.onMessage = (message)=>{
       if(message.t == 0) {
-        // pythonize _child.send({t:0, p: path, a: _serviceapi.returnAPITree(), c: _close_worker_timeout, g: _clear_obj_garbage_timeout});
+        _api_sock.send({t:0, p: path, a: _serviceapi.returnAPITree(), c: _close_worker_timeout, g: _clear_obj_garbage_timeout});
       }
       else if(message.t == 1) {
         _init_callback(false);
@@ -320,8 +390,10 @@ function WorkerDaemon() {
       }
       else if(message.t == 3) {
         _close_callback(false);
-        // pythonize _child.kill();
-        // pythonize _child = null;
+        _child.kill();
+        _child = null;
+        _api_sock.close();
+        _api_sock = null;
         _child_alive = false;
       }
       else if(message.t == 4) {
@@ -330,15 +402,15 @@ function WorkerDaemon() {
           _serviceapi.emitAPIRq(message.p, message.a, message.o);
         }
         catch (e) {
-          // pythonize _child.send({
-          // pythonize   t:98,
-          // pythonize   d:{
-          // pythonize     api_path: message.p,
-          // pythonize     call_args: message.a,
-          // pythonize     args_obj_tree: message.o
-          // pythonize   },
-          // pythonize   e: e.stack
-          // pythonize });
+           _api_sock.send({
+             t:98,
+             d:{
+               api_path: message.p,
+               call_args: message.a,
+               args_obj_tree: message.o
+             },
+             e: e.stack
+          });
         }
       }
       else if(message.t == 5) {
@@ -346,15 +418,15 @@ function WorkerDaemon() {
           _serviceapi.emitCallbackRq(message.p, message.a, message.o);
         }
         catch (e) {
-          // pythonize _child.send({
-          // pythonize   t:98,
-          // pythonize   d:{
-          // pythonize     obj_path: message.p,
-          // pythonize     call_args: message.a,
-          // pythonize     args_obj_tree: message.o
-          // pythonize   },
-          // pythonize   e: e.stack
-          // pythonize });
+           _api_sock.send({
+             t:98,
+             d:{
+               obj_path: message.p,
+               call_args: message.a,
+               args_obj_tree: message.o
+             },
+             e: e.stack
+          });
         }
       }
       else if(message.t == 6) {
@@ -367,8 +439,10 @@ function WorkerDaemon() {
       }
       else if(message.t == 96){
         _close_callback(new Error('Worker closing error:\n'+message.e));
-        // pythonize _child.kill();
+        _child.kill();
         _child = null;
+        _api_sock.close();
+        _api_sock = null;
         _child_alive = false;
       }
       else if(message.t == 97){
@@ -382,18 +456,26 @@ function WorkerDaemon() {
       }
     };
 
+    this.pairSocket = (APIsock)=> {
+      _api_sock = APIsock;
+      APIsock.on('message', (message)=> {
+        this.onMessage(message);
+      });
+      this.onMessage({t: 0});
+    };
+
     this.launch = (launch_callback)=> {
       _launch_callback = launch_callback;
-      // pythonize _child.send({t:1});
+      _api_sock.send({t:1});
     };
 
     this.init = (init_callback)=> {
       _init_callback = init_callback;
-      // pythonize _child = fork(require.resolve('./worker.js'), {stdio: [process.stdin, process.stdout, process.stderr, 'ipc']});
+      _child = spawn('python3', [require.resolve('./python/worker.py'), Constants.UNIX_SOCK_PATH, _service_name], {stdio: [process.stdin, process.stdout, process.stderr, 'ipc']});
+      _child.on('close', (code)=> {
+        _init_callback(new Error('PythonWorkerClient of "'+_service_name+'" occured error.'));
+      });
       _child_alive = true;
-      // pythonize _child.on('message', message => {
-      // pythonize   this.onMessage(message);
-      // pythonize });
     };
 
     this.relaunch = (relaunch_callback)=> {
@@ -468,11 +550,12 @@ function WorkerDaemon() {
   }
 
   this.generateWorker = (path, lang) => {
+    console.log(path, lang);
     if(lang == null || lang == 'js' || lang == 'javascript') {
       return new WorkerClient(path);
     }
     else if(lang == 'python') {
-
+      return new PythonWorkerClient(path);
     }
   }
 
@@ -481,7 +564,7 @@ function WorkerDaemon() {
   };
 
   this.close = ()=> {
-
+    _unix_sock_server.close();
   }
 }
 

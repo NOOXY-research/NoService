@@ -450,7 +450,7 @@ function Connection(options) {
 
     this.onClose = (connprofile) => {Utils.TagLog('*ERR*', 'onClose not implemented');};
 
-    this.send = function(connprofile, data) {
+    this.send = (connprofile, data)=> {
       _myclients[connprofile.returnGUID()].write(('0000000000000000'+Buffer.from(data).length).slice(-16)+data);
     };
 

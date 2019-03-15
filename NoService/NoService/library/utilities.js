@@ -358,7 +358,7 @@ let TagLog = (tag, logstring) => {
   console.log('['+tag+'] '+logstring.replaceAll('\n', '\n['+tag+'] '));
 };
 
-// generateGUId
+// generateGUID
 let generateUniqueId = () => {
   return '_' + Math.random().toString(36).substr(2, 9);
 };

@@ -576,7 +576,7 @@ function Service() {
           }
         }
         catch(err) {
-          erreport = new Error('Launching service "'+_service_name+'" ended with failure.');
+          erreport = new Error('Launching service "'+_service_name+'" ended with failure.\n'+err.toString());
           callback(erreport);
           return err;
         }
@@ -932,6 +932,8 @@ function Service() {
     };
 
     _close_next();
+
+
   };
 }
 

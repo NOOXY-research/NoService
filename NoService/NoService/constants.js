@@ -14,7 +14,8 @@ let Constant = {
   'MODEL_TABLE_NAME': 'NoService_Models',
   'MODEL_TABLE_PREFIX': 'NoService_Model_',
   'MODEL_INDEXKEY': 'Idx',
-  'MODEL_GROUPKEY': 'Grp'
+  'MODEL_GROUPKEY': 'Grp',
+  'UNIX_SOCK_PATH': '/tmp/NoService.sock'
 }
 
 module.exports = Constant;
