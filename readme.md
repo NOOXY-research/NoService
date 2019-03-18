@@ -42,7 +42,7 @@ NoService provide bundled services such as NoShell which give you access of NoSe
 ### Integrated ORM
 
 ## Target version
-* daemon: alpha 0.4.11
+* daemon: alpha 0.5.0
 * protocol: NSP alpha 0.4
 
 ## Dependences
