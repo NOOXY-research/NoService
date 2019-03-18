@@ -249,8 +249,8 @@ def start(self):
   ss = self.NoService.Service.ServiceSocket;
   def onConnect(entityId, callback):
     # Send msg on connected entity.
-    ss.sendData(entityId, 'Hello world!');
-    callback(False);
+    ss.sendData(entityId, 'Hello world!')
+    callback(False)
   ss.on('connect', onConnect)
 ```
 
@@ -335,30 +335,28 @@ this.start = ()=> {
 
 2. python3
 ``` python
-// Your service's entry.js
+# Your service's entry.py
 def start(self):
-
   NoService = self.NoService
-  ss = NoService.Service.ServiceSocket;
+  ss = NoService.Service.ServiceSocket
   # Normally define a ServiceFunction
   def Hello(json, entityId, returnJSON):
-    print(json['d']); # Print "I am client.".
+    print(json['d']) # Print "I am client.".
     json_be_returned = {'d': 'Hello! NoService Framework!'}
-    returnJSON(false, json_be_returned);
+    returnJSON(false, json_be_returned)
 
-  ss.define('Hello', Hello);
+  ss.define('Hello', Hello)
 
   def HelloSecuredPass(json, entityId, returnJSON):
-    print(json['d']); # Print "I am client.".
+    print(json['d']) # Print "I am client.".
     json_be_returned = {'d': 'Hello! NoService Framework! Secured.'}
-    returnJSON(false, json_be_returned);
+    returnJSON(false, json_be_returned)
 
   def HelloSecuredNotPass(json, entityId, returnJSON):
-    print('Auth failed.');
+    print('Auth failed.')
   # Safe define a ServiceFunction. User should be admin.
-  ss.sdefine('HelloSecured', HelloSecuredPass, HelloSecuredNotPass);
+  ss.sdefine('HelloSecured', HelloSecuredPass, HelloSecuredNotPass)
 
-}
 ```
 In order to well defined your protocol. It's suggest to defined your protocol in manifest.json file. (optional)
 
