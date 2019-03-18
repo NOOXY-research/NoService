@@ -339,6 +339,7 @@ this.start = ()=> {
 def start(self):
   NoService = self.NoService
   ss = NoService.Service.ServiceSocket
+
   # Normally define a ServiceFunction
   def Hello(json, entityId, returnJSON):
     print(json['d']) # Print "I am client.".
@@ -347,6 +348,7 @@ def start(self):
 
   ss.define('Hello', Hello)
 
+  # Safe define a ServiceFunction. User should be admin.
   def HelloSecuredPass(json, entityId, returnJSON):
     print(json['d']) # Print "I am client.".
     json_be_returned = {'d': 'Hello! NoService Framework! Secured.'}
@@ -354,7 +356,7 @@ def start(self):
 
   def HelloSecuredNotPass(json, entityId, returnJSON):
     print('Auth failed.')
-  # Safe define a ServiceFunction. User should be admin.
+
   ss.sdefine('HelloSecured', HelloSecuredPass, HelloSecuredNotPass)
 
 ```
