@@ -19,7 +19,6 @@
 // 97 runtime error
 // 98 launch error
 // 99 init error
-// memory leak on ActivitySocket!!!
 
 'use strict';
 
@@ -37,7 +36,7 @@ function WorkerDaemon() {
   let _serviceapi_module;
 
   try {
-    fs.unlinkSync(Constants.UNIX_SOCK_PATH);
+    fs.unlinkSync(Constants.WORKER_UNIX_SOCK_PATH);
   } catch(e) {}
 
   let _unix_sock_server = Net.createServer((socket)=>{
@@ -69,7 +68,7 @@ function WorkerDaemon() {
       _api_sock._onClose();
     });
 
-  }).listen(Constants.UNIX_SOCK_PATH);
+  }).listen(Constants.WORKER_UNIX_SOCK_PATH);
 
   function APISocket(sock) {
     let _on_callbacks = {};
@@ -471,7 +470,7 @@ function WorkerDaemon() {
 
     this.init = (init_callback)=> {
       _init_callback = init_callback;
-      _child = spawn('python3', [require.resolve('./python/worker.py'), Constants.UNIX_SOCK_PATH, _service_name], {stdio: [process.stdin, process.stdout, process.stderr, 'ipc']});
+      _child = spawn('python3', [require.resolve('./python/worker.py'), Constants.WORKER_UNIX_SOCK_PATH, _service_name], {stdio: [process.stdin, process.stdout, process.stderr, 'ipc']});
       _child.on('close', (code)=> {
         _init_callback(new Error('PythonWorkerClient of "'+_service_name+'" occured error.'));
       });
@@ -566,7 +565,7 @@ function WorkerDaemon() {
   this.close = ()=> {
     _unix_sock_server.close();
     try {
-      fs.unlinkSync(Constants.UNIX_SOCK_PATH);
+      fs.unlinkSync(Constants.WORKER_UNIX_SOCK_PATH);
     } catch(e) {}
   }
 }
