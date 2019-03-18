@@ -13,13 +13,14 @@
 # 5 getMemoryUsage
 # 99 close
 
-import sys, asyncio, socket, json, re, random, os, signal
+import sys, asyncio, socket, json, re, random, os, signal, json, importlib, traceback
 from api_prototype import *
 
 UNIX_Sock_Path = sys.argv[1]
 Service_Name = sys.argv[2]
 IPC_MSG_SIZE_PREFIX_SIZE = 16
 MSG_READ_SIZE = 2**16
+CONSTANTS_PATH = '../../constants.json'
 
 loop = asyncio.get_event_loop()
 
@@ -27,6 +28,12 @@ def keyboardInterruptHandler(signal, frame):
     pass
 
 signal.signal(signal.SIGINT, keyboardInterruptHandler)
+
+# class dummy():
+#     def __init__(self):
+#         pass
+#     def a(self, err, m):
+#         print(m)
 
 # main class of the NoService python worker
 class WorkerClient:
@@ -38,6 +45,7 @@ class WorkerClient:
         self.writer = writer
         self._local_obj_callbacks_dict = {}
         self._service_module = None
+        self._closed = False
 
     # send message to nodejs parent
     def send(self, message):
@@ -52,23 +60,27 @@ class WorkerClient:
     def callParentAPI(self, id_APIpath, args):
         id, APIpath = id_APIpath
         _data = {"t":4, "p": APIpath, "a": args, "o": {}}
-        for i, arg in args:
+        for i in range(len(args)):
+            arg = args[i]
             if callable(arg):
+                args[i] = None
                 _Id = random.randint(0, 999999)
                 self._local_obj_callbacks_dict[_Id] = arg
                 _data["o"][i] = [_Id, generateObjCallbacksTree(arg)]
-        self.send(data)
+        print(_data)
+        self.send(_data)
 
     # parent API caller wrapper
     def emitParentCallback(self, id_APIpath, args):
         id, APIpath = id_APIpath
         _data = {"t":5, "p": [obj_id, path], "a": args, "o": {}}
-        for i, arg in args:
+        for i in range(len(args)):
+            arg = args[i]
             if callable(arg):
                 _Id = random.randint(0, 999999)
                 self._local_obj_callbacks_dict[_Id] = arg
                 _data["o"][i] = [_Id, generateObjCallbacksTree(arg)]
-        self.send(data)
+        self.send(_data)
 
     # onMessage event callback
     async def onMessage(self, message):
@@ -79,22 +91,51 @@ class WorkerClient:
             self._close_timeout = message['c'];
             self._clear_obj_garbage_timeout = message['g'];
             self._api = generateObjCallbacks('API', message['a'], self.callParentAPI)
-            # self._api.getMe()
+
+            def getMeCallback(err, Me):
+                def getSettingsCallback(err, daemon_setting):
+                    if Me['Manifest']['LibraryAPI']:
+                        pass
+                    setattr(self._api, 'Constants', json.loads(open(sys.path[0]+'/'+CONSTANTS_PATH).read()))
+                    if Me['Manifest']['DatabaseAPI']:
+                        pass
+                    else:
+                        os.chdir(Me['FilesPath'])
+                        sys.path.append(message['p'].split('/entry')[0])
+                        from entry import Service
+                        self._service_module = Service(Me, self._api)
+                        self.send({'t':1})
+                self._api.Daemon.getSettings(getSettingsCallback)
+            self._api.getMe(getMeCallback)
             # not completed
         elif message['t'] == 1:
-            _service_module.start()
+            try:
+                self._service_module.start()
+            except Exception as e:
+                self.send({'t': 98, 'e': str(traceback.format_exc())});
         elif message['t'] == 2:
             callObjCallback(self._local_obj_callbacks_dict[message['p'][0]], message['p'][1], message['a'], message['o'], self.emitParentCallback, generateObjCallbacks)
         elif message['t'] == 3:
-            del  _local_obj_callbacks_dict[message['i']]
+            del  self._local_obj_callbacks_dict[message['i']]
         elif message['t'] == 4:
             self.send({'t':6, 'i':message['i'], 'c': len(_local_obj_callbacks_dict)})
         elif message['t'] == 5:
             # not implemented
             self.send({'t':7, 'i':message['i'], 'c': None})
         elif message['t'] == 98:
-            pass
+            print(message['e'])
         elif message['t'] == 99:
+            if self._closed == False:
+                self._closed = True
+                if self._service_module:
+                    try:
+                        if self._service_module.close:
+                            self._service_module.close()
+                            self.send({'t':3})
+                        else:
+                            self.send({'t':96, 'e': 'The service "'+self._service_name+'" have no "close" function.'})
+                    except Exception as e:
+                        self.send({'t': 96, 'e': str(traceback.format_exc())});
             self.alive = False
 
     def established(self):
@@ -126,7 +167,6 @@ async def unix_sock_client(loop):
     w.established()
     while w.alive:
         msg_string = await readOneMessege(reader)
-        print(msg_string)
         if(msg_string != None):
             loop.create_task(w.onMessage(msg_string))
         elif(w.alive):
@@ -134,14 +174,6 @@ async def unix_sock_client(loop):
             exit(0)
         else:
             exit(0)
-        # print('Send: %r' % message)
-        # writer.write(message['encode())
-        #
-        # data = await reader.read(100)
-        # print('Received: %r' % data.decode())
-        #
-        # print('Close the socket')
-        # writer.close()
 
 
 loop.run_until_complete(unix_sock_client(loop))

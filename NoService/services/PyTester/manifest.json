@@ -12,7 +12,7 @@
 
   "LibraryAPI": true,
 
-  "DatabaseAPI": true,
+  "DatabaseAPI": false,
 
   "implementation_api": false,
 

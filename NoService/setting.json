@@ -54,7 +54,7 @@
   ],
 
   "debug": false,
-  "verbose": false,
+  "verbose": true,
 
   "master_service": "NoServiceManager",
   "master_config": {
