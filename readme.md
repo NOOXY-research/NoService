@@ -23,7 +23,7 @@ NoService is super-lightweight both in client and daemon. But it has lots of fea
 ### communication between services
 The design of NoService sockets that we called service socket and activity socket. With the characteristic of those sockets, services can communicate each others. By this way each service don't need to sync data to promise the data is the newest.
 ### realtime
-NoService is design for realtime purpose. And it's of course super responsive.
+NoService is designed for realtime purpose. And it's of course super responsive.
 ### deploying services
 NoService is built for service. From it's protocol to it's local structure. It also have user authorization system natively integrated with protocol and software.
 ### for general conditions
