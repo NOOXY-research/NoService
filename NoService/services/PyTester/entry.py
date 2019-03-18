@@ -5,7 +5,7 @@
 
 class Service:
     def log(self, obj):
-        print('< NOOXY TESTER >', obj)
+        print('< NOSERVICE PYTESTER >', obj)
 
     def __init__(self, Me, NoService):
         self.Me = Me
@@ -17,7 +17,7 @@ class Service:
         self.log(rows)
 
     def start(self):
-        self.NoService.Authenticity.searchUsersByUsernameNRows('ad%', 1, this.handleUserSearch)
+        self.NoService.Authenticity.searchUsersByUsernameNRows('ad%', 1, self.handleUserSearch)
 
     def close(self):
         pass
