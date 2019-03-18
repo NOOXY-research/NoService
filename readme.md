@@ -396,6 +396,7 @@ in your manifest.json:
 In case that the service that user acesses might be sensitive. You can call many kinds of api to protect your data.
 
 For example:
+1. javascript
 ``` javascript
 // Token can vertify that the userA is that true userA.
 NoService.Authorization.Authby.Token(entityId, (err, pass)=>{
@@ -405,8 +406,20 @@ NoService.Authorization.Authby.Token(entityId, (err, pass)=>{
   else {
       // failed.
   }
-}
+});
 ```
+
+2. python3
+``` python
+# Token can vertify that the userA is that true userA.
+def handleAuth(err, passed):
+  if passed:
+    pass # what ever you want.
+  else:
+    pass # failed.
+NoService.Authorization.Authby.Token(entityId, handleAuth)
+```
+
 ### Model API
 In case that the service that user acesses might be sensitive. You can call many kinds of api to protect your data.
 
