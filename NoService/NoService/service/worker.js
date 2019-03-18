@@ -301,7 +301,7 @@ function WorkerClient() {
 let w = new WorkerClient();
 // prevent exit
 process.on('SIGINT', () => {
-
+  
 });
 
 process.on('disconnect', ()=> {

@@ -190,6 +190,9 @@ function Core(settings) {
           },
           Variables: Constants
         }
+
+        this.close = _daemon.close;
+
         process.on('SIGINT', () => {
           verbose('Daemon', 'Caught interrupt signal.');
           _daemon.close();
@@ -455,11 +458,24 @@ function Core(settings) {
   }
 }
 
+let _core;
+
 process.on('message', (msg)=> {
   if(msg.t == 0) {
-    let _core = new Core(msg.settings);
+    _core = new Core(msg.settings);
     _core.checkandlaunch();
   }
+  else if(msg.t == 99) {
+    _core.close();
+  }
+});
+
+process.on('SIGTERM', () => {
+  _core.close();
+});
+
+process.on('SIGINT', () => {
+  _core.close();
 });
 
 module.exports = Core;

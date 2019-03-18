@@ -13,7 +13,7 @@
 # 5 getMemoryUsage
 # 99 close
 
-import sys, asyncio, socket, json, re, random, os
+import sys, asyncio, socket, json, re, random, os, signal
 from api_prototype import *
 
 UNIX_Sock_Path = sys.argv[1]
@@ -21,10 +21,18 @@ Service_Name = sys.argv[2]
 IPC_MSG_SIZE_PREFIX_SIZE = 16
 MSG_READ_SIZE = 2**16
 
+loop = asyncio.get_event_loop()
+
+def keyboardInterruptHandler(signal, frame):
+    pass
+
+signal.signal(signal.SIGINT, keyboardInterruptHandler)
+
 # main class of the NoService python worker
 class WorkerClient:
     def __init__(self, loop, reader, writer):
         self.loop = loop
+        self.alive = True
         # Although WorkerClient has reader. It is supposed not to use it.
         self.reader = reader
         self.writer = writer
@@ -87,7 +95,7 @@ class WorkerClient:
         elif message['t'] == 98:
             pass
         elif message['t'] == 99:
-            pass
+            self.alive = False
 
     def established(self):
         self.send({'t':0, 's': Service_Name})
@@ -95,16 +103,20 @@ class WorkerClient:
 # readOneMessege from reader and follows the NoService TCP protocol
 async def readOneMessege(reader):
     msg_string = ""
-    msg_size = int((await reader.read(IPC_MSG_SIZE_PREFIX_SIZE)).decode())
-    left = msg_size
-    while left>0:
-        if left>MSG_READ_SIZE:
-            msg_string += (await reader.read(MSG_READ_SIZE)).decode()
-            left = left - MSG_READ_SIZE
-        else:
-            msg_string += (await reader.read(left)).decode()
-            left = 0
-    return msg_string
+    msg_size = (await reader.read(IPC_MSG_SIZE_PREFIX_SIZE)).decode()
+    if msg_size == '':
+        return None
+    else:
+        msg_size = int(msg_size)
+        left = msg_size
+        while left>0:
+            if left>MSG_READ_SIZE:
+                msg_string += (await reader.read(MSG_READ_SIZE)).decode()
+                left = left - MSG_READ_SIZE
+            else:
+                msg_string += (await reader.read(left)).decode()
+                left = 0
+        return msg_string
 
 # first layer of eventloop
 async def unix_sock_client(loop):
@@ -112,10 +124,16 @@ async def unix_sock_client(loop):
     reader, writer = await asyncio.open_unix_connection(UNIX_Sock_Path, loop=loop)
     w = WorkerClient(loop, reader, writer)
     w.established()
-    while True:
+    while w.alive:
         msg_string = await readOneMessege(reader)
         print(msg_string)
-        loop.create_task(w.onMessage(msg_string))
+        if(msg_string != None):
+            loop.create_task(w.onMessage(msg_string))
+        elif(w.alive):
+            print('Disconnect from NoService Core. "'+Service_Name+'" forced to exit. Your state may not be saved!')
+            exit(0)
+        else:
+            exit(0)
         # print('Send: %r' % message)
         # writer.write(message['encode())
         #
@@ -125,5 +143,5 @@ async def unix_sock_client(loop):
         # print('Close the socket')
         # writer.close()
 
-loop = asyncio.get_event_loop()
+
 loop.run_until_complete(unix_sock_client(loop))

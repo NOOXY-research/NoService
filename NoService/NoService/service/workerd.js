@@ -120,7 +120,7 @@ function WorkerDaemon() {
 
     this.getCBOCount = (callback)=> {
       if(_child_alive&&_child) {
-        let _rqid = Utils.generateUniqueID();
+        let _rqid = Utils.generateUniqueId();
         _InfoRq[_rqid] = callback;
         _child.send({t: 4, i: _rqid});
       }
@@ -131,7 +131,7 @@ function WorkerDaemon() {
 
     this.getMemoryUsage = (callback)=> {
       if(_child_alive&&_child) {
-        let _rqid = Utils.generateUniqueID();
+        let _rqid = Utils.generateUniqueId();
         _InfoRq[_rqid] = callback;
         _child.send({t: 5, i: _rqid});
       }
@@ -320,7 +320,7 @@ function WorkerDaemon() {
 
     this.getCBOCount = (callback)=> {
       if(_child_alive&&_child) {
-        let _rqid = Utils.generateUniqueID();
+        let _rqid = Utils.generateUniqueId();
         _InfoRq[_rqid] = callback;
         _api_sock.send({t: 4, i: _rqid});
       }
@@ -331,7 +331,7 @@ function WorkerDaemon() {
 
     this.getMemoryUsage = (callback)=> {
       if(_child_alive&&_child) {
-        let _rqid = Utils.generateUniqueID();
+        let _rqid = Utils.generateUniqueId();
         _InfoRq[_rqid] = callback;
         _api_sock.send({t: 5, i: _rqid});
       }
@@ -565,6 +565,9 @@ function WorkerDaemon() {
 
   this.close = ()=> {
     _unix_sock_server.close();
+    try {
+      fs.unlinkSync(Constants.UNIX_SOCK_PATH);
+    } catch(e) {}
   }
 }
 

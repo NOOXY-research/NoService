@@ -7,7 +7,7 @@
 const fork = require('child_process').fork;
 const fs = require('fs');
 
-process.title = 'NoServiceMaster';
+process.title = 'NoServiceLauncher';
 
 module.exports.launch = (path, settingspath)=> {
   let _child;
@@ -36,7 +36,7 @@ module.exports.launch = (path, settingspath)=> {
       }
 
       if(relaunch) {
-        console.log('NoServiceMaster is relauching NoService.');
+        console.log(process.title+' is relauching NoService.');
         setTimeout(launchCore, 1000);
       }
       else {
@@ -49,6 +49,16 @@ module.exports.launch = (path, settingspath)=> {
       if(msg.t==0) {
         relaunch = false;
       }
+    });
+
+    process.on('SIGTERM', () => {
+      _child.send({t:99});
+      process.exit();
+    });
+    
+    process.on('SIGINT', () => {
+      _child.send({t:99});
+      process.exit();
     });
   }
 
