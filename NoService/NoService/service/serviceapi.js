@@ -159,7 +159,6 @@ function ServiceAPI() {
               }
             }
           }
-
           _emitRemoteCallback([obj_id, path], args, _arg_objs_trees);
         });
 
@@ -1222,7 +1221,43 @@ function ServiceAPI() {
             });
           },
 
+          define: (name, remote_callback_obj)=> {
+            service_socket.def(name, (json, entityId, returnJSON)=> {
+              let returnJSON_LCBO = new LCBO(returnJSON, (returnJSON_syncRefer)=> {
+                return ((err, json_be_returned)=>{
+                  returnJSON(err, json_be_returned);
+                });
+              }, true);
+              if(remote_callback_obj) {
+                remote_callback_obj.run([], [json, entityId, returnJSON_LCBO]);
+              }
+            });
+          },
+
           sdef: (name, remote_callback_obj, remote_callback_obj_2)=> {
+            service_socket.sdef(name, (json, entityId, returnJSON)=> {
+              let returnJSON_LCBO = new LCBO(returnJSON, (returnJSON_syncRefer)=> {
+                return ((err, json_be_returned)=>{
+                  returnJSON(err, json_be_returned);
+                });
+              }, true);
+              if(remote_callback_obj) {
+                remote_callback_obj.run([], [json, entityId, returnJSON_LCBO]);
+              }
+            },
+            (json, entityId, returnJSON)=> {
+              let returnJSON_LCBO = new LCBO(returnJSON, (returnJSON_syncRefer)=> {
+                return ((err, json_be_returned)=>{
+                  returnJSON(err, json_be_returned);
+                });
+              }, true);
+              if(remote_callback_obj_2) {
+                remote_callback_obj_2.run([], [json, entityId, returnJSON_LCBO]);
+              }
+            });
+          },
+
+          sdefine: (name, remote_callback_obj, remote_callback_obj_2)=> {
             service_socket.sdef(name, (json, entityId, returnJSON)=> {
               let returnJSON_LCBO = new LCBO(returnJSON, (returnJSON_syncRefer)=> {
                 return ((err, json_be_returned)=>{
@@ -1345,7 +1380,43 @@ function ServiceAPI() {
             });
           },
 
+          define: (name, remote_callback_obj)=> {
+            service_socket.def(name, (json, entityId, returnJSON)=> {
+              let returnJSON_LCBO = new LCBO(returnJSON, (returnJSON_syncRefer)=> {
+                return ((err, json_be_returned)=>{
+                  returnJSON(err, json_be_returned);
+                });
+              }, true);
+              if(remote_callback_obj) {
+                remote_callback_obj.run([], [json, entityId, returnJSON_LCBO]);
+              }
+            });
+          },
+
           sdef: (name, remote_callback_obj, remote_callback_obj_2)=> {
+            service_socket.sdef(name, (json, entityId, returnJSON)=> {
+              let returnJSON_LCBO = new LCBO(returnJSON, (returnJSON_syncRefer)=> {
+                return ((err, json_be_returned)=>{
+                  returnJSON(err, json_be_returned);
+                });
+              }, true);
+              if(remote_callback_obj) {
+                remote_callback_obj.run([], [json, entityId, returnJSON_LCBO]);
+              }
+            },
+            (json, entityId, returnJSON)=> {
+              let returnJSON_LCBO = new LCBO(returnJSON, (returnJSON_syncRefer)=> {
+                return ((err, json_be_returned)=>{
+                  returnJSON(err, json_be_returned);
+                });
+              }, true);
+              if(remote_callback_obj_2) {
+                remote_callback_obj_2.run([], [json, entityId, returnJSON_LCBO]);
+              }
+            });
+          },
+
+          sdefine:  (name, remote_callback_obj, remote_callback_obj_2)=> {
             service_socket.sdef(name, (json, entityId, returnJSON)=> {
               let returnJSON_LCBO = new LCBO(returnJSON, (returnJSON_syncRefer)=> {
                 return ((err, json_be_returned)=>{

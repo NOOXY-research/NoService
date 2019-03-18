@@ -158,6 +158,8 @@ The core of NoService will navigate the directories of “services” directory 
       |--(settings.json)
 ```
 After the core finish navigating the directories under “services”. It will call the entry.js and call it’s function “start()” and pass API parameter in to start() function. Below show how the “entry.js” file might be.
+
+1. javascript
 ``` javascript
 // NoService/services/youservice/entry.js
 // Description:
@@ -182,6 +184,31 @@ function Service(Me, NoService) {
 // Export your work for system here.
 module.exports = Service;
 ```
+2. python3
+``` python
+# entry.py
+# Description:
+# "entry.py" is an NoService entry point
+# Copyright 2019 NOOXY. All Rights Reserved.
+
+class Service:
+  def __init__(self, Me, NoService):
+        self.Me = Me
+        self.NoService = NoService
+
+  # Here is where your service start
+  def start(self):
+    pass
+    # where your service start.
+    # do your jobs here
+
+  # If the daemon stop, your service receive close signal here.
+  def close(self):
+    pass
+    # Saving state of you service.
+    # Please save and manipulate your files in this directory
+
+```
 Beware that code in Service is ran as a superuser
 
 ### Creating a service
@@ -201,18 +228,32 @@ service create "Your Service name"
 Here is an example of sending data from service to client, client to service can be done by same way.
 
 In service
+1. javascript
 ``` javascript
 // Your service's entry.js
 this.start = ()=> {
   // Get the service socket of your service
   let ss = NoService.Service.ServiceSocket;
-  ss.onConnect = (entityId, callback) => {
+  ss.on('connect', (entityId, callback) => {
     // Send msg on connected entity.
     ss.sendData(entityId, 'Hello world!');
     callback(false);
-  }
+  });
 }
 ```
+2. python3
+``` python
+# Your service's entry.js
+def start(self):
+  # Get the service socket of your service
+  ss = self.NoService.Service.ServiceSocket;
+  def onConnect(entityId, callback):
+    # Send msg on connected entity.
+    ss.sendData(entityId, 'Hello world!')
+    callback(False)
+  ss.on('connect', onConnect)
+```
+
 In client(browser)
 ``` javascript
 // In your browser
@@ -260,6 +301,8 @@ let _NSc = new NSc();
 ```
 
 Service function defined in service
+
+1. javascript
 ``` javascript
 // Your service's entry.js
 this.start = ()=> {
@@ -288,6 +331,34 @@ this.start = ()=> {
   });
 
 }
+```
+
+2. python3
+``` python
+# Your service's entry.py
+def start(self):
+  NoService = self.NoService
+  ss = NoService.Service.ServiceSocket
+
+  # Normally define a ServiceFunction
+  def Hello(json, entityId, returnJSON):
+    print(json['d']) # Print "I am client.".
+    json_be_returned = {'d': 'Hello! NoService Framework!'}
+    returnJSON(false, json_be_returned)
+
+  ss.define('Hello', Hello)
+
+  # Safe define a ServiceFunction. User should be admin.
+  def HelloSecuredPass(json, entityId, returnJSON):
+    print(json['d']) # Print "I am client.".
+    json_be_returned = {'d': 'Hello! NoService Framework! Secured.'}
+    returnJSON(false, json_be_returned)
+
+  def HelloSecuredNotPass(json, entityId, returnJSON):
+    print('Auth failed.')
+
+  ss.sdefine('HelloSecured', HelloSecuredPass, HelloSecuredNotPass)
+
 ```
 In order to well defined your protocol. It's suggest to defined your protocol in manifest.json file. (optional)
 
@@ -327,6 +398,7 @@ in your manifest.json:
 In case that the service that user acesses might be sensitive. You can call many kinds of api to protect your data.
 
 For example:
+1. javascript
 ``` javascript
 // Token can vertify that the userA is that true userA.
 NoService.Authorization.Authby.Token(entityId, (err, pass)=>{
@@ -336,8 +408,20 @@ NoService.Authorization.Authby.Token(entityId, (err, pass)=>{
   else {
       // failed.
   }
-}
+});
 ```
+
+2. python3
+``` python
+# Token can vertify that the userA is that true userA.
+def handleAuth(err, passed):
+  if passed:
+    pass # what ever you want.
+  else:
+    pass # failed.
+NoService.Authorization.Authby.Token(entityId, handleAuth)
+```
+
 ### Model API
 In case that the service that user acesses might be sensitive. You can call many kinds of api to protect your data.
 

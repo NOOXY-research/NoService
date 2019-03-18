@@ -448,10 +448,10 @@ function WorkerDaemon() {
         // _launch_callback(new Error('Worker runtime error:\n'+message.e));
       }
       else if(message.t == 98){
-        _launch_callback(new Error('Worker launching error:\n'+message.e));
+        _launch_callback(new Error('"'+_service_name+'" worker launching error:\n'+message.e));
       }
       else if(message.t == 99){
-        _init_callback(new Error('Worker initializing error:\n'+message.e));
+        _init_callback(new Error('"'+_service_name+'" worker initializing error:\n'+message.e));
       }
     };
 
@@ -549,7 +549,6 @@ function WorkerDaemon() {
   }
 
   this.generateWorker = (path, lang) => {
-    console.log(path, lang);
     if(lang == null || lang == 'js' || lang == 'javascript') {
       return new WorkerClient(path);
     }

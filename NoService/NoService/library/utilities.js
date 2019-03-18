@@ -172,7 +172,7 @@ let generateGUID = ()=>{
 
 // for workers
 // generate fake Obj for remote calling back into local
-const generateObjCallbacks = (id, obj_tree, callback) => {
+const generateObjCallbacks = (callback_id, obj_tree, callparent) => {
   if(Object.keys(obj_tree).length) {
     let deeper = (sub_obj_tree, walked_path_list)=> {
       if(typeof(sub_obj_tree) == 'object' && sub_obj_tree!=null) {
@@ -182,7 +182,7 @@ const generateObjCallbacks = (id, obj_tree, callback) => {
       }
       else {
         sub_obj_tree = (...args)=> {
-          callback([id, walked_path_list], args)
+          callparent([callback_id, walked_path_list], args)
         };
       }
       return sub_obj_tree;
@@ -191,7 +191,7 @@ const generateObjCallbacks = (id, obj_tree, callback) => {
   }
   else {
     return (...args)=> {
-      callback([id, []], args)
+      callparent([callback_id, []], args)
     };
   }
 }

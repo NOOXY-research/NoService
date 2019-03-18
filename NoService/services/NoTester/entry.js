@@ -18,7 +18,7 @@ function Service(Me, NoService) {
 
 
   let log = (obj)=>{
-    console.log('< NOOXY TESTER > ', obj);
+    console.log('< NOSERVICE TESTER > ', obj);
   }
   // Your service entry point
   this.start = ()=> {
