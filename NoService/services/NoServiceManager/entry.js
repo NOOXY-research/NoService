@@ -26,7 +26,7 @@ function Service(Me, NoService) {
   NoServiceManager.importDaemon(NoService.Daemon);
   NoServiceManager.importServiceAPI(ServiceAPI);
 
-  ss.sdef('createService', (json, entityID, returnJSON)=>{
+  ss.sdef('createService', (json, entityId, returnJSON)=>{
     NoServiceManager.createService(json.name, json.type, (err)=> {
       let jsonr = {
         // succeess
@@ -39,45 +39,45 @@ function Service(Me, NoService) {
     });
   });
 
-  ss.sdef('getDependStack', (json, entityID, returnJSON)=> {
+  ss.sdef('getDependStack', (json, entityId, returnJSON)=> {
     let jsonr = {
       r: NoServiceManager.returnDependStack()
     };
     returnJSON(false, jsonr);
   });
 
-  ss.sdef('listServicesRepoBind', (json, entityID, returnJSON)=> {
+  ss.sdef('listServicesRepoBind', (json, entityId, returnJSON)=> {
     NoServiceManager.getServiceRepositoryBindList((err, list)=> {
       returnJSON(false, {s: err?err:'succeess', r: list});
     });
   });
 
-  ss.sdef('bindServiceRepo', (json, entityID, returnJSON)=> {
+  ss.sdef('bindServiceRepo', (json, entityId, returnJSON)=> {
     NoServiceManager.bindServiceToRepository(json.n, (err)=> {
       returnJSON(false, {s: err?err:'succeess'});
     });
   });
 
-  ss.sdef('bindAllServiceRepo', (json, entityID, returnJSON)=> {
+  ss.sdef('bindAllServiceRepo', (json, entityId, returnJSON)=> {
     NoServiceManager.bindAllServiceToRepository((err)=> {
       returnJSON(false, {s: err?err:'succeess'});
     });
   });
 
-  ss.sdef('unbindAllServiceRepo', (json, entityID, returnJSON)=> {
+  ss.sdef('unbindAllServiceRepo', (json, entityId, returnJSON)=> {
     NoServiceManager.unbindAllServiceFromRepository((err)=> {
       returnJSON(false, {s: err?err:'succeess'});
     });
   });
 
-  ss.sdef('unbindServiceRepo', (json, entityID, returnJSON)=> {
+  ss.sdef('unbindServiceRepo', (json, entityId, returnJSON)=> {
     NoServiceManager.unbindServiceFromRepository(json.n, (err)=> {
       returnJSON(false, {s: err?err:'succeess'});
     });
   });
 
-  ss.sdef('installService', (json, entityID, returnJSON)=> {
-    NoService.Authorization.Authby.Password(entityID, (err, valid)=> {
+  ss.sdef('installService', (json, entityId, returnJSON)=> {
+    NoService.Authorization.Authby.Password(entityId, (err, valid)=> {
       let method = json.m; // git
       let source = json.s; // github gitlab
       let repo =json.r;
@@ -107,19 +107,19 @@ function Service(Me, NoService) {
     });
   });
 
-  ss.sdef('upgradeAllService', (json, entityID, returnJSON)=> {
+  ss.sdef('upgradeAllService', (json, entityId, returnJSON)=> {
     NoServiceManager.upgradeAllService((err)=> {
       returnJSON(false, {s: err?err:'succeess'});
     });
   });
 
-  ss.sdef('upgradeService', (json, entityID, returnJSON)=> {
+  ss.sdef('upgradeService', (json, entityId, returnJSON)=> {
     NoServiceManager.upgradeService(json.n, (err)=> {
       returnJSON(false, {s: err?err:'succeess'});
     });
   });
 
-  ss.sdef('killService', (json, entityID, returnJSON)=> {
+  ss.sdef('killService', (json, entityId, returnJSON)=> {
 
   });
 
