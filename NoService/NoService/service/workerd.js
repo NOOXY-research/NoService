@@ -549,7 +549,6 @@ function WorkerDaemon() {
   }
 
   this.generateWorker = (path, lang) => {
-    console.log(path, lang);
     if(lang == null || lang == 'js' || lang == 'javascript') {
       return new WorkerClient(path);
     }

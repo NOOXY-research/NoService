@@ -38,7 +38,6 @@ def generateObjCallbacks(callback_id, obj_tree, callparent):
             else:
                 def callablefunc(*args):
                     callparent([callback_id, walked_path_list], list(args))
-                print('.'.join(walked_path_list))
                 return callablefunc
         return deeper(obj_tree, [])
     else:
@@ -53,6 +52,6 @@ def callObjCallback(Obj, Objpath, args, arg_objs_trees, obj_callback_policy, gen
         else:
             return subobj
     for i in arg_objs_trees:
-        args[i] = generate_obj_policy(arg_objs_trees[i][0], arg_objs_trees[i][1], obj_callback_policy)
+        args[int(i)] = generate_obj_policy(arg_objs_trees[i][0], arg_objs_trees[i][1], obj_callback_policy)
     f = getTargetObj(Objpath, Obj)
     f(*args)

@@ -12,12 +12,33 @@ class Service:
         self.NoService = NoService
         self.log(Me)
 
-    def handleUserSearch(self, err, rows):
-        self.log('searchUsersByUsernameNRows Test');
-        self.log(rows)
-
     def start(self):
-        self.NoService.Authenticity.searchUsersByUsernameNRows('ad%', 1, self.handleUserSearch)
+        log = self.log
+        NoService = self.NoService
+        ss = NoService.Service.ServiceSocket
 
+        def handleUserSearch(err, rows):
+            log('searchUsersByUsernameNRows Test')
+            log(rows)
+        NoService.Authenticity.searchUsersByUsernameNRows('ad%', 1, handleUserSearch)
+
+        log('ServiceSocket Test');
+
+        def jfunc1(json, entityId, returnJSON):
+            def auth_callback(err, p):
+                log('Auth status: '+str(p))
+                log(json)
+                json_be_returned = {'d': 'Hello! Jfunc return from service!'}
+                returnJSON(False, json_be_returned)
+            NoService.Authorization.Authby.Token(entityId, auth_callback)
+
+        ss.define('jfunc1', jfunc1)
+
+        def createDefaultAdminDeamonSocketCallback(err, activitysocket):
+            def jfunc1Callback(err, json):
+                log(json)
+            activitysocket.call('jfunc1', {'d':'Hello! Jfunc call from client!'}, jfunc1Callback)
+
+        NoService.Service.ActivitySocket.createDefaultAdminDeamonSocket('PyTester', createDefaultAdminDeamonSocketCallback)
     def close(self):
         pass

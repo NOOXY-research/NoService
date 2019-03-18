@@ -67,16 +67,16 @@ class WorkerClient:
                 _Id = random.randint(0, 999999)
                 self._local_obj_callbacks_dict[_Id] = arg
                 _data["o"][i] = [_Id, generateObjCallbacksTree(arg)]
-        print(_data)
         self.send(_data)
 
     # parent API caller wrapper
     def emitParentCallback(self, id_APIpath, args):
-        id, APIpath = id_APIpath
+        obj_id, path = id_APIpath
         _data = {"t":5, "p": [obj_id, path], "a": args, "o": {}}
         for i in range(len(args)):
             arg = args[i]
             if callable(arg):
+                args[i] = None
                 _Id = random.randint(0, 999999)
                 self._local_obj_callbacks_dict[_Id] = arg
                 _data["o"][i] = [_Id, generateObjCallbacksTree(arg)]
@@ -111,6 +111,7 @@ class WorkerClient:
         elif message['t'] == 1:
             try:
                 self._service_module.start()
+                self.send({'t': 2});
             except Exception as e:
                 self.send({'t': 98, 'e': str(traceback.format_exc())});
         elif message['t'] == 2:
@@ -121,7 +122,7 @@ class WorkerClient:
             self.send({'t':6, 'i':message['i'], 'c': len(_local_obj_callbacks_dict)})
         elif message['t'] == 5:
             # not implemented
-            self.send({'t':7, 'i':message['i'], 'c': None})
+            self.send({'t':7, 'i':message['i'], 'c': {"rss":0}})
         elif message['t'] == 98:
             print(message['e'])
         elif message['t'] == 99:
