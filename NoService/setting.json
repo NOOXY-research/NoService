@@ -49,8 +49,7 @@
     "NoServiceManager",
     "NoUser",
     "NoTalk",
-    "NoMailer",
-    "PyTester"
+    "NoMailer"
   ],
 
   "debug": false,
