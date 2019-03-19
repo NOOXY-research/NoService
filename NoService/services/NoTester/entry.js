@@ -157,6 +157,11 @@ function Service(Me, NoService) {
       });
     });
 
+    log('Get RawModel Test.');
+    // Test Get Model
+    NoService.Database.RAWModel.get(NoService.Constants.AUTHE_USER_MODEL_NAME, (err, model)=> {
+      log('Got RawModel "'+NoService.Constants.AUTHE_USER_MODEL_NAME+'". ModelType: '+model.modeltype);
+    });
     // Test Object Model
     log('Object Model Test.');
     NoService.Database.Model.define('ObjectTest', {

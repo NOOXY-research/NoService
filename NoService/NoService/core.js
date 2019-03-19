@@ -200,6 +200,8 @@ function Core(settings) {
         // create gateway
         verbose('Daemon', 'Creating coregateway...');
         let coregateway = {
+            Database: _database,
+            Model: _model,
             Utilities: Utils,
             Settings: settings,
             Authorization: _authorization,

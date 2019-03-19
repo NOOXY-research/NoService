@@ -560,7 +560,7 @@ NoService.Database.Model.define('IndexedListTest', {
   NoService.Crypto.decryptString(algo, key, toDecrypt, callback)
 
   ### Database
-  NoService.Database.Database.query(sql, values, callback);
+  NoService.Database.Database.query(query, callback);
 
   ### Database Model
   NoService.Database.Model.define(model_name, model_structure, callback)\

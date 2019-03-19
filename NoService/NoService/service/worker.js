@@ -170,6 +170,10 @@ function WorkerClient() {
                       callback(err, new_models);
                     });
                   };
+                  
+                  _api.Database.Model.close= ()=>{
+                    _model.close();
+                  };
 
                   _api.Database.RAWModel.remove = (model_name, callback)=>{
                     _model.remove(model_name, _api.SafeCallback(callback));
@@ -188,12 +192,7 @@ function WorkerClient() {
                     _model.getModelsDict(_api.SafeCallback(callback));
                   };
 
-
                   _api.Database.RAWModel.close= ()=>{
-                    _model.close();
-                  };
-
-                  _api.Database.Model.close= ()=>{
                     _model.close();
                   };
 

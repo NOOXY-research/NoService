@@ -1205,6 +1205,7 @@ function ServiceAPI() {
   };
 
   this.createServiceAPI = (service_socket, manifest, callback) => {
+    let _service_name = manifest.name;
     _get_normal_api((err, api) => {
       api.addAPI(['Service', 'ServiceSocket'], (LCBO)=> {
         return ({
@@ -1359,10 +1360,104 @@ function ServiceAPI() {
           }
         });
       });
-      
-      api.addAPI(['Database', 'Database'], (LCBO)=> {});
-      api.addAPI(['Database', 'Model'], (LCBO)=> {});
-      api.addAPI(['Database', 'RawModel'], (LCBO)=> {});
+
+      api.addAPI(['Database', 'Database'], (LCBO)=> {
+        return({
+          query: (query, remote_callback_obj)=> {
+            _coregateway.Database.Database.query(query, (err, result)=> {
+              if(remote_callback_obj) {
+                remote_callback_obj.run([], [err, result]);
+                remote_callback_obj.unbindRemote();
+              }
+            });
+          }
+        })
+      });
+      api.addAPI(['Database', 'Model'], (LCBO)=> {
+        return({
+          remove: (model_name, remote_callback_obj)=> {
+            _model.remove(_service_name+'_'+model_name, (err)=> {
+              if(remote_callback_obj) {
+                remote_callback_obj.run([], [err]);
+                remote_callback_obj.unbindRemote();
+              }
+            });
+          },
+
+          exist: (model_name, remote_callback_obj)=> {
+            _model.exist(_service_name+'_'+model_name, (err, exist)=> {
+              if(remote_callback_obj) {
+                remote_callback_obj.run([], [err, exist]);
+                remote_callback_obj.unbindRemote();
+              }
+            });
+          },
+
+          get: (model_name, remote_callback_obj)=> {
+            _model.get(_service_name+'_'+model_name, (err, the_model)=> {
+              if(remote_callback_obj) {
+                let local_callback_obj;
+                local_callback_obj = new LCBO(the_model, (the_model_syncRefer)=> {
+                  return ({
+                      getModelType: (remote_callback_obj_2)=> {
+                        if(remote_callback_obj_2) {
+                          the_model_syncRefer(remote_callback_obj_2);
+                          remote_callback_obj_2.run([], [err, the_model.ModelType]);
+                          remote_callback_obj_2.unbindRemote();
+                        }
+                      }
+                  })
+                });
+                remote_callback_obj.run([], [err, local_callback_obj]);
+                remote_callback_obj.unbindRemote();
+              }
+            });
+          },
+
+          define: (model_name, model_structure, remote_callback_obj)=> {
+
+          },
+
+          doBatchSetup: (models_dict, remote_callback_obj)=> {
+
+          }
+        });
+        // close cannot be implemented this time compare to worker.js
+      });
+      api.addAPI(['Database', 'RAWModel'], (LCBO)=> {
+        return({
+          get: (model_name, remote_callback_obj)=> {
+            _coregateway.Model.get(model_name, (err, the_model)=> {
+              if(remote_callback_obj) {
+                let local_callback_obj;
+                local_callback_obj = new LCBO(the_model, (the_model_syncRefer)=> {
+                  return ({
+                      getModelType: (remote_callback_obj_2)=> {
+                        if(remote_callback_obj_2) {
+                          the_model_syncRefer(remote_callback_obj_2);
+                          remote_callback_obj_2.run([], [err, the_model.ModelType]);
+                          remote_callback_obj_2.unbindRemote();
+                        }
+                      }
+                  })
+                });
+                remote_callback_obj.run([], [err, local_callback_obj]);
+                remote_callback_obj.unbindRemote();
+              }
+            });
+          }
+        });
+        // return({
+        //   return({
+        //     remove:,
+        //     exist:,
+        //     get:,
+        //     define:,
+        //     getModelsDict:
+        //   });
+        // });
+        // close cannot be implemented this time compare to worker.js
+      });
 
       callback(false, api);
     });

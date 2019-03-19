@@ -58,6 +58,14 @@ class Service:
             activitysocket.call('jfunc1', {'d':'Hello! ServiceFunction call from client!'}, jfunc1Callback)
 
         NoService.Service.ActivitySocket.createDefaultAdminDeamonSocket('PyTester', createDefaultAdminDeamonSocketCallback)
+        log('Get RawModel Test.')
+
+        def RawModelgetCallback(err, model):
+            def getModelTypeCallback(err, type):
+                log('Got RawModel "'+NoService.Constants['AUTHE_USER_MODEL_NAME']+'". ModelType: '+type)
+            model.getModelType(getModelTypeCallback)
+
+        NoService.Database.RAWModel.get(NoService.Constants['AUTHE_USER_MODEL_NAME'], RawModelgetCallback)
 
     def close(self):
         self.log('Service Closed')

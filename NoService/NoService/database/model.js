@@ -19,6 +19,7 @@ function Model() {
   // For something like different and huge amount of groups of messages or logs need ordered index.
   function GroupIndexedListModel(table_name, structure, do_timestamp) {
     this.modeltype = 'GroupIndexedList';
+    this.ModelType = this.modeltype;
     let model_key = MODEL_INDEXKEY;
     let model_group_key = MODEL_GROUPKEY;
 
@@ -211,6 +212,7 @@ function Model() {
   // For something like messages or logs need ordered index.
   function IndexedListModel(table_name, structure, do_timestamp) {
     this.modeltype = 'IndexedList';
+    this.ModelType = this.modeltype;
     let model_key = MODEL_INDEXKEY;
 
     this.searchAll = (keyword, callback)=> {
@@ -367,6 +369,7 @@ function Model() {
   function ObjModel(table_name, model_key, structure, do_timestamp) {
 
     this.modeltype = 'Object';
+    this.ModelType = this.modeltype;
     // get an instense
     this.get = (key_value, callback)=> {
       _db.getRows(MODEL_TABLE_PREFIX+table_name, model_key+' LIKE ?', [key_value], (err, results)=> {
@@ -486,6 +489,7 @@ function Model() {
   function PairModel(table_name, model_key, structure, do_timestamp) {
 
     this.modeltype = 'Pair';
+    this.ModelType = this.modeltype;
 
     this.create = (properties_dict, callback)=> {
       if(do_timestamp) {
