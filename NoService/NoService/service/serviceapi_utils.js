@@ -74,6 +74,8 @@ function API(_coregateway) {
         _RCBOs[id].unbindRemote();
         delete _RCBOs[id];
       }
+      obj = null;
+      _obj = null;
     };
 
     this.callCallback = (path, args, arg_objs_trees)=>{

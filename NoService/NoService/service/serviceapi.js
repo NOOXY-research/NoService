@@ -180,6 +180,25 @@ function ServiceAPI() {
       })
     });
     api.addAPI(['Database', 'Model'], (LCBO)=> {
+      let _turn_model_to_local_callback_obj = (model)=> {
+        if(model.ModelType == 'Object') {
+
+        }
+        else if(model.ModelType == 'Pair') {
+          return(new LCBO(model, (model_syncRefer)=> {
+            return ({
+                getModelType: (remote_callback_obj)=> {
+                  if(remote_callback_obj) {
+                    model_syncRefer(remote_callback_obj_2);
+                    remote_callback_obj.run([], [err, the_model.ModelType]);
+                    remote_callback_obj.unbindRemote();
+                  }
+                }
+            })
+          }))
+        }
+      };
+
       return({
         remove: (model_name, remote_callback_obj)=> {
           _coregateway.Model.remove(_service_name+'_'+model_name, (err)=> {
@@ -202,19 +221,7 @@ function ServiceAPI() {
         get: (model_name, remote_callback_obj)=> {
           _coregateway.Model.get(_service_name+'_'+model_name, (err, the_model)=> {
             if(remote_callback_obj) {
-              let local_callback_obj;
-              local_callback_obj = new LCBO(the_model, (the_model_syncRefer)=> {
-                return ({
-                    getModelType: (remote_callback_obj_2)=> {
-                      if(remote_callback_obj_2) {
-                        the_model_syncRefer(remote_callback_obj_2);
-                        remote_callback_obj_2.run([], [err, the_model.ModelType]);
-                        remote_callback_obj_2.unbindRemote();
-                      }
-                    }
-                })
-              });
-              remote_callback_obj.run([], [err, local_callback_obj]);
+              remote_callback_obj.run([], [err, _turn_model_to_local_callback_obj(the_model)]);
               remote_callback_obj.unbindRemote();
             }
           });
@@ -225,7 +232,15 @@ function ServiceAPI() {
         },
 
         doBatchSetup: (models_dict, remote_callback_obj)=> {
-
+          _coregateway.Model.doBatchSetup(models_dict, (err, models)=> {
+            for(let key in models) {
+              models[key] = _turn_model_to_local_callback_obj(models[key]);
+            };
+            if(remote_callback_obj) {
+              remote_callback_obj.run([], [err, new LCBO(models, ()=>{return models})]);
+              remote_callback_obj.unbindRemote();
+            }
+          })
         }
       });
       // close cannot be implemented this time compare to worker.js
