@@ -3,7 +3,7 @@
 # "api_prototype.py" is service worker client python version for NOOXY service framework.
 # Copyright 2018-2019 NOOXY. All Rights Reserved.
 
-import functools, types
+import functools, types, traceback
 
 def vdir(obj):
     return [x for x in dir(obj) if not x.startswith('__')]
@@ -54,4 +54,8 @@ def callObjCallback(Obj, Objpath, args, arg_objs_trees, obj_callback_policy, gen
     for i in arg_objs_trees:
         args[int(i)] = generate_obj_policy(arg_objs_trees[i][0], arg_objs_trees[i][1], obj_callback_policy)
     f = getTargetObj(Objpath, Obj)
-    f(*args)
+    try:
+        f(*args)
+    except Exception as e:
+        print(str(traceback.format_exc()))
+        print(f)

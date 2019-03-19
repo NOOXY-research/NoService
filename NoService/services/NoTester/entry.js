@@ -189,13 +189,13 @@ function Service(Me, NoService) {
           }
           else {
             log('Object Model Get.');
-            model.get(0, (err, instance)=> {
+            model.get(0, (err, result)=> {
               if(err) {
                 log(err)
               }
               else {
-                log(instance);
-                log('Object Model Get.');
+                log(result);
+                log('Object Model Replace.');
                 model.replace({
                   objkey: 0,
                   property1: 'HAHARPLACE',
@@ -205,8 +205,8 @@ function Service(Me, NoService) {
                     log(err)
                   }
                   else {
-                    model.get(0, (err, instance)=> {
-                      log(instance);
+                    model.get(0, (err, result)=> {
+                      log(result);
                       NoService.Database.Model.remove('ObjectTest', (err)=>{
                         if(err) {
                           log(err);
@@ -264,12 +264,12 @@ function Service(Me, NoService) {
           }
           else {
             log('IndexedList Model Get Test.');
-            model.getAllRows((err, instance)=> {
+            model.getAllRows((err, result)=> {
               if(err) {
                 log(err)
               }
               else {
-                log(instance);
+                log(result);
                 log('IndexedList Model Update Test.');
                 model.updateRows([
                   {
@@ -285,8 +285,8 @@ function Service(Me, NoService) {
                     log(err);
                   }
                   else {
-                    model.getRowsFromTo(1, 2, (err, instance)=> {
-                      log(instance);
+                    model.getRowsFromTo(1, 2, (err, result)=> {
+                      log(result);
                       NoService.Database.Model.remove('IndexedListTest', (err)=>{
                         if(err) {
                           log(err);
@@ -343,12 +343,12 @@ function Service(Me, NoService) {
           }
           else {
             log('GroupIndexedList Model Get Test.');
-            model.getAllRows('Group1' ,(err, instance)=> {
+            model.getAllRows('Group1' ,(err, result)=> {
               if(err) {
                 log(err)
               }
               else {
-                log(instance);
+                log(result);
                 log('GroupIndexedList Model append Test.');
                 model.appendRows('Group2' ,[
                   {
@@ -388,8 +388,8 @@ function Service(Me, NoService) {
                       }
                       else {
                         log('GroupIndexedList Model getRowsFromTo Test.');
-                        model.getRowsFromTo('Group2' ,1, 2, (err, instance)=> {
-                          log(instance);
+                        model.getRowsFromTo('Group2' ,1, 2, (err, result)=> {
+                          log(result);
                           log('GroupIndexedList Model searchAll Test.');
                           model.searchAllNRows('Group2', '%2', 3, (err, rows)=> {
                             log(rows);

@@ -67,5 +67,43 @@ class Service:
 
         NoService.Database.RAWModel.get(NoService.Constants['AUTHE_USER_MODEL_NAME'], RawModelgetCallback)
 
+        log('Object Model Test.')
+        def defineCallback(err, model):
+            if err:
+                log(err)
+            else:
+                log('Object Model Create.')
+                def createCallback(err):
+                    if err:
+                        log(err)
+                    else:
+                        log('Object Model Get.')
+                        def getCallback(err, result):
+                            if err:
+                                log(err)
+                            else:
+                                log(result)
+                                log('Object Model Replace.')
+                                def replaceCallback(err):
+                                    if err:
+                                        log(err)
+                                    else:
+                                        def getCallback(err, result):
+                                            if err:
+                                                log(err)
+                                            else:
+                                                log(result)
+                                                def removeCallback(err):
+                                                    if err:
+                                                        log(err)
+                                                    else:
+                                                        log('Object Model PASS.')
+                                                NoService.Database.Model.remove('ObjectTest', removeCallback)
+                                        model.get(0, getCallback)
+                                model.replace({'objkey': 0,'property1': 'HAHARPLACE', 'property2': 0}, replaceCallback)
+                        model.get(0, getCallback)
+                model.create({'objkey': 0, 'property1': 'HAHA', 'property2': 0}, createCallback)
+        NoService.Database.Model.define('ObjectTest', {'model_type': "Object",'do_timestamp': True,'model_key': "objkey",'structure': {'objkey': 'INTEGER','property1': 'TEXT','property2': 'INTEGER'}}, defineCallback)
+
     def close(self):
         self.log('Service Closed')
