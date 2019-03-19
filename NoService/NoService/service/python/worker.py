@@ -93,6 +93,7 @@ class WorkerClient:
             self._api = generateObjCallbacks('API', message['a'], self.callParentAPI)
 
             def getMeCallback(err, Me):
+                self._Me = Me
                 def getSettingsCallback(err, daemon_setting):
                     if Me['Manifest']['LibraryAPI']:
                         pass
@@ -110,7 +111,7 @@ class WorkerClient:
             # not completed
         elif message['t'] == 1:
             try:
-                self._service_module.start()
+                self._service_module.start(self._Me, self._api)
                 self.send({'t': 2});
             except Exception as e:
                 self.send({'t': 98, 'e': str(traceback.format_exc())});

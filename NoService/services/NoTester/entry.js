@@ -32,14 +32,14 @@ function Service(Me, NoService) {
     // JSONfunction is a function that can be defined, which others entities can call.
     // It is a NOOXY Service Framework Standard
     log('ServiceSocket Test');
-    ss.def('jfunc1', (json, entityID, returnJSON)=>{
-      NoService.Authorization.Authby.Token(entityID, (err, pass)=>{
+    ss.def('jfunc1', (json, entityId, returnJSON)=>{
+      NoService.Authorization.Authby.Token(entityId, (err, pass)=>{
         log('Auth status: '+pass)
         log(json);
         // Code here for JSONfunciton
         // Return Value for JSONfunction call. Otherwise remote will not recieve funciton return value.
         let json_be_returned = {
-          d: 'Hello! Jfunc return from service!'
+          d: 'Hello! ServiceFunction return from service!'
         }
         // First parameter for error, next is JSON to be returned.
         returnJSON(false, json_be_returned);
@@ -47,7 +47,7 @@ function Service(Me, NoService) {
     });
 
     // Safe define a JSONfunction.
-    ss.sdef('SafeJSONfunction', (json, entityID, returnJSON)=>{
+    ss.sdef('SafeJSONfunction', (json, entityId, returnJSON)=>{
       // Code here for JSONfunciton
       // Return Value for JSONfunction call. Otherwise remote will not recieve funciton return value.
       let json_be_returned = {
@@ -62,10 +62,10 @@ function Service(Me, NoService) {
     });
 
     // ServiceSocket.onData, in case client send data to this Service.
-    // You will need entityID to Authorize remote user. And identify remote.
-    ss.on('data', (entityID, data) => {
+    // You will need entityId to Authorize remote user. And identify remote.
+    ss.on('data', (entityId, data) => {
       // Get Username and process your work.
-      NoService.Service.Entity.getEntityOwner(entityID, (err, username)=>{
+      NoService.Service.Entity.getEntityOwner(entityId, (err, username)=>{
         // To store your data and associated with userid INSEAD OF USERNAME!!!
         // Since userid can be promised as a unique identifer!!!
         let userid = null;
@@ -79,15 +79,15 @@ function Service(Me, NoService) {
       });
     });
     // ServiceSocket.onConnect, in case on new connection.
-    ss.on('connect', (entityID, callback) => {
-      log('Activty "'+entityID+'" connected.');
+    ss.on('connect', (entityId, callback) => {
+      log('Activty "'+entityId+'" connected.');
       // Send data to client.
-      ss.sendData(entityID, 'A sent data from service.');
+      ss.sendData(entityId, 'A sent data from service.');
       ss.sendDataToUsername('admin', 'An entity connected. Msg to admin.');
-      ss.emit(entityID, 'event1', 'Event msg. SHOULD APPEAR(1/3)');
-      ss.emit(entityID, 'event2', 'Event msg. SHOULD NOT APPEAR.');
+      ss.emit(entityId, 'event1', 'Event msg. SHOULD APPEAR(1/3)');
+      ss.emit(entityId, 'event2', 'Event msg. SHOULD NOT APPEAR.');
 
-      NoService.Service.Entity.addEntityToGroups(entityID, ['superuser', 'whatever', 'good'], (err)=> {
+      NoService.Service.Entity.addEntityToGroups(entityId, ['superuser', 'whatever', 'good'], (err)=> {
         ss.sendDataToIncludingGroups(['superuser', 'good', 'excluded'], 'Superuser entity group msg. SHOULD NOT APPEAR');
         ss.sendDataToIncludingGroups(['superuser', 'good'], 'Superuser entity group msg. SHOULD APPEAR(1/2)');
         ss.sendDataToGroups(['superuser', 'good'], 'Superuser entity group msg. SHOULD APPEAR(2/2)');
@@ -101,7 +101,7 @@ function Service(Me, NoService) {
         //     ss.emitToGroups(['superuser', 'good', 'excluded'], 'stress', 'Event msg. SHOULD NOT APPEAR');
         //     ss.emitToGroups(['superuser', 'good'], 'stress', 'Event msg. SHOULD APPEAR(2/3)');
         //   };
-        //   ss.emit(entityID, 'stressOK');
+        //   ss.emit(entityId, 'stressOK');
         // }, 5000);
       });
       // Do something.
@@ -109,9 +109,9 @@ function Service(Me, NoService) {
       callback(false);
     });
     // ServiceSocket.onClose, in case connection close.
-    ss.on('close', (entityID, callback) => {
+    ss.on('close', (entityId, callback) => {
       // Get Username and process your work.
-      NoService.Service.Entity.getEntityOwner(entityID, (err, username)=>{
+      NoService.Service.Entity.getEntityOwner(entityId, (err, username)=>{
         // To store your data and associated with userid INSEAD OF USERNAME!!!
         // Since userid can be promised as a unique identifer!!!
         let userid = null;
@@ -120,7 +120,7 @@ function Service(Me, NoService) {
           userid = id;
         });
         // process you operation here
-        log('ServiceSocket closed properly. ', entityID);
+        log('ServiceSocket closed properly. ', entityId);
         // report error;
         callback(false);
       });
@@ -152,7 +152,7 @@ function Service(Me, NoService) {
         }, 1000);
       });
       activitysocket.sendData('A sent data from activity.');
-      activitysocket.call('jfunc1', {d:'Hello! Jfunc call from client!'}, (err, json)=> {
+      activitysocket.call('jfunc1', {d:'Hello! ServiceFunction call from client!'}, (err, json)=> {
         log(json);
       });
     });

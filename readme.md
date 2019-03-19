@@ -244,9 +244,9 @@ this.start = ()=> {
 2. python3
 ``` python
 # Your service's entry.js
-def start(self):
+def start(self, Me, NoService):
   # Get the service socket of your service
-  ss = self.NoService.Service.ServiceSocket;
+  ss = NoService.Service.ServiceSocket;
   def onConnect(entityId, callback):
     # Send msg on connected entity.
     ss.sendData(entityId, 'Hello world!')

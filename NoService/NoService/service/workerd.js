@@ -361,7 +361,7 @@ function WorkerDaemon() {
         a: args,
         o: argsobj
       }
-
+      
       try {
         if(_child_alive&&_child&&_api_sock)
            _api_sock.send(_data, (err)=> {
