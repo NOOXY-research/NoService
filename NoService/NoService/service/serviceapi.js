@@ -1359,6 +1359,11 @@ function ServiceAPI() {
           }
         });
       });
+      
+      api.addAPI(['Database', 'Database'], (LCBO)=> {});
+      api.addAPI(['Database', 'Model'], (LCBO)=> {});
+      api.addAPI(['Database', 'RawModel'], (LCBO)=> {});
+
       callback(false, api);
     });
   };

@@ -13,7 +13,7 @@
 
   "LibraryAPI": true,
 
-  "DatabaseAPI": true,
+  "DiscreteDatabaseAPI": true,
 
   "dependencies": {
 

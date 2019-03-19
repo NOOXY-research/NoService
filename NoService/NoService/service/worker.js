@@ -122,7 +122,7 @@ function WorkerClient() {
             _api.Constants = Constants;
 
             // inject Database API
-            if(Me.Manifest.DatabaseAPI) {
+            if(Me.Manifest.DatabaseAPI||Me.Manifest.DiscreteDatabaseAPI) {
               let _db = new Database(daemon_setting.database);
               let _model = new Model();
 
@@ -301,7 +301,7 @@ function WorkerClient() {
 let w = new WorkerClient();
 // prevent exit
 process.on('SIGINT', () => {
-  
+
 });
 
 process.on('disconnect', ()=> {
