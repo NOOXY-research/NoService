@@ -286,8 +286,8 @@ function ServiceAPI() {
                   remote_callback_obj.unbindRemote();
                 }
               },
-              create: (remote_callback_obj)=> {
-                model.whatever((...args)=> {
+              create: (properties_dict, remote_callback_obj)=> {
+                model.create(properties_dict, (...args)=> {
                   if(remote_callback_obj) {
                     model_syncRefer(remote_callback_obj);
                     remote_callback_obj.run([], args);
@@ -295,8 +295,8 @@ function ServiceAPI() {
                   }
                 });
               },
-              searchAll: (remote_callback_obj)=> {
-                model.whatever((...args)=> {
+              searchAll: (keyword, remote_callback_obj)=> {
+                model.searchAll(keyword, (...args)=> {
                   if(remote_callback_obj) {
                     model_syncRefer(remote_callback_obj);
                     remote_callback_obj.run([], args);
@@ -304,8 +304,8 @@ function ServiceAPI() {
                   }
                 });
               },
-              searchColumns: (remote_callback_obj)=> {
-                model.whatever((...args)=> {
+              searchColumns: (column_list, keyword, remote_callback_obj)=> {
+                model.searchColumns(column_list, keyword, (...args)=> {
                   if(remote_callback_obj) {
                     model_syncRefer(remote_callback_obj);
                     remote_callback_obj.run([], args);
@@ -313,8 +313,8 @@ function ServiceAPI() {
                   }
                 });
               },
-              searchAllNRows: (remote_callback_obj)=> {
-                model.whatever((...args)=> {
+              searchAllNRows: (keyword, N, remote_callback_obj)=> {
+                model.searchAllNRows(keyword, N, (...args)=> {
                   if(remote_callback_obj) {
                     model_syncRefer(remote_callback_obj);
                     remote_callback_obj.run([], args);
@@ -322,8 +322,8 @@ function ServiceAPI() {
                   }
                 });
               },
-              searchColumnsNRows: (remote_callback_obj)=> {
-                model.whatever((...args)=> {
+              searchColumnsNRows: (column_list, keyword, N, remote_callback_obj)=> {
+                model.searchColumnsNRows(column_list, keyword, N, (...args)=> {
                   if(remote_callback_obj) {
                     model_syncRefer(remote_callback_obj);
                     remote_callback_obj.run([], args);
@@ -331,8 +331,8 @@ function ServiceAPI() {
                   }
                 });
               },
-              getWhere: (remote_callback_obj)=> {
-                model.whatever((...args)=> {
+              getWhere: (where, query_values, remote_callback_obj)=> {
+                model.getWhere(where, query_values, (...args)=> {
                   if(remote_callback_obj) {
                     model_syncRefer(remote_callback_obj);
                     remote_callback_obj.run([], args);
@@ -349,8 +349,8 @@ function ServiceAPI() {
                   }
                 });
               },
-              getByPair: (remote_callback_obj)=> {
-                model.whatever((...args)=> {
+              getByPair: (pair, remote_callback_obj)=> {
+                model.getByPair(pair, (...args)=> {
                   if(remote_callback_obj) {
                     model_syncRefer(remote_callback_obj);
                     remote_callback_obj.run([], args);
@@ -358,8 +358,8 @@ function ServiceAPI() {
                   }
                 });
               },
-              getByBoth: (remote_callback_obj)=> {
-                model.whatever((...args)=> {
+              getByBoth: (both, remote_callback_obj)=> {
+                model.getByBoth(both, (...args)=> {
                   if(remote_callback_obj) {
                     model_syncRefer(remote_callback_obj);
                     remote_callback_obj.run([], args);
@@ -367,8 +367,8 @@ function ServiceAPI() {
                   }
                 });
               },
-              getByFirst: (remote_callback_obj)=> {
-                model.whatever((...args)=> {
+              getByFirst: (first, remote_callback_obj)=> {
+                model.getByFirst(first, (...args)=> {
                   if(remote_callback_obj) {
                     model_syncRefer(remote_callback_obj);
                     remote_callback_obj.run([], args);
@@ -376,8 +376,8 @@ function ServiceAPI() {
                   }
                 });
               },
-              getBySecond: (remote_callback_obj)=> {
-                model.whatever((...args)=> {
+              getBySecond: (second, remote_callback_obj)=> {
+                model.getBySecond(second, (...args)=> {
                   if(remote_callback_obj) {
                     model_syncRefer(remote_callback_obj);
                     remote_callback_obj.run([], args);
@@ -385,8 +385,8 @@ function ServiceAPI() {
                   }
                 });
               },
-              replace: (remote_callback_obj)=> {
-                model.whatever((...args)=> {
+              replace: (properties_dict, remote_callback_obj)=> {
+                model.replace(properties_dict, (...args)=> {
                   if(remote_callback_obj) {
                     model_syncRefer(remote_callback_obj);
                     remote_callback_obj.run([], args);
@@ -394,8 +394,8 @@ function ServiceAPI() {
                   }
                 });
               },
-              update: (remote_callback_obj)=> {
-                model.whatever((...args)=> {
+              update: (properties_dict, remote_callback_obj)=> {
+                model.update(properties_dict, (...args)=> {
                   if(remote_callback_obj) {
                     model_syncRefer(remote_callback_obj);
                     remote_callback_obj.run([], args);
@@ -403,8 +403,8 @@ function ServiceAPI() {
                   }
                 });
               },
-              removeByPair: (remote_callback_obj)=> {
-                model.whatever((...args)=> {
+              removeByPair: (pair, remote_callback_obj)=> {
+                model.removeByPair(pair, (...args)=> {
                   if(remote_callback_obj) {
                     model_syncRefer(remote_callback_obj);
                     remote_callback_obj.run([], args);
@@ -412,8 +412,8 @@ function ServiceAPI() {
                   }
                 });
               },
-              removeByBoth: (remote_callback_obj)=> {
-                model.whatever((...args)=> {
+              removeByBoth: (both, remote_callback_obj)=> {
+                model.removeByBoth(both, (...args)=> {
                   if(remote_callback_obj) {
                     model_syncRefer(remote_callback_obj);
                     remote_callback_obj.run([], args);
@@ -421,8 +421,8 @@ function ServiceAPI() {
                   }
                 });
               },
-              removeByFirst: (remote_callback_obj)=> {
-                model.whatever((...args)=> {
+              removeByFirst: (first, remote_callback_obj)=> {
+                model.removeByFirst(first, (...args)=> {
                   if(remote_callback_obj) {
                     model_syncRefer(remote_callback_obj);
                     remote_callback_obj.run([], args);
@@ -430,8 +430,8 @@ function ServiceAPI() {
                   }
                 });
               },
-              removeBySecond: (remote_callback_obj)=> {
-                model.whatever((...args)=> {
+              removeBySecond: (second, remote_callback_obj)=> {
+                model.removeBySecond(second, (...args)=> {
                   if(remote_callback_obj) {
                     model_syncRefer(remote_callback_obj);
                     remote_callback_obj.run([], args);
@@ -439,8 +439,8 @@ function ServiceAPI() {
                   }
                 });
               },
-              addProperties: (remote_callback_obj)=> {
-                model.whatever((...args)=> {
+              addProperties: (properties_dict, remote_callback_obj)=> {
+                model.addProperties(properties_dict, (...args)=> {
                   if(remote_callback_obj) {
                     model_syncRefer(remote_callback_obj);
                     remote_callback_obj.run([], args);
@@ -448,8 +448,8 @@ function ServiceAPI() {
                   }
                 });
               },
-              existProperty: (remote_callback_obj)=> {
-                model.whatever((...args)=> {
+              existProperty: (property_name, remote_callback_obj)=> {
+                model.existProperty(property_name, (...args)=> {
                   if(remote_callback_obj) {
                     model_syncRefer(remote_callback_obj);
                     remote_callback_obj.run([], args);
@@ -457,8 +457,8 @@ function ServiceAPI() {
                   }
                 });
               },
-              removeProperty: (remote_callback_obj)=> {
-                model.whatever((...args)=> {
+              removeProperty: (properties_list, remote_callback_obj)=> {
+                model.removeProperty(properties_list, (...args)=> {
                   if(remote_callback_obj) {
                     model_syncRefer(remote_callback_obj);
                     remote_callback_obj.run([], args);
