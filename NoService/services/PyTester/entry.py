@@ -187,5 +187,5 @@ class Service:
                 model.getAllRows('Group1' ,getAllRowsCallback)
         NoService.Database.Model.define('GroupIndexedListTest', {'model_type': "GroupIndexedList",'do_timestamp': True,'structure': {'property1': 'TEXT','property2': 'INTEGER'}}, GroupIndexedListdefineCallback)
 
-    def close(self):
+    def close(self, Me, NoService):
         self.log('Service Closed')

@@ -132,7 +132,7 @@ class WorkerClient:
                 if self._service_module:
                     try:
                         if self._service_module.close:
-                            self._service_module.close()
+                            self._service_module.close(self._Me, self._api)
                             self.send({'t':3})
                         else:
                             self.send({'t':96, 'e': 'The service "'+self._service_name+'" have no "close" function.'})
