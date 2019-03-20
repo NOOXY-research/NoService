@@ -285,6 +285,186 @@ function ServiceAPI() {
                   remote_callback_obj.run([], [err, model.ModelType]);
                   remote_callback_obj.unbindRemote();
                 }
+              },
+              create: (remote_callback_obj)=> {
+                model.whatever((...args)=> {
+                  if(remote_callback_obj) {
+                    model_syncRefer(remote_callback_obj);
+                    remote_callback_obj.run([], args);
+                    remote_callback_obj.unbindRemote();
+                  }
+                });
+              },
+              searchAll: (remote_callback_obj)=> {
+                model.whatever((...args)=> {
+                  if(remote_callback_obj) {
+                    model_syncRefer(remote_callback_obj);
+                    remote_callback_obj.run([], args);
+                    remote_callback_obj.unbindRemote();
+                  }
+                });
+              },
+              searchColumns: (remote_callback_obj)=> {
+                model.whatever((...args)=> {
+                  if(remote_callback_obj) {
+                    model_syncRefer(remote_callback_obj);
+                    remote_callback_obj.run([], args);
+                    remote_callback_obj.unbindRemote();
+                  }
+                });
+              },
+              searchAllNRows: (remote_callback_obj)=> {
+                model.whatever((...args)=> {
+                  if(remote_callback_obj) {
+                    model_syncRefer(remote_callback_obj);
+                    remote_callback_obj.run([], args);
+                    remote_callback_obj.unbindRemote();
+                  }
+                });
+              },
+              searchColumnsNRows: (remote_callback_obj)=> {
+                model.whatever((...args)=> {
+                  if(remote_callback_obj) {
+                    model_syncRefer(remote_callback_obj);
+                    remote_callback_obj.run([], args);
+                    remote_callback_obj.unbindRemote();
+                  }
+                });
+              },
+              getWhere: (remote_callback_obj)=> {
+                model.whatever((...args)=> {
+                  if(remote_callback_obj) {
+                    model_syncRefer(remote_callback_obj);
+                    remote_callback_obj.run([], args);
+                    remote_callback_obj.unbindRemote();
+                  }
+                });
+              },
+              getAll: (remote_callback_obj)=> {
+                model.whatever((...args)=> {
+                  if(remote_callback_obj) {
+                    model_syncRefer(remote_callback_obj);
+                    remote_callback_obj.run([], args);
+                    remote_callback_obj.unbindRemote();
+                  }
+                });
+              },
+              getByPair: (remote_callback_obj)=> {
+                model.whatever((...args)=> {
+                  if(remote_callback_obj) {
+                    model_syncRefer(remote_callback_obj);
+                    remote_callback_obj.run([], args);
+                    remote_callback_obj.unbindRemote();
+                  }
+                });
+              },
+              getByBoth: (remote_callback_obj)=> {
+                model.whatever((...args)=> {
+                  if(remote_callback_obj) {
+                    model_syncRefer(remote_callback_obj);
+                    remote_callback_obj.run([], args);
+                    remote_callback_obj.unbindRemote();
+                  }
+                });
+              },
+              getByFirst: (remote_callback_obj)=> {
+                model.whatever((...args)=> {
+                  if(remote_callback_obj) {
+                    model_syncRefer(remote_callback_obj);
+                    remote_callback_obj.run([], args);
+                    remote_callback_obj.unbindRemote();
+                  }
+                });
+              },
+              getBySecond: (remote_callback_obj)=> {
+                model.whatever((...args)=> {
+                  if(remote_callback_obj) {
+                    model_syncRefer(remote_callback_obj);
+                    remote_callback_obj.run([], args);
+                    remote_callback_obj.unbindRemote();
+                  }
+                });
+              },
+              replace: (remote_callback_obj)=> {
+                model.whatever((...args)=> {
+                  if(remote_callback_obj) {
+                    model_syncRefer(remote_callback_obj);
+                    remote_callback_obj.run([], args);
+                    remote_callback_obj.unbindRemote();
+                  }
+                });
+              },
+              update: (remote_callback_obj)=> {
+                model.whatever((...args)=> {
+                  if(remote_callback_obj) {
+                    model_syncRefer(remote_callback_obj);
+                    remote_callback_obj.run([], args);
+                    remote_callback_obj.unbindRemote();
+                  }
+                });
+              },
+              removeByPair: (remote_callback_obj)=> {
+                model.whatever((...args)=> {
+                  if(remote_callback_obj) {
+                    model_syncRefer(remote_callback_obj);
+                    remote_callback_obj.run([], args);
+                    remote_callback_obj.unbindRemote();
+                  }
+                });
+              },
+              removeByBoth: (remote_callback_obj)=> {
+                model.whatever((...args)=> {
+                  if(remote_callback_obj) {
+                    model_syncRefer(remote_callback_obj);
+                    remote_callback_obj.run([], args);
+                    remote_callback_obj.unbindRemote();
+                  }
+                });
+              },
+              removeByFirst: (remote_callback_obj)=> {
+                model.whatever((...args)=> {
+                  if(remote_callback_obj) {
+                    model_syncRefer(remote_callback_obj);
+                    remote_callback_obj.run([], args);
+                    remote_callback_obj.unbindRemote();
+                  }
+                });
+              },
+              removeBySecond: (remote_callback_obj)=> {
+                model.whatever((...args)=> {
+                  if(remote_callback_obj) {
+                    model_syncRefer(remote_callback_obj);
+                    remote_callback_obj.run([], args);
+                    remote_callback_obj.unbindRemote();
+                  }
+                });
+              },
+              addProperties: (remote_callback_obj)=> {
+                model.whatever((...args)=> {
+                  if(remote_callback_obj) {
+                    model_syncRefer(remote_callback_obj);
+                    remote_callback_obj.run([], args);
+                    remote_callback_obj.unbindRemote();
+                  }
+                });
+              },
+              existProperty: (remote_callback_obj)=> {
+                model.whatever((...args)=> {
+                  if(remote_callback_obj) {
+                    model_syncRefer(remote_callback_obj);
+                    remote_callback_obj.run([], args);
+                    remote_callback_obj.unbindRemote();
+                  }
+                });
+              },
+              removeProperty: (remote_callback_obj)=> {
+                model.whatever((...args)=> {
+                  if(remote_callback_obj) {
+                    model_syncRefer(remote_callback_obj);
+                    remote_callback_obj.run([], args);
+                    remote_callback_obj.unbindRemote();
+                  }
+                });
               }
           });
         }));
