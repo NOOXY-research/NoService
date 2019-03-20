@@ -167,6 +167,129 @@ function ServiceAPI() {
       });
     });
 
+    let _turn_model_to_local_callback_obj = (model, LCBO)=> {
+      if(model == null){
+        return null;
+      }
+      else if(model.ModelType == 'Object') {
+        return(new LCBO(model, (model_syncRefer)=> {
+          return ({
+              getModelType: (remote_callback_obj)=> {
+                if(remote_callback_obj) {
+                  model_syncRefer(remote_callback_obj);
+                  remote_callback_obj.run([], [err, model.ModelType]);
+                  remote_callback_obj.unbindRemote();
+                }
+              },
+              get: (key_value, remote_callback_obj)=> {
+                model.get(key_value, (...args)=> {
+                  model_syncRefer(remote_callback_obj);
+                  remote_callback_obj.run([], args);
+                  remote_callback_obj.unbindRemote();
+                });
+              },
+              getAll: (remote_callback_obj)=> {
+                model.getAll(key_value, (...args)=> {
+                  model_syncRefer(remote_callback_obj);
+                  remote_callback_obj.run([], args);
+                  remote_callback_obj.unbindRemote();
+                });
+              },
+              getWhere: (where, query_values, remote_callback_obj)=> {
+                model.getWhere(where, query_values, (...args)=> {
+                  model_syncRefer(remote_callback_obj);
+                  remote_callback_obj.run([], args);
+                  remote_callback_obj.unbindRemote();
+                });
+              },
+              searchAll: (keyword, remote_callback_obj)=> {
+                model.searchAll(keyword, (...args)=> {
+                  model_syncRefer(remote_callback_obj);
+                  remote_callback_obj.run([], args);
+                  remote_callback_obj.unbindRemote();
+                });
+              },
+              searchColumns: (column_list, keyword, remote_callback_obj)=> {
+                model.searchColumns(column_list, keyword, (...args)=> {
+                  model_syncRefer(remote_callback_obj);
+                  remote_callback_obj.run([], args);
+                  remote_callback_obj.unbindRemote();
+                });
+              },
+              searchAllNRows: (keyword, N, remote_callback_obj)=> {
+                model.searchAllNRows(keyword, N, (...args)=> {
+                  model_syncRefer(remote_callback_obj);
+                  remote_callback_obj.run([], args);
+                  remote_callback_obj.unbindRemote();
+                });
+              },
+              searchColumnsNRows: (column_list, keyword, N, remote_callback_obj)=> {
+                model.searchColumnsNRows(column_list, keyword, N, (...args)=> {
+                  model_syncRefer(remote_callback_obj);
+                  remote_callback_obj.run([], args);
+                  remote_callback_obj.unbindRemote();
+                });
+              },
+              create: (properties_dict, remote_callback_obj)=> {
+                model.create(properties_dict, (...args)=> {
+                  model_syncRefer(remote_callback_obj);
+                  remote_callback_obj.run([], args);
+                  remote_callback_obj.unbindRemote();
+                });
+              },
+              replace: (properties_dict, remote_callback_obj)=> {
+                model.replace(properties_dict, (...args)=> {
+                  model_syncRefer(remote_callback_obj);
+                  remote_callback_obj.run([], args);
+                  remote_callback_obj.unbindRemote();
+                });
+              },
+              update: (properties_dict, remote_callback_obj)=> {
+                model.update(properties_dict, (...args)=> {
+                  model_syncRefer(remote_callback_obj);
+                  remote_callback_obj.run([], args);
+                  remote_callback_obj.unbindRemote();
+                });
+              },
+              addProperties: (properties_dict, remote_callback_obj)=> {
+                model.addProperties(properties_dict, (...args)=> {
+                  model_syncRefer(remote_callback_obj);
+                  remote_callback_obj.run([], args);
+                  remote_callback_obj.unbindRemote();
+                });
+              },
+              existProperty: (property_name, remote_callback_obj)=> {
+                model.existProperty(property_name, (...args)=> {
+                  model_syncRefer(remote_callback_obj);
+                  remote_callback_obj.run([], args);
+                  remote_callback_obj.unbindRemote();
+                });
+              },
+              removeProperties: (properties_list, remote_callback_obj)=> {
+                model.removeProperties(properties_list, (...args)=> {
+                  model_syncRefer(remote_callback_obj);
+                  remote_callback_obj.run([], args);
+                  remote_callback_obj.unbindRemote();
+                });
+              },
+              remove: ()=> {},
+          });
+        }));
+      }
+      else if(model.ModelType == 'Pair') {
+        return(new LCBO(model, (model_syncRefer)=> {
+          return ({
+              getModelType: (remote_callback_obj)=> {
+                if(remote_callback_obj) {
+                  model_syncRefer(remote_callback_obj);
+                  remote_callback_obj.run([], [err, model.ModelType]);
+                  remote_callback_obj.unbindRemote();
+                }
+              }
+          });
+        }));
+      }
+    };
     api.addAPI(['Database', 'Database'], (LCBO)=> {
       return({
         query: (query, remote_callback_obj)=> {
@@ -180,130 +303,6 @@ function ServiceAPI() {
       })
     });
     api.addAPI(['Database', 'Model'], (LCBO)=> {
-      let _turn_model_to_local_callback_obj = (model)=> {
-        if(model == null){
-          return null;
-        }
-        else if(model.ModelType == 'Object') {
-          return(new LCBO(model, (model_syncRefer)=> {
-            return ({
-                getModelType: (remote_callback_obj)=> {
-                  if(remote_callback_obj) {
-                    model_syncRefer(remote_callback_obj);
-                    remote_callback_obj.run([], [err, model.ModelType]);
-                    remote_callback_obj.unbindRemote();
-                  }
-                },
-                get: (key_value, remote_callback_obj)=> {
-                  model.get(key_value, (...args)=> {
-                    model_syncRefer(remote_callback_obj);
-                    remote_callback_obj.run([], args);
-                    remote_callback_obj.unbindRemote();
-                  });
-                },
-                getAll: (remote_callback_obj)=> {
-                  model.getAll(key_value, (...args)=> {
-                    model_syncRefer(remote_callback_obj);
-                    remote_callback_obj.run([], args);
-                    remote_callback_obj.unbindRemote();
-                  });
-                },
-                getWhere: (where, query_values, remote_callback_obj)=> {
-                  model.getWhere(where, query_values, (...args)=> {
-                    model_syncRefer(remote_callback_obj);
-                    remote_callback_obj.run([], args);
-                    remote_callback_obj.unbindRemote();
-                  });
-                },
-                searchAll: (keyword, remote_callback_obj)=> {
-                  model.searchAll(keyword, (...args)=> {
-                    model_syncRefer(remote_callback_obj);
-                    remote_callback_obj.run([], args);
-                    remote_callback_obj.unbindRemote();
-                  });
-                },
-                searchColumns: (column_list, keyword, remote_callback_obj)=> {
-                  model.searchColumns(column_list, keyword, (...args)=> {
-                    model_syncRefer(remote_callback_obj);
-                    remote_callback_obj.run([], args);
-                    remote_callback_obj.unbindRemote();
-                  });
-                },
-                searchAllNRows: (keyword, N, remote_callback_obj)=> {
-                  model.searchAllNRows(keyword, N, (...args)=> {
-                    model_syncRefer(remote_callback_obj);
-                    remote_callback_obj.run([], args);
-                    remote_callback_obj.unbindRemote();
-                  });
-                },
-                searchColumnsNRows: (column_list, keyword, N, remote_callback_obj)=> {
-                  model.searchColumnsNRows(column_list, keyword, N, (...args)=> {
-                    model_syncRefer(remote_callback_obj);
-                    remote_callback_obj.run([], args);
-                    remote_callback_obj.unbindRemote();
-                  });
-                },
-                create: (properties_dict, remote_callback_obj)=> {
-                  model.create(properties_dict, (...args)=> {
-                    model_syncRefer(remote_callback_obj);
-                    remote_callback_obj.run([], args);
-                    remote_callback_obj.unbindRemote();
-                  });
-                },
-                replace: (properties_dict, remote_callback_obj)=> {
-                  model.replace(properties_dict, (...args)=> {
-                    model_syncRefer(remote_callback_obj);
-                    remote_callback_obj.run([], args);
-                    remote_callback_obj.unbindRemote();
-                  });
-                },
-                update: (properties_dict, remote_callback_obj)=> {
-                  model.update(properties_dict, (...args)=> {
-                    model_syncRefer(remote_callback_obj);
-                    remote_callback_obj.run([], args);
-                    remote_callback_obj.unbindRemote();
-                  });
-                },
-                addProperties: (properties_dict, remote_callback_obj)=> {
-                  model.addProperties(properties_dict, (...args)=> {
-                    model_syncRefer(remote_callback_obj);
-                    remote_callback_obj.run([], args);
-                    remote_callback_obj.unbindRemote();
-                  });
-                },
-                existProperty: (property_name, remote_callback_obj)=> {
-                  model.existProperty(property_name, (...args)=> {
-                    model_syncRefer(remote_callback_obj);
-                    remote_callback_obj.run([], args);
-                    remote_callback_obj.unbindRemote();
-                  });
-                },
-                removeProperties: (properties_list, remote_callback_obj)=> {
-                  model.removeProperties(properties_list, (...args)=> {
-                    model_syncRefer(remote_callback_obj);
-                    remote_callback_obj.run([], args);
-                    remote_callback_obj.unbindRemote();
-                  });
-                },
-                remove: ()=> {},
-            });
-          }));
-        }
-        else if(model.ModelType == 'Pair') {
-          return(new LCBO(model, (model_syncRefer)=> {
-            return ({
-                getModelType: (remote_callback_obj)=> {
-                  if(remote_callback_obj) {
-                    model_syncRefer(remote_callback_obj);
-                    remote_callback_obj.run([], [err, model.ModelType]);
-                    remote_callback_obj.unbindRemote();
-                  }
-                }
-            });
-          }));
-        }
-      };
-
       return({
         remove: (model_name, remote_callback_obj)=> {
           _coregateway.Model.remove(_service_name+'_'+model_name, (err)=> {
@@ -326,7 +325,7 @@ function ServiceAPI() {
         get: (model_name, remote_callback_obj)=> {
           _coregateway.Model.get(_service_name+'_'+model_name, (err, the_model)=> {
             if(remote_callback_obj) {
-              remote_callback_obj.run([], [err, _turn_model_to_local_callback_obj(the_model)]);
+              remote_callback_obj.run([], [err, _turn_model_to_local_callback_obj(the_model, LCBO)]);
               remote_callback_obj.unbindRemote();
             }
           });
@@ -335,7 +334,7 @@ function ServiceAPI() {
         define: (model_name, model_structure, remote_callback_obj)=> {
           _coregateway.Model.define(_service_name+'_'+model_name, model_structure, (err, the_model)=> {
             if(remote_callback_obj) {
-              remote_callback_obj.run([], [err, _turn_model_to_local_callback_obj(the_model)]);
+              remote_callback_obj.run([], [err, _turn_model_to_local_callback_obj(the_model, LCBO)]);
               remote_callback_obj.unbindRemote();
             }
           });
@@ -350,7 +349,7 @@ function ServiceAPI() {
             let local_callback_obj = new LCBO(models, (models_syncRefer)=> {
               let dict = {};
               for(let key in models) {
-                dict[key] = _turn_model_to_local_callback_obj(models[key]);
+                dict[key] = _turn_model_to_local_callback_obj(models[key], LCBO);
               };
               return dict;
             });
