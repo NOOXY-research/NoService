@@ -1,5 +1,5 @@
-# NoService
 ![](https://raw.githubusercontent.com/NOOXY-inc/Art-Collection/master/NoService/NoService.png)
+# NoService
 Deploy services just like apps
 The project is still in alpha!
 ## Installation and Deploy
@@ -426,6 +426,7 @@ NoService.Authorization.Authby.Token(entityId, handleAuth)
 In case that the service that user acesses might be sensitive. You can call many kinds of api to protect your data.
 
 For example:
+1. javascript
 ``` javascript
 //
 NoService.Database.Model.define('IndexedListTest', {
@@ -464,6 +465,18 @@ NoService.Database.Model.define('IndexedListTest', {
         });
     }
 });
+```
+2. python
+``` python
+def ModelDefineCallback(err, model):
+    if err:
+        log(err)
+    else:
+        log('IndexedList Model Append.');
+        def appendRowsCallback(err):
+          # whatever
+        model.appendRows([{'property1': 'A','property2': 0},{'property1': 'B','property2': 1},{'property1': 'C','property2': 2},{'property1': 'D','property2': 3}], appendRowsCallback);
+NoService.Database.Model.define('IndexedListTest', {'model_type': "IndexedList",'do_timestamp': True,'structure': {'property1': 'TEXT','property2': 'INTEGER'}}, ModelDefineCallback);
 ```
 
 ## APIs
