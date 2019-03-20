@@ -285,6 +285,7 @@ function Service(Me, NoService) {
                     log(err);
                   }
                   else {
+                    log('IndexedList Model getRowsFromTo Test.');
                     model.getRowsFromTo(1, 2, (err, result)=> {
                       log(result);
                       NoService.Database.Model.remove('IndexedListTest', (err)=>{

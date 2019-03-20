@@ -128,6 +128,7 @@ class Service:
                                     if err:
                                         log(err)
                                     else:
+                                        log('IndexedList Model getRowsFromTo Test.')
                                         def getRowsFromToCallback(err, result):
                                             if err:
                                                 log(err)
@@ -144,6 +145,47 @@ class Service:
                         model.getAllRows(getAllRowsCallback)
                 model.appendRows([{'property1': 'A','property2': 0},{'property1': 'B','property2': 1},{'property1': 'C','property2': 2},{'property1': 'D','property2': 3}], appendRowsCallback)
         NoService.Database.Model.define('IndexedListTest', {'model_type': "IndexedList",'do_timestamp': True,'structure': {'property1': 'TEXT','property2': 'INTEGER' }}, IndexedListdefineCallback)
+
+        # GroupIndexedList Model Test
+        log('GroupIndexedList Model Test.')
+        def GroupIndexedListdefineCallback(err, model):
+            if err:
+                log(err)
+            else:
+                log('GroupIndexedList Model Append Test.')
+                def getAllRowsCallback(err, result):
+                    if err:
+                        log(err)
+                    else:
+                        log(result)
+                        log('GroupIndexedList Model append Test.')
+                        def appendRowsCallback(err):
+                            if err:
+                                log(err)
+                            else:
+                                log('GroupIndexedList Model Update Test.')
+                                def updateRowsCallback(err):
+                                    if err:
+                                        log(err)
+                                    else:
+                                        log('GroupIndexedList Model getRowsFromTo Test.')
+                                        def getRowsFromToCallback(err, result):
+                                            if err:
+                                                log(err)
+                                            else:
+                                                log(result)
+                                                log('Remove GroupIndexedList Model Test.')
+                                                def removeCallback(err):
+                                                    if err:
+                                                        log(err)
+                                                    else:
+                                                        log('GroupIndexedList Model PASS.')
+                                                NoService.Database.Model.remove('GroupIndexedListTest', removeCallback)
+                                        model.getRowsFromTo('Group2', 1, 2, getRowsFromToCallback)
+                                model.updateRows('Group1', [{'Idx': 1,'property1': 'Br' },{'Idx': 2,'property1': 'Cr'}], updateRowsCallback)
+                        model.appendRows('Group2' ,[{'property1': 'AA2','property2': 0},{'property1': 'BB2','property2': 1},{'property1': 'CC2','property2': 2},{'property1': 'DD2','property2': 3}], appendRowsCallback)
+                model.getAllRows('Group1' ,getAllRowsCallback)
+        NoService.Database.Model.define('GroupIndexedListTest', {'model_type': "GroupIndexedList",'do_timestamp': True,'structure': {'property1': 'TEXT','property2': 'INTEGER'}}, GroupIndexedListdefineCallback)
 
     def close(self):
         self.log('Service Closed')
