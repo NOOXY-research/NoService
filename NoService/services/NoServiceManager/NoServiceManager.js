@@ -1,7 +1,7 @@
 // NoServiceManager.js
 // Description:
 // "NoServiceManager.js" is a extension module for NoServiceManager.
-// Copyright 2018 NOOXY. All Rights Reserved.
+// Copyright 2018-2019 NOOXY. All Rights Reserved.
 
 const fs = require('fs');
 let Library;

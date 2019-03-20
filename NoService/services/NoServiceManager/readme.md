@@ -4,7 +4,7 @@
 # Install
 launch you NoService framework and type
 ```
-service git install NOOXY-Research/NoShell github
+service git install NOOXY-Research/NoServiceManager github
 ```
 
 # Upgrade

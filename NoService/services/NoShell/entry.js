@@ -1,7 +1,7 @@
 // NoService/services/NoShell/entry.js
 // Description:
 // "NoShell/entry.js" is a NoService Shell service.
-// Copyright 2018 NOOXY. All Rights Reserved.
+// Copyright 2018-2019 NOOXY. All Rights Reserved.
 'use strict';
 
 function Service(Me, NoService) {
@@ -144,6 +144,7 @@ function Service(Me, NoService) {
                   '[service]\n'+
                   '  service [list|cbo|memuse|dependstack]\n'+
                   '  service [manifest|create|relaunch] {service name}\n'+
+                  '  service create {service name} [blank|complete|normal|python]\n'+
                   '  service [funclist|funcdict|funcshow] {target service}\n'+
                   '  service func {target service} {target username} {target service function} {JSON} ---Call a Service function as target user.\n'+
                   '  service entity [show {entityID}|list|count|showuser {username}]\n'+

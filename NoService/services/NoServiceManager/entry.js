@@ -1,7 +1,7 @@
 // NoService/services/NoServiceManager/entry.js
 // Description:
 // "NoServiceManager/entry.js" .
-// Copyright 2018 NOOXY. All Rights Reserved.
+// Copyright 2018-2019 NOOXY. All Rights Reserved.
 let NoServiceManager = new (require('./NoServiceManager'))()
 // Service entry point
 function Service(Me, NoService) {

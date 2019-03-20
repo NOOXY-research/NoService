@@ -1,7 +1,7 @@
 // {{ servicename }}.js
 // Description:
 // "{{ servicename }}.js" is a extension module for {{ servicename }}.
-// Copyright 2018 NOOXY. All Rights Reserved.
+// Copyright 2018-2019 NOOXY. All Rights Reserved.
 
 'use strict';
 let models_dict = require('./models.json')

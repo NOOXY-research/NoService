@@ -1,6 +1,6 @@
-# NoService/services/{{ servicename }}/entry.js
+# NoService/services/{{ servicename }}/entry.py
 # Description:
-# "{{ servicename }}/entry.js" is an NoService entry point
+# "{{ servicename }}/entry.py" is an NoService entry point
 # Copyright 2019 NOOXY. All Rights Reserved.
 
 class Service:

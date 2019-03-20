@@ -1,7 +1,7 @@
 // NoService/services/{{ servicename }}/entry.js
 // Description:
 // "{{ servicename }}/entry.js" description.
-// Copyright 2018 NOOXY. All Rights Reserved.
+// Copyright 2018-2019 NOOXY. All Rights Reserved.
 'use strict';
 
 function Service(Me, NoService) {
