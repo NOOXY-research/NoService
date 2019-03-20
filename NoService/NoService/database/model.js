@@ -449,6 +449,17 @@ function Model() {
     let model_key = MODEL_INDEXKEY;
     let model_group_key = MODEL_GROUPKEY;
 
+    this.existGroup = (group_name, callback)=> {
+      _db.getRows(MODEL_TABLE_PREFIX+table_name, model_group_key+' LIKE ?', [group_name], (err, results)=> {
+        if(results) {
+          callback(err, results[0]?true: false);
+        }
+        else {
+          callback(err, false);
+        }
+      });
+    };
+
     this.searchAll = (group_name, keyword, callback)=> {
       let sql = '(';
       let column_list = Object.keys(structure);
@@ -485,17 +496,6 @@ function Model() {
       let values = column_list.map(v=>{return keyword});
       values.push(group_name);
       _db.getRowsTopNRows(MODEL_TABLE_PREFIX+table_name, sql, values, N, callback);
-    };
-
-    this.existGroup = (group_name, callback)=> {
-      _db.getRows(MODEL_TABLE_PREFIX+table_name, model_group_key+' LIKE ?', [group_name], (err, results)=> {
-        if(results) {
-          callback(err, results[0]?true: false);
-        }
-        else {
-          callback(err, false);
-        }
-      });
     };
 
     // get an instense
@@ -589,7 +589,7 @@ function Model() {
       _db.appendRowsandGroupAutoIncrease(MODEL_TABLE_PREFIX+table_name, [model_key, model_group_key], rows, callback);
     };
 
-    this.appendRowsAllGroup = (group_name, rows, callback)=> {
+    this.appendRowsAllGroup = (rows, callback)=> {
       // not finished
     };
 

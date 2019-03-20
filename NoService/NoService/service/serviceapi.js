@@ -636,13 +636,188 @@ function ServiceAPI() {
         }));
       }
       else if(model.ModelType == 'GroupIndexedList') {
-        getModelType: (remote_callback_obj)=> {
-          if(remote_callback_obj) {
-            model_syncRefer(remote_callback_obj);
-            remote_callback_obj.run([], [err, model.ModelType]);
-            remote_callback_obj.unbindRemote();
-          }
-        }
+        return(new LCBO(model, (model_syncRefer)=> {
+          return ({
+            getModelType: (remote_callback_obj)=> {
+              if(remote_callback_obj) {
+                model_syncRefer(remote_callback_obj);
+                remote_callback_obj.run([], [err, model.ModelType]);
+                remote_callback_obj.unbindRemote();
+              }
+            },
+            existGroup: (group_name, remote_callback_obj)=> {
+              model.existGroup(group_name, (...args)=> {
+                if(remote_callback_obj) {
+                  model_syncRefer(remote_callback_obj);
+                  remote_callback_obj.run([], args);
+                  remote_callback_obj.unbindRemote();
+                }
+              });
+            },
+            searchAll: (group_name, keyword, remote_callback_obj)=> {
+              model.searchAll(group_name, keyword, (...args)=> {
+                if(remote_callback_obj) {
+                  model_syncRefer(remote_callback_obj);
+                  remote_callback_obj.run([], args);
+                  remote_callback_obj.unbindRemote();
+                }
+              });
+            },
+            searchColumns: (group_name, column_list, remote_callback_obj)=> {
+              model.searchColumns(group_name, column_list, (...args)=> {
+                if(remote_callback_obj) {
+                  model_syncRefer(remote_callback_obj);
+                  remote_callback_obj.run([], args);
+                  remote_callback_obj.unbindRemote();
+                }
+              });
+            },
+            searchAllNRows: (group_name, keyword, N, remote_callback_obj)=> {
+              model.searchAllNRows(group_name, keyword, N, (...args)=> {
+                if(remote_callback_obj) {
+                  model_syncRefer(remote_callback_obj);
+                  remote_callback_obj.run([], args);
+                  remote_callback_obj.unbindRemote();
+                }
+              });
+            },
+            searchColumnsNRows: (group_name, column_list, keyword, N, remote_callback_obj)=> {
+              model.searchColumnsNRows(group_name, column_list, keyword, N, (...args)=> {
+                if(remote_callback_obj) {
+                  model_syncRefer(remote_callback_obj);
+                  remote_callback_obj.run([], args);
+                  remote_callback_obj.unbindRemote();
+                }
+              });
+            },
+            get: (group_name, key_value, remote_callback_obj)=> {
+              model.get(group_name, key_value, (...args)=> {
+                if(remote_callback_obj) {
+                  model_syncRefer(remote_callback_obj);
+                  remote_callback_obj.run([], args);
+                  remote_callback_obj.unbindRemote();
+                }
+              });
+            },
+            getWhere: (where, query_values, remote_callback_obj)=> {
+              model.getWhere(where, query_values, (...args)=> {
+                if(remote_callback_obj) {
+                  model_syncRefer(remote_callback_obj);
+                  remote_callback_obj.run([], args);
+                  remote_callback_obj.unbindRemote();
+                }
+              });
+            },
+            replaceRows: (group_name, rows, remote_callback_obj)=> {
+              model.replaceRows(group_name, rows, (...args)=> {
+                if(remote_callback_obj) {
+                  model_syncRefer(remote_callback_obj);
+                  remote_callback_obj.run([], args);
+                  remote_callback_obj.unbindRemote();
+                }
+              });
+            },
+            updateRows: (group_name, rows, remote_callback_obj)=> {
+              model.updateRows(group_name, rows, (...args)=> {
+                if(remote_callback_obj) {
+                  model_syncRefer(remote_callback_obj);
+                  remote_callback_obj.run([], args);
+                  remote_callback_obj.unbindRemote();
+                }
+              });
+            },
+            deleteRows: (group_name, begin, end, remote_callback_obj)=> {
+              model.deleteRows(group_name, begin, end, (...args)=> {
+                if(remote_callback_obj) {
+                  model_syncRefer(remote_callback_obj);
+                  remote_callback_obj.run([], args);
+                  remote_callback_obj.unbindRemote();
+                }
+              });
+            },
+            appendRows: (group_name, rows, remote_callback_obj)=> {
+              model.appendRows(group_name, rows, (...args)=> {
+                if(remote_callback_obj) {
+                  model_syncRefer(remote_callback_obj);
+                  remote_callback_obj.run([], args);
+                  remote_callback_obj.unbindRemote();
+                }
+              });
+            },
+            appendRowsAllGroup: (rows, remote_callback_obj)=> {
+              model.appendRowsAllGroup(rows, (...args)=> {
+                if(remote_callback_obj) {
+                  model_syncRefer(remote_callback_obj);
+                  remote_callback_obj.run([], args);
+                  remote_callback_obj.unbindRemote();
+                }
+              });
+            },
+            getLatestNRows: (group_name, n, remote_callback_obj)=> {
+              model.getLatestNRows(group_name, n, (...args)=> {
+                if(remote_callback_obj) {
+                  model_syncRefer(remote_callback_obj);
+                  remote_callback_obj.run([], args);
+                  remote_callback_obj.unbindRemote();
+                }
+              });
+            },
+            getRowsFromTo: (group_name, begin, end, remote_callback_obj)=> {
+              model.getRowsFromTo(group_name, begin, end, (...args)=> {
+                if(remote_callback_obj) {
+                  model_syncRefer(remote_callback_obj);
+                  remote_callback_obj.run([], args);
+                  remote_callback_obj.unbindRemote();
+                }
+              });
+            },
+            getAllRows: (group_name, remote_callback_obj)=> {
+              model.getAllRows(group_name, (...args)=> {
+                if(remote_callback_obj) {
+                  model_syncRefer(remote_callback_obj);
+                  remote_callback_obj.run([], args);
+                  remote_callback_obj.unbindRemote();
+                }
+              });
+            },
+            getLatestIndex: (group_name, remote_callback_obj)=> {
+              model.getLatestIndex(group_name, (...args)=> {
+                if(remote_callback_obj) {
+                  model_syncRefer(remote_callback_obj);
+                  remote_callback_obj.run([], args);
+                  remote_callback_obj.unbindRemote();
+                }
+              });
+            },
+            addFields: (fields_dict, remote_callback_obj)=> {
+              model.addFields(fields_dict, (...args)=> {
+                if(remote_callback_obj) {
+                  model_syncRefer(remote_callback_obj);
+                  remote_callback_obj.run([], args);
+                  remote_callback_obj.unbindRemote();
+                }
+              });
+            },
+            existField: (field_name, remote_callback_obj)=> {
+              model.existField(field_name, (...args)=> {
+                if(remote_callback_obj) {
+                  model_syncRefer(remote_callback_obj);
+                  remote_callback_obj.run([], args);
+                  remote_callback_obj.unbindRemote();
+                }
+              });
+            },
+            removeFields: (fields_dict, remote_callback_obj)=> {
+              model.removeFields(fields_dict, (...args)=> {
+                if(remote_callback_obj) {
+                  model_syncRefer(remote_callback_obj);
+                  remote_callback_obj.run([], args);
+                  remote_callback_obj.unbindRemote();
+                }
+              });
+            }
+          });
+        }));
       }
 
     };
