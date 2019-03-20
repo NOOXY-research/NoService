@@ -67,8 +67,9 @@ class Service:
 
         NoService.Database.RAWModel.get(NoService.Constants['AUTHE_USER_MODEL_NAME'], RawModelgetCallback)
 
+        # Object Model Test
         log('Object Model Test.')
-        def defineCallback(err, model):
+        def ObjectdefineCallback(err, model):
             if err:
                 log(err)
             else:
@@ -103,7 +104,46 @@ class Service:
                                 model.replace({'objkey': 0,'property1': 'HAHARPLACE', 'property2': 0}, replaceCallback)
                         model.get(0, getCallback)
                 model.create({'objkey': 0, 'property1': 'HAHA', 'property2': 0}, createCallback)
-        NoService.Database.Model.define('ObjectTest', {'model_type': "Object",'do_timestamp': True,'model_key': "objkey",'structure': {'objkey': 'INTEGER','property1': 'TEXT','property2': 'INTEGER'}}, defineCallback)
+        NoService.Database.Model.define('ObjectTest', {'model_type': "Object",'do_timestamp': True,'model_key': "objkey",'structure': {'objkey': 'INTEGER','property1': 'TEXT','property2': 'INTEGER'}}, ObjectdefineCallback)
+
+        # IndexedList Model Test
+        log('IndexedList Model Test.')
+        def IndexedListdefineCallback(err, model):
+            if err:
+                log(err)
+            else:
+                log('IndexedList Model Append Test.')
+                def appendRowsCallback(err):
+                    if err:
+                        log(err)
+                    else:
+                        log('IndexedList Model Get Test.')
+                        def getAllRowsCallback(err, result):
+                            if err:
+                                log(err)
+                            else:
+                                log(result)
+                                log('IndexedList Model Update Test.')
+                                def updateRowsCallback(err):
+                                    if err:
+                                        log(err)
+                                    else:
+                                        def getRowsFromToCallback(err, result):
+                                            if err:
+                                                log(err)
+                                            else:
+                                                log(result)
+                                                def removeCallback(err):
+                                                    if err:
+                                                        log(err)
+                                                    else:
+                                                        log('IndexedList Model PASS.')
+                                                NoService.Database.Model.remove('IndexedListTest', removeCallback)
+                                        model.getRowsFromTo(1, 2, getRowsFromToCallback)
+                                model.updateRows([{'Idx': 1,'property1': 'Br'},{'Idx': 2,'property1': 'Cr'}], updateRowsCallback)
+                        model.getAllRows(getAllRowsCallback)
+                model.appendRows([{'property1': 'A','property2': 0},{'property1': 'B','property2': 1},{'property1': 'C','property2': 2},{'property1': 'D','property2': 3}], appendRowsCallback)
+        NoService.Database.Model.define('IndexedListTest', {'model_type': "IndexedList",'do_timestamp': True,'structure': {'property1': 'TEXT','property2': 'INTEGER' }}, IndexedListdefineCallback)
 
     def close(self):
         self.log('Service Closed')
