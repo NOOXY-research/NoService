@@ -30,7 +30,7 @@ NoService is built for service. From it's protocol to it's local structure. It a
 NoService is designed for any kind of condition such as game, IoT, text contain. However, we have only implemented game([reversi](https://nooxy.org/noversi)), chat([Talksy](https://talk.nooxy.org)), notification([NOOXY](https://nooxy.org)), shell([NoShell](https://www.nooxy.org/static/nsf/shell.html)). Nevertheless the development of NoService is still in progress. We can fix bugs and add features to confirm other abilities.
 ### cross platform client
 Now, NoService can run on browser(javascript) and desktop(javascript). It also supports TCP/IP, websocket connections. Other languages is still on the way.
-### supporting python in server-side(still working with 0.5.x update)
+### supporting Python in server-side
 You can write your service in python and it's event-based asyncio module.
 
 ### Socket-based+API control
