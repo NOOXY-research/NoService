@@ -76,11 +76,14 @@ function NoServiceManager() {
           console.log(err);
           Utils.TagLog('Service', 'AutoUpgrade failed! Skipped.');
         }
-
         let stacked_services = [];
         let unstacked_services = [];
         // Check version and dependencies.
         ServiceAPI.getServicesManifest((err, manifests)=> {
+          if(err) {
+            console.log(err);
+          }
+
           unstacked_services = Object.keys(manifests);
           let root_level = {};
           for(let service_name in manifests) {
@@ -131,6 +134,7 @@ function NoServiceManager() {
               Daemon.close();
             }
           };
+
           // push root level
           dependencies_level_stack.push(root_level);
           // root should not be empty
@@ -320,6 +324,9 @@ function NoServiceManager() {
                     }
                   }
                 }
+          }
+          else if (type == "python"){
+            manifest.language = "python";
           }
 
           fs.writeFileSync(services_path+service_name+'/manifest.json', JSON.stringify(manifest, null, 2));

@@ -98,14 +98,11 @@ class WorkerClient:
                     if Me['Manifest']['LibraryAPI']:
                         pass
                     setattr(self._api, 'Constants', json.loads(open(sys.path[0]+'/'+CONSTANTS_PATH).read()))
-                    if Me['Manifest']['DatabaseAPI']:
-                        pass
-                    else:
-                        os.chdir(Me['FilesPath'])
-                        sys.path.append(message['p'].split('/entry')[0])
-                        from entry import Service
-                        self._service_module = Service(Me, self._api)
-                        self.send({'t':1})
+                    os.chdir(Me['FilesPath'])
+                    sys.path.append(message['p'].split('/entry')[0])
+                    from entry import Service
+                    self._service_module = Service(Me, self._api)
+                    self.send({'t':1})
                 self._api.Daemon.getSettings(getSettingsCallback)
             self._api.getMe(getMeCallback)
             # not completed

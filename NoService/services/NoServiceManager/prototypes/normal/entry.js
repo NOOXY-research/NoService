@@ -19,7 +19,7 @@ function Service(Me, NoService) {
 
   // ServiceFunction is a function that can be defined, which others entities can call.
   // It is a NOOXY Service Framework Standard
-  ss.def('ServiceFunction', (json, entityID, returnJSON)=> {
+  ss.def('ServiceFunction', (json, entityId, returnJSON)=> {
     // Code here for JSONfunciton
     // Return Value for ServiceFunction call. Otherwise remote will not recieve funciton return value.
     let json_be_returned = {
@@ -30,7 +30,7 @@ function Service(Me, NoService) {
   });
 
   // Safe define a ServiceFunction.
-  ss.sdef('SafeServiceFunction', (json, entityID, returnJSON)=> {
+  ss.sdef('SafeServiceFunction', (json, entityId, returnJSON)=> {
     // Code here for JSONfunciton
     // Return Value for ServiceFunction call. Otherwise remote will not recieve funciton return value.
     let json_be_returned = {
@@ -45,10 +45,10 @@ function Service(Me, NoService) {
   });
 
   // ServiceSocket.onData, in case client send data to this Service.
-  // You will need entityID to Authorize remote user. And identify remote.
-  ss.on('data', (entityID, data) => {
+  // You will need entityId to Authorize remote user. And identify remote.
+  ss.on('data', (entityId, data) => {
     // Get Username and process your work.
-    NoService.Service.Entity.getEntityOwner(entityID, (err, username)=> {
+    NoService.Service.Entity.getEntityOwner(entityId, (err, username)=> {
       // To store your data and associated with userid INSEAD OF USERNAME!!!
       // Since userid can be promised as a unique identifer!!!
       let userid = null;
@@ -64,15 +64,15 @@ function Service(Me, NoService) {
   // Send data to client.
   ss.sendData('A entity ID', 'My data to be transfer.');
   // ServiceSocket.onConnect, in case on new connection.
-  ss.on('connect', (entityID, callback) => {
+  ss.on('connect', (entityId, callback) => {
     // Do something.
     // report error;
     callback(false);
   });
   // ServiceSocket.onClose, in case connection close.
-  ss.on('close', (entityID, callback) => {
+  ss.on('close', (entityId, callback) => {
     // Get Username and process your work.
-    NoService.Service.Entity.getEntityOwner(entityID, (err, username)=> {
+    NoService.Service.Entity.getEntityOwner(entityId, (err, username)=> {
       // To store your data and associated with userid INSEAD OF USERNAME!!!
       // Since userid can be promised as a unique identifer!!!
       let userid = null;

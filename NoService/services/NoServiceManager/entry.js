@@ -139,8 +139,10 @@ function Service(Me, NoService) {
       }
     }, settings.check_memory_interval_sec*1000);
 
-    NoServiceManager.launchOtherServices(()=> {
-
+    NoServiceManager.launchOtherServices((err)=> {
+      if(err) {
+        console.log(err);
+      }
     });
   }
 

@@ -1,26 +1,16 @@
 {
   "name": "servicename",
-
   "version": "0.0.0",
-
   "displayname": "Service fullname",
-
   "description": "Service description",
-
+  "language": null,
   "Authors": [],
-
   "git_url": null,
-
   "upgrade_branch": "master",
-
   "implementation_api": false,
-
   "LibraryAPI": true,
-
   "DatabaseAPI": true,
-
   "dependencies": {
-
     "node_packages" : {
 
     },
