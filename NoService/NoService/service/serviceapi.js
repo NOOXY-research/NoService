@@ -469,6 +469,182 @@ function ServiceAPI() {
           });
         }));
       }
+      else if(model.ModelType == 'IndexedList') {
+        return(new LCBO(model, (model_syncRefer)=> {
+          return ({
+            getModelType: (remote_callback_obj)=> {
+              if(remote_callback_obj) {
+                model_syncRefer(remote_callback_obj);
+                remote_callback_obj.run([], [err, model.ModelType]);
+                remote_callback_obj.unbindRemote();
+              }
+            },
+            searchAll: (keyword, remote_callback_obj)=> {
+              model.searchAll(keyword, (...args)=> {
+                if(remote_callback_obj) {
+                  model_syncRefer(remote_callback_obj);
+                  remote_callback_obj.run([], args);
+                  remote_callback_obj.unbindRemote();
+                }
+              });
+            },
+            searchColumns: (column_list, remote_callback_obj)=> {
+              model.searchColumns(column_list, (...args)=> {
+                if(remote_callback_obj) {
+                  model_syncRefer(remote_callback_obj);
+                  remote_callback_obj.run([], args);
+                  remote_callback_obj.unbindRemote();
+                }
+              });
+            },
+            searchAllNRows: (keyword, N, remote_callback_obj)=> {
+              model.searchAllNRows(keyword, N, (...args)=> {
+                if(remote_callback_obj) {
+                  model_syncRefer(remote_callback_obj);
+                  remote_callback_obj.run([], args);
+                  remote_callback_obj.unbindRemote();
+                }
+              });
+            },
+            searchColumnsNRows: (column_list, keyword, N, remote_callback_obj)=> {
+              model.searchColumnsNRows(column_list, keyword, N, (...args)=> {
+                if(remote_callback_obj) {
+                  model_syncRefer(remote_callback_obj);
+                  remote_callback_obj.run([], args);
+                  remote_callback_obj.unbindRemote();
+                }
+              });
+            },
+            get: (key_value, remote_callback_obj)=> {
+              model.get(key_value, (...args)=> {
+                if(remote_callback_obj) {
+                  model_syncRefer(remote_callback_obj);
+                  remote_callback_obj.run([], args);
+                  remote_callback_obj.unbindRemote();
+                }
+              });
+            },
+            getWhere: (where, query_values, remote_callback_obj)=> {
+              model.getWhere(where, query_values, (...args)=> {
+                if(remote_callback_obj) {
+                  model_syncRefer(remote_callback_obj);
+                  remote_callback_obj.run([], args);
+                  remote_callback_obj.unbindRemote();
+                }
+              });
+            },
+            replaceRows: (rows, remote_callback_obj)=> {
+              model.replaceRows(rows, (...args)=> {
+                if(remote_callback_obj) {
+                  model_syncRefer(remote_callback_obj);
+                  remote_callback_obj.run([], args);
+                  remote_callback_obj.unbindRemote();
+                }
+              });
+            },
+            updateRows: (rows, remote_callback_obj)=> {
+              model.updateRows(rows, (...args)=> {
+                if(remote_callback_obj) {
+                  model_syncRefer(remote_callback_obj);
+                  remote_callback_obj.run([], args);
+                  remote_callback_obj.unbindRemote();
+                }
+              });
+            },
+            deleteRows: (begin, end, remote_callback_obj)=> {
+              model.deleteRows(begin, end, (...args)=> {
+                if(remote_callback_obj) {
+                  model_syncRefer(remote_callback_obj);
+                  remote_callback_obj.run([], args);
+                  remote_callback_obj.unbindRemote();
+                }
+              });
+            },
+            appendRows: (rows, remote_callback_obj)=> {
+              model.appendRows(rows, (...args)=> {
+                if(remote_callback_obj) {
+                  model_syncRefer(remote_callback_obj);
+                  remote_callback_obj.run([], args);
+                  remote_callback_obj.unbindRemote();
+                }
+              });
+            },
+            getLatestNRows: (n, remote_callback_obj)=> {
+              model.getLatestNRows(n, (...args)=> {
+                if(remote_callback_obj) {
+                  model_syncRefer(remote_callback_obj);
+                  remote_callback_obj.run([], args);
+                  remote_callback_obj.unbindRemote();
+                }
+              });
+            },
+            getRowsFromTo: (begin, end, remote_callback_obj)=> {
+              model.getRowsFromTo(begin, end, (...args)=> {
+                if(remote_callback_obj) {
+                  model_syncRefer(remote_callback_obj);
+                  remote_callback_obj.run([], args);
+                  remote_callback_obj.unbindRemote();
+                }
+              });
+            },
+            getAllRows: (remote_callback_obj)=> {
+              model.getAllRows((...args)=> {
+                if(remote_callback_obj) {
+                  model_syncRefer(remote_callback_obj);
+                  remote_callback_obj.run([], args);
+                  remote_callback_obj.unbindRemote();
+                }
+              });
+            },
+            getLatestIndex: (remote_callback_obj)=> {
+              model.getLatestIndex((...args)=> {
+                if(remote_callback_obj) {
+                  model_syncRefer(remote_callback_obj);
+                  remote_callback_obj.run([], args);
+                  remote_callback_obj.unbindRemote();
+                }
+              });
+            },
+            addFields: (fields_dict, remote_callback_obj)=> {
+              model.addFields(fields_dict, (...args)=> {
+                if(remote_callback_obj) {
+                  model_syncRefer(remote_callback_obj);
+                  remote_callback_obj.run([], args);
+                  remote_callback_obj.unbindRemote();
+                }
+              });
+            },
+            existField: (field_name, remote_callback_obj)=> {
+              model.existField(field_name, (...args)=> {
+                if(remote_callback_obj) {
+                  model_syncRefer(remote_callback_obj);
+                  remote_callback_obj.run([], args);
+                  remote_callback_obj.unbindRemote();
+                }
+              });
+            },
+            removeFields: (fields_dict, remote_callback_obj)=> {
+              model.removeFields(fields_dict, (...args)=> {
+                if(remote_callback_obj) {
+                  model_syncRefer(remote_callback_obj);
+                  remote_callback_obj.run([], args);
+                  remote_callback_obj.unbindRemote();
+                }
+              });
+            }
+          });
+        }));
+      }
+      else if(model.ModelType == 'GroupIndexedList') {
+        getModelType: (remote_callback_obj)=> {
+          if(remote_callback_obj) {
+            model_syncRefer(remote_callback_obj);
+            remote_callback_obj.run([], [err, model.ModelType]);
+            remote_callback_obj.unbindRemote();
+          }
+        }
+      }
+
     };
     api.addAPI(['Database', 'Database'], (LCBO)=> {
       return({

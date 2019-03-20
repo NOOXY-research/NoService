@@ -286,6 +286,162 @@ function Model() {
     };
   };
 
+  // For something like messages or logs need ordered index.
+  function IndexedListModel(table_name, structure, do_timestamp) {
+    this.modeltype = 'IndexedList';
+    this.ModelType = this.modeltype;
+    let model_key = MODEL_INDEXKEY;
+
+    this.searchAll = (keyword, callback)=> {
+      let sql = '';
+      let column_list = Object.keys(structure);
+      sql = column_list.join(' LIKE ? OR ');
+      sql = sql + ' LIKE ?';
+      _db.getRows(MODEL_TABLE_PREFIX+table_name, sql, column_list.map(v=>{return keyword}), callback);
+    };
+
+    this.searchColumns = (column_list, keyword, callback)=> {
+      let sql = '';
+      sql = column_list.join(' LIKE ? OR ');
+      sql = sql + ' LIKE ?';
+      _db.getRows(MODEL_TABLE_PREFIX+table_name, sql, column_list.map(v=>{return keyword}), callback);
+    };
+
+    this.searchAllNRows = (keyword, N, callback)=> {
+      let sql = '';
+      let column_list = Object.keys(structure);
+      sql = column_list.join(' LIKE ? OR ');
+      sql = sql + ' LIKE ?';
+      _db.getRowsTopNRows(MODEL_TABLE_PREFIX+table_name, sql, column_list.map(v=>{return keyword}), N, callback);
+    };
+
+    this.searchColumnsNRows = (column_list, keyword, N, callback)=> {
+      let sql = '';
+      sql = column_list.join(' LIKE ? OR ');
+      sql = sql + ' LIKE ?';
+      _db.getRowsTopNRows(MODEL_TABLE_PREFIX+table_name, sql, column_list.map(v=>{return keyword}), N, callback);
+    };
+
+    // get an instense
+    this.get = (key_value, callback)=> {
+      _db.getRows(MODEL_TABLE_PREFIX+table_name, model_key+' LIKE ?', [key_value], (err, results)=> {
+        if(results) {
+          callback(err, results[0]);
+        }
+        else {
+          callback(err);
+        }
+      });
+    };
+
+    this.getWhere = (where, query_values, callback)=> {
+      _db.getRows(MODEL_TABLE_PREFIX+table_name, where, query_values, (err, results)=> {
+        if(results) {
+          callback(err, results);
+        }
+        else {
+          callback(err);
+        }
+      });
+    };
+
+    this.replaceRows = (rows, callback)=> {
+      if(do_timestamp) {
+        let datenow = Utils.DatetoSQL(new Date());
+        for(let i in rows) {
+          (rows[i])['modifydate'] = datenow;
+        }
+      }
+      _db.replaceRows(MODEL_TABLE_PREFIX+table_name, rows, callback);
+    };
+
+    this.updateRows = (rows, callback)=> {
+      let datenow;
+      let left = rows.length;
+      let call_callback = (err)=> {
+          left--;
+          if((left == 0 || err)&&(left >= 0)) {
+            callback(err);
+            left = -1;
+          }
+      };
+      if(do_timestamp) {
+        datenow = Utils.DatetoSQL(new Date());
+      }
+      for(let i in rows) {
+        let properties_dict = rows[i];
+        if(properties_dict[model_key]) {
+          if(do_timestamp) {
+            properties_dict['modifydate'] = datenow;
+          }
+          _db.updateRows(MODEL_TABLE_PREFIX+table_name, model_key+' LIKE ?', [properties_dict[model_key]], properties_dict, call_callback);
+        }
+        else {
+          call_callback(new Error('Key "'+model_key+'" is required.'));
+        }
+      };
+    };
+
+    this.deleteRows = (begin, end, callback)=> {
+      _db.deleteRows(MODEL_TABLE_PREFIX+table_name, model_key+' >= ? AND '+model_key+' <= ?', [begin, end], callback);
+    };
+
+    this.appendRows = (rows, callback)=> {
+      // _db.getRows(MODEL_TABLE_PREFIX+table_name, 'MAX('+model_key+')', [], (err, results)=> {
+      //
+      // });
+      if(do_timestamp) {
+        let datenow = Utils.DatetoSQL(new Date());
+        for(let i in rows) {
+          rows[i].createdate = datenow;
+          rows[i].modifydate = datenow;
+        }
+      }
+      _db.appendRows(MODEL_TABLE_PREFIX+table_name, rows, callback);
+    };
+
+    this.getLatestNRows = (n, callback)=> {
+      _db.getRows(MODEL_TABLE_PREFIX+table_name, MODEL_INDEXKEY+' > ((SELECT max('+MODEL_INDEXKEY+') FROM '+MODEL_TABLE_PREFIX+table_name+') - ?)', [n], callback);
+    };
+
+    this.getRowsFromTo = (begin, end, callback)=> {
+      _db.getRows(MODEL_TABLE_PREFIX+table_name, MODEL_INDEXKEY+' >= ? AND '+ MODEL_INDEXKEY+' <= ?', [begin, end], callback);
+    };
+
+    this.getAllRows = (callback)=> {
+      _db.getAllRows(MODEL_TABLE_PREFIX+table_name, callback);
+    };
+
+    this.getLatestIndex = (callback)=> {
+      _db.getRows(MODEL_TABLE_PREFIX+table_name, MODEL_INDEXKEY+' = (SELECT max('+MODEL_INDEXKEY+') FROM '+MODEL_TABLE_PREFIX+table_name+')', (err, results)=> {
+        if(err) {
+          callback(err);
+        }
+        else if(results.length) {
+          callback(err, (results[0])[MODEL_INDEXKEY]);
+        }
+        else {
+          callback(err);
+        }
+      });
+    };
+
+    this.addFields = (fields_dict, callback)=> {
+      for(let field in fields_dict) {
+        fields_dict[field] = {type: fields_dict[field]};
+      }
+      _db.addFields(MODEL_TABLE_PREFIX+table_name, fields_dict, callback);
+    };
+
+    this.existField = (field_name, callback)=> {
+      _db.existField(MODEL_TABLE_PREFIX+table_name, field_name, callback);
+    };
+
+    this.removeFields = (fields_dict, callback)=> {
+      _db.removeFields(MODEL_TABLE_PREFIX+table_name, fields_dict, callback);
+    };
+  };
+
   // For something like different and huge amount of groups of messages or logs need ordered index.
   function GroupIndexedListModel(table_name, structure, do_timestamp) {
     this.modeltype = 'GroupIndexedList';
@@ -451,162 +607,6 @@ function Model() {
 
     this.getLatestIndex = (group_name, callback)=> {
       _db.getRows(MODEL_TABLE_PREFIX+table_name, model_group_key+' LIKE ? AND '+MODEL_INDEXKEY+' = (SELECT max('+MODEL_INDEXKEY+') FROM '+MODEL_TABLE_PREFIX+table_name+' WHERE '+model_group_key+' LIKE ?)', [group_name, group_name], (err, results)=> {
-        if(err) {
-          callback(err);
-        }
-        else if(results.length) {
-          callback(err, (results[0])[MODEL_INDEXKEY]);
-        }
-        else {
-          callback(err);
-        }
-      });
-    };
-
-    this.addFields = (fields_dict, callback)=> {
-      for(let field in fields_dict) {
-        fields_dict[field] = {type: fields_dict[field]};
-      }
-      _db.addFields(MODEL_TABLE_PREFIX+table_name, fields_dict, callback);
-    };
-
-    this.existField = (field_name, callback)=> {
-      _db.existField(MODEL_TABLE_PREFIX+table_name, field_name, callback);
-    };
-
-    this.removeFields = (fields_dict, callback)=> {
-      _db.removeFields(MODEL_TABLE_PREFIX+table_name, fields_dict, callback);
-    };
-  };
-
-  // For something like messages or logs need ordered index.
-  function IndexedListModel(table_name, structure, do_timestamp) {
-    this.modeltype = 'IndexedList';
-    this.ModelType = this.modeltype;
-    let model_key = MODEL_INDEXKEY;
-
-    this.searchAll = (keyword, callback)=> {
-      let sql = '';
-      let column_list = Object.keys(structure);
-      sql = column_list.join(' LIKE ? OR ');
-      sql = sql + ' LIKE ?';
-      _db.getRows(MODEL_TABLE_PREFIX+table_name, sql, column_list.map(v=>{return keyword}), callback);
-    };
-
-    this.searchColumns = (column_list, keyword, callback)=> {
-      let sql = '';
-      sql = column_list.join(' LIKE ? OR ');
-      sql = sql + ' LIKE ?';
-      _db.getRows(MODEL_TABLE_PREFIX+table_name, sql, column_list.map(v=>{return keyword}), callback);
-    };
-
-    this.searchAllNRows = (keyword, N, callback)=> {
-      let sql = '';
-      let column_list = Object.keys(structure);
-      sql = column_list.join(' LIKE ? OR ');
-      sql = sql + ' LIKE ?';
-      _db.getRowsTopNRows(MODEL_TABLE_PREFIX+table_name, sql, column_list.map(v=>{return keyword}), N, callback);
-    };
-
-    this.searchColumnsNRows = (column_list, keyword, N, callback)=> {
-      let sql = '';
-      sql = column_list.join(' LIKE ? OR ');
-      sql = sql + ' LIKE ?';
-      _db.getRowsTopNRows(MODEL_TABLE_PREFIX+table_name, sql, column_list.map(v=>{return keyword}), N, callback);
-    };
-
-    // get an instense
-    this.get = (key_value, callback)=> {
-      _db.getRows(MODEL_TABLE_PREFIX+table_name, model_key+' LIKE ?', [key_value], (err, results)=> {
-        if(results) {
-          callback(err, results[0]);
-        }
-        else {
-          callback(err);
-        }
-      });
-    };
-
-    this.getWhere = (where, query_values, callback)=> {
-      _db.getRows(MODEL_TABLE_PREFIX+table_name, where, query_values, (err, results)=> {
-        if(results) {
-          callback(err, results);
-        }
-        else {
-          callback(err);
-        }
-      });
-    };
-
-    this.replaceRows = (rows, callback)=> {
-      if(do_timestamp) {
-        let datenow = Utils.DatetoSQL(new Date());
-        for(let i in rows) {
-          (rows[i])['modifydate'] = datenow;
-        }
-      }
-      _db.replaceRows(MODEL_TABLE_PREFIX+table_name, rows, callback);
-    };
-
-    this.updateRows = (rows, callback)=> {
-      let datenow;
-      let left = rows.length;
-      let call_callback = (err)=> {
-          left--;
-          if((left == 0 || err)&&(left >= 0)) {
-            callback(err);
-            left = -1;
-          }
-      };
-      if(do_timestamp) {
-        datenow = Utils.DatetoSQL(new Date());
-      }
-      for(let i in rows) {
-        let properties_dict = rows[i];
-        if(properties_dict[model_key]) {
-          if(do_timestamp) {
-            properties_dict['modifydate'] = datenow;
-          }
-          _db.updateRows(MODEL_TABLE_PREFIX+table_name, model_key+' LIKE ?', [properties_dict[model_key]], properties_dict, call_callback);
-        }
-        else {
-          call_callback(new Error('Key "'+model_key+'" is required.'));
-        }
-      };
-    };
-
-    this.deleteRows = (begin, end, callback)=> {
-      _db.deleteRows(MODEL_TABLE_PREFIX+table_name, model_key+' >= ? AND '+model_key+' <= ?', [begin, end], callback);
-    };
-
-    this.appendRows = (rows, callback)=> {
-      // _db.getRows(MODEL_TABLE_PREFIX+table_name, 'MAX('+model_key+')', [], (err, results)=> {
-      //
-      // });
-      if(do_timestamp) {
-        let datenow = Utils.DatetoSQL(new Date());
-        for(let i in rows) {
-          rows[i].createdate = datenow;
-          rows[i].modifydate = datenow;
-        }
-      }
-      _db.appendRows(MODEL_TABLE_PREFIX+table_name, rows, callback);
-    };
-
-    this.getLatestNRows = (n, callback)=> {
-      _db.getRows(MODEL_TABLE_PREFIX+table_name, MODEL_INDEXKEY+' > ((SELECT max('+MODEL_INDEXKEY+') FROM '+MODEL_TABLE_PREFIX+table_name+') - ?)', [n], callback);
-    };
-
-    this.getRowsFromTo = (begin, end, callback)=> {
-      _db.getRows(MODEL_TABLE_PREFIX+table_name, MODEL_INDEXKEY+' >= ? AND '+ MODEL_INDEXKEY+' <= ?', [begin, end], callback);
-    };
-
-    this.getAllRows = (callback)=> {
-      _db.getAllRows(MODEL_TABLE_PREFIX+table_name, callback);
-    };
-
-    this.getLatestIndex = (callback)=> {
-      _db.getRows(MODEL_TABLE_PREFIX+table_name, MODEL_INDEXKEY+' = (SELECT max('+MODEL_INDEXKEY+') FROM '+MODEL_TABLE_PREFIX+table_name+')', (err, results)=> {
         if(err) {
           callback(err);
         }
