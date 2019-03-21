@@ -1,4 +1,4 @@
-// NoService/NoService/worker.js
+// NoService/NoService/service/worker.js
 // Description:
 // "worker.js" is service worker client for NOOXY service framework.
 // Copyright 2018-2019 NOOXY. All Rights Reserved.
@@ -170,7 +170,7 @@ function WorkerClient() {
                       callback(err, new_models);
                     });
                   };
-                  
+
                   _api.Database.Model.close= ()=>{
                     _model.close();
                   };

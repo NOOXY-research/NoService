@@ -1,4 +1,4 @@
-// NoService/NoService/serviceapi.js
+// NoService/NoService/service/serviceapi.js
 // Description:
 // "serviceapi.js" provide interface of interacting with core. This module is desgined
 // for multithreading.
