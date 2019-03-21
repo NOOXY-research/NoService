@@ -5,7 +5,7 @@
 'use strict';
 
 const crypto = require('crypto');
-const Utils = require('./library').Utilities;
+const Utils = require('../library').Utilities;
 
 // the authenticity module
 function Authenticity() {

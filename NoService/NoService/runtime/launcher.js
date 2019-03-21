@@ -19,7 +19,7 @@ module.exports.launch = (path, settingspath)=> {
   let launchCore = ()=> {
     settings = JSON.parse(fs.readFileSync(settingspath, 'utf8'));
     settings["path"] = path+'/';
-    _child  = fork(require.resolve('./core'), {stdio: [process.stdin, process.stdout, process.stderr, 'ipc']});
+    _child  = fork(require.resolve('./create_core_instance'), {stdio: [process.stdin, process.stdout, process.stderr, 'ipc']});
     _child.send({t:0, settings: settings});
     _child.on('exit', (code)=> {
 
@@ -55,13 +55,11 @@ module.exports.launch = (path, settingspath)=> {
       _child.send({t:99});
       process.exit();
     });
-    
+
     process.on('SIGINT', () => {
       _child.send({t:99});
       process.exit();
     });
   }
-
   launchCore();
-
 };

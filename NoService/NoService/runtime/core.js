@@ -1,4 +1,4 @@
-// NoService/NoService/core.js
+// NoService/NoService/runtime/core.js
 // Description:
 // "core.js" control main behavior of deamon.
 // Copyright 2018-2019 NOOXY. All Rights Reserved.
@@ -6,28 +6,12 @@
 
 const fs = require('fs');
 
-// Checking dependencies
 let Constants = require('./constants');
-
-let terminateNoService = ()=> {
-  process.send({t:0});
-  process.exit();
-};
-
-for(let pkg in Constants.dependencies) {
-  try {
-    require.resolve(Constants.dependencies[pkg]);
-  } catch (e) {
-    console.log('Please install package "'+Constants.dependencies[pkg]+'".');
-    terminateNoService();
-  }
-}
+const Implementation = require('./implementation');
 
 const Connection = require('../connection').Connection;
-const Authenticity = require('../authenticity');
 const Router = require('../router').Router;
 const NSPS = require('../router').NSPS;
-const Implementation = require('../implementation');
 const Log = null;
 const Utils = require('../library').Utilities;
 const NoCrypto = require('../crypto').Crypto;
@@ -45,6 +29,7 @@ const Entity = require('../service').Entity;
 // db
 const Database = require('../database').Database;
 const Model = require('../database').Model;
+const Authenticity = require('../database').Authenticity;
 
 
 function Core(settings) {
@@ -90,7 +75,7 @@ function Core(settings) {
         if(err) {
           verbose('*ERR*', 'Error occured during initializing.');
           console.log(err);
-          terminateNoService();
+          this.onTerminated();
         }
         else {
           Utils.TagLog('OKAY', 'Initialized. Please restart!');
@@ -407,7 +392,7 @@ function Core(settings) {
         Utils.TagLog('*ERR*', '$ openssl genrsa -des3 -out private.pem 2048');
         Utils.TagLog('*ERR*', '$ openssl rsa -in private.pem -outform PEM -pubout -out public.pem');
         Utils.TagLog('*ERR*', '$ openssl rsa -in private.pem -out private.pem -outform PEM');
-        terminateNoService();
+        this.onTerminated();
         return false;
       }
     }
@@ -479,25 +464,5 @@ function Core(settings) {
 
   }
 }
-
-let _core;
-
-process.on('message', (msg)=> {
-  if(msg.t == 0) {
-    _core = new Core(msg.settings);
-    _core.checkandlaunch();
-  }
-  else if(msg.t == 99) {
-    _core.close();
-  }
-});
-
-process.on('SIGTERM', () => {
-  _core.close();
-});
-
-process.on('SIGINT', () => {
-  _core.close();
-});
 
 module.exports = Core;
