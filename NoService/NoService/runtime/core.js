@@ -270,8 +270,8 @@ function Core(NoServiceLibrary, settings) {
         // Import connected db to model module
         _model.setTableName(Constants.MODEL_TABLE_NAME);
         _model.setTablePrefix(Constants.MODEL_TABLE_PREFIX);
-        _model.setIndexkey(Constants.MODEL_INDEXKEY);
-        _model.setGroupkey(Constants.MODEL_GROUPKEY);
+        _model.setIndexkey(Constants.MODEL_INDEX_KEY);
+        _model.setGroupkey(Constants.MODEL_GROUP_KEY);
 
         _model.importDatabase(_database, (err)=> {
           if(err) {
@@ -433,6 +433,10 @@ function Core(NoServiceLibrary, settings) {
           throw(err);
         }
         verbose('Daemon', 'Importing Model...')
+        // setup authenticity
+        _init_auth.TokenExpirePeriod = settings.token_expire_period;
+        _init_auth.setDefaultUsername(Constants.default_user.username);
+        _init_auth.setUserModelName(Constants.AUTHE_USER_MODEL_NAME);
         // Import set Model Module to authenticity.
         _init_auth.importModelModule(_init_model, (err)=>{
           if(err) {

@@ -13,8 +13,8 @@
   "AUTHE_USER_MODEL_NAME": "NSUser",
   "MODEL_TABLE_NAME": "NoService_Models",
   "MODEL_TABLE_PREFIX": "NoService_Model_",
-  "MODEL_INDEXKEY": "Idx",
-  "MODEL_GROUPKEY": "Grp",
+  "MODEL_INDEX_KEY": "Idx",
+  "MODEL_GROUP_KEY": "Grp",
   "WORKER_UNIX_SOCK_PATH": "/tmp/NoService.sock",
   "CONNECTION_METHOD_NAME_MAP": {
     "TCP": "TCP",

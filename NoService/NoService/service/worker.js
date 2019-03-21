@@ -125,6 +125,11 @@ function WorkerClient() {
               let _db = new Database(daemon_setting.database);
               let _model = new Model();
 
+              _model.setTableName(_api.Constants.MODEL_TABLE_NAME);
+              _model.setTablePrefix(_api.Constants.MODEL_TABLE_PREFIX);
+              _model.setIndexkey(_api.Constants.MODEL_INDEXKEY);
+              _model.setGroupkey(_api.Constants.MODEL_GROUPKEY);
+
               _api.Database = {};
               _api.Database.Database = _db;
 

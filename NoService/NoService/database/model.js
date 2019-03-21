@@ -967,14 +967,16 @@ function Model() {
     });
   };
 
-  this.close = ()=> {
-    _db = null;
-  };
 
   this.setTableName = (value)=> {_TableName = value};
   this.setTablePrefix = (value)=> {_TablePrefix = value};
   this.setIndexkey = (value)=> {_Indexkey = value};
   this.setGroupkey = (value)=> {_Groupkey = value};
+
+  this.close = ()=> {
+    _db = null;
+  };
+
 }
 
 module.exports = Model;
