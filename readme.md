@@ -44,7 +44,7 @@ NoService provide bundled services such as NoShell which give you access of NoSe
 ### Integrated ORM
 
 ## Target version
-* daemon: alpha 0.5.0
+* daemon: alpha 0.5.2
 * protocol: NSP alpha 0.4
 
 ## Dependences
@@ -195,17 +195,15 @@ module.exports = Service;
 
 class Service:
   def __init__(self, Me, NoService):
-        self.Me = Me
-        self.NoService = NoService
 
   # Here is where your service start
-  def start(self):
+  def start(self, Me, NoService):
     pass
     # where your service start.
     # do your jobs here
 
   # If the daemon stop, your service receive close signal here.
-  def close(self):
+  def close(self, Me, NoService):
     pass
     # Saving state of you service.
     # Please save and manipulate your files in this directory
