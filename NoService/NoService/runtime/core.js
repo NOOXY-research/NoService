@@ -9,30 +9,31 @@ const fs = require('fs');
 let Constants = require('./constants');
 const Implementation = require('./implementation');
 
-const Connection = require('../connection').Connection;
-const Router = require('../router').Router;
-const NSPS = require('../router').NSPS;
-const Log = null;
-const Utils = require('../library').Utilities;
-const NoCrypto = require('../crypto').Crypto;
+function Core(NoServiceLib, settings) {
+  const Log = null;
+  const Connection = NoServiceLib.Connection.Connection;
+  const Utils = NoServiceLib.Library.Utilities;
+  const NoCrypto = NoServiceLib.Crypto.Crypto;
 
-// auth
-const Authorization = require('../authorization').Authorization;
-const AuthorizationHandler = require('../authorization').AuthorizationHandler;
+  // router
+  const Router = NoServiceLib.Router.Router;
+  const NSPS = NoServiceLib.Router.NSPS;
 
-// service
-const Service = require('../service').Service;
-const WorkerDaemon = require('../service').WorkerDaemon;
-const ServiceAPI = require('../service').ServiceAPI;
-const Entity = require('../service').Entity;
+  // auth
+  const Authorization = NoServiceLib.Authorization.Authorization;
+  const AuthorizationHandler = NoServiceLib.Authorization.AuthorizationHandler;
 
-// db
-const Database = require('../database').Database;
-const Model = require('../database').Model;
-const Authenticity = require('../database').Authenticity;
+  // service
+  const Service = NoServiceLib.Service.Service;
+  const WorkerDaemon = NoServiceLib.Service.WorkerDaemon;
+  const ServiceAPI = NoServiceLib.Service.ServiceAPI;
+  const Entity = NoServiceLib.Service.Entity;
 
+  // db
+  const Database = NoServiceLib.Database.Database;
+  const Model = NoServiceLib.Database.Model;
+  const Authenticity = NoServiceLib.Database.Authenticity;
 
-function Core(settings) {
   Utils.printLOGO(Constants.version, Constants.copyright);
 
   let verbose = (tag, log) => {

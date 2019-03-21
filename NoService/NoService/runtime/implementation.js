@@ -15,9 +15,7 @@ function Implementation() {
   let _nsps_list = ['generateAESCBC256KeyByHash', 'encryptString', 'decryptString'];
 
   let _implts = {
-
     // NOOXY service protocol sercure
-
       // hashing two string (host and client pub key)by SHA256 to get AES-CBC 256 key 32 char
       generateAESCBC256KeyByHash: (string1, string2, callback) => {
         Utils.TagLog('*ERR*', 'generateAESCBC256KeyByHash not implemented');
