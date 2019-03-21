@@ -100,9 +100,9 @@ function Connection(options) {
     }
     else if(_conn_meth_name_map[conn_method]) {
       let _serverId = Utils.generateUniqueId();
-      let server = new Connections[_conn_meth_name_map[conn_method]].Server(_serverId, ConnectionProfile);
+      let server = new Connections[_conn_meth_name_map[conn_method]].Server(_serverId, ConnectionProfile, ssl_priv_key, ssl_cert);
       _servers[_serverId] = server;
-      server.start(ip, port, ssl_priv_key=ssl_priv_key, ssl_cert=ssl_cert);
+      server.start(ip, port);
       server.onData = this.onData;
       server.onClose = this.onClose;
     }

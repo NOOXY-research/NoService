@@ -9,7 +9,7 @@ const WebSocket = require('ws');
 const Utils = require('../../library').Utilities;
 
 // a wrapped WebSocket server for nooxy service framework
-function Server(ServerId, ConnectionProfile) {
+function Server(ServerId, ConnectionProfile, ssl_priv_key=null, ssl_cert=null) {
   let _hostip = null;
   let _wss = null;
   let _myclients = {};
@@ -34,7 +34,7 @@ function Server(ServerId, ConnectionProfile) {
     }
   };
 
-  this.start = (ip, port, origin = false, ssl_priv_key=null, ssl_cert=null) => {
+  this.start = (ip, port, origin = false) => {
     // launch server
     let credentials = { key: ssl_priv_key, cert: ssl_cert };
     let httpsServer = Https.createServer(credentials);
