@@ -256,12 +256,15 @@ function Core(settings) {
         _connection.importSSLCert(certificate);
       }
 
+      _connection.importConnectionMethodNameMap(Constants.CONNECTION_METHOD_NAME_MAP);
+
       for(let server in settings.connection_servers) {
         _connection.addServer(settings.connection_servers[server].type,
            settings.connection_servers[server].ip, settings.connection_servers[server].port);
       }
 
       _connection.importHeartBeatCycle(settings.heartbeat_cycle);
+
 
 
       // setup implementation
@@ -276,6 +279,11 @@ function Core(settings) {
         }
         verbose('Daemon', 'Importing Database to Model...');
         // Import connected db to model module
+        _model.setTableName(Constants.MODEL_TABLE_NAME);
+        _model.setTablePrefix(Constants.MODEL_TABLE_PREFIX);
+        _model.setIndexkey(Constants.MODEL_INDEXKEY);
+        _model.setGroupkey(Constants.MODEL_GROUPKEY);
+
         _model.importDatabase(_database, (err)=> {
           if(err) {
             Utils.TagLog('*ERR*', 'Occur failure on importing database for model.');
@@ -285,6 +293,9 @@ function Core(settings) {
 
           // setup authenticity
           _authenticity.TokenExpirePeriod = settings.token_expire_period;
+          _authenticity.setDefaultUsername(Constants.default_user.username);
+          _authenticity.setUserModelName(Constants.AUTHE_USER_MODEL_NAME);
+
           _authenticity.importModelModule(_model, (err)=> {
             if(err) {
               Utils.TagLog('*ERR*', 'Occur failure on importing model for authenticity.');
@@ -342,6 +353,10 @@ function Core(settings) {
             // setup WorkerDaemon
             _workerd.importCloseTimeout(settings.kill_daemon_timeout);
             _workerd.importClearGarbageTimeout(settings.clear_garbage_timeout);
+            _workerd.setConstantsPath(require("path").join(__dirname, './constants.json'));
+            _workerd.setUnixSocketPath(Constants.WORKER_UNIX_SOCK_PATH);
+            _workerd.start();
+
             //
 
             // setup api
@@ -418,6 +433,11 @@ function Core(settings) {
       }
       verbose('Daemon', 'Importing Database...')
       // Import connected db to model module
+      _init_model.setTableName(Constants.MODEL_TABLE_NAME);
+      _init_model.setTablePrefix(Constants.MODEL_TABLE_PREFIX);
+      _init_model.setIndexkey(Constants.MODEL_INDEXKEY);
+      _init_model.setGroupkey(Constants.MODEL_GROUPKEY);
+
       _init_model.importDatabase(_init_db, (err)=> {
         if(err) {
           Utils.TagLog('*ERR*', 'Occur failure on importing database for model.');

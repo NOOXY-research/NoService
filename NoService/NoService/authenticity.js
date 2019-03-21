@@ -6,14 +6,15 @@
 
 const crypto = require('crypto');
 const Utils = require('./library').Utilities;
-const Constants = require('./runtime/constants');
-const AUTHE_USER_MODEL_NAME = Constants.AUTHE_USER_MODEL_NAME;
 
 // the authenticity module
 function Authenticity() {
 
   let _model_module;
+  let _user_model_name;
   let _user_model;
+  let _default_username;
+
   const SHA256KEY = 'FATFROG';
 
   // Declare parameters
@@ -22,13 +23,13 @@ function Authenticity() {
   // import Module from specified path
   this.importModelModule = (model, callback) => {
     _model_module = model;
-    _model_module.exist(AUTHE_USER_MODEL_NAME, (err, has_model)=> {
+    _model_module.exist(_user_model_name, (err, has_model)=> {
       if(err) {
         callback(err);
       }
       else {
         if(!has_model) {
-          _model_module.define(AUTHE_USER_MODEL_NAME, {
+          _model_module.define(_user_model_name, {
             model_type: "Pair",
             do_timestamp: true,
             model_key: ['username', 'userid'],
@@ -50,13 +51,21 @@ function Authenticity() {
           });
         }
         else {
-          _model_module.get(AUTHE_USER_MODEL_NAME, (err, user_model)=> {
+          _model_module.get(_user_model_name, (err, user_model)=> {
             _user_model = user_model;
             callback(false);
           });
         }
       }
     });
+  };
+
+  this.setDefaultUsername = (username)=> {
+    _default_username = username;
+  };
+
+  this.setUserModelName = (model_name)=> {
+    _user_model_name = model_name;
   };
 
 
@@ -174,7 +183,7 @@ function Authenticity() {
   };
 
   this.deleteUserByUsername = (username, callback) => {
-    if(username == Constants.default_user.username) {
+    if(username == _default_username) {
       let err = new Error("Default user should not be deleted.");
       callback(err);
     }
@@ -207,7 +216,7 @@ function Authenticity() {
   };
 
   this.updatePrivilegeByUsername = (username, privilege, callback) => {
-    if(username == Constants.default_user.username) {
+    if(username == _default_username) {
       let err = new Error("Default user should not change it's privilege.");
       callback(err);
     }
@@ -388,7 +397,7 @@ function Authenticity() {
     _user_model.getBySecond(userid, (err, [user_meta]) => {
       if(user_meta) {
         username = user_meta.username;
-        if(username == Constants.default_user.username) {
+        if(username == _default_username) {
           let err = new Error("Default user should not be deleted.");
           callback(err);
         }
@@ -430,7 +439,7 @@ function Authenticity() {
     _user_model.getBySecond(userid, (err, [user_meta]) => {
       if(user_meta) {
         username = user_meta.username;
-        if(username == Constants.default_user.username) {
+        if(username == _default_username) {
           let err = new Error("Default user should not change it's privilege.");
           callback(err);
         }

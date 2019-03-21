@@ -18,10 +18,9 @@ const Utils = require('../library').Utilities;
 // For injecting database to api
 const Database = require('../database').Database;
 const Model = require('../database').Model;
-const Constants = require('../runtime/constants');
 const fs = require('fs');
-process.title = 'NoService_worker';
 
+process.title = 'NoService_worker';
 
 function WorkerClient() {
   try {
@@ -119,7 +118,7 @@ function WorkerClient() {
             if(Me.Manifest.LibraryAPI)
               _api.Library = require('../library');
 
-            _api.Constants = Constants;
+            _api.Constants = require(message.cpath);
 
             // inject Database API
             if(Me.Manifest.DatabaseAPI||Me.Manifest.DiscreteDatabaseAPI) {

@@ -20,7 +20,6 @@ UNIX_Sock_Path = sys.argv[1]
 Service_Name = sys.argv[2]
 IPC_MSG_SIZE_PREFIX_SIZE = 16
 MSG_READ_SIZE = 2**16
-CONSTANTS_PATH = '../../constants.json'
 
 loop = asyncio.get_event_loop()
 
@@ -97,7 +96,7 @@ class WorkerClient:
                 def getSettingsCallback(err, daemon_setting):
                     if Me['Manifest']['LibraryAPI']:
                         pass
-                    setattr(self._api, 'Constants', json.loads(open(sys.path[0]+'/'+CONSTANTS_PATH).read()))
+                    setattr(self._api, 'Constants', json.loads(open(sys.path[0]+'/'+message['cpath']).read()))
                     os.chdir(Me['FilesPath'])
                     sys.path.append(message['p'].split('/entry')[0])
                     from entry import Service

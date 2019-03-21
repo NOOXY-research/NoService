@@ -7,14 +7,13 @@
 'use strict';
 
 const Utils = require('../library').Utilities;
-const Constants = require('../runtime/constants');
-const MODEL_TABLE_NAME = Constants.MODEL_TABLE_NAME;
-const MODEL_TABLE_PREFIX = Constants.MODEL_TABLE_PREFIX;
-const MODEL_INDEXKEY = Constants.MODEL_INDEXKEY;
-const MODEL_GROUPKEY = Constants.MODEL_GROUPKEY;
 
 function Model() {
   let _db;
+  let _TableName;
+  let _TablePrefix;
+  let _Indexkey;
+  let _Groupkey;
   // For storing objects that appear often
   function ObjModel(table_name, model_key, structure, do_timestamp) {
 
@@ -22,7 +21,7 @@ function Model() {
     this.ModelType = this.modeltype;
     // get an instense
     this.get = (key_value, callback)=> {
-      _db.getRows(MODEL_TABLE_PREFIX+table_name, model_key+' LIKE ?', [key_value], (err, results)=> {
+      _db.getRows(_TablePrefix+table_name, model_key+' LIKE ?', [key_value], (err, results)=> {
         if(results) {
           callback(err, results[0]);
         }
@@ -33,11 +32,11 @@ function Model() {
     };
 
     this.getAll = (callback)=> {
-      _db.getAllRows(MODEL_TABLE_PREFIX+table_name, callback);
+      _db.getAllRows(_TablePrefix+table_name, callback);
     };
 
     this.getWhere = (where, query_values, callback)=> {
-      _db.getRows(MODEL_TABLE_PREFIX+table_name, where, query_values, (err, results)=> {
+      _db.getRows(_TablePrefix+table_name, where, query_values, (err, results)=> {
         if(results) {
           callback(err, results);
         }
@@ -52,14 +51,14 @@ function Model() {
       let column_list = Object.keys(structure);
       sql = column_list.join(' LIKE ? OR ');
       sql = sql + ' LIKE ?';
-      _db.getRows(MODEL_TABLE_PREFIX+table_name, sql, column_list.map(v=>{return keyword}), callback);
+      _db.getRows(_TablePrefix+table_name, sql, column_list.map(v=>{return keyword}), callback);
     };
 
     this.searchColumns = (column_list, keyword, callback)=> {
       let sql = '';
       sql = column_list.join(' LIKE ? OR ');
       sql = sql + ' LIKE ?';
-      _db.getRows(MODEL_TABLE_PREFIX+table_name, sql, column_list.map(v=>{return keyword}), callback);
+      _db.getRows(_TablePrefix+table_name, sql, column_list.map(v=>{return keyword}), callback);
     };
 
     this.searchAllNRows = (keyword, N, callback)=> {
@@ -67,14 +66,14 @@ function Model() {
       let column_list = Object.keys(structure);
       sql = column_list.join(' LIKE ? OR ');
       sql = sql + ' LIKE ?';
-      _db.getRowsTopNRows(MODEL_TABLE_PREFIX+table_name, sql, column_list.map(v=>{return keyword}), N, callback);
+      _db.getRowsTopNRows(_TablePrefix+table_name, sql, column_list.map(v=>{return keyword}), N, callback);
     };
 
     this.searchColumnsNRows = (column_list, keyword, N, callback)=> {
       let sql = '';
       sql = column_list.join(' LIKE ? OR ');
       sql = sql + ' LIKE ?';
-      _db.getRowsTopNRows(MODEL_TABLE_PREFIX+table_name, sql, column_list.map(v=>{return keyword}), N, callback);
+      _db.getRowsTopNRows(_TablePrefix+table_name, sql, column_list.map(v=>{return keyword}), N, callback);
     };
 
     this.create = (properties_dict, callback)=> {
@@ -82,14 +81,14 @@ function Model() {
         properties_dict['createdate'] = Utils.DatetoSQL(new Date());
         properties_dict['modifydate'] = Utils.DatetoSQL(new Date());
       }
-      _db.appendRows(MODEL_TABLE_PREFIX+table_name, [properties_dict], callback);
+      _db.appendRows(_TablePrefix+table_name, [properties_dict], callback);
     };
 
     this.replace = (properties_dict, callback)=> {
       if(do_timestamp) {
         properties_dict['modifydate'] = Utils.DatetoSQL(new Date());
       }
-      _db.replaceRows(MODEL_TABLE_PREFIX+table_name,  [properties_dict], callback);
+      _db.replaceRows(_TablePrefix+table_name,  [properties_dict], callback);
     };
 
     this.update = (properties_dict, callback)=> {
@@ -102,7 +101,7 @@ function Model() {
             properties_dict['modifydate'] = Utils.DatetoSQL(new Date());
           }
           if(properties_dict[model_key]) {
-            _db.updateRows(MODEL_TABLE_PREFIX+table_name, model_key+' LIKE ?', [properties_dict[model_key]], properties_dict, callback);
+            _db.updateRows(_TablePrefix+table_name, model_key+' LIKE ?', [properties_dict[model_key]], properties_dict, callback);
           }
           else {
             callback(new Error('Key "'+model_key+'" is required.'));
@@ -119,19 +118,19 @@ function Model() {
       for(let field in properties_dict) {
         properties_dict[field] = {type: properties_dict[field]};
       }
-      _db.addFields(MODEL_TABLE_PREFIX+table_name, properties_dict, callback);
+      _db.addFields(_TablePrefix+table_name, properties_dict, callback);
     };
 
     this.existProperty = (property_name, callback)=> {
-      _db.existField(MODEL_TABLE_PREFIX+table_name, property_name, callback);
+      _db.existField(_TablePrefix+table_name, property_name, callback);
     };
 
     this.removeProperties = (properties_list, callback)=> {
-      db.removeFields(MODEL_TABLE_PREFIX+table_name, properties_list, callback);
+      db.removeFields(_TablePrefix+table_name, properties_list, callback);
     };
 
     this.remove = (key, callback)=> {
-      _db.deleteRows(MODEL_TABLE_PREFIX+table_name, model_key+' LIKE ?', [key], callback);
+      _db.deleteRows(_TablePrefix+table_name, model_key+' LIKE ?', [key], callback);
     };
   };
 
@@ -146,7 +145,7 @@ function Model() {
         properties_dict['createdate'] = Utils.DatetoSQL(new Date());
         properties_dict['modifydate'] = Utils.DatetoSQL(new Date());
       }
-      _db.appendRows(MODEL_TABLE_PREFIX+table_name, [properties_dict], callback);
+      _db.appendRows(_TablePrefix+table_name, [properties_dict], callback);
     };
 
     this.searchAll = (keyword, callback)=> {
@@ -154,14 +153,14 @@ function Model() {
       let column_list = Object.keys(structure);
       sql = column_list.join(' LIKE ? OR ');
       sql = sql + ' LIKE ?';
-      _db.getRows(MODEL_TABLE_PREFIX+table_name, sql, column_list.map(v=>{return keyword}), callback);
+      _db.getRows(_TablePrefix+table_name, sql, column_list.map(v=>{return keyword}), callback);
     };
 
     this.searchColumns = (column_list, keyword, callback)=> {
       let sql = '';
       sql = column_list.join(' LIKE ? OR ');
       sql = sql + ' LIKE ?';
-      _db.getRows(MODEL_TABLE_PREFIX+table_name, sql, column_list.map(v=>{return keyword}), callback);
+      _db.getRows(_TablePrefix+table_name, sql, column_list.map(v=>{return keyword}), callback);
     };
 
     this.searchAllNRows = (keyword, N, callback)=> {
@@ -169,18 +168,18 @@ function Model() {
       let column_list = Object.keys(structure);
       sql = column_list.join(' LIKE ? OR ');
       sql = sql + ' LIKE ?';
-      _db.getRowsTopNRows(MODEL_TABLE_PREFIX+table_name, sql, column_list.map(v=>{return keyword}), N, callback);
+      _db.getRowsTopNRows(_TablePrefix+table_name, sql, column_list.map(v=>{return keyword}), N, callback);
     };
 
     this.searchColumnsNRows = (column_list, keyword, N, callback)=> {
       let sql = '';
       sql = column_list.join(' LIKE ? OR ');
       sql = sql + ' LIKE ?';
-      _db.getRowsTopNRows(MODEL_TABLE_PREFIX+table_name, sql, column_list.map(v=>{return keyword}), N, callback);
+      _db.getRowsTopNRows(_TablePrefix+table_name, sql, column_list.map(v=>{return keyword}), N, callback);
     };
 
     this.getWhere = (where, query_values, callback)=> {
-      _db.getRows(MODEL_TABLE_PREFIX+table_name, where, query_values, (err, results)=> {
+      _db.getRows(_TablePrefix+table_name, where, query_values, (err, results)=> {
         if(results) {
           callback(err, results);
         }
@@ -191,33 +190,33 @@ function Model() {
     };
 
     this.getAll = (callback)=> {
-      _db.getAllRows(MODEL_TABLE_PREFIX+table_name, callback);
+      _db.getAllRows(_TablePrefix+table_name, callback);
     };
 
     // return list
     this.getByPair = (pair, callback)=> {
-      _db.getRows(MODEL_TABLE_PREFIX+table_name, model_key[0]+' LIKE ? AND '+model_key[1]+' LIKE ?', pair, (err, results)=> {
+      _db.getRows(_TablePrefix+table_name, model_key[0]+' LIKE ? AND '+model_key[1]+' LIKE ?', pair, (err, results)=> {
         callback(err, results);
       });
     };
 
     // return list
     this.getByBoth = (both, callback)=> {
-      _db.getRows(MODEL_TABLE_PREFIX+table_name, model_key[0]+' LIKE ? OR '+model_key[1]+' LIKE ?', [both, both], (err, results)=> {
+      _db.getRows(_TablePrefix+table_name, model_key[0]+' LIKE ? OR '+model_key[1]+' LIKE ?', [both, both], (err, results)=> {
         callback(err, results);
       });
     };
 
     // return list
     this.getByFirst = (first, callback)=> {
-      _db.getRows(MODEL_TABLE_PREFIX+table_name, model_key[0]+' LIKE ?', [first], (err, results)=> {
+      _db.getRows(_TablePrefix+table_name, model_key[0]+' LIKE ?', [first], (err, results)=> {
         callback(err, results);
       });
     };
 
     // return list
     this.getBySecond = (second, callback)=> {
-      _db.getRows(MODEL_TABLE_PREFIX+table_name, model_key[1]+' LIKE ?', [second], (err, results)=> {
+      _db.getRows(_TablePrefix+table_name, model_key[1]+' LIKE ?', [second], (err, results)=> {
         callback(err, results);
       });
     };
@@ -228,7 +227,7 @@ function Model() {
         properties_dict['modifydate'] = Utils.DatetoSQL(new Date());
       }
       if(properties_dict[model_key[0]]||properties_dict[model_key[1]]) {
-        _db.replaceRows(MODEL_TABLE_PREFIX+table_name, [properties_dict], callback);
+        _db.replaceRows(_TablePrefix+table_name, [properties_dict], callback);
       }
       else {
         callback(new Error('Either property "'+model_key[0]+'" or "'+model_key[1]+'" should be specified.'));
@@ -241,13 +240,13 @@ function Model() {
         properties_dict['modifydate'] = Utils.DatetoSQL(new Date());
       }
       if(properties_dict[model_key[0]]&&properties_dict[model_key[1]]) {
-        _db.updateRows(MODEL_TABLE_PREFIX+table_name, model_key[0]+' LIKE ? AND '+model_key[1]+' LIKE ?', [properties_dict[model_key[0]], properties_dict[model_key[1]]], properties_dict, callback);
+        _db.updateRows(_TablePrefix+table_name, model_key[0]+' LIKE ? AND '+model_key[1]+' LIKE ?', [properties_dict[model_key[0]], properties_dict[model_key[1]]], properties_dict, callback);
       }
       else if(properties_dict[model_key[0]]){
-        _db.updateRows(MODEL_TABLE_PREFIX+table_name, model_key[0]+' LIKE ?', [properties_dict[model_key[0]]], properties_dict, callback);
+        _db.updateRows(_TablePrefix+table_name, model_key[0]+' LIKE ?', [properties_dict[model_key[0]]], properties_dict, callback);
       }
       else if(properties_dict[model_key[1]]) {
-        _db.updateRows(MODEL_TABLE_PREFIX+table_name, model_key[1]+' LIKE ?', [properties_dict[model_key[1]]], properties_dict, callback);
+        _db.updateRows(_TablePrefix+table_name, model_key[1]+' LIKE ?', [properties_dict[model_key[1]]], properties_dict, callback);
       }
       else {
         callback(new Error('Either property "'+model_key[0]+'" or "'+model_key[1]+'" should be specified.'));
@@ -255,34 +254,34 @@ function Model() {
     };
 
     this.removeByPair = (pair, callback)=> {
-      _db.deleteRows(MODEL_TABLE_PREFIX+table_name, model_key[0]+' LIKE ? AND '+model_key[1]+' LIKE ?', pair, callback);
+      _db.deleteRows(_TablePrefix+table_name, model_key[0]+' LIKE ? AND '+model_key[1]+' LIKE ?', pair, callback);
     };
 
     this.removeByBoth = (both, callback)=> {
-      _db.deleteRows(MODEL_TABLE_PREFIX+table_name, model_key[0]+' LIKE ? OR '+model_key[1]+' LIKE ?', [both, both], callback);
+      _db.deleteRows(_TablePrefix+table_name, model_key[0]+' LIKE ? OR '+model_key[1]+' LIKE ?', [both, both], callback);
     };
 
     this.removeByFirst = (first, callback)=> {
-      _db.deleteRows(MODEL_TABLE_PREFIX+table_name, model_key[0]+' LIKE ?', [first], callback);
+      _db.deleteRows(_TablePrefix+table_name, model_key[0]+' LIKE ?', [first], callback);
     };
 
     this.removeBySecond = (second, callback)=> {
-      _db.deleteRows(MODEL_TABLE_PREFIX+table_name, model_key[1]+' LIKE ?', [second], callback);
+      _db.deleteRows(_TablePrefix+table_name, model_key[1]+' LIKE ?', [second], callback);
     };
 
     this.addProperties = (properties_dict, callback)=> {
       for(let field in properties_dict) {
         properties_dict[field] = {type: properties_dict[field]};
       }
-      _db.addFields(MODEL_TABLE_PREFIX+table_name, properties_dict, callback);
+      _db.addFields(_TablePrefix+table_name, properties_dict, callback);
     };
 
     this.existProperty = (property_name, callback)=> {
-      _db.existField(MODEL_TABLE_PREFIX+table_name, property_name, callback);
+      _db.existField(_TablePrefix+table_name, property_name, callback);
     };
 
     this.removeProperty = (properties_list, callback)=> {
-      _db.removeFields(MODEL_TABLE_PREFIX+table_name, properties_list, callback);
+      _db.removeFields(_TablePrefix+table_name, properties_list, callback);
     };
   };
 
@@ -290,21 +289,21 @@ function Model() {
   function IndexedListModel(table_name, structure, do_timestamp) {
     this.modeltype = 'IndexedList';
     this.ModelType = this.modeltype;
-    let model_key = MODEL_INDEXKEY;
+    let model_key = _Indexkey;
 
     this.searchAll = (keyword, callback)=> {
       let sql = '';
       let column_list = Object.keys(structure);
       sql = column_list.join(' LIKE ? OR ');
       sql = sql + ' LIKE ?';
-      _db.getRows(MODEL_TABLE_PREFIX+table_name, sql, column_list.map(v=>{return keyword}), callback);
+      _db.getRows(_TablePrefix+table_name, sql, column_list.map(v=>{return keyword}), callback);
     };
 
     this.searchColumns = (column_list, keyword, callback)=> {
       let sql = '';
       sql = column_list.join(' LIKE ? OR ');
       sql = sql + ' LIKE ?';
-      _db.getRows(MODEL_TABLE_PREFIX+table_name, sql, column_list.map(v=>{return keyword}), callback);
+      _db.getRows(_TablePrefix+table_name, sql, column_list.map(v=>{return keyword}), callback);
     };
 
     this.searchAllNRows = (keyword, N, callback)=> {
@@ -312,19 +311,19 @@ function Model() {
       let column_list = Object.keys(structure);
       sql = column_list.join(' LIKE ? OR ');
       sql = sql + ' LIKE ?';
-      _db.getRowsTopNRows(MODEL_TABLE_PREFIX+table_name, sql, column_list.map(v=>{return keyword}), N, callback);
+      _db.getRowsTopNRows(_TablePrefix+table_name, sql, column_list.map(v=>{return keyword}), N, callback);
     };
 
     this.searchColumnsNRows = (column_list, keyword, N, callback)=> {
       let sql = '';
       sql = column_list.join(' LIKE ? OR ');
       sql = sql + ' LIKE ?';
-      _db.getRowsTopNRows(MODEL_TABLE_PREFIX+table_name, sql, column_list.map(v=>{return keyword}), N, callback);
+      _db.getRowsTopNRows(_TablePrefix+table_name, sql, column_list.map(v=>{return keyword}), N, callback);
     };
 
     // get an instense
     this.get = (key_value, callback)=> {
-      _db.getRows(MODEL_TABLE_PREFIX+table_name, model_key+' LIKE ?', [key_value], (err, results)=> {
+      _db.getRows(_TablePrefix+table_name, model_key+' LIKE ?', [key_value], (err, results)=> {
         if(results) {
           callback(err, results[0]);
         }
@@ -335,7 +334,7 @@ function Model() {
     };
 
     this.getWhere = (where, query_values, callback)=> {
-      _db.getRows(MODEL_TABLE_PREFIX+table_name, where, query_values, (err, results)=> {
+      _db.getRows(_TablePrefix+table_name, where, query_values, (err, results)=> {
         if(results) {
           callback(err, results);
         }
@@ -352,7 +351,7 @@ function Model() {
           (rows[i])['modifydate'] = datenow;
         }
       }
-      _db.replaceRows(MODEL_TABLE_PREFIX+table_name, rows, callback);
+      _db.replaceRows(_TablePrefix+table_name, rows, callback);
     };
 
     this.updateRows = (rows, callback)=> {
@@ -374,7 +373,7 @@ function Model() {
           if(do_timestamp) {
             properties_dict['modifydate'] = datenow;
           }
-          _db.updateRows(MODEL_TABLE_PREFIX+table_name, model_key+' LIKE ?', [properties_dict[model_key]], properties_dict, call_callback);
+          _db.updateRows(_TablePrefix+table_name, model_key+' LIKE ?', [properties_dict[model_key]], properties_dict, call_callback);
         }
         else {
           call_callback(new Error('Key "'+model_key+'" is required.'));
@@ -383,11 +382,11 @@ function Model() {
     };
 
     this.deleteRows = (begin, end, callback)=> {
-      _db.deleteRows(MODEL_TABLE_PREFIX+table_name, model_key+' >= ? AND '+model_key+' <= ?', [begin, end], callback);
+      _db.deleteRows(_TablePrefix+table_name, model_key+' >= ? AND '+model_key+' <= ?', [begin, end], callback);
     };
 
     this.appendRows = (rows, callback)=> {
-      // _db.getRows(MODEL_TABLE_PREFIX+table_name, 'MAX('+model_key+')', [], (err, results)=> {
+      // _db.getRows(_TablePrefix+table_name, 'MAX('+model_key+')', [], (err, results)=> {
       //
       // });
       if(do_timestamp) {
@@ -397,28 +396,28 @@ function Model() {
           rows[i].modifydate = datenow;
         }
       }
-      _db.appendRows(MODEL_TABLE_PREFIX+table_name, rows, callback);
+      _db.appendRows(_TablePrefix+table_name, rows, callback);
     };
 
     this.getLatestNRows = (n, callback)=> {
-      _db.getRows(MODEL_TABLE_PREFIX+table_name, MODEL_INDEXKEY+' > ((SELECT max('+MODEL_INDEXKEY+') FROM '+MODEL_TABLE_PREFIX+table_name+') - ?)', [n], callback);
+      _db.getRows(_TablePrefix+table_name, _Indexkey+' > ((SELECT max('+_Indexkey+') FROM '+_TablePrefix+table_name+') - ?)', [n], callback);
     };
 
     this.getRowsFromTo = (begin, end, callback)=> {
-      _db.getRows(MODEL_TABLE_PREFIX+table_name, MODEL_INDEXKEY+' >= ? AND '+ MODEL_INDEXKEY+' <= ?', [begin, end], callback);
+      _db.getRows(_TablePrefix+table_name, _Indexkey+' >= ? AND '+ _Indexkey+' <= ?', [begin, end], callback);
     };
 
     this.getAllRows = (callback)=> {
-      _db.getAllRows(MODEL_TABLE_PREFIX+table_name, callback);
+      _db.getAllRows(_TablePrefix+table_name, callback);
     };
 
     this.getLatestIndex = (callback)=> {
-      _db.getRows(MODEL_TABLE_PREFIX+table_name, MODEL_INDEXKEY+' = (SELECT max('+MODEL_INDEXKEY+') FROM '+MODEL_TABLE_PREFIX+table_name+')', (err, results)=> {
+      _db.getRows(_TablePrefix+table_name, _Indexkey+' = (SELECT max('+_Indexkey+') FROM '+_TablePrefix+table_name+')', (err, results)=> {
         if(err) {
           callback(err);
         }
         else if(results.length) {
-          callback(err, (results[0])[MODEL_INDEXKEY]);
+          callback(err, (results[0])[_Indexkey]);
         }
         else {
           callback(err);
@@ -430,15 +429,15 @@ function Model() {
       for(let field in fields_dict) {
         fields_dict[field] = {type: fields_dict[field]};
       }
-      _db.addFields(MODEL_TABLE_PREFIX+table_name, fields_dict, callback);
+      _db.addFields(_TablePrefix+table_name, fields_dict, callback);
     };
 
     this.existField = (field_name, callback)=> {
-      _db.existField(MODEL_TABLE_PREFIX+table_name, field_name, callback);
+      _db.existField(_TablePrefix+table_name, field_name, callback);
     };
 
     this.removeFields = (fields_dict, callback)=> {
-      _db.removeFields(MODEL_TABLE_PREFIX+table_name, fields_dict, callback);
+      _db.removeFields(_TablePrefix+table_name, fields_dict, callback);
     };
   };
 
@@ -446,11 +445,11 @@ function Model() {
   function GroupIndexedListModel(table_name, structure, do_timestamp) {
     this.modeltype = 'GroupIndexedList';
     this.ModelType = this.modeltype;
-    let model_key = MODEL_INDEXKEY;
-    let model_group_key = MODEL_GROUPKEY;
+    let model_key = _Indexkey;
+    let model_group_key = _Groupkey;
 
     this.existGroup = (group_name, callback)=> {
-      _db.getRows(MODEL_TABLE_PREFIX+table_name, model_group_key+' LIKE ?', [group_name], (err, results)=> {
+      _db.getRows(_TablePrefix+table_name, model_group_key+' LIKE ?', [group_name], (err, results)=> {
         if(results) {
           callback(err, results[0]?true: false);
         }
@@ -467,7 +466,7 @@ function Model() {
       sql = sql + ' LIKE ? ) AND ('+model_group_key+' LIKE ?)';
       let values = column_list.map(v=>{return keyword});
       values.push(group_name);
-      _db.getRows(MODEL_TABLE_PREFIX+table_name, sql, values, callback);
+      _db.getRows(_TablePrefix+table_name, sql, values, callback);
     };
 
     this.searchColumns = (group_name, column_list, keyword, callback)=> {
@@ -476,7 +475,7 @@ function Model() {
       sql = sql + ' LIKE ? ) AND ('+model_group_key+' LIKE ?)';
       let values = column_list.map(v=>{return keyword});
       values.push(group_name);
-      _db.getRows(MODEL_TABLE_PREFIX+table_name, sql, values, callback);
+      _db.getRows(_TablePrefix+table_name, sql, values, callback);
     };
 
     this.searchAllNRows = (group_name, keyword, N, callback)=> {
@@ -486,7 +485,7 @@ function Model() {
       sql = sql + ' LIKE ? ) AND ('+model_group_key+' LIKE ?)';
       let values = column_list.map(v=>{return keyword});
       values.push(group_name);
-      _db.getRowsTopNRows(MODEL_TABLE_PREFIX+table_name, sql, values, N, callback);
+      _db.getRowsTopNRows(_TablePrefix+table_name, sql, values, N, callback);
     };
 
     this.searchColumnsNRows = (group_name, column_list, keyword, N, callback)=> {
@@ -495,12 +494,12 @@ function Model() {
       sql = sql + ' LIKE ? ) AND ('+model_group_key+' LIKE ?)';
       let values = column_list.map(v=>{return keyword});
       values.push(group_name);
-      _db.getRowsTopNRows(MODEL_TABLE_PREFIX+table_name, sql, values, N, callback);
+      _db.getRowsTopNRows(_TablePrefix+table_name, sql, values, N, callback);
     };
 
     // get an instense
     this.get = (group_name, index_value, callback)=> {
-      _db.getRows(MODEL_TABLE_PREFIX+table_name, model_group_key+' LIKE ? AND '+model_key+' LIKE ?', [group_name, index_value], (err, results)=> {
+      _db.getRows(_TablePrefix+table_name, model_group_key+' LIKE ? AND '+model_key+' LIKE ?', [group_name, index_value], (err, results)=> {
         if(results) {
           callback(err, results[0]);
         }
@@ -511,7 +510,7 @@ function Model() {
     };
 
     this.getWhere = (where, query_values, callback)=> {
-      _db.getRows(MODEL_TABLE_PREFIX+table_name, where, query_values, (err, results)=> {
+      _db.getRows(_TablePrefix+table_name, where, query_values, (err, results)=> {
         if(results) {
           callback(err, results);
         }
@@ -534,7 +533,7 @@ function Model() {
           (rows[i])[model_group_key] = group_name;
         }
       }
-      _db.replaceRows(MODEL_TABLE_PREFIX+table_name, rows, callback);
+      _db.replaceRows(_TablePrefix+table_name, rows, callback);
     };
 
     this.updateRows = (group_name, rows, callback)=> {
@@ -557,7 +556,7 @@ function Model() {
             properties_dict['modifydate'] = datenow;
             properties_dict[model_group_key] = group_name;
           }
-          _db.updateRows(MODEL_TABLE_PREFIX+table_name, model_group_key+' LIKE ? AND '+model_key+' LIKE ?', [group_name, properties_dict[model_key]], properties_dict, call_callback);
+          _db.updateRows(_TablePrefix+table_name, model_group_key+' LIKE ? AND '+model_key+' LIKE ?', [group_name, properties_dict[model_key]], properties_dict, call_callback);
         }
         else {
           call_callback(new Error('Key "'+model_key+'" is required.'));
@@ -566,11 +565,11 @@ function Model() {
     };
 
     this.deleteRows = (group_name, begin, end, callback)=> {
-      _db.deleteRows(MODEL_TABLE_PREFIX+table_name, model_group_key+' LIKE ? AND '+model_key+' >= ? AND '+model_key+' <= ?', [group_name, begin, end], callback);
+      _db.deleteRows(_TablePrefix+table_name, model_group_key+' LIKE ? AND '+model_key+' >= ? AND '+model_key+' <= ?', [group_name, begin, end], callback);
     };
 
     this.appendRows = (group_name, rows, callback)=> {
-      // _db.getRows(MODEL_TABLE_PREFIX+table_name, 'MAX('+model_key+')', [], (err, results)=> {
+      // _db.getRows(_TablePrefix+table_name, 'MAX('+model_key+')', [], (err, results)=> {
       //
       // });
       if(do_timestamp) {
@@ -586,7 +585,7 @@ function Model() {
           (rows[i])[model_group_key] = group_name;
         }
       }
-      _db.appendRowsandGroupAutoIncrease(MODEL_TABLE_PREFIX+table_name, [model_key, model_group_key], rows, callback);
+      _db.appendRowsandGroupAutoIncrease(_TablePrefix+table_name, [model_key, model_group_key], rows, callback);
     };
 
     this.appendRowsAllGroup = (rows, callback)=> {
@@ -594,24 +593,24 @@ function Model() {
     };
 
     this.getLatestNRows = (group_name, n, callback)=> {
-      _db.getRows(MODEL_TABLE_PREFIX+table_name, model_group_key+' LIKE ? AND '+MODEL_INDEXKEY+' > ((SELECT max('+MODEL_INDEXKEY+') FROM '+MODEL_TABLE_PREFIX+table_name+' WHERE '+model_group_key+' LIKE ?)- ?)', [group_name, group_name, n], callback);
+      _db.getRows(_TablePrefix+table_name, model_group_key+' LIKE ? AND '+_Indexkey+' > ((SELECT max('+_Indexkey+') FROM '+_TablePrefix+table_name+' WHERE '+model_group_key+' LIKE ?)- ?)', [group_name, group_name, n], callback);
     };
 
     this.getRowsFromTo = (group_name, begin, end, callback)=> {
-      _db.getRows(MODEL_TABLE_PREFIX+table_name, model_group_key+' LIKE ? AND '+MODEL_INDEXKEY+' >= ? AND '+ MODEL_INDEXKEY+' <= ?', [group_name, begin, end], callback);
+      _db.getRows(_TablePrefix+table_name, model_group_key+' LIKE ? AND '+_Indexkey+' >= ? AND '+ _Indexkey+' <= ?', [group_name, begin, end], callback);
     };
 
     this.getAllRows = (group_name, callback)=> {
-      _db.getRows(MODEL_TABLE_PREFIX+table_name, model_group_key+' LIKE ?', [group_name], callback);
+      _db.getRows(_TablePrefix+table_name, model_group_key+' LIKE ?', [group_name], callback);
     };
 
     this.getLatestIndex = (group_name, callback)=> {
-      _db.getRows(MODEL_TABLE_PREFIX+table_name, model_group_key+' LIKE ? AND '+MODEL_INDEXKEY+' = (SELECT max('+MODEL_INDEXKEY+') FROM '+MODEL_TABLE_PREFIX+table_name+' WHERE '+model_group_key+' LIKE ?)', [group_name, group_name], (err, results)=> {
+      _db.getRows(_TablePrefix+table_name, model_group_key+' LIKE ? AND '+_Indexkey+' = (SELECT max('+_Indexkey+') FROM '+_TablePrefix+table_name+' WHERE '+model_group_key+' LIKE ?)', [group_name, group_name], (err, results)=> {
         if(err) {
           callback(err);
         }
         else if(results.length) {
-          callback(err, (results[0])[MODEL_INDEXKEY]);
+          callback(err, (results[0])[_Indexkey]);
         }
         else {
           callback(err);
@@ -623,27 +622,27 @@ function Model() {
       for(let field in fields_dict) {
         fields_dict[field] = {type: fields_dict[field]};
       }
-      _db.addFields(MODEL_TABLE_PREFIX+table_name, fields_dict, callback);
+      _db.addFields(_TablePrefix+table_name, fields_dict, callback);
     };
 
     this.existField = (field_name, callback)=> {
-      _db.existField(MODEL_TABLE_PREFIX+table_name, field_name, callback);
+      _db.existField(_TablePrefix+table_name, field_name, callback);
     };
 
     this.removeFields = (fields_dict, callback)=> {
-      _db.removeFields(MODEL_TABLE_PREFIX+table_name, fields_dict, callback);
+      _db.removeFields(_TablePrefix+table_name, fields_dict, callback);
     };
   };
 
 
 
   this.remove = (model_name, callback)=> {
-    _db.dropTable(MODEL_TABLE_PREFIX+model_name, (err)=> {
+    _db.dropTable(_TablePrefix+model_name, (err)=> {
       if(err) {
         callback(err);
       }
       else {
-        _db.deleteRows(MODEL_TABLE_NAME, 'name LIKE ?', [model_name], (err)=> {
+        _db.deleteRows(_TableName, 'name LIKE ?', [model_name], (err)=> {
           callback(err);
         });
       }
@@ -681,7 +680,7 @@ function Model() {
       let do_timestamp = model_structure.do_timestamp;
       let model_key = model_structure.model_key;
       let structure = model_structure.structure;
-      _db.existTable(MODEL_TABLE_PREFIX+model_name, (err, exist)=> {
+      _db.existTable(_TablePrefix+model_name, (err, exist)=> {
         if(exist) {
           callback(new Error('Model "'+model_name+'" exist.'));
         }
@@ -703,12 +702,12 @@ function Model() {
             field_structure[model_key].iskey = true;
             field_structure[model_key].notnull = true;
 
-            _db.createTable(MODEL_TABLE_PREFIX+model_name, false, field_structure, (err)=> {
+            _db.createTable(_TablePrefix+model_name, false, field_structure, (err)=> {
               if(err) {
                 callback(err);
               }
               else {
-                _db.replaceRows(MODEL_TABLE_NAME, [{
+                _db.replaceRows(_TableName, [{
                   name: model_name,
                   structure: JSON.stringify(model_structure)
                 }], (err)=> {
@@ -725,7 +724,7 @@ function Model() {
           else if (model_type == 'IndexedList') {
             let field_structure = {};
             let a = {};
-            a[MODEL_INDEXKEY] = 'INTEGER';
+            a[_Indexkey] = 'INTEGER';
 
             structure = Object.assign({}, a, structure);
             if(do_timestamp) {
@@ -739,16 +738,16 @@ function Model() {
               };
             }
 
-            field_structure[MODEL_INDEXKEY].iskey = true;
-            field_structure[MODEL_INDEXKEY].notnull = true;
-            field_structure[MODEL_INDEXKEY].autoincrease = true;
+            field_structure[_Indexkey].iskey = true;
+            field_structure[_Indexkey].notnull = true;
+            field_structure[_Indexkey].autoincrease = true;
 
-            _db.createTable(MODEL_TABLE_PREFIX+model_name, true, field_structure, (err)=> {
+            _db.createTable(_TablePrefix+model_name, true, field_structure, (err)=> {
               if(err) {
                 callback(err);
               }
               else {
-                _db.replaceRows(MODEL_TABLE_NAME, [{
+                _db.replaceRows(_TableName, [{
                   name: model_name,
                   structure: JSON.stringify(model_structure)
                 }], (err)=> {
@@ -765,8 +764,8 @@ function Model() {
           else if (model_type == 'GroupIndexedList') {
             let field_structure = {};
             let a = {};
-            a[MODEL_GROUPKEY] = 'VARCHAR(128)';
-            a[MODEL_INDEXKEY] = 'INTEGER';
+            a[_Groupkey] = 'VARCHAR(128)';
+            a[_Indexkey] = 'INTEGER';
 
             structure = Object.assign({}, a, structure);
             if(do_timestamp) {
@@ -780,19 +779,19 @@ function Model() {
               };
             }
 
-            field_structure[MODEL_GROUPKEY].iskey = true;
-            field_structure[MODEL_GROUPKEY].notnull = true;
+            field_structure[_Groupkey].iskey = true;
+            field_structure[_Groupkey].notnull = true;
 
-            field_structure[MODEL_INDEXKEY].iskey = true;
-            field_structure[MODEL_INDEXKEY].notnull = true;
-            field_structure[MODEL_INDEXKEY].autoincrease = true;
+            field_structure[_Indexkey].iskey = true;
+            field_structure[_Indexkey].notnull = true;
+            field_structure[_Indexkey].autoincrease = true;
 
-            _db.createTable(MODEL_TABLE_PREFIX+model_name, true, field_structure, (err)=> {
+            _db.createTable(_TablePrefix+model_name, true, field_structure, (err)=> {
               if(err) {
                 callback(err);
               }
               else {
-                _db.replaceRows(MODEL_TABLE_NAME, [{
+                _db.replaceRows(_TableName, [{
                   name: model_name,
                   structure: JSON.stringify(model_structure)
                 }], (err)=> {
@@ -825,12 +824,12 @@ function Model() {
             field_structure[model_key[1]].iskey = true;
             field_structure[model_key[1]].notnull = true;
 
-            _db.createTable(MODEL_TABLE_PREFIX+model_name, false, field_structure, (err)=> {
+            _db.createTable(_TablePrefix+model_name, false, field_structure, (err)=> {
               if(err) {
                 callback(err);
               }
               else {
-                _db.replaceRows(MODEL_TABLE_NAME, [{
+                _db.replaceRows(_TableName, [{
                   name: model_name,
                   structure: JSON.stringify(model_structure)
                 }], (err)=> {
@@ -857,7 +856,7 @@ function Model() {
   };
 
   this.get = (model_name, callback) => {
-    _db.getRows(MODEL_TABLE_NAME, 'name = ?', [model_name], (err, results)=> {
+    _db.getRows(_TableName, 'name = ?', [model_name], (err, results)=> {
       if(results.length) {
         let model_structure = JSON.parse(results[0].structure);
         let model_type = model_structure.model_type;
@@ -884,11 +883,11 @@ function Model() {
   };
 
   this.exist = (model_name, callback)=> {
-    _db.existTable(MODEL_TABLE_PREFIX+model_name, callback);
+    _db.existTable(_TablePrefix+model_name, callback);
   };
 
   this.getModelsDict = (callback)=> {
-    _db.getAllRows(MODEL_TABLE_NAME, (err, results)=> {
+    _db.getAllRows(_TableName, (err, results)=> {
       if(err) {
         callback(err);
       }
@@ -943,12 +942,12 @@ function Model() {
 
   this.importDatabase = (db, callback)=> {
     _db = db;
-    _db.existTable(MODEL_TABLE_NAME, (err, exist)=> {
+    _db.existTable(_TableName, (err, exist)=> {
       if(err) {
         callback(err);
       }
       else if(!exist) {
-        _db.createTable(MODEL_TABLE_NAME, false,{
+        _db.createTable(_TableName, false,{
           name: {
             type: 'VARCHAR(255)',
             iskey: true,
@@ -971,6 +970,11 @@ function Model() {
   this.close = ()=> {
     _db = null;
   };
+
+  this.setTableName = (value)=> {_TableName = value};
+  this.setTablePrefix = (value)=> {_TablePrefix = value};
+  this.setIndexkey = (value)=> {_Indexkey = value};
+  this.setGroupkey = (value)=> {_Groupkey = value};
 }
 
 module.exports = Model;

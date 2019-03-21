@@ -5,7 +5,6 @@
 'use strict';
 
 const Utils = require('../library').Utilities;
-const Constants = require('../runtime/constants');
 const ConnectionsPath = require("path").join(__dirname, "connections");
 let Connections = {};
 
@@ -28,6 +27,7 @@ function Connection(options) {
   let heartbeat_phrase = '{m:"HB"}';
   let heartbeat_cycle = 60000;
   let _debug = false;
+  let _conn_meth_name_map;
 
 
   // define an profile of an connection
@@ -98,9 +98,9 @@ function Connection(options) {
         Utils.TagLog('*ERR*', 'Can only exist one local server.');
       }
     }
-    else if(Constants.CONNECTION_METHOD_NAME_MAP[conn_method]) {
+    else if(_conn_meth_name_map[conn_method]) {
       let _serverId = Utils.generateUniqueId();
-      let server = new Connections[Constants.CONNECTION_METHOD_NAME_MAP[conn_method]].Server(_serverId, ConnectionProfile);
+      let server = new Connections[_conn_meth_name_map[conn_method]].Server(_serverId, ConnectionProfile);
       _servers[_serverId] = server;
       server.start(ip, port, ssl_priv_key=ssl_priv_key, ssl_cert=ssl_cert);
       server.onData = this.onData;
@@ -149,8 +149,8 @@ function Connection(options) {
       }
     }
 
-    else if(Constants.CONNECTION_METHOD_NAME_MAP[conn_method]) {
-      let netc = new Connections[Constants.CONNECTION_METHOD_NAME_MAP[conn_method]].Client(ConnectionProfile);
+    else if(_conn_meth_name_map[conn_method]) {
+      let netc = new Connections[_conn_meth_name_map[conn_method]].Client(ConnectionProfile);
       netc.onData = onData_wrapped;
       netc.onClose = this.onClose;
       netc.connect(remoteip, port, callback);
@@ -227,6 +227,10 @@ function Connection(options) {
 
   this.importHeartBeatCycle = (cycle) => {
     heartbeat_cycle = cycle;
+  };
+
+  this.importConnectionMethodNameMap = (dict)=> {
+    _conn_meth_name_map = dict;
   };
 
   this.close = () =>{

@@ -25,50 +25,16 @@
 const {fork, spawn} = require('child_process');
 const Utils = require('../library').Utilities;
 const Net = require('net');
-const Constants = require('../runtime/constants');
 const fs = require('fs');
 
 function WorkerDaemon() {
   let _worker_clients = {};
   let _close_worker_timeout = 3000;
   let _clear_obj_garbage_timeout = 1000*60*10;
+  let _unix_socket_path;
+  let _const_path;
   // let _services_relaunch_cycle = 1000*60*60*24;
   let _serviceapi_module;
-
-  try {
-    fs.unlinkSync(Constants.WORKER_UNIX_SOCK_PATH);
-  } catch(e) {}
-
-  let _unix_sock_server = Net.createServer((socket)=>{
-    let _api_sock = new APISocket(socket);
-    socket.on('data', (data)=> {
-
-      while(data.length) {
-
-        let chunks_size = parseInt(data.slice(0, 16).toString());
-        let msg = JSON.parse(data.slice(16, 16+chunks_size).toString());
-        if(msg.t == 0) {
-          _worker_clients[msg.s].pairSocket(_api_sock);
-        }
-        else {
-          _api_sock._onMessege(msg);
-        }
-        data = data.slice(16+chunks_size);
-      }
-    });
-
-    socket.on('error', (error) => {
-      Utils.TagLog('*ERR*', 'An error occured on worker daemon module.');
-      Utils.TagLog('*ERR*', error);
-      socket.destroy();
-      _api_sock._onClose();
-    });
-
-    socket.on('close', ()=> {
-      _api_sock._onClose();
-    });
-
-  }).listen(Constants.WORKER_UNIX_SOCK_PATH);
 
   function APISocket(sock) {
     let _on_callbacks = {};
@@ -179,7 +145,7 @@ function WorkerDaemon() {
 
     this.onMessage = (message)=>{
       if(message.t == 0) {
-        _child.send({t:0, p: path, a: _serviceapi.returnAPITree(), c: _close_worker_timeout, g: _clear_obj_garbage_timeout});
+        _child.send({t:0, p: path, a: _serviceapi.returnAPITree(), c: _close_worker_timeout, g: _clear_obj_garbage_timeout, cpath: _const_path});
       }
       else if(message.t == 1) {
         _init_callback(false);
@@ -302,7 +268,6 @@ function WorkerDaemon() {
     let _serviceapi = null;
     let _child = null;
     let _api_sock = null;
-    let _unix_socket_path = null;
     let _service_name =  /.*\/([^\/]*)\/entry/g.exec(path)[1];
     let _InfoRq = {};
     let _init_callback;
@@ -379,7 +344,7 @@ function WorkerDaemon() {
 
     this.onMessage = (message)=>{
       if(message.t == 0) {
-        _api_sock.send({t:0, p: path, a: _serviceapi.returnAPITree(), c: _close_worker_timeout, g: _clear_obj_garbage_timeout});
+        _api_sock.send({t:0, p: path, a: _serviceapi.returnAPITree(), c: _close_worker_timeout, g: _clear_obj_garbage_timeout, cpath: _const_path});
       }
       else if(message.t == 1) {
         _init_callback(false);
@@ -470,7 +435,7 @@ function WorkerDaemon() {
 
     this.init = (init_callback)=> {
       _init_callback = init_callback;
-      _child = spawn('python3', [require.resolve('./python/worker.py'), Constants.WORKER_UNIX_SOCK_PATH, _service_name], {stdio: [process.stdin, process.stdout, process.stderr, 'ipc']});
+      _child = spawn('python3', [require.resolve('./python/worker.py'), _unix_socket_path, _service_name], {stdio: [process.stdin, process.stdout, process.stderr, 'ipc']});
       _child.on('close', (code)=> {
         _init_callback(new Error('PythonWorkerClient of "'+_service_name+'" occured error.'));
       });
@@ -561,10 +526,51 @@ function WorkerDaemon() {
     _serviceapi_module = serviceapi_module;
   };
 
+  this.setConstantsPath = (path)=> {_const_path = path};
+
+  this.setUnixSocketPath = (path)=> {_unix_socket_path = path};
+
+  this.start = ()=> {
+    try {
+      fs.unlinkSync(_unix_socket_path);
+    } catch(e) {}
+
+    let _unix_sock_server = Net.createServer((socket)=>{
+      let _api_sock = new APISocket(socket);
+      socket.on('data', (data)=> {
+
+        while(data.length) {
+
+          let chunks_size = parseInt(data.slice(0, 16).toString());
+          let msg = JSON.parse(data.slice(16, 16+chunks_size).toString());
+          if(msg.t == 0) {
+            _worker_clients[msg.s].pairSocket(_api_sock);
+          }
+          else {
+            _api_sock._onMessege(msg);
+          }
+          data = data.slice(16+chunks_size);
+        }
+      });
+
+      socket.on('error', (error) => {
+        Utils.TagLog('*ERR*', 'An error occured on worker daemon module.');
+        Utils.TagLog('*ERR*', error);
+        socket.destroy();
+        _api_sock._onClose();
+      });
+
+      socket.on('close', ()=> {
+        _api_sock._onClose();
+      });
+
+    }).listen(_unix_socket_path);
+  };
+
   this.close = ()=> {
     _unix_sock_server.close();
     try {
-      fs.unlinkSync(Constants.WORKER_UNIX_SOCK_PATH);
+      fs.unlinkSync(_unix_socket_path);
     } catch(e) {}
   }
 }
