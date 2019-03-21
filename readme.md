@@ -33,6 +33,8 @@ Now, NoService can run on browser(javascript) and desktop(javascript). It also s
 ### supporting Python in server-side
 You can write your service in python and it's event-based asyncio module.
 
+### Make your local scripts online
+
 ### Socket-based+API control
 Socket base+API pattern makes the concept easy to understand. NoService wraps the native TCP/IP, websocket or even http polling mode in the future as transportation layer. Make you no need to consider about integrating features with different connections. And with the advantage of NoService, in theory different activities(clients) can share same the socket in the same time. If the NoService Client is implemented well.
 
