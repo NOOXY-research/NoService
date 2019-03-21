@@ -18,7 +18,7 @@ const Utils = require('../library').Utilities;
 // For injecting database to api
 const Database = require('../database').Database;
 const Model = require('../database').Model;
-const Constants = require('../constants');
+const Constants = require('../runtime/constants');
 const fs = require('fs');
 process.title = 'NoService_worker';
 

@@ -27,7 +27,7 @@
     }
   ],
 
-  "default_server": 2,
+  "default_server": null,
 
   "local_services_owner" : "admin",
 

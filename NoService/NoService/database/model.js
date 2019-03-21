@@ -7,7 +7,7 @@
 'use strict';
 
 const Utils = require('../library').Utilities;
-const Constants = require('../constants');
+const Constants = require('../runtime/constants');
 const MODEL_TABLE_NAME = Constants.MODEL_TABLE_NAME;
 const MODEL_TABLE_PREFIX = Constants.MODEL_TABLE_PREFIX;
 const MODEL_INDEXKEY = Constants.MODEL_INDEXKEY;

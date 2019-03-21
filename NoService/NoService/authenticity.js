@@ -6,7 +6,7 @@
 
 const crypto = require('crypto');
 const Utils = require('./library').Utilities;
-const Constants = require('./constants');
+const Constants = require('./runtime/constants');
 const AUTHE_USER_MODEL_NAME = Constants.AUTHE_USER_MODEL_NAME;
 
 // the authenticity module
@@ -579,4 +579,5 @@ function Authenticity() {
     _user_model = null;
   };
 };
+
 module.exports = Authenticity;

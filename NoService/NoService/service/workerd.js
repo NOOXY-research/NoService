@@ -25,7 +25,7 @@
 const {fork, spawn} = require('child_process');
 const Utils = require('../library').Utilities;
 const Net = require('net');
-const Constants = require('../constants');
+const Constants = require('../runtime/constants');
 const fs = require('fs');
 
 function WorkerDaemon() {

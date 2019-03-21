@@ -23,28 +23,28 @@ for(let pkg in Constants.dependencies) {
   }
 }
 
-const Connection = require('./connection');
-const Authenticity = require('./authenticity');
-const Router = require('./router');
-const Implementation = require('./implementation');
+const Connection = require('../connection').Connection;
+const Authenticity = require('../authenticity');
+const Router = require('../router').Router;
+const NSPS = require('../router').NSPS;
+const Implementation = require('../implementation');
 const Log = null;
-const Utils = require('./library').Utilities;
-const NoCrypto = require('./crypto').NoCrypto;
-const NSPS = require('./crypto').NSPS;
+const Utils = require('../library').Utilities;
+const NoCrypto = require('../crypto').Crypto;
 
 // auth
-const Authorization = require('./authorization').Authorization;
-const AuthorizationHandler = require('./authorization').AuthorizationHandler;
+const Authorization = require('../authorization').Authorization;
+const AuthorizationHandler = require('../authorization').AuthorizationHandler;
 
 // service
-const Service = require('./service').Service;
-const WorkerDaemon = require('./service').WorkerDaemon;
-const ServiceAPI = require('./service').ServiceAPI;
-const Entity = require('./service').Entity;
+const Service = require('../service').Service;
+const WorkerDaemon = require('../service').WorkerDaemon;
+const ServiceAPI = require('../service').ServiceAPI;
+const Entity = require('../service').Entity;
 
 // db
-const Database = require('./database').Database;
-const Model = require('./database').Model;
+const Database = require('../database').Database;
+const Model = require('../database').Model;
 
 
 function Core(settings) {

@@ -15,5 +15,15 @@
   "MODEL_TABLE_PREFIX": "NoService_Model_",
   "MODEL_INDEXKEY": "Idx",
   "MODEL_GROUPKEY": "Grp",
-  "WORKER_UNIX_SOCK_PATH": "/tmp/NoService.sock"
+  "WORKER_UNIX_SOCK_PATH": "/tmp/NoService.sock",
+  "CONNECTION_METHOD_NAME_MAP": {
+    "TCP": "TCP",
+    "WebSocket": "WebSocket",
+    "WebSocketSecure": "WebSocketSecure",
+    "Local": "Local",
+    "TCP/IP": "TCP",
+    "ws": "WebSocket",
+    "wss": "WebSocketSecure",
+    "local": "Local"
+  }
 }
