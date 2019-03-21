@@ -5,4 +5,4 @@ module.exports.Database = require('./database');
 module.exports.Library = require('./library');
 module.exports.Router = require('./router');
 module.exports.Runtime = require('./runtime');
-module.exports.Serivce = require('./service');
+module.exports.Service = require('./service');

@@ -9,30 +9,33 @@ const fs = require('fs');
 let Constants = require('./constants');
 const Implementation = require('./implementation');
 
-function Core(NoServiceLib, settings) {
+function Core(NoServiceLibrary, settings) {
+  if(settings['path'])
+    process.chdir(settings['path'])
+
   const Log = null;
-  const Connection = NoServiceLib.Connection.Connection;
-  const Utils = NoServiceLib.Library.Utilities;
-  const NoCrypto = NoServiceLib.Crypto.Crypto;
+  const Connection = NoServiceLibrary.Connection.Connection;
+  const Utils = NoServiceLibrary.Library.Utilities;
+  const NoCrypto = NoServiceLibrary.Crypto.Crypto;
 
   // router
-  const Router = NoServiceLib.Router.Router;
-  const NSPS = NoServiceLib.Router.NSPS;
+  const Router = NoServiceLibrary.Router.Router;
+  const NSPS = NoServiceLibrary.Router.NSPS;
 
   // auth
-  const Authorization = NoServiceLib.Authorization.Authorization;
-  const AuthorizationHandler = NoServiceLib.Authorization.AuthorizationHandler;
+  const Authorization = NoServiceLibrary.Authorization.Authorization;
+  const AuthorizationHandler = NoServiceLibrary.Authorization.AuthorizationHandler;
 
   // service
-  const Service = NoServiceLib.Service.Service;
-  const WorkerDaemon = NoServiceLib.Service.WorkerDaemon;
-  const ServiceAPI = NoServiceLib.Service.ServiceAPI;
-  const Entity = NoServiceLib.Service.Entity;
+  const Service = NoServiceLibrary.Service.Service;
+  const WorkerDaemon = NoServiceLibrary.Service.WorkerDaemon;
+  const ServiceAPI = NoServiceLibrary.Service.ServiceAPI;
+  const Entity = NoServiceLibrary.Service.Entity;
 
   // db
-  const Database = NoServiceLib.Database.Database;
-  const Model = NoServiceLib.Database.Model;
-  const Authenticity = NoServiceLib.Database.Authenticity;
+  const Database = NoServiceLibrary.Database.Database;
+  const Model = NoServiceLibrary.Database.Model;
+  const Authenticity = NoServiceLibrary.Database.Authenticity;
 
   Utils.printLOGO(Constants.version, Constants.copyright);
 

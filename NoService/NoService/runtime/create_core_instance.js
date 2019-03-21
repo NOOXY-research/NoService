@@ -6,7 +6,7 @@
 
 const Constants = require('./constants');
 const Core = require('./core');
-
+const NoServiceLibaray = require('../../NoService');
 let _core;
 
 let terminateNoService = ()=> {
@@ -26,7 +26,7 @@ for(let pkg in Constants.dependencies) {
 
 process.on('message', (msg)=> {
   if(msg.t == 0) {
-    _core = new Core(msg.settings);
+    _core = new Core(NoServiceLibaray, msg.settings);
     _core.onTerminated = terminateNoService;
     _core.checkandlaunch();
   }

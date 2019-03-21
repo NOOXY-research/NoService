@@ -7,6 +7,35 @@ The project is still in alpha!
 npm install noservice -save
 npx create-noservice .
 ```
+## Launch
+1. launcher
+``` sh
+node launch.js
+```
+2. NoService Library(via runtime launcher)
+``` javascript
+const Launcher = require('./NoService').Runtime.Launcher;
+const Path = require("path");
+
+Launcher.launch(Path.resolve("./"), Path.resolve("./")+'/setting.json');
+```
+3. NoService Library(native library)
+``` javascript
+const NoService = require('./NoService');
+const Core = NoService.Runtime.Core;
+const settings = JSON.parse(fs.readFileSync('settings.json', 'utf8'));
+
+// you can modify NoService Library, such as changing module
+NoService.Database = require('./my/own/database');
+
+core = new Core(NoService, settings);
+core.onTerminated = ()=> {
+  // NoService terminated
+};
+
+core.checkandlaunch();
+
+```
 ## What is NoService?
 NoService is a high level framework for services that provide you "nodejs" and "python3" environment and eliminate service designer to care about low level part of your project.Such as authorization, user system, database, protocol and so on. It also run multiple services integrated and we also provide a manager and shell to manipulate all of them.
 
