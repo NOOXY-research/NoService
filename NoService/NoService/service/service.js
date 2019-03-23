@@ -14,30 +14,18 @@ function Service() {
   let _local_services = {};
   let _local_services_path;
   let _local_services_files_path;
-  let _local_services_owner;
+  let _local_service_owner;
   let _entity_module;
   let _serviceapi_module;
   let _authorization_module;
   let _authenticity_module;
-  let _ActivityRsCEcallbacks = {};
-  let _daemon_auth_key;
-  let _ASockets = {};
+
   let _debug = false;
   let _workerd;
   let _master_service;
   let _debug_service;
 
-  let ActivitySocketDestroyTimeout = 1000;
-
-  let _emitRouter = () => {Utils.TagLog('*ERR*', 'emitRouter not implemented');};
-  let _unbindActivitySocketList = (_entity_id)=> {
-    setTimeout(()=>{
-      // tell worker abort referance
-      if(_ASockets[_entity_id])
-        _ASockets[_entity_id].worker_cancel_refer = true;
-      delete _ASockets[_entity_id];
-    }, ActivitySocketDestroyTimeout);
-  };
+  let _emitRouter;
 
   // object for managing service.
   function ServiceObj(service_name) {
@@ -116,14 +104,14 @@ function Service() {
 
       _worker = _workerd.generateWorker(_service_path+'/entry', _service_manifest.language);
       // load module from local service directory
-      _authenticity_module.getUserIdByUsername(_local_services_owner, (err, ownerid)=> {
+      _authenticity_module.getUserIdByUsername(_local_service_owner, (err, ownerid)=> {
         // create a description of this service entity.
         let _entity_json = {
           serverid: "Local",
           service: _service_name,
           type: "Service",
-          spwandomain: "Local",
-          owner: _local_services_owner,
+          spawndomain: "Local",
+          owner: _local_service_owner,
           ownerid: ownerid,
           ownerdomain: "Local",
           connectiontype: null,
@@ -272,9 +260,7 @@ function Service() {
     _workerd = wd;
   };
 
-  this.importDaemonAuthKey = (key) => {
-    _daemon_auth_key = key;
-  };
+
 
   this.importAuthorization = (mod) => {
     _authorization_module = mod;
@@ -285,7 +271,7 @@ function Service() {
   };
 
   this.importOwner = (owner) => {
-    _local_services_owner = owner;
+    _local_service_owner = owner;
   }
 
   this.importServicesList = (service_list) => {
@@ -306,144 +292,25 @@ function Service() {
     _workerd.importAPI(serviceapi_module);
   };
 
-  this.spwanClient = () => {Utils.TagLog('*ERR*', 'spwanClient not implemented');};
-
   this.setEmitRouter = (emitRouter) => {_emitRouter = emitRouter};
 
   this.emitConnectionClose = (connprofile, callback) => {
-
     let _entitiesId = connprofile.returnBundle('bundle_entities');
     if(!_entitiesId) {
       callback(true);
     }
     else if(_entitiesId.length) {
-      let Rpos = connprofile.returnRemotePosition();
-      if(connprofile.returnRemotePosition() === 'Client') {
-        let i = 0;
-        let loop = () => {
-          let nowidx = i;
-          let theservice = _local_services[_entity_module.returnEntityValue(_entitiesId[nowidx], 'service')];
-          if(theservice)
-            theservice.emitSSClose(_entitiesId[nowidx], true);
-          if(i < _entitiesId.length-1) {
-            i++;
-            loop();
-          }
-        };
-        loop();
-        callback(false);
+      for(let i in _entitiesId) {
+        let theservice = _local_services[_entity_module.returnEntityValue(_entitiesId[i], 'service')];
+        if(theservice)
+          theservice.emitSSClose(_entitiesId[i], true);
       }
-      else {
-
-        for(let i in _entitiesId) {
-          _ASockets[_entitiesId[i]]._emitClose();
-          setTimeout(()=>{
-            // for worker abort referance
-            _ASockets[_entitiesId[i]].worker_cancel_refer = true;
-            delete _ASockets[_entitiesId[i]];
-          }, ActivitySocketDestroyTimeout);
-        }
-        callback(false);
-      }
+      callback(false);
     }
     else {
       callback(false);
     }
   };
-
-  // ClientSide
-  this.ServiceRsRouter =  (connprofile, data) => {
-
-    let methods = {
-      // nooxy service protocol implementation of "Call Service: Vertify Connection"
-      VE: (connprofile, data) => {
-        if(data.d.s === 'OK') {
-          _ASockets[data.d.i].launch();
-        }
-        else {
-          _ASockets[data.d.i]._emitClose();
-        }
-      },
-      // nooxy service protocol implementation of "Call Service: ServiceSocket"
-      SS: (connprofile, data) => {
-
-      },
-      // nooxy service protocol implementation of "Call Service: JSONfunction"
-      JF: (connprofile, data) => {
-        if(data.d.s === 'OK') {
-          _ASockets[data.d.i].sendJFReturn(false, data.d.t, data.d.r);
-        }
-        else {
-          _ASockets[data.d.i].sendJFReturn(true, data.d.t, data.d.r);
-        }
-      },
-      // nooxy service protocol implementation of "Call Activity: createEntity"
-      CE: (connprofile, data) => {
-        // tell server finish create
-        if(data.d.i != null) {
-          // create a description of this service entity.
-          _ActivityRsCEcallbacks[data.d.t](connprofile, data);
-          let _data = {
-            "m": "VE",
-            "d": {
-              "i": data.d.i,
-            }
-          };
-
-          _emitRouter(connprofile, 'CS', _data);
-        }
-        else {
-          _ActivityRsCEcallbacks[data.d.t](connprofile, data);
-          delete  _ActivityRsCEcallbacks[data.d.t];
-          connprofile.closeConnetion();
-        }
-      }
-    }
-
-    // call the callback.
-    methods[data.m](connprofile, data);
-  };
-
-  // Serverside implement
-  this.ActivityRqRouter = (connprofile, data, response_emit) => {
-
-    let methods = {
-      // nooxy service protocol implementation of "Call Activity: ActivitySocket"
-      AS: () => {
-        _ASockets[data.d.i]._emitData(data.d.d);
-        let _data = {
-          "m": "AS",
-          "d": {
-            // status
-            "i": data.d.i,
-            "s": "OK"
-          }
-        };
-        response_emit(connprofile, 'CA', 'rs', _data);
-      },
-      // nooxy service protocol implementation of "Call Activity: Event"
-      EV: () => {
-        _ASockets[data.d.i]._emitEvent(data.d.n, data.d.d);
-        let _data = {
-          "m": "EV",
-          "d": {
-            // status
-            "i": data.d.i,
-            "s": "OK"
-          }
-        };
-        response_emit(connprofile, 'CA', 'rs', _data);
-      },
-      // nooxy service protocol implementation of "Call Activity: Close ActivitySocket"
-      CS: () => {
-        _ASockets[data.d.i].remoteClosed = true;
-        _ASockets[data.d.i].close();
-      }
-    }
-    // call the callback.
-    methods[data.m](connprofile, data.d, response_emit);
-  }
-
 
   this.setDebugService = (name)=> {
     _debug_service = name;
@@ -541,79 +408,7 @@ function Service() {
 
   // Service module Owner
   this.setupOwner = (username) => {
-    _local_services_owner = username;
-  };
-
-  // Service module create activity socket
-  this.createActivitySocket = (method, targetip, targetport, service, owner, callback) => {
-    let err = false;
-    let _data = {
-      "m": "CE",
-      "d": {
-        t: Utils.generateGUID(),
-        o: owner,
-        m: 'normal',
-        s: service,
-        od: targetip,
-      }
-    };
-
-    this.spwanClient(method, targetip, targetport, (err, connprofile) => {
-      let _as = new SocketPair.ActivitySocket(connprofile, _emitRouter, _unbindActivitySocketList, _debug);
-      _ActivityRsCEcallbacks[_data.d.t] = (connprofile, data) => {
-        if(data.d.i) {
-          _as.setEntityId(data.d.i);
-          connprofile.setBundle('entityId', data.d.i);
-          _ASockets[data.d.i] = _as;
-          callback(false, _ASockets[data.d.i]);
-        }
-        else{
-          delete  _ASockets[data.d.i];
-          callback(new Error('Could not create this entity for some reason.'));
-        }
-
-      }
-      _emitRouter(connprofile, 'CS', _data);
-    });
-  };
-
-  this.createAdminDaemonActivitySocket = (method, targetip, targetport, service, callback) => {
-    this.createDaemonActivitySocket(method, targetip, targetport, service, _local_services_owner, callback);
-  };
-
-  this.createDaemonActivitySocket = (method, targetip, targetport, service, owner, callback) => {
-    let err = false;
-    let _data = {
-      "m": "CE",
-      "d": {
-        t: Utils.generateGUID(),
-        m: 'daemon',
-        k: _daemon_auth_key,
-        o: owner,
-        s: service,
-        od: targetip,
-      }
-    };
-
-
-    this.spwanClient(method, targetip, targetport, (err, connprofile) => {
-      let _as = new SocketPair.ActivitySocket(connprofile, _emitRouter, _unbindActivitySocketList, _debug);
-      _ActivityRsCEcallbacks[_data.d.t] = (connprofile, data) => {
-        if(data.d.i) {
-          _as.setEntityId(data.d.i);
-          connprofile.setBundle('entityId', data.d.i);
-          _ASockets[data.d.i] = _as;
-          callback(false, _as);
-        }
-        else{
-          delete  _ASockets[data.d.i];
-          callback(true);
-        }
-
-      }
-      _emitRouter(connprofile, 'CS', _data);
-    });
-
+    _local_service_owner = username;
   };
 
   this.returnServiceManifest = (service_name)=> {
@@ -689,7 +484,7 @@ function Service() {
         mode: mode,
         daemonauthkey: daemon_authkey,
         type: "Activity",
-        spwandomain: spawn_domain,
+        spawndomain: spawn_domain,
         owner: owner,
         ownerdomain: owner_domain,
         serverid: serverid,
@@ -770,6 +565,22 @@ function Service() {
 
     let max = Object.keys(_local_services).length;
     let i=0;
+    let _clear_var = ()=> {
+      // need add service event system
+      _local_services = {};
+      _local_services_path = null;
+      _local_services_files_path = null;
+      _local_service_owner = null;
+      _entity_module = null;
+      _serviceapi_module = null;
+      _authorization_module = null;
+      _authenticity_module = null;
+      _debug = false;
+      _workerd = null;
+      _master_service = null;
+      _debug_service = null;
+    };
+
     let _close_next =()=> {
       try{
         _local_services[Object.keys(_local_services)[i]].close(()=> {
@@ -778,6 +589,7 @@ function Service() {
             _close_next();
           }
           else {
+            _clear_var();
             callback(false);
           }
         });
@@ -790,14 +602,12 @@ function Service() {
           _close_next();
         }
         else {
+          _clear_var();
           callback(false);
         }
       }
     };
-
     _close_next();
-
-
   };
 }
 

@@ -13,8 +13,9 @@ module.exports = function Protocol(coregateway, emitRouter) {
     rs: "Both"
   };
 
-  this.RequestHandler = coregateway.Service.ActivityRqRouter;
+  this.RequestHandler = coregateway.Activity.ActivityRqRouter;
 
+  // Serverside
   this.ResponseHandler = (connprofile, data) => {
 
     let methods = {

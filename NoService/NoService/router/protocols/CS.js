@@ -15,6 +15,7 @@ module.exports = function Protocol(coregateway, emitRouter) {
 
   let Service = coregateway.Service;
 
+  // Serverside
   this.RequestHandler = (connprofile, data, response_emit) => {
     Service.getServiceInstanceByEntityId(data.d.i, (err, theservice)=> {
       let methods = {
@@ -151,6 +152,6 @@ module.exports = function Protocol(coregateway, emitRouter) {
     });
   };
 
-  this.ResponseHandler = coregateway.Service.ServiceRsRouter;
+  this.ResponseHandler = coregateway.Activity.ServiceRsRouter;
 
 }

@@ -167,7 +167,7 @@ function Authorization() {
     },
 
     Domain : (entityId, callback) => {
-      if(_trusted_domains.includes(_entity_module.returnEntityValue(entityId, 'spwandomain'))) {
+      if(_trusted_domains.includes(_entity_module.returnEntityValue(entityId, 'spawndomain'))) {
         callback(false, true);
       }
       else {

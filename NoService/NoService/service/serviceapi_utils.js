@@ -215,7 +215,7 @@ function API(_coregateway) {
   _api.Service = {
     ActivitySocket: {
       createSocket: (method, targetip, targetport, service, owner, remote_callback_obj) => {
-        _coregateway.Service.createActivitySocket(method, targetip, targetport, service, owner, (err, as)=> {
+        _coregateway.Activity.createActivitySocket(method, targetip, targetport, service, owner, (err, as)=> {
           let local_callback_obj = new LCBO(as, (syncRefer)=> {
             return ({
                 call: (name, Json, remote_callback_obj_2)=> {
@@ -273,7 +273,7 @@ function API(_coregateway) {
         });
       },
       createDefaultDeamonSocket: (service, owner, remote_callback_obj) => {
-        _coregateway.Service.createDaemonActivitySocket(DAEMONTYPE, DAEMONIP, DAEMONPORT, service, owner, (err, as)=> {
+        _coregateway.Activity.createDaemonActivitySocket(DAEMONTYPE, DAEMONIP, DAEMONPORT, service, owner, (err, as)=> {
           let local_callback_obj = new LCBO(as, (syncRefer)=> {
             return ({
                 call: (name, Json, remote_callback_obj_2)=> {
@@ -330,7 +330,7 @@ function API(_coregateway) {
         });
       },
       createDeamonSocket: (method, targetip, targetport, service, owner, remote_callback_obj) => {
-        _coregateway.Service.createDaemonActivitySocket(method, targetip, targetport, service, owner, (err, as)=> {
+        _coregateway.Activity.createDaemonActivitySocket(method, targetip, targetport, service, owner, (err, as)=> {
           let local_callback_obj = new LCBO(as, (syncRefer)=> {
             return ({
                 call: (name, Json, remote_callback_obj_2)=> {
@@ -389,7 +389,7 @@ function API(_coregateway) {
         });
       },
       createAdminDeamonSocket: (method, targetip, targetport, service, remote_callback_obj) => {
-        _coregateway.Service.createAdminDaemonActivitySocket(method, targetip, targetport, service, (err, as)=> {
+        _coregateway.Activity.createAdminDaemonActivitySocket(method, targetip, targetport, service, (err, as)=> {
           let local_callback_obj = new LCBO(as, (syncRefer)=> {
             return ({
                 call: (name, Json, remote_callback_obj_2)=> {
@@ -447,7 +447,7 @@ function API(_coregateway) {
       },
 
       createDefaultAdminDeamonSocket: (service, remote_callback_obj) => {
-        _coregateway.Service.createAdminDaemonActivitySocket(DAEMONTYPE, DAEMONIP, DAEMONPORT, service, (err, as)=> {
+        _coregateway.Activity.createAdminDaemonActivitySocket(DAEMONTYPE, DAEMONIP, DAEMONPORT, service, (err, as)=> {
           let local_callback_obj = new LCBO(as, (syncRefer)=> {
             return ({
                 call: (name, Json, remote_callback_obj_2)=> {

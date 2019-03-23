@@ -21,7 +21,7 @@ function Entity() {
       serverid: Json.serverid,
       service: Json.service,
       type: Json.type,
-      spwandomain: Json.spwandomain,
+      spawndomain: Json.spawndomain,
       owner: Json.owner,
       ownerid: Json.ownerid,
       ownerdomain: Json.ownerdomain,

@@ -31,6 +31,7 @@ function Core(NoServiceLibrary, settings) {
   const WorkerDaemon = NoServiceLibrary.Service.WorkerDaemon;
   const ServiceAPI = NoServiceLibrary.Service.ServiceAPI;
   const Entity = NoServiceLibrary.Service.Entity;
+  const Activty = NoServiceLibrary.Service.Activty;
 
   // db
   const Database = NoServiceLibrary.Database.Database;
@@ -60,6 +61,7 @@ function Core(NoServiceLibrary, settings) {
   let _authenticity;
   let _router;
   let _service;
+  let _activity;
   let _entity;
   let _serviceAPI;
   let _implementation;
@@ -124,6 +126,7 @@ function Core(NoServiceLibrary, settings) {
       _authenticity = new Authenticity();
       _router = new Router();
       _service = new Service();
+      _activity = new Activty();
       _entity = new Entity();
       _serviceAPI = new ServiceAPI();
       _implementation = new Implementation();
@@ -142,6 +145,7 @@ function Core(NoServiceLibrary, settings) {
               _daemon.close_emmited = true;
               _connection.close();
               _router.close();
+              _activity.close();
               _service.close(()=> {
                 _authorization.close();
                 _authorizationhandler.close();
@@ -162,6 +166,7 @@ function Core(NoServiceLibrary, settings) {
               _daemon.close_emmited = true;
               _connection.close();
               _router.close();
+              _activity.close();
               _service.close(()=> {
                 _authorization.close();
                 _authorizationhandler.close();
@@ -196,6 +201,7 @@ function Core(NoServiceLibrary, settings) {
             Authorization: _authorization,
             AuthorizationHandler: _authorizationhandler,
             Service : _service,
+            Activity: _activity,
             Connection: _connection,
             Router: _router,
             ServiceAPI: _serviceAPI,
@@ -293,14 +299,19 @@ function Core(NoServiceLibrary, settings) {
             // setup entity
             // pass
 
-            // setup Authorization
+            // setup authorization
             _authorization.importAuthenticityModule(_authenticity);
             _authorization.importEntityModule(_entity);
             _authorization.importTrustedDomains(settings.trusted_domains);
             _authorization.importDaemonAuthKey(settings.daemon_authorization_key);
 
+            // setup service: Activity
+            _activity.spawnClient = _connection.createClient;
+            _activity.setDefaultUsername(Constants.default_user.username);
+            _activity.importDaemonAuthKey(settings.daemon_authorization_key);
+            _activity.setDebug(settings.debug);
 
-            // setup service
+            // setup service: Service
             _service.setDebug(settings.debug);
             _service.importWorkerDaemon(_workerd);
             _service.setDebugService(settings.debug_service);
@@ -336,7 +347,6 @@ function Core(NoServiceLibrary, settings) {
             _service.importEntity(_entity);
             _service.importAPI(_serviceAPI);
             _service.importOwner(settings.local_services_owner);
-            _service.importDaemonAuthKey(settings.daemon_authorization_key);
             // setup WorkerDaemon
             _workerd.importCloseTimeout(settings.kill_daemon_timeout);
             _workerd.importClearGarbageTimeout(settings.clear_garbage_timeout);

@@ -177,9 +177,17 @@ function Router() {
 
     _coregateway.Connection.onClose = (connprofile) => {
       try {
-        _coregateway.Service.emitConnectionClose(connprofile, (err)=>{
-          connprofile.destroy();
-        });
+        if(connprofile.returnRemotePosition() === 'Client') {
+          _coregateway.Service.emitConnectionClose(connprofile, (err)=>{
+            connprofile.destroy();
+          });
+        }
+        else {
+          _coregateway.Activity.emitConnectionClose(connprofile, (err)=>{
+            connprofile.destroy();
+          });
+        }
+
       }
       catch (er) {
         if(_debug) {
@@ -218,7 +226,7 @@ function Router() {
     _coregateway.NSPS.emitRouter = this.emit;
 
     _coregateway.Service.setEmitRouter(this.emit);
-    _coregateway.Service.spwanClient = _coregateway.Connection.createClient;
+    _coregateway.Activity.setEmitRouter(this.emit);
 
     _coregateway.Implementation.emitRouter = (connprofile, data, data_sender)=>{
       _coregateway.Connection.getClients((er, clients)=>{
