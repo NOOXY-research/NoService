@@ -12,24 +12,8 @@ function Authorization() {
   let _trusted_domains = [];
   let _authe_module;
   let _entity_module;
-  let _auth_timeout = 180;
   let _daemon_auth_key;
-  let _queue_operation = {};
-
-  this.emitRouter = () => {console.log('[*ERR*] emit not implemented');};
-
-  this.RsRouter = (connprofile, data) => {
-    try {
-      let op = _queue_operation[data.d.t];
-      if(op) {
-        op(connprofile, data);
-        delete _queue_operation[data.d.t];
-      }
-    }
-    catch (e) {
-      console.log(e);
-    }
-  };
+  let _on_handler = {};
 
   // function that import working authenticity module.
   this.importAuthenticityModule = (authe_module) => {
@@ -45,13 +29,11 @@ function Authorization() {
   };
 
   //
-  let _checkhaveusername = (entityID, callback, next) => {
-    let user = _entity_module.returnEntityValue(entityID, 'owner');
+  let _checkhaveusername = (entityId, callback, next) => {
+    let user = _entity_module.returnEntityValue(entityId, 'owner');
     if(!user) {
       callback(false, false);
-      _entity_module.getEntityConnProfile(entityID, (err, connprofile) => {
-        this.emitRouter(connprofile, 'AU', {m: 'SI'});
-      });
+      _on_handler['SigninRq'](entityId);
     }
     else {
       next();
@@ -60,36 +42,26 @@ function Authorization() {
 
   // Authby group
   this.Authby = {
-    Password : (entityID, callback) => {
-      let mode = _entity_module.returnEntityValue(entityID, 'mode');
+    Password : (entityId, callback) => {
+      let mode = _entity_module.returnEntityValue(entityId, 'mode');
       if(mode === 'normal') {
-        _checkhaveusername(entityID, callback, ()=>{
-          let user = _entity_module.returnEntityValue(entityID, 'owner');
-          let data = {
-            m: "PW",
-            d: {t: Utils.generateGUID()}
-          }
-          _entity_module.getEntityConnProfile(entityID, (err, connprofile) => {
-            let op = (connprofile, data) => {
-                _authe_module.checkPasswordisValidByUsername(user, data.d.v, (err, isValid) => {
-                  if(isValid) {
-                    callback(false, true);
-                  }
-                  else {
-                    this.emitRouter(connprofile, 'AU', {m: 'PF'});
-                    callback(false, false);
-                  }
-                });
-            }
-            _queue_operation[data.d.t] = op;
-            // set the timeout of this operation
-            setTimeout(() => {if(_queue_operation[data.d.t]) {delete _queue_operation[data.d.t]}}, _auth_timeout*1000);
-            this.emitRouter(connprofile, 'AU', data);
+        _checkhaveusername(entityId, callback, ()=>{
+          _on_handler['AuthPasswordRq'](entityId, (err, password)=> {
+            let user = _entity_module.returnEntityValue(entityId, 'owner');
+            _authe_module.checkPasswordisValidByUsername(user, password, (err, isValid) => {
+              if(isValid) {
+                callback(false, true);
+              }
+              else {
+                _on_handler['AuthbyPasswordFailed'](entityId);
+                callback(false, false);
+              }
+            });
           });
         });
       }
       else {
-        this.Authby.DaemonAuthKey(entityID, (err, pass) => {
+        this.Authby.DaemonAuthKey(entityId, (err, pass) => {
           if(pass) {
             callback(false, true);
           }
@@ -100,42 +72,35 @@ function Authorization() {
       }
     },
 
-    Action : (entityID, action_meta_data, callback) =>{
+    Action : (entityId, action_meta_data, callback) =>{
 
     },
 
-    Token : (entityID, callback) =>{
-      let mode = _entity_module.returnEntityValue(entityID, 'mode');
+    Token : (entityId, callback) =>{
+      let mode = _entity_module.returnEntityValue(entityId, 'mode');
       if(mode === 'normal') {
-        _checkhaveusername(entityID, callback, ()=> {
-          let user = _entity_module.returnEntityValue(entityID, 'owner');
-          let data = {
-            m: "TK",
-            d: {t: Utils.generateGUID()}
-          }
-          _entity_module.getEntityConnProfile(entityID, (err, connprofile) => {
+        _checkhaveusername(entityId, callback, ()=> {
+          let user = _entity_module.returnEntityValue(entityId, 'owner');
+          _entity_module.getEntityConnProfile(entityId, (err, connprofile) => {
             if(err) {
               console.log(err);
               callback(err);
             }
             else {
               let _authonline = ()=> {
-                let op = (connprofile, data) => {
-                  _authe_module.checkTokenisValidByUsername(user, data.d.v, (err, isValid) => {
+                _on_handler['AuthTokenRq'](entityId, (err, token)=> {
+                  _authe_module.checkTokenisValidByUsername(user, token, (err, isValid) => {
                     if(isValid) {
-                      connprofile.setBundle('NSToken', data.d.v);
+                      connprofile.setBundle('NSToken', token);
                       callback(false, true);
                     }
                     else {
-                      this.emitRouter(connprofile, 'AU', {m: 'TF'});
+                      _on_handler['AuthbyPasswordFailed'](entityId);
                       callback(false, false);
                     }
                   });
-                }
-                _queue_operation[data.d.t] = op;
-                // set the timeout of clearing expired authorization.
-                setTimeout(() => {delete _queue_operation[data.d.t]}, _auth_timeout*1000);
-                this.emitRouter(connprofile, 'AU', data);
+                });
+
               };
 
               connprofile.getBundle('NSToken', (err, tk)=>{
@@ -158,7 +123,7 @@ function Authorization() {
         });
       }
       else {
-        this.Authby.DaemonAuthKey(entityID, (err, pass) => {
+        this.Authby.DaemonAuthKey(entityId, (err, pass) => {
           if(pass) {
             callback(false, true);
           }
@@ -170,9 +135,9 @@ function Authorization() {
     },
 
     // smaller have more privilege
-    isSuperUser : (entityID, callback) =>{
-      _checkhaveusername(entityID, callback, ()=>{
-        let _owner = _entity_module.returnEntityOwner(entityID);
+    isSuperUser : (entityId, callback) =>{
+      _checkhaveusername(entityId, callback, ()=>{
+        let _owner = _entity_module.returnEntityOwner(entityId);
         _authe_module.getUserPrivilegeByUsername(_owner, (err, level) => {
           if(level === 0) {
             // isSuperUser
@@ -186,11 +151,11 @@ function Authorization() {
       });
     },
 
-    isSuperUserwithToken: (entityID, callback) =>{
-      _checkhaveusername(entityID, callback, ()=>{
-        this.Authby.isSuperUser(entityID, (err, pass) => {
+    isSuperUserwithToken: (entityId, callback) =>{
+      _checkhaveusername(entityId, callback, ()=>{
+        this.Authby.isSuperUser(entityId, (err, pass) => {
           if(pass) {
-            this.Authby.Token(entityID, (err, pass) => {
+            this.Authby.Token(entityId, (err, pass) => {
               callback(err, pass);
             })
           }
@@ -201,8 +166,8 @@ function Authorization() {
       });
     },
 
-    Domain : (entityID, callback) => {
-      if(_trusted_domains.includes(_entity_module.returnEntityValue(entityID, 'spwandomain'))) {
+    Domain : (entityId, callback) => {
+      if(_trusted_domains.includes(_entity_module.returnEntityValue(entityId, 'spwandomain'))) {
         callback(false, true);
       }
       else {
@@ -210,10 +175,10 @@ function Authorization() {
       }
     },
 
-    DaemonAuthKey: (entityID, callback)=> {
-      this.Authby.Domain(entityID, (err, pass) => {
+    DaemonAuthKey: (entityId, callback)=> {
+      this.Authby.Domain(entityId, (err, pass) => {
         if(pass) {
-          if(_daemon_auth_key === _entity_module.returnEntityValue(entityID, 'daemonauthkey')) {
+          if(_daemon_auth_key === _entity_module.returnEntityValue(entityId, 'daemonauthkey')) {
             callback(false, true);
           }
           else {
@@ -237,10 +202,12 @@ function Authorization() {
 
   this.getRealtimeToken = (callback) => {callback(_realtime_token);}
 
-  this.emitSignin = (entityID)=> {
-    _entity_module.getEntityConnProfile(entityID, (err, connprofile) => {
-      this.emitRouter(connprofile, 'AU', {m: 'SI'});
-    });
+  this.emitSignin = (entityId)=> {
+    _on_handler['SigninRq'](entityId);
+  };
+
+  this.on = (event, callback)=> {
+    _on_handler[event] = callback;
   };
 
   this.close = () =>{

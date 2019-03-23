@@ -2,6 +2,7 @@
 // Description:
 // "GT.js" nooxy service protocol implementation of "get token"
 // Copyright 2018-2019 NOOXY. All Rights Reserved.
+'use strict';
 
 
 module.exports = function Protocol(coregateway, emitRouter) {
@@ -12,7 +13,7 @@ module.exports = function Protocol(coregateway, emitRouter) {
     rs: "Server"
   };
 
-  this.Request = (connprofile, data, _senddata) => {
+  this.RequestHandler = (connprofile, data, _senddata) => {
     let responsedata = {};
     coregateway.Authenticity.getUserTokenByUsername(data.u, data.p, (err, token)=>{
       responsedata['t'] = token;
@@ -26,7 +27,7 @@ module.exports = function Protocol(coregateway, emitRouter) {
     });
   };
 
-  this.Response = (connprofile, data) => {
+  this.ResponseHandler = (connprofile, data) => {
     coregateway.Implementation.onToken(connprofile, data.s, data.t);
   };
 

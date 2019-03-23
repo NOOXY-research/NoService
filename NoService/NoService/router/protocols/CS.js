@@ -2,6 +2,7 @@
 // Description:
 // "CS.js" nooxy service protocol implementation of "call service"
 // Copyright 2018-2019 NOOXY. All Rights Reserved.
+'use strict';
 
 
 module.exports = function Protocol(coregateway, emitRouter) {
@@ -12,8 +13,8 @@ module.exports = function Protocol(coregateway, emitRouter) {
     rs: "Server"
   };
 
-  this.Request = coregateway.Service.ServiceRqRouter;
+  this.RequestHandler = coregateway.Service.ServiceRqRouter;
 
-  this.Response = coregateway.Service.ServiceRsRouter;
+  this.ResponseHandler = coregateway.Service.ServiceRsRouter;
 
 }

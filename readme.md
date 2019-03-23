@@ -798,7 +798,7 @@ NoService.Database.Model.define('IndexedListTest', {'model_type': "IndexedList",
 ```
 "Secure protocol"
 RSA_Public = text
-Request(daemon):
+RequestHandler(daemon):
 {
        m: “SP”,
        s: “rq”,
@@ -806,7 +806,7 @@ Request(daemon):
 }
 
 RSA_Public_encrypted = text
-Response(client):
+ResponseHandler(client):
 {
        m: “SP”,
        s: “rs”,

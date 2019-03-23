@@ -1,6 +1,6 @@
 // NoService/NoService/connection/virtualnet.js
 // Description:
-// "connection.js" provide connection interface.
+// "virtualnet.js" provide connection interface.
 // Copyright 2018-2019 NOOXY. All Rights Reserved.
 
 function Virtualnet() {

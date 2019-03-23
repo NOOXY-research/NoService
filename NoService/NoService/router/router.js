@@ -78,8 +78,8 @@ function Router() {
         }
 
         let actions = {
-          rq : _coregateway.NSPS.Request,
-          rs : _coregateway.NSPS.Response
+          rq : _coregateway.NSPS.RequestHandler,
+          rs : _coregateway.NSPS.ResponseHandler
         }
         connprofile.getRemotePosition((err, pos)=> {
           if(rq_rs_pos[session] === pos || rq_rs_pos[session] === 'Both') {
@@ -201,10 +201,10 @@ function Router() {
           connprofile.getRemotePosition((err, pos)=> {
             if(p.Positions[session] === pos || p.Positions[session] === 'Both') {
               if(session === 'rq') {
-                p.Request(connprofile, data, _senddata);
+                p.RequestHandler(connprofile, data, _senddata);
               }
               else {
-                p.Response(connprofile, data);
+                p.ResponseHandler(connprofile, data);
               }
             }
             else {
