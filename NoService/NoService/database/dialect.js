@@ -159,7 +159,7 @@ function Sqlite3(meta) {
       let left = rows_dict_list.length;
       let call_callback = (err)=> {
           left--;
-          if((left == 0 || err)&&(left >= 0)) {
+          if((left === 0 || err)&&(left >= 0)) {
             callback(err);
             left = -1;
           }
@@ -189,7 +189,7 @@ function Sqlite3(meta) {
       let op;
       let call_callback = (err)=> {
         left--;
-        if((left == 0 || err)&&(left >= 0)) {
+        if((left === 0 || err)&&(left >= 0)) {
           callback(err);
           left = -1;
         }
@@ -224,7 +224,7 @@ function Sqlite3(meta) {
       let op;
       let call_callback = (err)=> {
         left--;
-        if((left == 0 || err)&&(left >= 0)) {
+        if((left === 0 || err)&&(left >= 0)) {
           callback(err);
           left = -1;
         }
@@ -487,7 +487,7 @@ function Mariadb(meta) {
         let op;
         let call_callback = (err)=> {
           left--;
-          if((left == 0 || err)&&(left >= 0)) {
+          if((left === 0 || err)&&(left >= 0)) {
             callback(err);
             left = -1;
           }

@@ -33,7 +33,7 @@ function NSPS() {
               let host_rsa_pub = _rsa_pub;
               let client_random_num = json.r;
               _crypto_module.generateAESCBC256KeyByHash(host_rsa_pub, client_random_num, (err, aes_key) => {
-                if(aes_key == json.a) {
+                if(aes_key === json.a) {
                   connprofile.setBundle('aes_256_cbc_key', aes_key);
                   connprofile.setBundle('NSPS', true);
                   connprofile.setBundle('NSPSremote', true);

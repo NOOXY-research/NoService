@@ -88,7 +88,7 @@ function ServiceAPI() {
         },
 
         on: (type, remote_callback_obj)=> {
-          if(type == 'data') {
+          if(type === 'data') {
             service_socket.on('data', (entityId, data)=> {
               if(remote_callback_obj) {
                 remote_callback_obj.run([], [entityId, data]);
@@ -168,10 +168,10 @@ function ServiceAPI() {
     });
 
     let _turn_model_to_local_callback_obj = (model, LCBO)=> {
-      if(model == null){
+      if(!model){
         return null;
       }
-      else if(model.ModelType == 'Object') {
+      else if(model.ModelType === 'Object') {
         return(new LCBO(model, (model_syncRefer)=> {
           return ({
               getModelType: (remote_callback_obj)=> {
@@ -276,7 +276,7 @@ function ServiceAPI() {
           });
         }));
       }
-      else if(model.ModelType == 'Pair') {
+      else if(model.ModelType === 'Pair') {
         return(new LCBO(model, (model_syncRefer)=> {
           return ({
               getModelType: (remote_callback_obj)=> {
@@ -469,7 +469,7 @@ function ServiceAPI() {
           });
         }));
       }
-      else if(model.ModelType == 'IndexedList') {
+      else if(model.ModelType === 'IndexedList') {
         return(new LCBO(model, (model_syncRefer)=> {
           return ({
             getModelType: (remote_callback_obj)=> {
@@ -635,7 +635,7 @@ function ServiceAPI() {
           });
         }));
       }
-      else if(model.ModelType == 'GroupIndexedList') {
+      else if(model.ModelType === 'GroupIndexedList') {
         return(new LCBO(model, (model_syncRefer)=> {
           return ({
             getModelType: (remote_callback_obj)=> {

@@ -25,12 +25,12 @@ for(let pkg in Constants.dependencies) {
 }
 
 process.on('message', (msg)=> {
-  if(msg.t == 0) {
+  if(msg.t === 0) {
     _core = new Core(NoServiceLibaray, msg.settings);
     _core.onTerminated = terminateNoService;
     _core.checkandlaunch();
   }
-  else if(msg.t == 99) {
+  else if(msg.t === 99) {
     _core.close();
   }
 });

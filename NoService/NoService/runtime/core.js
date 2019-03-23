@@ -74,7 +74,7 @@ function Core(NoServiceLibrary, settings) {
     // initialize environment
     verbose('Daemon', 'Checking environment...')
 
-    if (this.isinitialized() == false) {
+    if (this.isinitialized() === false) {
       this.initialize((err)=>{
         if(err) {
           verbose('*ERR*', 'Error occured during initializing.');
@@ -215,7 +215,7 @@ function Core(NoServiceLibrary, settings) {
             "port": "LOCALPORT"
       });
 
-      if(settings.default_server == 'Local' || settings.default_server == null ) {
+      if(settings.default_server === 'Local' || !settings.default_server ) {
         settings.default_server = settings.connection_servers.length-1;
       }
 
@@ -363,11 +363,11 @@ function Core(NoServiceLibrary, settings) {
             verbose('Daemon', 'Launching services done.');
             //
             verbose('Daemon', 'NOOXY Service Framework successfully started.');
-            if(settings.shell_service == null) {
+            if(!settings.shell_service) {
               verbose('Shell', 'Shell Service not implemented.');
             }
 
-            if(settings.shell_client_service == null) {
+            if(!settings.shell_client_service) {
               verbose('Shellc', 'Local Shell not implemented.');
             }
 
@@ -380,7 +380,7 @@ function Core(NoServiceLibrary, settings) {
 
   this.isinitialized = () => {
     if (fs.existsSync('eula.txt')) {
-      if(settings.sercure == false) {
+      if(settings.sercure === false) {
         return true;
       }
       else if(fs.existsSync(settings.rsa_2048_priv_key) && fs.existsSync(settings.rsa_2048_pub_key)) {

@@ -73,7 +73,7 @@ function ServiceSocket(service_name, prototype, emitRouter, debug, entity_module
   };
 
   this.def = (name, callback) => {
-    _socketfunctions[name] = _socketfunctions[name] == null?{}:_socketfunctions[name];
+    _socketfunctions[name] = (!_socketfunctions[name])?{}:_socketfunctions[name];
     _socketfunctions[name].obj = callback;
   };
 
@@ -492,7 +492,7 @@ function ActivitySocket(conn_profile, emitRouter, unbindActivitySocketList, debu
         }
       }
       conn_profile.setBundle('bundle_entities', bundle);
-      if(bundle.length == 0) {
+      if(bundle.length === 0) {
         conn_profile.closeConnetion();
       }
     }

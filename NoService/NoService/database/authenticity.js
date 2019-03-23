@@ -111,23 +111,23 @@ function Authenticity() {
         let err = new Error("User existed.");
         callback(err);
       }
-      else if(Number.isInteger(privilege) == false) {
+      else if(Number.isInteger(privilege) === false) {
         let err = new Error("Privilege invalid.");
         callback(err);
       }
-      else if(username.length < 5 || username == null || / /.test(username) || !Utils.isEnglish(username)) {
+      else if(username.length < 5 || !username || / /.test(username) || !Utils.isEnglish(username)) {
         let err = new Error("Username invalid.");
         callback(err);
       }
-      else if(firstname.length < 2 || firstname == null || /\d/.test(firstname)) {
+      else if(firstname.length < 2 || !firstname || /\d/.test(firstname)) {
         let err = new Error("First name invalid.");
         callback(err);
       }
-      else if(lastname.length < 2 || lastname == null || /\d/.test(lastname)) {
+      else if(lastname.length < 2 || !lastname || /\d/.test(lastname)) {
         let err = new Error("Last name invalid.");
         callback(err);
       }
-      else if(password == null) {
+      else if(!password) {
         let err = new Error("Password invalid.");
         callback(err);
       }
@@ -183,7 +183,7 @@ function Authenticity() {
   };
 
   this.deleteUserByUsername = (username, callback) => {
-    if(username == _default_username) {
+    if(username === _default_username) {
       let err = new Error("Default user should not be deleted.");
       callback(err);
     }
@@ -216,7 +216,7 @@ function Authenticity() {
   };
 
   this.updatePrivilegeByUsername = (username, privilege, callback) => {
-    if(username == _default_username) {
+    if(username === _default_username) {
       let err = new Error("Default user should not change it's privilege.");
       callback(err);
     }
@@ -238,11 +238,11 @@ function Authenticity() {
   };
 
   this.updateNameByUsername = (username, firstname, lastname, callback) => {
-    if(firstname == null || /\d/.test(firstname)) {
+    if(!firstname || /\d/.test(firstname)) {
       let err = new Error(firstname+"First name invalid.");
       callback(err);
     }
-    else if(lastname == null || /\d/.test(lastname)) {
+    else if(!lastname || /\d/.test(lastname)) {
       let err = new Error("Last name invalid.");
       callback(err);
     }
@@ -261,7 +261,7 @@ function Authenticity() {
       if(user_meta) {
         let pwdhash = user_meta.pwdhash;
         let pwdhashalpha = crypto.createHmac('sha256', SHA256KEY).update(password).digest('hex');
-        if(pwdhash == pwdhashalpha) {
+        if(pwdhash === pwdhashalpha) {
           isValid = true;
         }
         callback(false, isValid);
@@ -397,7 +397,7 @@ function Authenticity() {
     _user_model.getBySecond(userid, (err, [user_meta]) => {
       if(user_meta) {
         username = user_meta.username;
-        if(username == _default_username) {
+        if(username === _default_username) {
           let err = new Error("Default user should not be deleted.");
           callback(err);
         }
@@ -439,7 +439,7 @@ function Authenticity() {
     _user_model.getBySecond(userid, (err, [user_meta]) => {
       if(user_meta) {
         username = user_meta.username;
-        if(username == _default_username) {
+        if(username === _default_username) {
           let err = new Error("Default user should not change it's privilege.");
           callback(err);
         }
@@ -467,11 +467,11 @@ function Authenticity() {
   };
 
   this.updateNameByUserId = (userid, firstname, lastname, callback) => {
-    if(firstname == null || /\d/.test(firstname)) {
+    if(!firstname || /\d/.test(firstname)) {
       let err = new Error(firstname+"First name invalid.");
       callback(err);
     }
-    else if(lastname == null || /\d/.test(lastname)) {
+    else if(!lastname || /\d/.test(lastname)) {
       let err = new Error("Last name invalid.");
       callback(err);
     }
@@ -490,7 +490,7 @@ function Authenticity() {
       if(user_meta) {
         let pwdhash = user_meta.pwdhash;
         let pwdhashalpha = crypto.createHmac('sha256', SHA256KEY).update(password).digest('hex');
-        if(pwdhash == pwdhashalpha) {
+        if(pwdhash === pwdhashalpha) {
           isValid = true;
         }
         callback(false, isValid);

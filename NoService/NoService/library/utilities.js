@@ -110,11 +110,11 @@ let compareVersion = (v1, v2, options)=> {
     }
 
     for (let i = 0; i < v1parts.length; ++i) {
-        if (v2parts.length == i) {
+        if (v2parts.length === i) {
             return 1;
         }
 
-        if (v1parts[i] == v2parts[i]) {
+        if (v1parts[i] === v2parts[i]) {
             continue;
         }
         else if (v1parts[i] > v2parts[i]) {
@@ -175,7 +175,7 @@ let generateGUID = ()=>{
 const generateObjCallbacks = (callback_id, obj_tree, callparent) => {
   if(Object.keys(obj_tree).length) {
     let deeper = (sub_obj_tree, walked_path_list)=> {
-      if(typeof(sub_obj_tree) == 'object' && sub_obj_tree!=null) {
+      if(typeof(sub_obj_tree) === 'object' && sub_obj_tree!=null) {
         for(let key in sub_obj_tree) {
           sub_obj_tree[key]=deeper(sub_obj_tree[key], walked_path_list.concat([key]));
         }
@@ -216,7 +216,7 @@ const generateObjCallbacksTree = (obj_raw) => {
   if(typeof(obj_raw)!='function') {
     let deeper = (subobj)=> {
       let obj_tree = {};
-      if(typeof(subobj) == 'object') {
+      if(typeof(subobj) === 'object') {
         for(let key in subobj) {
           obj_tree[key] = deeper(subobj[key]);
         }
@@ -238,9 +238,9 @@ const hasFunction = (obj_raw) => {
   if(typeof(obj_raw)=='object') {
     let boo = false;
     let deeper = (subobj)=> {
-      if(typeof(subobj) == 'object') {
+      if(typeof(subobj) === 'object') {
         for(let key in subobj) {
-          if(typeof(subobj[key]) == 'function') {
+          if(typeof(subobj[key]) === 'function') {
             boo = true;
             break;
           }

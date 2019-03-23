@@ -8,12 +8,12 @@ const Utils = require('../library').Utilities;
 
 // Serverside authorization emitter.
 function Authorization() {
-  let _realtime_token = null;
+  let _realtime_token;
   let _trusted_domains = [];
-  let _authe_module = null;
-  let _entity_module = null;
+  let _authe_module;
+  let _entity_module;
   let _auth_timeout = 180;
-  let _daemon_auth_key = null;
+  let _daemon_auth_key;
   let _queue_operation = {};
 
   this.emitRouter = () => {console.log('[*ERR*] emit not implemented');};
@@ -47,7 +47,7 @@ function Authorization() {
   //
   let _checkhaveusername = (entityID, callback, next) => {
     let user = _entity_module.returnEntityValue(entityID, 'owner');
-    if(user == null) {
+    if(!user) {
       callback(false, false);
       _entity_module.getEntityConnProfile(entityID, (err, connprofile) => {
         this.emitRouter(connprofile, 'AU', {m: 'SI'});
@@ -62,7 +62,7 @@ function Authorization() {
   this.Authby = {
     Password : (entityID, callback) => {
       let mode = _entity_module.returnEntityValue(entityID, 'mode');
-      if(mode == 'normal') {
+      if(mode === 'normal') {
         _checkhaveusername(entityID, callback, ()=>{
           let user = _entity_module.returnEntityValue(entityID, 'owner');
           let data = {
@@ -106,7 +106,7 @@ function Authorization() {
 
     Token : (entityID, callback) =>{
       let mode = _entity_module.returnEntityValue(entityID, 'mode');
-      if(mode == 'normal') {
+      if(mode === 'normal') {
         _checkhaveusername(entityID, callback, ()=> {
           let user = _entity_module.returnEntityValue(entityID, 'owner');
           let data = {
@@ -168,7 +168,7 @@ function Authorization() {
       _checkhaveusername(entityID, callback, ()=>{
         let _owner = _entity_module.returnEntityOwner(entityID);
         _authe_module.getUserPrivilegeByUsername(_owner, (err, level) => {
-          if(level == 0) {
+          if(level === 0) {
             // isSuperUser
             callback(false, true);
           }
@@ -207,7 +207,7 @@ function Authorization() {
     DaemonAuthKey: (entityID, callback)=> {
       this.Authby.Domain(entityID, (err, pass) => {
         if(pass) {
-          if(_daemon_auth_key == _entity_module.returnEntityValue(entityID, 'daemonauthkey')) {
+          if(_daemon_auth_key === _entity_module.returnEntityValue(entityID, 'daemonauthkey')) {
             callback(false, true);
           }
           else {

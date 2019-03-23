@@ -91,7 +91,7 @@ function WorkerClient() {
 
     this.onMessage = (message)=>{
       // init worker
-      if(message.t == 0) {
+      if(message.t === 0) {
         _service_name = /.*\/([^\/]*)\/entry/g.exec(message.p)[1];
         process.title = 'NoService_worker: '+_service_name;
         _close_timeout = message.c;
@@ -230,7 +230,7 @@ function WorkerClient() {
           });
         });
       }
-      else if (message.t == 1) {
+      else if (message.t === 1) {
         try {
           _service_module.start();
           process.send({t: 2});
@@ -240,7 +240,7 @@ function WorkerClient() {
         }
       }
       // function return
-      else if(message.t == 2) {
+      else if(message.t === 2) {
         try {
           Utils.callObjCallback(_local_obj_callbacks_dict[message.p[0]], message.p[1], message.a, message.o, this.emitParentCallback, Utils.generateObjCallbacks);
         }
@@ -251,25 +251,25 @@ function WorkerClient() {
           console.log(e);
         }
       }
-      else if(message.t == 3) {
+      else if(message.t === 3) {
         delete _local_obj_callbacks_dict[message.i];
         // console.log(Object.keys(_local_obj_callbacks_dict).length);
       }
-      else if(message.t == 4) {
+      else if(message.t === 4) {
         process.send({t:6, i:message.i, c:Object.keys(_local_obj_callbacks_dict).length});
       }
       // memory
-      else if(message.t == 5) {
+      else if(message.t === 5) {
         process.send({t:7, i:message.i, c: process.memoryUsage()});
       }
 
-      else if(message.t == 98) {
+      else if(message.t === 98) {
         Utils.TagLog('*ERR*', 'Service "'+_service_name+'" occured error on API call.');
         console.log('Details: ');
         console.log(message.d);
         console.log(message.e);
       }
-      else if(message.t == 99) {
+      else if(message.t === 99) {
         if(!_closed) {
           _closed = true;
           if(_service_module)

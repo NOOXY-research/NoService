@@ -86,7 +86,7 @@ function Entity() {
   }
 
   this.on = (type, callback) => {
-    if(_on_callbacks[type] == null) {
+    if(!_on_callbacks[type]) {
       _on_callbacks[type] = [];
     }
     _on_callbacks[type].push(callback);
@@ -168,7 +168,7 @@ function Entity() {
       for(let i in qs) {
         let key = qs[i].split('=')[0];
         let value = qs[i].split('=')[1];
-        if(_meta[key] == value) {
+        if(_meta[key] === value) {
           _e[k] = _meta;
         }
       };

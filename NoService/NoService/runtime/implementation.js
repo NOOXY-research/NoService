@@ -95,7 +95,7 @@ function Implementation() {
   };
 
   this.onToken = (connprofile, status, token)=> {
-    if(status == 'OK') {
+    if(status === 'OK') {
       _implts['onToken'](false, token);
     }
     else {

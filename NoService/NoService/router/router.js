@@ -45,14 +45,14 @@ function Router() {
     // finally sent the data through the connection.
     if(connprofile) {
       connprofile.getBundle('NSPS', (err, NSPS)=>{
-        if(NSPS == true) {
+        if(NSPS === true) {
           connprofile.getBundle('aes_256_cbc_key', (err, key)=>{
             _coregateway.NoCrypto.encryptString('AESCBC256', key, json, (err, encrypted)=> {
               _coregateway.Connection.send(connprofile, encrypted);
             });
           })
         }
-        else if (NSPS == 'finalize') {
+        else if (NSPS === 'finalize') {
           connprofile.setBundle('NSPS', true);
           _coregateway.Connection.send(connprofile, json);
 
@@ -83,8 +83,8 @@ function Router() {
           rs : _coregateway.NSPS.RsRouter
         }
         connprofile.getRemotePosition((err, pos)=> {
-          if(rq_rs_pos[session] == pos || rq_rs_pos[session] == 'Both') {
-            if(session == 'rq') {
+          if(rq_rs_pos[session] === pos || rq_rs_pos[session] === 'Both') {
+            if(session === 'rq') {
               actions[session](connprofile, data, _senddata);
             }
             else {
@@ -130,8 +130,8 @@ function Router() {
           }
         }
         connprofile.getRemotePosition((err, pos)=> {
-          if(rq_rs_pos[session] == pos || rq_rs_pos[session] == 'Both') {
-            if(session == 'rq') {
+          if(rq_rs_pos[session] === pos || rq_rs_pos[session] === 'Both') {
+            if(session === 'rq') {
               actions[session](connprofile, data, _senddata);
             }
             else {
@@ -162,8 +162,8 @@ function Router() {
           rs : _coregateway.Authorization.RsRouter
         }
         connprofile.getRemotePosition((err, pos)=> {
-          if(rq_rs_pos[session] == pos || rq_rs_pos[session] == 'Both') {
-            if(session == 'rq') {
+          if(rq_rs_pos[session] === pos || rq_rs_pos[session] === 'Both') {
+            if(session === 'rq') {
               actions[session](connprofile, data, _senddata);
             }
             else {
@@ -194,8 +194,8 @@ function Router() {
           rs : _coregateway.Service.ServiceRsRouter
         }
         connprofile.getRemotePosition((err, pos)=> {
-          if(rq_rs_pos[session] == pos || rq_rs_pos[session] == 'Both') {
-            if(session == 'rq') {
+          if(rq_rs_pos[session] === pos || rq_rs_pos[session] === 'Both') {
+            if(session === 'rq') {
               actions[session](connprofile, data, _senddata);
             }
             else {
@@ -227,8 +227,8 @@ function Router() {
         }
 
         connprofile.getRemotePosition((err, pos)=> {
-          if(rq_rs_pos[session] == pos || rq_rs_pos[session] == 'Both') {
-            if(session == 'rq') {
+          if(rq_rs_pos[session] === pos || rq_rs_pos[session] === 'Both') {
+            if(session === 'rq') {
               actions[session](connprofile, data, _senddata);
             }
             else {
@@ -265,14 +265,14 @@ function Router() {
     _coregateway.Connection.onData = (connprofile, data) => {
       _tellRAWSniffers(data);
       try {
-        if(_coregateway.Settings.secure == true && connprofile.returnConnMethod() != 'Local' && connprofile.returnConnMethod() != 'local') {
+        if(_coregateway.Settings.secure === true && connprofile.returnConnMethod() != 'Local' && connprofile.returnConnMethod() != 'local') {
           // upgrade protocol
-          if(connprofile.returnBundle('NSPS') == 'pending') {
+          if(connprofile.returnBundle('NSPS') === 'pending') {
             let json = JSON.parse(data);
             _tellJSONSniffers(json);
             methods[json.m].handler(connprofile, json.s, json.d);
           }
-          else if(connprofile.returnBundle('NSPS') != true && connprofile.returnRemotePosition() == 'Client') {
+          else if(connprofile.returnBundle('NSPS') != true && connprofile.returnRemotePosition() === 'Client') {
             _coregateway.NSPS.upgradeConnection(connprofile, (err, succeess)=>{
               if(succeess) {
                 let json = JSON.parse(data);
@@ -292,7 +292,7 @@ function Router() {
             _tellJSONSniffers(json);
             methods[json.m].handler(connprofile, json.s, json.d);
           }
-          else if(connprofile.returnBundle('NSPS') == true) {
+          else if(connprofile.returnBundle('NSPS') === true) {
             // true
 
             _coregateway.NoCrypto.decryptString('AESCBC256', connprofile.returnBundle('aes_256_cbc_key'), data, (err, decrypted)=> {

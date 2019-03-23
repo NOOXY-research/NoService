@@ -88,12 +88,12 @@ function Service() {
   this.emitConnectionClose = (connprofile, callback) => {
 
     let _entitiesId = connprofile.returnBundle('bundle_entities');
-    if(_entitiesId == null) {
+    if(!_entitiesId) {
       callback(true);
     }
     else if(_entitiesId.length) {
       let Rpos = connprofile.returnRemotePosition();
-      if(connprofile.returnRemotePosition() == 'Client') {
+      if(connprofile.returnRemotePosition() === 'Client') {
         let i = 0;
         let loop = () => {
           let nowidx = i;
@@ -208,7 +208,7 @@ function Service() {
                   // status
                   "t": data.t,
                   "i": data.i,
-                  "s": err.toString()
+                  "s": err.stack
                 }
               };
             }
@@ -258,16 +258,16 @@ function Service() {
             description: data.d
           };
 
-          if(_entity_json.owner == "") {
+          if(_entity_json.owner === "") {
             _entity_json.owner = null;
           }
 
-          if(_entity_json.mode == null) {
+          if(!_entity_json.mode) {
             _entity_json.mode = 'normal';
           }
 
-          if(_entity_json.ownerdomain == null) {
-            _entity_json.ownerdomain == connprofile.returnHostIP();
+          if(!_entity_json.ownerdomain) {
+            _entity_json.ownerdomain === connprofile.returnHostIP();
           }
           _authenticity_module.getUserIdByUsername(data.o, (err, ownerid)=> {
             _entity_json.ownerid = ownerid;
@@ -318,7 +318,7 @@ function Service() {
     let methods = {
       // nooxy service protocol implementation of "Call Service: Vertify Connection"
       VE: (connprofile, data) => {
-        if(data.d.s == 'OK') {
+        if(data.d.s === 'OK') {
           _ASockets[data.d.i].launch();
         }
         else {
@@ -331,7 +331,7 @@ function Service() {
       },
       // nooxy service protocol implementation of "Call Service: JSONfunction"
       JF: (connprofile, data) => {
-        if(data.d.s == 'OK') {
+        if(data.d.s === 'OK') {
           _ASockets[data.d.i].sendJFReturn(false, data.d.t, data.d.r);
         }
         else {
@@ -424,13 +424,13 @@ function Service() {
 
   // object for managing service.
   function ServiceObj(service_name) {
-    let _entity_id = null;
-    let _service_socket = null;
-    let _service_path = null;
-    let _service_files_path = null;
+    let _entity_id;
+    let _service_socket;
+    let _service_path;
+    let _service_files_path;
     let _service_name = service_name;
-    let _worker = null;
-    let _service_manifest = null;
+    let _worker;
+    let _service_manifest;
 
     let _isInitialized = false;
     let _isLaunched = false;
@@ -552,7 +552,7 @@ function Service() {
               callback(err);
             }
           }
-          if(_service_manifest.implementation_api == false) {
+          if(_service_manifest.implementation_api === false) {
             _serviceapi_module.createServiceAPI(_service_socket, _service_manifest, (err, api) => {
               _worker.importAPI(api);
               _worker.init((err)=> {
@@ -576,7 +576,7 @@ function Service() {
           }
         }
         catch(err) {
-          erreport = new Error('Launching service "'+_service_name+'" ended with failure.\n'+err.toString());
+          erreport = new Error('Launching service "'+_service_name+'" ended with failure.\n'+err.stack);
           callback(erreport);
           return err;
         }
@@ -662,14 +662,14 @@ function Service() {
       _local_services[_debug_service].init((err)=> {
         if(err) {
           Utils.TagLog('*ERR*', 'Error occured while initializing debug service "'+_debug_service+'".');
-          Utils.TagLog('*ERR*', err.toString());
+          Utils.TagLog('*ERR*', err.stack);
           callback(new Error('Error occured while initializing debug service "'+_debug_service+'".'));
         }
         else {
           _local_services[_debug_service].launch((err)=> {
             if(err) {
               Utils.TagLog('*ERR*', 'Error occured while launching debug service "'+_debug_service+'".');
-              Utils.TagLog('*ERR*', err.toString());
+              Utils.TagLog('*ERR*', err.stack);
               callback(new Error('Error occured while launching debug service "'+_debug_service+'".'));
 
             }
@@ -707,14 +707,14 @@ function Service() {
       _local_services[_master_service].init((err)=> {
         if(err) {
           Utils.TagLog('*ERR*', 'Error occured while initializing master service "'+_master_service+'".');
-          Utils.TagLog('*ERR*', err.toString());
+          Utils.TagLog('*ERR*', err.stack);
           callback(new Error('Error occured while initializing master service "'+_master_service+'".'));
         }
         else {
           _local_services[_master_service].launch((err)=> {
             if(err) {
               Utils.TagLog('*ERR*', 'Error occured while launching master service "'+_master_service+'".');
-              Utils.TagLog('*ERR*', err.toString());
+              Utils.TagLog('*ERR*', err.stack);
               callback(new Error('Error occured while launching master service "'+_master_service+'".'));
 
             }

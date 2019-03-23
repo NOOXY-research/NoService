@@ -359,7 +359,7 @@ function Model() {
       let left = rows.length;
       let call_callback = (err)=> {
           left--;
-          if((left == 0 || err)&&(left >= 0)) {
+          if((left === 0 || err)&&(left >= 0)) {
             callback(err);
             left = -1;
           }
@@ -541,7 +541,7 @@ function Model() {
       let left = rows.length;
       let call_callback = (err)=> {
           left--;
-          if((left == 0 || err)&&(left >= 0)) {
+          if((left === 0 || err)&&(left >= 0)) {
             callback(err);
             left = -1;
           }
@@ -685,7 +685,7 @@ function Model() {
           callback(new Error('Model "'+model_name+'" exist.'));
         }
         else {
-          if(model_type == 'Object') {
+          if(model_type === 'Object') {
             let field_structure = {};
 
             if(do_timestamp) {
@@ -721,7 +721,7 @@ function Model() {
               }
             });
           }
-          else if (model_type == 'IndexedList') {
+          else if (model_type === 'IndexedList') {
             let field_structure = {};
             let a = {};
             a[_Indexkey] = 'INTEGER';
@@ -761,7 +761,7 @@ function Model() {
               }
             });
           }
-          else if (model_type == 'GroupIndexedList') {
+          else if (model_type === 'GroupIndexedList') {
             let field_structure = {};
             let a = {};
             a[_Groupkey] = 'VARCHAR(128)';
@@ -805,7 +805,7 @@ function Model() {
               }
             });
           }
-          else if (model_type == 'Pair') {
+          else if (model_type === 'Pair') {
             let field_structure = {};
 
             if(do_timestamp) {
@@ -863,16 +863,16 @@ function Model() {
         let do_timestamp = model_structure.do_timestamp;
         let model_key = model_structure.model_key;
         let structure = model_structure.structure;
-        if(model_type == 'Object') {
+        if(model_type === 'Object') {
           callback(err, new ObjModel(model_name, model_key, structure, do_timestamp));
         }
-        else if (model_type == 'IndexedList') {
+        else if (model_type === 'IndexedList') {
           callback(err, new IndexedListModel(model_name, structure, do_timestamp));
         }
-        else if (model_type == 'GroupIndexedList') {
+        else if (model_type === 'GroupIndexedList') {
           callback(err, new GroupIndexedListModel(model_name, structure, do_timestamp));
         }
-        else if (model_type == 'Pair') {
+        else if (model_type === 'Pair') {
           callback(err, new PairModel(model_name, model_key, structure, do_timestamp));
         }
       }

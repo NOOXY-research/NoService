@@ -12,13 +12,13 @@ const Dialect = require('./dialect');
 function Database(meta) {
   let _dialect;
 
-  if(meta.dialect == "sqlite3") {
+  if(meta.dialect === "sqlite3") {
     _dialect = new Dialect.Sqlite3(meta);
   }
-  else if(meta.dialect == "mysql") {
+  else if(meta.dialect === "mysql") {
 
   }
-  else if(meta.dialect == "mariadb") {
+  else if(meta.dialect === "mariadb") {
     _dialect = new Dialect.Mariadb(meta);
   }
   else {

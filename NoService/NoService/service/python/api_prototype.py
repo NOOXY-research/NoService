@@ -18,7 +18,7 @@ def generateObjCallbacksTree(obj_raw):
     else:
         def deeper(subobj):
             obj_tree = {}
-            if isinstance(obj_raw, types.FunctionType) or obj_raw == None:
+            if isinstance(obj_raw, types.FunctionType) or obj_raw === None:
                 return None
             else:
                 for i in vdir(subobj):

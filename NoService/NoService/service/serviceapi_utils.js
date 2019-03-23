@@ -25,7 +25,7 @@ function API(_coregateway) {
   setInterval(()=>{
     try {
       for(let key in _LCBOs) {
-        if(_LCBOs[key].isReferCanceled() == false) {
+        if(_LCBOs[key].isReferCanceled() === false) {
           _LCBOs[key].destroy();
         }
       }

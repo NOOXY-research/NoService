@@ -33,6 +33,7 @@ function WorkerDaemon() {
   let _clear_obj_garbage_timeout = 1000*60*10;
   let _unix_socket_path;
   let _const_path;
+  let _unix_sock_server;
   // let _services_relaunch_cycle = 1000*60*60*24;
   let _serviceapi_module;
 
@@ -144,22 +145,22 @@ function WorkerDaemon() {
     }
 
     this.onMessage = (message)=>{
-      if(message.t == 0) {
+      if(message.t === 0) {
         _child.send({t:0, p: path, a: _serviceapi.returnAPITree(), c: _close_worker_timeout, g: _clear_obj_garbage_timeout, cpath: _const_path});
       }
-      else if(message.t == 1) {
+      else if(message.t === 1) {
         _init_callback(false);
       }
-      else if(message.t == 2) {
+      else if(message.t === 2) {
         _launch_callback(false);
       }
-      else if(message.t == 3) {
+      else if(message.t === 3) {
         _close_callback(false);
         _child.kill();
         _child = null;
         _child_alive = false;
       }
-      else if(message.t == 4) {
+      else if(message.t === 4) {
         try {
           _serviceapi.emitAPIRq(message.p, message.a, message.o);
         }
@@ -175,7 +176,7 @@ function WorkerDaemon() {
           });
         }
       }
-      else if(message.t == 5) {
+      else if(message.t === 5) {
         try {
           _serviceapi.emitCallbackRq(message.p, message.a, message.o);
         }
@@ -191,27 +192,27 @@ function WorkerDaemon() {
           });
         }
       }
-      else if(message.t == 6) {
+      else if(message.t === 6) {
         _InfoRq[message.i](false, {daemon: _serviceapi.returnLCBOCount(), client: message.c})
         delete _InfoRq[message.i];
       }
-      else if(message.t == 7) {
+      else if(message.t === 7) {
         _InfoRq[message.i](false, message.c)
         delete _InfoRq[message.i];
       }
-      else if(message.t == 96){
+      else if(message.t === 96){
         _close_callback(new Error('Worker closing error:\n'+message.e));
         _child.kill();
         _child = null;
         _child_alive = false;
       }
-      else if(message.t == 97){
+      else if(message.t === 97){
         // _launch_callback(new Error('Worker runtime error:\n'+message.e));
       }
-      else if(message.t == 98){
+      else if(message.t === 98){
         _launch_callback(new Error('Worker launching error:\n'+message.e));
       }
-      else if(message.t == 99){
+      else if(message.t === 99){
         _init_callback(new Error('Worker initializing error:\n'+message.e));
       }
     };
@@ -343,16 +344,16 @@ function WorkerDaemon() {
     }
 
     this.onMessage = (message)=>{
-      if(message.t == 0) {
+      if(message.t === 0) {
         _api_sock.send({t:0, p: path, a: _serviceapi.returnAPITree(), c: _close_worker_timeout, g: _clear_obj_garbage_timeout, cpath: _const_path});
       }
-      else if(message.t == 1) {
+      else if(message.t === 1) {
         _init_callback(false);
       }
-      else if(message.t == 2) {
+      else if(message.t === 2) {
         _launch_callback(false);
       }
-      else if(message.t == 3) {
+      else if(message.t === 3) {
         _close_callback(false);
         _child.kill();
         _child = null;
@@ -360,7 +361,7 @@ function WorkerDaemon() {
         _api_sock = null;
         _child_alive = false;
       }
-      else if(message.t == 4) {
+      else if(message.t === 4) {
         // python version needs to check is it a database api!
         try {
           _serviceapi.emitAPIRq(message.p, message.a, message.o);
@@ -377,7 +378,7 @@ function WorkerDaemon() {
           });
         }
       }
-      else if(message.t == 5) {
+      else if(message.t === 5) {
         try {
           _serviceapi.emitCallbackRq(message.p, message.a, message.o);
         }
@@ -393,15 +394,15 @@ function WorkerDaemon() {
           });
         }
       }
-      else if(message.t == 6) {
+      else if(message.t === 6) {
         _InfoRq[message.i](false, {daemon: _serviceapi.returnLCBOCount(), client: message.c})
         delete _InfoRq[message.i];
       }
-      else if(message.t == 7) {
+      else if(message.t === 7) {
         _InfoRq[message.i](false, message.c)
         delete _InfoRq[message.i];
       }
-      else if(message.t == 96){
+      else if(message.t === 96){
         _close_callback(new Error('Worker closing error:\n'+message.e));
         _child.kill();
         _child = null;
@@ -409,13 +410,13 @@ function WorkerDaemon() {
         _api_sock = null;
         _child_alive = false;
       }
-      else if(message.t == 97){
+      else if(message.t === 97){
         // _launch_callback(new Error('Worker runtime error:\n'+message.e));
       }
-      else if(message.t == 98){
+      else if(message.t === 98){
         _launch_callback(new Error('"'+_service_name+'" worker launching error:\n'+message.e));
       }
-      else if(message.t == 99){
+      else if(message.t === 99){
         _init_callback(new Error('"'+_service_name+'" worker initializing error:\n'+message.e));
       }
     };
@@ -514,10 +515,10 @@ function WorkerDaemon() {
   }
 
   this.generateWorker = (path, lang) => {
-    if(lang == null || lang == 'js' || lang == 'javascript') {
+    if(!lang || lang === 'js' || lang === 'javascript') {
       return new WorkerClient(path);
     }
-    else if(lang == 'python') {
+    else if(lang === 'python') {
       return new PythonWorkerClient(path);
     }
   }
@@ -535,7 +536,7 @@ function WorkerDaemon() {
       fs.unlinkSync(_unix_socket_path);
     } catch(e) {}
 
-    let _unix_sock_server = Net.createServer((socket)=>{
+    _unix_sock_server = Net.createServer((socket)=>{
       let _api_sock = new APISocket(socket);
       socket.on('data', (data)=> {
 
@@ -543,7 +544,7 @@ function WorkerDaemon() {
 
           let chunks_size = parseInt(data.slice(0, 16).toString());
           let msg = JSON.parse(data.slice(16, 16+chunks_size).toString());
-          if(msg.t == 0) {
+          if(msg.t === 0) {
             _worker_clients[msg.s].pairSocket(_api_sock);
           }
           else {

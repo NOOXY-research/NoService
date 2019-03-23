@@ -41,7 +41,7 @@ function Connection(options) {
     let _hostport = hostport;
     let _clientip = clientip;
     let _conn = conn; // conn is wrapped!
-    if(Rpos == 'Server') {
+    if(Rpos === 'Server') {
       _clients[_GUID] = this;
     }
 
@@ -84,8 +84,8 @@ function Connection(options) {
 
   this.addServer = (conn_method, ip, port) => {
 
-    if(conn_method == 'local'||conn_method =='Local') {
-      if(_have_local_server == false) {
+    if(conn_method === 'local'||conn_method =='Local') {
+      if(_have_local_server === false) {
         let _serverId = "LOCAL";
         let server = new Connections.Local.Server(_serverId, ConnectionProfile);
         _servers[_serverId] = server;
@@ -137,8 +137,8 @@ function Connection(options) {
       }
     };
 
-    if(conn_method == 'local'||conn_method =='Local') {
-      if(_have_local_server == false) {
+    if(conn_method === 'local'||conn_method =='Local') {
+      if(_have_local_server === false) {
         Utils.TagLog('*ERR*', 'Local server not started.');
       }
       else {
