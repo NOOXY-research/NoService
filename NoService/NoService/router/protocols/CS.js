@@ -143,7 +143,7 @@ module.exports = function Protocol(coregateway, emitRouter) {
 
         }
       }
-      
+
       if(!err || data.m === 'CE' || data.m === 'VE') {
         // call the callback.
         methods[data.m](connprofile, data.d, response_emit);
