@@ -11,14 +11,10 @@ function NSPS() {
   let _crypto_module;
   let _operation_timeout = 60; // seconds
 
-  this.importOperationTimeout = (timeout) => {
-    _operation_timeout = timeout;
-  };
-
   this.emitRouter = () => {console.log('[*ERR*] emit not implemented');};
 
   // daemon side
-  this.RsRouter = (connprofile, data) => {
+  this.ResponseRouter = (connprofile, data) => {
     let resume = _resumes[connprofile.returnGUID()];
     if(resume) {
       try{
@@ -61,7 +57,7 @@ function NSPS() {
 
   // Nooxy service protocol secure request ClientSide
   // in client need to be in implementation module
-  this.RqRouter = (connprofile, data, data_sender) => {
+  this.RequestRouter = (connprofile, data, data_sender) => {
     let host_rsa_pub = data.p;
     let client_random_num = _crypto_module.returnRandomInt(99999);
     connprofile.setBundle('host_rsa_pub_key', host_rsa_pub);
@@ -78,6 +74,26 @@ function NSPS() {
     });
   };
 
+  this.secure = (connprofile, data, callback)=> {
+    connprofile.getBundle('aes_256_cbc_key', (err, key)=>{
+      crypto_module.encryptString('AESCBC256', key, json, (err, encrypted)=> {
+        callback(err, encrypted);
+      });
+    });
+  };
+
+  this.isConnectionSecured = (connprofile, callback)=> {
+    connprofile.getBundle('NSPS', (err, NSPS)=>{
+      if(NSPS === 'finalize') {
+        connprofile.setBundle('NSPS', true);
+        callback(false);
+      }
+      else {
+        callback(NSPS);
+      }
+    });
+  };
+
   this.upgradeConnection = (connprofile, callback) => {
     _resumes[connprofile.returnGUID()] = callback;
     // operation timeout
@@ -91,6 +107,10 @@ function NSPS() {
     connprofile.setBundle('NSPS', 'pending');
     this.emitRouter(connprofile, 'SP', _data);
   }
+
+  this.importOperationTimeout = (timeout) => {
+    _operation_timeout = timeout;
+  };
 
   this.importCryptoModule = (crypto_module) => {
     _crypto_module = crypto_module;

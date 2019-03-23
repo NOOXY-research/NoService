@@ -39,6 +39,231 @@ function Service() {
     }, ActivitySocketDestroyTimeout);
   };
 
+  // object for managing service.
+  function ServiceObj(service_name) {
+    let _entity_id;
+    let _service_socket;
+    let _service_path;
+    let _service_files_path;
+    let _service_name = service_name;
+    let _worker;
+    let _service_manifest;
+
+    let _isInitialized = false;
+    let _isLaunched = false;
+
+    this.isInitialized = (callback)=> {
+      callback(false, _isInitialized);
+    };
+
+    this.isLaunched = (callback)=> {
+      callback(false, _isClosed);
+    };
+
+    this.relaunch = (callback)=> {
+      this.close((err)=> {
+        if(err) {
+          callback(err);
+        }
+        else {
+          this.init((err)=> {
+            if(err) {
+              callback(err);
+            }
+            else {
+              this.launch(callback);
+            }
+          });
+        }
+      });
+    }
+
+    this.launch = (callback)=> {
+      if(_isLaunched) {
+        callback(new Error('Service "'+_service_name+'" already launched.'));
+      }
+      else {
+        _worker.launch((err)=> {
+          if(!err) {
+            _isLaunched = true;
+          }
+          callback(err);
+        });
+      }
+
+    };
+
+    this.init = (callback) => {
+      let erreport;
+      // check node packages dependencies
+      try {
+        for(let package_name in _service_manifest.dependencies.node_packages) {
+          try {
+            require.resolve(package_name);
+          }
+          catch (err) {
+            erreport = new Error('Service "'+_service_name+'" require node package "'+package_name+'".');
+            callback(erreport);
+            return err;
+          }
+        }
+      }
+      catch (err) {
+        erreport = new Error('Service "'+_service_name+'" have wrong dependencies settings.');
+        callback(erreport);
+        return err;
+      }
+
+      _worker = _workerd.generateWorker(_service_path+'/entry', _service_manifest.language);
+      // load module from local service directory
+      _authenticity_module.getUserIdByUsername(_local_services_owner, (err, ownerid)=> {
+        // create a description of this service entity.
+        let _entity_json = {
+          serverid: "Local",
+          service: _service_name,
+          type: "Service",
+          spwandomain: "Local",
+          owner: _local_services_owner,
+          ownerid: ownerid,
+          ownerdomain: "Local",
+          connectiontype: null,
+          description: "A Serverside Entity. Service Entity"
+        };
+
+        // register this service to entity system
+        _entity_module.registerEntity(_entity_json, null, (entity_id) => {
+          _entity_id = entity_id;
+        });
+
+        _service_socket = new SocketPair.ServiceSocket(_service_name, _service_manifest.servicefunctions, _emitRouter, _debug, _entity_module, _authorization_module); // _onJFCAll = on JSONfunction call
+
+        // create the service for module.
+        try {
+          if(_service_manifest.name != _service_name) {
+            erreport = new Error('Service name in manifest must fit with name "'+_service_name+'". Please check manifest file.\n');
+            callback(erreport);
+            return err;
+          }
+          else if(!fs.existsSync(_service_files_path)) {
+            fs.mkdirSync(_service_files_path);
+            if(_debug) {
+              Utils.TagLog('Service', 'Created service files folder at '+_service_files_path);
+            }
+          }
+          if(!fs.existsSync(_service_files_path+'/settings.json')) {
+            if(typeof(_service_manifest.settings) != 'undefined') {
+              fs.writeFileSync(_service_files_path+'/settings.json', JSON.stringify(_service_manifest.settings, null, 2));
+              Utils.TagLog('Service', 'Settings file not exist. Created service settings at "'+_service_files_path+'/settings.json"');
+            }
+          }
+          else {
+            try {
+              let real_settings = JSON.parse(fs.readFileSync(_service_files_path+'/settings.json', 'utf8'));
+              for(let item in real_settings) {
+                (_service_manifest.settings)[item] = real_settings[item];
+              }
+              fs.writeFileSync(_service_files_path+'/settings.json', JSON.stringify(_service_manifest.settings, null, 2));
+            }
+            catch (err) {
+              Utils.TagLog('*ERR*', 'Settings file corrupted. FilesPath "'+_service_files_path+'/settings.json"');
+              callback(err);
+            }
+          }
+          if(_service_manifest.implementation_api === false) {
+            _serviceapi_module.createServiceAPI(_service_socket, _service_manifest, (err, api) => {
+              _worker.importAPI(api);
+              _worker.init((err)=> {
+                if(!err) {
+                  _isInitialized = true;
+                }
+                callback(err);
+              });
+            });
+          }
+          else {
+            _serviceapi_module.createServiceAPIwithImplementaion(_service_socket, _service_manifest, (err, api) => {
+              _worker.importAPI(api);
+              _worker.init((err)=> {
+                if(!err) {
+                  _isInitialized = true;
+                }
+                callback(err);
+              });
+            });
+          }
+        }
+        catch(err) {
+          erreport = new Error('Launching service "'+_service_name+'" ended with failure.\n'+err.stack);
+          callback(erreport);
+          return err;
+        }
+      });
+    };
+
+    this.returnServiceFunctionList = () => {
+      return _service_socket.returnServiceFunctionList();
+    };
+
+    this.returnServiceFunctionDict = () => {
+      return _service_socket.returnServiceFunctionDict();
+    };
+
+    this.setupPath = (path) => {
+      _service_path = path;
+      try{
+        _service_manifest = Utils.returnJSONfromFile(_service_path+'/manifest.json');
+      }
+      catch(err) {
+        throw new Error('Service "'+_service_name+'" load manifest.json with failure.');
+      };
+    };
+
+    this.setupFilesPath = (path) => {
+      _service_files_path = path;
+    };
+
+    this.emitSSConnection = (entityId, callback) => {
+      _service_socket._emitConnect(entityId, callback);
+    };
+
+    this.emitSSClose = (entityId, remoteClosed) => {
+      _service_socket._closeSocket(entityId, remoteClosed);
+    };
+
+    this.emitSSData = (entityId, data) => {
+      _service_socket._emitData(entityId, data);
+    };
+
+    this.emitSSJFCall = (entityId, JFname, jsons, callback) => {
+      _service_socket._emitFunctionCall(entityId, JFname, jsons, callback);
+    };
+
+    this.returnManifest = () => {
+      _service_manifest = Utils.returnJSONfromFile(_service_path+'/manifest.json');
+      return _service_manifest;
+    };
+
+    this.close = (callback) => {
+      if(_isLaunched) {
+        _isInitialized = false;
+        _isLaunched = false;
+        _service_socket.closeAll(()=>{
+          _worker.close(callback);
+        });
+      }
+      else if (_isInitialized) {
+        _isInitialized = false;
+        _isLaunched = false;
+        _worker.close(callback);
+      }
+      else {
+        _isInitialized = false;
+        _isLaunched = false;
+        callback(false);
+      }
+    };
+  };
+
   this.setDebug = (boolean) => {
     _debug = boolean;
   };
@@ -270,16 +495,29 @@ function Service() {
             _entity_json.ownerdomain === connprofile.returnHostIP();
           }
           _authenticity_module.getUserIdByUsername(data.o, (err, ownerid)=> {
-            _entity_json.ownerid = ownerid;
-            _entity_module.registerEntity(_entity_json, connprofile, (err, id) => {
-                let _data = {
-                  "m": "CE",
-                  "d": {
-                    // temp id
-                    "t": data.t,
-                    "i": id
-                  }
-                };
+            if(err) {
+              response_emit(connprofile, 'CS', 'rs', {
+                "m": "CE",
+                "d": {
+                  // temp id
+                  "t": data.t,
+                  "i": null
+                }
+              });
+            }
+            else {
+              _entity_json.ownerid = ownerid;
+              _entity_module.registerEntity(_entity_json, connprofile, (err, id) => {
+                if(err) {
+                  response_emit(connprofile, 'CS', 'rs', {
+                    "m": "CE",
+                    "d": {
+                      // temp id
+                      "t": data.t,
+                      "i": null
+                    }
+                  });
+                }
                 let entities_prev = connprofile.returnBundle('bundle_entities');
                 if(entities_prev != null) {
                   connprofile.setBundle('bundle_entities', [id].concat(entities_prev));
@@ -287,8 +525,16 @@ function Service() {
                 else {
                   connprofile.setBundle('bundle_entities', [id]);
                 }
-                response_emit(connprofile, 'CS', 'rs', _data);
-            });
+                response_emit(connprofile, 'CS', 'rs', {
+                  "m": "CE",
+                  "d": {
+                    // temp id
+                    "t": data.t,
+                    "i": id
+                  }
+                });
+              });
+            }
           });
         }
         else {
@@ -340,7 +586,6 @@ function Service() {
       },
       // nooxy service protocol implementation of "Call Activity: createEntity"
       CE: (connprofile, data) => {
-
         // tell server finish create
         if(data.d.i != null) {
           // create a description of this service entity.
@@ -355,6 +600,7 @@ function Service() {
           _emitRouter(connprofile, 'CS', _data);
         }
         else {
+          _ActivityRsCEcallbacks[data.d.t](connprofile, data);
           delete  _ActivityRsCEcallbacks[data.d.t];
           connprofile.closeConnetion();
         }
@@ -420,231 +666,6 @@ function Service() {
     }
 
     methods[data.m](connprofile, data.d);
-  };
-
-  // object for managing service.
-  function ServiceObj(service_name) {
-    let _entity_id;
-    let _service_socket;
-    let _service_path;
-    let _service_files_path;
-    let _service_name = service_name;
-    let _worker;
-    let _service_manifest;
-
-    let _isInitialized = false;
-    let _isLaunched = false;
-
-    this.isInitialized = (callback)=> {
-      callback(false, _isInitialized);
-    };
-
-    this.isLaunched = (callback)=> {
-      callback(false, _isClosed);
-    };
-
-    this.relaunch = (callback)=> {
-      this.close((err)=> {
-        if(err) {
-          callback(err);
-        }
-        else {
-          this.init((err)=> {
-            if(err) {
-              callback(err);
-            }
-            else {
-              this.launch(callback);
-            }
-          });
-        }
-      });
-    }
-
-    this.launch = (callback)=> {
-      if(_isLaunched) {
-        callback(new Error('Service "'+_service_name+'" already launched.'));
-      }
-      else {
-        _worker.launch((err)=> {
-          if(!err) {
-            _isLaunched = true;
-          }
-          callback(err);
-        });
-      }
-
-    };
-
-    this.init = (callback) => {
-      let erreport;
-      // check node packages dependencies
-      try {
-        for(let package_name in _service_manifest.dependencies.node_packages) {
-          try {
-            require.resolve(package_name);
-          }
-          catch (err) {
-            erreport = new Error('Service "'+_service_name+'" require node package "'+package_name+'".');
-            callback(erreport);
-            return err;
-          }
-        }
-      }
-      catch (err) {
-        erreport = new Error('Service "'+_service_name+'" have wrong dependencies settings.');
-        callback(erreport);
-        return err;
-      }
-
-      _worker = _workerd.generateWorker(_service_path+'/entry', _service_manifest.language);
-      // load module from local service directory
-      _authenticity_module.getUserIdByUsername(_local_services_owner, (err, ownerid)=> {
-        // create a description of this service entity.
-        let _entity_json = {
-          serverid: "Local",
-          service: _service_name,
-          type: "Service",
-          spwandomain: "Local",
-          owner: _local_services_owner,
-          ownerid: ownerid,
-          ownerdomain: "Local",
-          connectiontype: null,
-          description: "A Serverside Entity. Service Entity"
-        };
-
-        // register this service to entity system
-        _entity_module.registerEntity(_entity_json, null, (entity_id) => {
-          _entity_id = entity_id;
-        });
-
-        _service_socket = new SocketPair.ServiceSocket(_service_name, _service_manifest.servicefunctions, _emitRouter, _debug, _entity_module, _authorization_module); // _onJFCAll = on JSONfunction call
-
-        // create the service for module.
-        try {
-          if(_service_manifest.name != _service_name) {
-            erreport = new Error('Service name in manifest must fit with name "'+_service_name+'". Please check manifest file.\n');
-            callback(erreport);
-            return err;
-          }
-          else if(!fs.existsSync(_service_files_path)) {
-            fs.mkdirSync(_service_files_path);
-            if(_debug) {
-              Utils.TagLog('Service', 'Created service files folder at '+_service_files_path);
-            }
-          }
-          if(!fs.existsSync(_service_files_path+'/settings.json')) {
-            if(typeof(_service_manifest.settings) != 'undefined') {
-              fs.writeFileSync(_service_files_path+'/settings.json', JSON.stringify(_service_manifest.settings, null, 2));
-              Utils.TagLog('Service', 'Settings file not exist. Created service settings at "'+_service_files_path+'/settings.json"');
-            }
-          }
-          else {
-            try {
-              let real_settings = JSON.parse(fs.readFileSync(_service_files_path+'/settings.json', 'utf8'));
-              for(let item in real_settings) {
-                (_service_manifest.settings)[item] = real_settings[item];
-              }
-              fs.writeFileSync(_service_files_path+'/settings.json', JSON.stringify(_service_manifest.settings, null, 2));
-            }
-            catch (err) {
-              Utils.TagLog('*ERR*', 'Settings file corrupted. FilesPath "'+_service_files_path+'/settings.json"');
-              callback(err);
-            }
-          }
-          if(_service_manifest.implementation_api === false) {
-            _serviceapi_module.createServiceAPI(_service_socket, _service_manifest, (err, api) => {
-              _worker.importAPI(api);
-              _worker.init((err)=> {
-                if(!err) {
-                  _isInitialized = true;
-                }
-                callback(err);
-              });
-            });
-          }
-          else {
-            _serviceapi_module.createServiceAPIwithImplementaion(_service_socket, _service_manifest, (err, api) => {
-              _worker.importAPI(api);
-              _worker.init((err)=> {
-                if(!err) {
-                  _isInitialized = true;
-                }
-                callback(err);
-              });
-            });
-          }
-        }
-        catch(err) {
-          erreport = new Error('Launching service "'+_service_name+'" ended with failure.\n'+err.stack);
-          callback(erreport);
-          return err;
-        }
-      });
-    };
-
-    this.returnServiceFunctionList = () => {
-      return _service_socket.returnServiceFunctionList();
-    };
-
-    this.returnServiceFunctionDict = () => {
-      return _service_socket.returnServiceFunctionDict();
-    };
-
-    this.setupPath = (path) => {
-      _service_path = path;
-      try{
-        _service_manifest = Utils.returnJSONfromFile(_service_path+'/manifest.json');
-      }
-      catch(err) {
-        throw new Error('Service "'+_service_name+'" load manifest.json with failure.');
-      };
-    };
-
-    this.setupFilesPath = (path) => {
-      _service_files_path = path;
-    };
-
-    this.emitSSConnection = (entityId, callback) => {
-      _service_socket._emitConnect(entityId, callback);
-    };
-
-    this.emitSSClose = (entityId, remoteClosed) => {
-      _service_socket._closeSocket(entityId, remoteClosed);
-    };
-
-    this.emitSSData = (entityId, data) => {
-      _service_socket._emitData(entityId, data);
-    };
-
-    this.emitSSJFCall = (entityId, JFname, jsons, callback) => {
-      _service_socket._emitFunctionCall(entityId, JFname, jsons, callback);
-    };
-
-    this.returnManifest = () => {
-      _service_manifest = Utils.returnJSONfromFile(_service_path+'/manifest.json');
-      return _service_manifest;
-    };
-
-    this.close = (callback) => {
-      if(_isLaunched) {
-        _isInitialized = false;
-        _isLaunched = false;
-        _service_socket.closeAll(()=>{
-          _worker.close(callback);
-        });
-      }
-      else if (_isInitialized) {
-        _isInitialized = false;
-        _isLaunched = false;
-        _worker.close(callback);
-      }
-      else {
-        _isInitialized = false;
-        _isLaunched = false;
-        callback(false);
-      }
-    };
   };
 
   this.setDebugService = (name)=> {
@@ -763,14 +784,15 @@ function Service() {
     this.spwanClient(method, targetip, targetport, (err, connprofile) => {
       let _as = new SocketPair.ActivitySocket(connprofile, _emitRouter, _unbindActivitySocketList, _debug);
       _ActivityRsCEcallbacks[_data.d.t] = (connprofile, data) => {
-        if(data.d.i != "FAIL") {
+        if(data.d.i) {
           _as.setEntityId(data.d.i);
           connprofile.setBundle('entityId', data.d.i);
           _ASockets[data.d.i] = _as;
           callback(false, _ASockets[data.d.i]);
         }
         else{
-          callback(true, _ASockets[data.d.i]);
+          delete  _ASockets[data.d.i];
+          callback(new Error('Could not create this entity for some reason.'));
         }
 
       }
@@ -800,15 +822,15 @@ function Service() {
     this.spwanClient(method, targetip, targetport, (err, connprofile) => {
       let _as = new SocketPair.ActivitySocket(connprofile, _emitRouter, _unbindActivitySocketList, _debug);
       _ActivityRsCEcallbacks[_data.d.t] = (connprofile, data) => {
-
-        if(data.d.i != "FAIL") {
+        if(data.d.i) {
           _as.setEntityId(data.d.i);
           connprofile.setBundle('entityId', data.d.i);
           _ASockets[data.d.i] = _as;
           callback(false, _as);
         }
         else{
-          callback(true, _as);
+          delete  _ASockets[data.d.i];
+          callback(true);
         }
 
       }

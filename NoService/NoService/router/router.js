@@ -44,18 +44,11 @@ function Router() {
     let json = JSON.stringify(wrapped);
     // finally sent the data through the connection.
     if(connprofile) {
-      connprofile.getBundle('NSPS', (err, NSPS)=>{
-        if(NSPS === true) {
-          connprofile.getBundle('aes_256_cbc_key', (err, key)=>{
-            _coregateway.NoCrypto.encryptString('AESCBC256', key, json, (err, encrypted)=> {
-              _coregateway.Connection.send(connprofile, encrypted);
-            });
-          })
-        }
-        else if (NSPS === 'finalize') {
-          connprofile.setBundle('NSPS', true);
-          _coregateway.Connection.send(connprofile, json);
-
+      _coregateway.NSPS.isConnectionSecured(connprofile, (secured)=> {
+        if(secured === true) {
+          NSPS.secure(connprofile, json, (connprofile, encrypted)=> {
+            _coregateway.Connection.send(connprofile, encrypted);
+          });
         }
         else {
           _coregateway.Connection.send(connprofile, json);
@@ -79,8 +72,8 @@ function Router() {
         }
 
         let actions = {
-          rq : _coregateway.NSPS.RqRouter,
-          rs : _coregateway.NSPS.RsRouter
+          rq : _coregateway.NSPS.RequestRouter,
+          rs : _coregateway.NSPS.ResponseRouter
         }
         connprofile.getRemotePosition((err, pos)=> {
           if(rq_rs_pos[session] === pos || rq_rs_pos[session] === 'Both') {
