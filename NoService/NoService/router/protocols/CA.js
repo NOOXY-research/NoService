@@ -15,6 +15,20 @@ module.exports = function Protocol(coregateway, emitRouter) {
 
   this.RequestHandler = coregateway.Service.ActivityRqRouter;
 
-  this.ResponseHandler = coregateway.Service.ActivityRsRouter;
+  this.ResponseHandler = (connprofile, data) => {
+
+    let methods = {
+      // nooxy service protocol implementation of "Call Activity: ActivitySocket"
+      AS: (connprofile, data) => {
+        // no need to implement anything
+      },
+
+      EV: (connprofile, data) => {
+        // no need to implement anything
+      }
+    }
+
+    methods[data.m](connprofile, data.d);
+  };
 
 }

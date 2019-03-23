@@ -444,22 +444,6 @@ function Service() {
     methods[data.m](connprofile, data.d, response_emit);
   }
 
-  // ServerSide
-  this.ActivityRsRouter = (connprofile, data) => {
-
-    let methods = {
-      // nooxy service protocol implementation of "Call Activity: ActivitySocket"
-      AS: (connprofile, data) => {
-        // no need to implement anything
-      },
-
-      EV: (connprofile, data) => {
-        // no need to implement anything
-      }
-    }
-
-    methods[data.m](connprofile, data.d);
-  };
 
   this.setDebugService = (name)=> {
     _debug_service = name;
