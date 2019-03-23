@@ -9,7 +9,7 @@ const Utils = require('../library').Utilities;
 
 function Implementation() {
   let _support_secure = false;
-  let _connection_module = null;
+  let _connection_module;
 
   // NOOXY service protocol secure list
   let _nsps_list = ['generateAESCBC256KeyByHash', 'encryptString', 'decryptString'];

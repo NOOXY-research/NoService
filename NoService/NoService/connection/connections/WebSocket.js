@@ -9,8 +9,8 @@ const Utils = require('../../library').Utilities;
 
 // a wrapped WebSocket server for nooxy service framework
 function Server(ServerId, ConnectionProfile) {
-  let _hostip = null;
-  let _wss = null;
+  let _hostip;
+  let _wss;
   let _myclients = {};
 
   this.closeConnetion = (GUID) => {
@@ -84,7 +84,7 @@ function Client(ConnectionProfile) {
   };
 
   this.connect = (ip, port, callback) => {
-    let connprofile = null;
+    let connprofile;
     _ws = new WebSocket('ws://'+ip+':'+port);
     connprofile = new ConnectionProfile(null, 'Server', 'WebSocket', ip, port, 'localhost', this);
     _ws.on('open', function open() {

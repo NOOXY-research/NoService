@@ -7,7 +7,7 @@
 const Utils = require('../library').Utilities;
 
 function Router() {
-  let _coregateway = null;
+  let _coregateway;
   // nooxy service protocol secure
   let _json_sniffers = [];
   let _raw_sniffers = [];

@@ -5,10 +5,10 @@
 
 // NOOXY service protocol secure
 function NSPS() {
-  let _rsa_pub = null;
-  let _rsa_priv = null;
+  let _rsa_pub;
+  let _rsa_priv;
   let _resumes = {};
-  let _crypto_module = null;
+  let _crypto_module;
   let _operation_timeout = 60; // seconds
 
   this.importOperationTimeout = (timeout) => {
@@ -27,7 +27,7 @@ function NSPS() {
             resume(err);
           }
           else {
-            let json = null;
+            let json;
             try {
               json = JSON.parse(decrypted);
               let host_rsa_pub = _rsa_pub;

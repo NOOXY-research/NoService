@@ -68,7 +68,7 @@ function Service(Me, NoService) {
       NoService.Service.Entity.getEntityOwner(entityId, (err, username)=>{
         // To store your data and associated with userid INSEAD OF USERNAME!!!
         // Since userid can be promised as a unique identifer!!!
-        let userid = null;
+        let userid;
         // Get userid from API
         NoService.Authenticity.getUserIdByUsername(username, (err, id) => {
           userid = id;
@@ -114,7 +114,7 @@ function Service(Me, NoService) {
       NoService.Service.Entity.getEntityOwner(entityId, (err, username)=>{
         // To store your data and associated with userid INSEAD OF USERNAME!!!
         // Since userid can be promised as a unique identifer!!!
-        let userid = null;
+        let userid;
         // Get userid from API
         NoService.Authenticity.getUserIdByUsername(username, (err, id) => {
           userid = id;

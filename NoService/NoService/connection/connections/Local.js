@@ -9,7 +9,7 @@ const VirtualNet = new (require('../virtualnet'))();
 
 
 function Server(ServerId, ConnectionProfile) {
-  let _vnets = null;
+  let _vnets;
   let _myclients= {};
 
   this.closeConnetion = (GUID) => {
@@ -62,7 +62,7 @@ function Server(ServerId, ConnectionProfile) {
 
 function Client(ConnectionProfile) {
   // VirtualNet client
-  let _vnetc = null;
+  let _vnetc;
   let _vs = null
 
   this.closeConnetion = (GUID) => {_vs.close()};
@@ -76,7 +76,7 @@ function Client(ConnectionProfile) {
   };
 
   this.connect = (virtip, virtport, callback) => {
-    let connprofile = null;
+    let connprofile;
     _vnetc = VirtualNet.createClient('LOCALIP', Utils.generateGUID(), virtip, virtport);
     _vnetc.connect(virtip, virtport, (err, vs) => {
       _vs = vs;

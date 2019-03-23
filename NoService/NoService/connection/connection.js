@@ -22,8 +22,8 @@ function Connection(options) {
   let _clients = {};
   let _have_local_server = false;
   let _blocked_ip = [];
-  let ssl_priv_key = null;
-  let ssl_cert = null;
+  let ssl_priv_key;
+  let ssl_cert;
   let heartbeat_phrase = '{m:"HB"}';
   let heartbeat_cycle = 60000;
   let _debug = false;

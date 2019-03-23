@@ -103,7 +103,7 @@ function Authenticity() {
   };
 
   this.createUser = (username, displayname, password, privilege, detail, firstname, lastname, callback) => {
-    let pwdhash = null;
+    let pwdhash;
     username = username?username.toLowerCase():''();
     _user_model.getByFirst(username, (err, list)=> {
       let user_meta = list[0];

@@ -9,7 +9,7 @@
 
 const APIUtils = require('./serviceapi_utils');
 function ServiceAPI() {
-  let _coregateway = null;
+  let _coregateway;
 
   let _addNormalAPIs = (api, service_socket, manifest)=> {
     let _service_name = manifest.name;

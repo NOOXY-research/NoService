@@ -8,8 +8,8 @@ const Net = require('net');
 const Utils = require('../../library').Utilities;
 
 function Server(ServerId, ConnectionProfile) {
-  let _hostip = null;
-  let _netserver = null;
+  let _hostip;
+  let _netserver;
   let _myclients = {};
 
   this.closeConnetion = (GUID) => {
@@ -84,7 +84,7 @@ function Client(ConnectionProfile) {
 
   this.connect = (ip, port, callback) => {
     _netc =  new Net.Socket();
-    let connprofile = null;
+    let connprofile;
     _netc.connect(port, ip, ()=>{
       connprofile = new ConnectionProfile(null, 'Server', 'TCP/IP', ip, port, 'localhost', this);
       callback(false, connprofile);

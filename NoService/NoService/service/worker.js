@@ -25,7 +25,7 @@ process.title = 'NoService_worker';
 function WorkerClient() {
   try {
     let _local_obj_callbacks_dict = {};
-    let _service_module = null;
+    let _service_module;
     let _api;
     let _clear_obj_garbage_timeout = 3000;
     let _close_timeout = 1000;

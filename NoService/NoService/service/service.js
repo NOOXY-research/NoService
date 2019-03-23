@@ -12,15 +12,15 @@ const SocketPair = require('./socketpair');
 function Service() {
   // need add service event system
   let _local_services = {};
-  let _local_services_path = null;
-  let _local_services_files_path = null;
-  let _local_services_owner = null;
-  let _entity_module = null;
-  let _serviceapi_module = null;
-  let _authorization_module = null;
-  let _authenticity_module = null;
+  let _local_services_path;
+  let _local_services_files_path;
+  let _local_services_owner;
+  let _entity_module;
+  let _serviceapi_module;
+  let _authorization_module;
+  let _authenticity_module;
   let _ActivityRsCEcallbacks = {};
-  let _daemon_auth_key = null;
+  let _daemon_auth_key;
   let _ASockets = {};
   let _debug = false;
   let _workerd;
@@ -127,7 +127,7 @@ function Service() {
   };
   // Serverside
   this.ServiceRqRouter = (connprofile, data, response_emit) => {
-    let theservice = null;
+    let theservice;
     if(data.d.i != null) {
       theservice = _local_services[_entity_module.returnEntityValue(data.d.i, 'service')];
     }
@@ -147,7 +147,7 @@ function Service() {
       // nooxy service protocol implementation of "Call Service: Vertify Entity"
       VE: (connprofile, data, response_emit) => {
         theservice.emitSSConnection(data.i, (err)=> {
-          let _data = null;
+          let _data;
           if(err) {
             _data = {
               m: "VE",
@@ -172,7 +172,7 @@ function Service() {
       },
       // nooxy service protocol implementation of "Call Service: ServiceSocket"
       SS: (connprofile, data, response_emit) => {
-        let _data = null;
+        let _data;
         if(typeof(theservice) != 'undefined'||theservice!=null) {
           theservice.emitSSData(data.i, data.d);
           _data = {
@@ -198,7 +198,7 @@ function Service() {
       },
       // nooxy service protocol implementation of "Call Service: json function"
       JF: (connprofile, data, response_emit) => {
-        let _data = null;
+        let _data;
         if(typeof(theservice) != 'undefined') {
           theservice.emitSSJFCall(data.i, data.n, data.j, (err, returnvalue)=>{
             if(err) {
@@ -477,7 +477,7 @@ function Service() {
     };
 
     this.init = (callback) => {
-      let erreport = null;
+      let erreport;
       // check node packages dependencies
       try {
         for(let package_name in _service_manifest.dependencies.node_packages) {

@@ -6,8 +6,8 @@
 
 // Handling responses to authorization requests.
 function AuthorizationHandler() {
-  let _implementation_module = null;
-  let _daemon_auth_key = null;
+  let _implementation_module;
+  let _daemon_auth_key;
   let _trusted_domains = [];
 
   let _implts_callback = {

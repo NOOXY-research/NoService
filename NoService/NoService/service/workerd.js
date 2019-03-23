@@ -68,8 +68,8 @@ function WorkerDaemon() {
   }
 
   function WorkerClient(path) {
-    let _serviceapi = null;
-    let _child = null;
+    let _serviceapi;
+    let _child;
     let _service_name =  /.*\/([^\/]*)\/entry/g.exec(path)[1];
     let _InfoRq = {};
     let _init_callback;
@@ -266,9 +266,9 @@ function WorkerDaemon() {
   };
 
   function PythonWorkerClient(path) {
-    let _serviceapi = null;
-    let _child = null;
-    let _api_sock = null;
+    let _serviceapi;
+    let _child;
+    let _api_sock;
     let _service_name =  /.*\/([^\/]*)\/entry/g.exec(path)[1];
     let _InfoRq = {};
     let _init_callback;

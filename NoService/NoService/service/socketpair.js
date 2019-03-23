@@ -43,8 +43,8 @@ function ServiceSocket(service_name, prototype, emitRouter, debug, entity_module
   }
   // JSON Function
 
-  let _send_handler = null;
-  let _mode = null;
+  let _send_handler;
+  let _mode;
   let _on_dict = {
     connect: (entityId, callback) => {
       if(debug)
@@ -373,7 +373,7 @@ function ActivitySocket(conn_profile, emitRouter, unbindActivitySocketList, debu
     emitRouter(conn_profile, 'CS', _data);
   }
 
-  let _entity_id = null;
+  let _entity_id;
   let _launched = false;
 
   let wait_ops = [];
