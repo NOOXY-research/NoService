@@ -14,7 +14,7 @@ function NSPS() {
   this.emitRouter = () => {console.log('[*ERR*] emit not implemented');};
 
   // daemon side
-  this.ResponseRouter = (connprofile, data) => {
+  this.Response = (connprofile, data) => {
     let resume = _resumes[connprofile.returnGUID()];
     if(resume) {
       try{
@@ -57,7 +57,7 @@ function NSPS() {
 
   // Nooxy service protocol secure request ClientSide
   // in client need to be in implementation module
-  this.RequestRouter = (connprofile, data, data_sender) => {
+  this.Request = (connprofile, data, data_sender) => {
     let host_rsa_pub = data.p;
     let client_random_num = _crypto_module.returnRandomInt(99999);
     connprofile.setBundle('host_rsa_pub_key', host_rsa_pub);
@@ -76,7 +76,7 @@ function NSPS() {
 
   this.secure = (connprofile, data, callback)=> {
     connprofile.getBundle('aes_256_cbc_key', (err, key)=>{
-      crypto_module.encryptString('AESCBC256', key, json, (err, encrypted)=> {
+      _crypto_module.encryptString('AESCBC256', key, data, (err, encrypted)=> {
         callback(err, encrypted);
       });
     });

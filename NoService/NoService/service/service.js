@@ -518,21 +518,23 @@ function Service() {
                     }
                   });
                 }
-                let entities_prev = connprofile.returnBundle('bundle_entities');
-                if(entities_prev != null) {
-                  connprofile.setBundle('bundle_entities', [id].concat(entities_prev));
-                }
                 else {
-                  connprofile.setBundle('bundle_entities', [id]);
-                }
-                response_emit(connprofile, 'CS', 'rs', {
-                  "m": "CE",
-                  "d": {
-                    // temp id
-                    "t": data.t,
-                    "i": id
+                  let entities_prev = connprofile.returnBundle('bundle_entities');
+                  if(entities_prev != null) {
+                    connprofile.setBundle('bundle_entities', [id].concat(entities_prev));
                   }
-                });
+                  else {
+                    connprofile.setBundle('bundle_entities', [id]);
+                  }
+                  response_emit(connprofile, 'CS', 'rs', {
+                    "m": "CE",
+                    "d": {
+                      // temp id
+                      "t": data.t,
+                      "i": id
+                    }
+                  });
+                }
               });
             }
           });

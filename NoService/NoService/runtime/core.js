@@ -232,7 +232,7 @@ function Core(NoServiceLibrary, settings) {
         _router.importCore(coregateway);
       }
       catch(e) {
-
+        Utils.TagLog('*ERR*', e.stack);
       }
 
       // setup connection

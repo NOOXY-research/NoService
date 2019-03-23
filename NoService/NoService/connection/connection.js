@@ -5,11 +5,11 @@
 'use strict';
 
 const Utils = require('../library').Utilities;
-const ConnectionsPath = require("path").join(__dirname, "connections");
+const ConnectionsPath = require("path").join(__dirname, "./connections");
 let Connections = {};
 
 require("fs").readdirSync(ConnectionsPath).forEach((file)=> {
-  let conn = require("./connections/" + file);
+  let conn = require(ConnectionsPath+"/" + file);
   Connections[conn.ConnectMethod] = conn;
 });
 

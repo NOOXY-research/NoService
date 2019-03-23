@@ -132,10 +132,15 @@ function Entity() {
 
   this.getEntityConnProfile = (entityId, callback) => {
     try {
-      _entities[entityId].getConnProfile(callback);
+      if(!_entities[entityId]) {
+        callback(new Error('Entity not existed with this Id('+entityId+').'));
+      }
+      else {
+        _entities[entityId].getConnProfile(callback);
+      }
     }
-    catch {
-      callback(new Error('Entity not existed with this Id('+entityId+').'));
+    catch (e) {
+      callback(e);
     }
   };
 

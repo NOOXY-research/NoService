@@ -5,6 +5,7 @@
 'use strict';
 
 const Utils = require('../library').Utilities;
+const ProtocolsPath = require("path").join(__dirname, "protocols");
 
 function Router() {
   let _coregateway;
@@ -29,7 +30,7 @@ function Router() {
 
   // in case of wrong session of the position
   let _sessionnotsupport = () => {
-    console.log('[*ERR*] session not support');
+    Utils.TagLog('*ERR*', 'session not support');
     let err = new Error();
     throw err;
   }
@@ -46,8 +47,13 @@ function Router() {
     if(connprofile) {
       _coregateway.NSPS.isConnectionSecured(connprofile, (secured)=> {
         if(secured === true) {
-          NSPS.secure(connprofile, json, (connprofile, encrypted)=> {
-            _coregateway.Connection.send(connprofile, encrypted);
+          _coregateway.NSPS.secure(connprofile, json, (err, encrypted)=> {
+            if(!err) {
+              _coregateway.Connection.send(connprofile, encrypted);
+            }
+            else if(_debug) {
+              Utils.TagLog('*WARN*', err.trace);
+            }
           });
         }
         else {
@@ -72,153 +78,9 @@ function Router() {
         }
 
         let actions = {
-          rq : _coregateway.NSPS.RequestRouter,
-          rs : _coregateway.NSPS.ResponseRouter
+          rq : _coregateway.NSPS.Request,
+          rs : _coregateway.NSPS.Response
         }
-        connprofile.getRemotePosition((err, pos)=> {
-          if(rq_rs_pos[session] === pos || rq_rs_pos[session] === 'Both') {
-            if(session === 'rq') {
-              actions[session](connprofile, data, _senddata);
-            }
-            else {
-              actions[session](connprofile, data);
-            }
-          }
-          else {
-            _sessionnotsupport();
-          }
-        });
-      }
-    },
-
-    // nooxy service protocol implementation of "get token"
-    GT: {
-      emitter : (connprofile, data) => {
-        _senddata(connprofile, 'GT', 'rq', data);
-      },
-
-      handler : (connprofile, session, data) => {
-        let rq_rs_pos = {
-          rq: "Client",
-          rs: "Server"
-        }
-
-        let actions = {
-          rq : (connprofile, data) => {
-              let responsedata = {};
-              _coregateway.Authenticity.getUserTokenByUsername(data.u, data.p, (err, token)=>{
-                responsedata['t'] = token;
-                if(err) {
-                  responsedata['s'] = 'Fail';
-                }
-                else {
-                  responsedata['s'] = 'OK';
-                }
-                _senddata(connprofile, 'GT', 'rs', responsedata);
-              });
-          },
-
-          rs : (connprofile, data) => {
-            _coregateway.Implementation.onToken(connprofile, data.s, data.t);
-          }
-        }
-        connprofile.getRemotePosition((err, pos)=> {
-          if(rq_rs_pos[session] === pos || rq_rs_pos[session] === 'Both') {
-            if(session === 'rq') {
-              actions[session](connprofile, data, _senddata);
-            }
-            else {
-              actions[session](connprofile, data);
-            }
-          }
-          else {
-            _sessionnotsupport();
-          }
-        });
-      }
-    },
-
-    // nooxy service protocol implementation of "Authorization"
-    AU: {
-      emitter : (connprofile, data) => {
-        _senddata(connprofile, 'AU', 'rq', data);
-      },
-
-      handler : (connprofile, session, data) => {
-        let rq_rs_pos = {
-          rq: "Server",
-          rs: "Client"
-        }
-
-        let actions = {
-          rq : _coregateway.AuthorizationHandler.RqRouter,
-          rs : _coregateway.Authorization.RsRouter
-        }
-        connprofile.getRemotePosition((err, pos)=> {
-          if(rq_rs_pos[session] === pos || rq_rs_pos[session] === 'Both') {
-            if(session === 'rq') {
-              actions[session](connprofile, data, _senddata);
-            }
-            else {
-              actions[session](connprofile, data);
-            }
-          }
-          else {
-            _sessionnotsupport();
-          }
-        });
-      }
-    },
-
-    // nooxy service protocol implementation of "Call Service"
-    CS: {
-      emitter : (connprofile, data) => {
-        _senddata(connprofile, 'CS', 'rq', data);
-      },
-
-      handler : (connprofile, session, data) => {
-        let rq_rs_pos = {
-          rq: "Client",
-          rs: "Server"
-        }
-
-        let actions = {
-          rq : _coregateway.Service.ServiceRqRouter,
-          rs : _coregateway.Service.ServiceRsRouter
-        }
-        connprofile.getRemotePosition((err, pos)=> {
-          if(rq_rs_pos[session] === pos || rq_rs_pos[session] === 'Both') {
-            if(session === 'rq') {
-              actions[session](connprofile, data, _senddata);
-            }
-            else {
-              actions[session](connprofile, data);
-            }
-          }
-          else {
-            _sessionnotsupport();
-          }
-        })
-      }
-    },
-
-    // nooxy service protocol implementation of "Call Activity"
-    CA: {
-      emitter : (connprofile, data) => {
-        _senddata(connprofile, 'CA', 'rq', data);
-      },
-
-      handler : (connprofile, session, data) => {
-        let rq_rs_pos = {
-          rq: "Both",
-          rs: "Both"
-        }
-
-        let actions = {
-          rq : _coregateway.Service.ActivityRqRouter,
-          rs : _coregateway.Service.ActivityRsRouter
-        }
-
         connprofile.getRemotePosition((err, pos)=> {
           if(rq_rs_pos[session] === pos || rq_rs_pos[session] === 'Both') {
             if(session === 'rq') {
@@ -327,8 +189,37 @@ function Router() {
       }
     };
 
-    _coregateway.Authenticity.emitRouter = this.emit;
+    require("fs").readdirSync(ProtocolsPath).forEach((file)=> {
+      let p = new (require(ProtocolsPath+"/" + file))(_coregateway, this.emit);
+      p.emitRouter = this.emit;
+      methods[p.Protocol] = {
+        emitter : (connprofile, data) => {
+          _senddata(connprofile, p.Protocol, 'rq', data);
+        },
+
+        handler : (connprofile, session, data) => {
+          connprofile.getRemotePosition((err, pos)=> {
+            if(p.Positions[session] === pos || p.Positions[session] === 'Both') {
+              if(session === 'rq') {
+                p.Request(connprofile, data, _senddata);
+              }
+              else {
+                p.Response(connprofile, data);
+              }
+            }
+            else {
+              _sessionnotsupport();
+            }
+          });
+        }
+      };
+    });
+
+    _coregateway.NSPS.emitRouter = this.emit;
+
     _coregateway.Service.setEmitRouter(this.emit);
+    _coregateway.Service.spwanClient = _coregateway.Connection.createClient;
+
     _coregateway.Implementation.emitRouter = (connprofile, data, data_sender)=>{
       _coregateway.Connection.getClients((er, clients)=>{
         connprofile.getGUID((er, id)=>{
@@ -336,10 +227,8 @@ function Router() {
         });
       });
     };
+
     _coregateway.Implementation.sendRouterData = _senddata;
-    _coregateway.Authorization.emitRouter = this.emit;
-    _coregateway.NSPS.emitRouter = this.emit;
-    _coregateway.Service.spwanClient = _coregateway.Connection.createClient;
   };
 
   this.close = () => {

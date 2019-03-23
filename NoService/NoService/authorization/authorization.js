@@ -114,40 +114,46 @@ function Authorization() {
             d: {t: Utils.generateGUID()}
           }
           _entity_module.getEntityConnProfile(entityID, (err, connprofile) => {
-            let _authonline = ()=> {
-              let op = (connprofile, data) => {
-                _authe_module.checkTokenisValidByUsername(user, data.d.v, (err, isValid) => {
-                  if(isValid) {
-                    connprofile.setBundle('NSToken', data.d.v);
-                    callback(false, true);
-                  }
-                  else {
-                    this.emitRouter(connprofile, 'AU', {m: 'TF'});
-                    callback(false, false);
-                  }
-                });
-              }
-              _queue_operation[data.d.t] = op;
-              // set the timeout of clearing expired authorization.
-              setTimeout(() => {delete _queue_operation[data.d.t]}, _auth_timeout*1000);
-              this.emitRouter(connprofile, 'AU', data);
-            };
+            if(err) {
+              console.log(err);
+              callback(err);
+            }
+            else {
+              let _authonline = ()=> {
+                let op = (connprofile, data) => {
+                  _authe_module.checkTokenisValidByUsername(user, data.d.v, (err, isValid) => {
+                    if(isValid) {
+                      connprofile.setBundle('NSToken', data.d.v);
+                      callback(false, true);
+                    }
+                    else {
+                      this.emitRouter(connprofile, 'AU', {m: 'TF'});
+                      callback(false, false);
+                    }
+                  });
+                }
+                _queue_operation[data.d.t] = op;
+                // set the timeout of clearing expired authorization.
+                setTimeout(() => {delete _queue_operation[data.d.t]}, _auth_timeout*1000);
+                this.emitRouter(connprofile, 'AU', data);
+              };
 
-            connprofile.getBundle('NSToken', (err, tk)=>{
-              if(tk != null) {
-                _authe_module.checkTokenisValidByUsername(user, tk, (err, isValid) => {
-                  if(isValid) {
-                    callback(false, true);
-                  }
-                  else {
-                    _authonline();
-                  }
-                });
-              }
-              else {
-                _authonline();
-              }
-            });
+              connprofile.getBundle('NSToken', (err, tk)=>{
+                if(tk != null) {
+                  _authe_module.checkTokenisValidByUsername(user, tk, (err, isValid) => {
+                    if(isValid) {
+                      callback(false, true);
+                    }
+                    else {
+                      _authonline();
+                    }
+                  });
+                }
+                else {
+                  _authonline();
+                }
+              });
+            }
           });
         });
       }
