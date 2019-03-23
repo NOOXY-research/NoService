@@ -27,7 +27,7 @@
     }
   ],
 
-  "default_server": 2,
+  "default_server": null,
 
   "local_services_owner" : "admin",
 
@@ -52,7 +52,7 @@
     "NoMailer"
   ],
 
-  "debug": true,
+  "debug": false,
   "verbose": false,
 
   "master_service": "NoServiceManager",

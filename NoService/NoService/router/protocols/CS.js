@@ -41,6 +41,42 @@ module.exports = function Protocol(coregateway, emitRouter) {
 
   });
 
+  coregateway.Activity.on('EmitSSDataRq', (conn_profile, entityId, d) => {
+      let _data = {
+        "m": "SS",
+        "d": {
+          "i": entityId,
+          "d": d,
+        }
+      };
+      emitRouter(conn_profile, 'CS', _data);
+
+  });
+
+  coregateway.Activity.on('EmitSSServiceFunctionRq', (conn_profile, entityId, name, data, tempid) => {
+      let _data = {
+        "m": "JF",
+        "d": {
+          "i": entityId,
+          "n": name,
+          "j": data,
+          "t": tempid
+        }
+      };
+      emitRouter(conn_profile, 'CS', _data);
+
+  });
+
+  coregateway.Activity.on('EmitASCloseRq', (conn_profile, entityId) => {
+      let _data = {
+        "m": "CS",
+        "d": {
+          "i": entityId
+        }
+      };
+      emitRouter(conn_profile, 'CS', _data);
+  });
+
   // Serverside
   this.RequestHandler = (connprofile, data, response_emit) => {
     Service.getServiceInstanceByEntityId(data.d.i, (err, theservice)=> {
@@ -167,7 +203,6 @@ module.exports = function Protocol(coregateway, emitRouter) {
               }
             });
           });
-
         }
       }
 

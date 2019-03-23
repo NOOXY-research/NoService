@@ -9,11 +9,14 @@ const SocketPair = require('./socketpair');
 function Activity() {
   let ActivitySocketDestroyTimeout = 1000;
   let _ASockets = {};
-  let _emitRouter;
   let _admin_name = 'admin';
   let _daemon_auth_key;
   let _debug = false;
   let _on_handler = {};
+
+  let _emmiter;
+
+
 
   let _unbindActivitySocketList = (_entity_id)=> {
     setTimeout(()=>{
@@ -24,12 +27,15 @@ function Activity() {
     }, ActivitySocketDestroyTimeout);
   };
 
-  this.setEmitRouter = (emitRouter) => {_emitRouter = emitRouter};
-
   // Service module create activity socket
   this.createActivitySocket = (method, targetip, targetport, service, owner, callback) => {
+    _emmiter = {
+      Data: _on_handler['EmitSSDataRq'],
+      ServiceFunction: _on_handler['EmitSSServiceFunctionRq'],
+      Close: _on_handler['EmitASCloseRq'],
+    }
     _on_handler['createActivitySocketRq'](method, targetport, owner, 'normal', service, targetip, false, (err, connprofile, entityId)=> {
-      let _as = new SocketPair.ActivitySocket(connprofile, _emitRouter, _unbindActivitySocketList, _debug);
+      let _as = new SocketPair.ActivitySocket(connprofile, _emmiter, _unbindActivitySocketList, _debug);
       if(entityId) {
         _as.setEntityId(entityId);
         connprofile.setBundle('entityId', entityId);
@@ -48,8 +54,13 @@ function Activity() {
   };
 
   this.createDaemonActivitySocket = (method, targetip, targetport, service, owner, callback) => {
+    _emmiter = {
+      Data: _on_handler['EmitSSDataRq'],
+      ServiceFunction: _on_handler['EmitSSServiceFunctionRq'],
+      Close: _on_handler['EmitASCloseRq'],
+    }
     _on_handler['createActivitySocketRq'](method, targetport, owner, 'daemon', service, targetip, _daemon_auth_key, (err, connprofile, entityId)=> {
-      let _as = new SocketPair.ActivitySocket(connprofile, _emitRouter, _unbindActivitySocketList, _debug);
+      let _as = new SocketPair.ActivitySocket(connprofile, _emmiter, _unbindActivitySocketList, _debug);
       if(entityId) {
         _as.setEntityId(entityId);
         connprofile.setBundle('entityId', entityId);
@@ -122,7 +133,7 @@ function Activity() {
   this.close = ()=> {
     ActivitySocketDestroyTimeout = 1000;
     _ASockets = {};
-    _emitRouter = null;
+    _emmiter = null;
     _admin_name = 'admin';
     _daemon_auth_key = null;
     _debug = false;

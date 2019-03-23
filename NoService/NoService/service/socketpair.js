@@ -257,7 +257,7 @@ function ServiceSocket(service_name, prototype, emitter, debug, entity_module, a
   this._emitFunctionCall = (entityId, SFname, jsons, callback) => {
     try {
       if(_socketfunctions[SFname]) {
-        _socketfunctions[SFname].obj(JSON.parse(jsons==null?'{}':jsons), entityId, (err, returnVal)=> {
+        _socketfunctions[SFname].obj(jsons, entityId, (err, returnVal)=> {
           callback(err, returnVal);
         });
       }
@@ -309,42 +309,13 @@ function ServiceSocket(service_name, prototype, emitter, debug, entity_module, a
 
 };
 
-function ActivitySocket(conn_profile, emitRouter, unbindActivitySocketList, debug) {
+function ActivitySocket(conn_profile, emitter, unbindActivitySocketList, debug) {
   // Service Socket callback
-  let _emitdata = (i, d) => {
-    let _data = {
-      "m": "SS",
-      "d": {
-        "i": i,
-        "d": d,
-      }
-    };
-    emitRouter(conn_profile, 'CS', _data);
-  }
+  let _emitasdata = emitter.Data;
 
-  // Service Socket callback
-  let _emitclose = (i) => {
-    let _data = {
-      "m": "CS",
-      "d": {
-        "i": i
-      }
-    };
-    emitRouter(conn_profile, 'CS', _data);
-  }
+  let _emit_sfunc = emitter.ServiceFunction;
 
-  let _emit_sfunc = (entity_id, name, tempid, Json)=> {
-    let _data = {
-      "m": "JF",
-      "d": {
-        "i": entity_id,
-        "n": name,
-        "j": JSON.stringify(Json),
-        "t": tempid
-      }
-    };
-    emitRouter(conn_profile, 'CS', _data);
-  }
+  let _emitasclose = emitter.Close;
 
   let _entity_id;
   let _launched = false;
@@ -409,7 +380,7 @@ function ActivitySocket(conn_profile, emitRouter, unbindActivitySocketList, debu
       _jfqueue[tempid] = (err, returnvalue) => {
         callback(err, returnvalue);
       };
-      _emit_sfunc(_entity_id, name, tempid, Json);
+      _emit_sfunc(conn_profile, _entity_id, name, Json, tempid);
     };
     exec(op);
   }
@@ -420,7 +391,7 @@ function ActivitySocket(conn_profile, emitRouter, unbindActivitySocketList, debu
 
   this.sendData = (data) => {
     let op = ()=> {
-      _emitdata(_entity_id, data);
+      _emitdata(conn_profile, _entity_id, data);
     };
     exec(op);
   };
@@ -455,7 +426,7 @@ function ActivitySocket(conn_profile, emitRouter, unbindActivitySocketList, debu
   this.close = () => {
     let op = ()=> {
       if(!this.remoteClosed)
-        _emitclose(_entity_id);
+        _emitclose(conn_profile, _entity_id);
       this._emitClose();
       let bundle = conn_profile.returnBundle('bundle_entities');
       for (let i=bundle.length-1; i>=0; i--) {

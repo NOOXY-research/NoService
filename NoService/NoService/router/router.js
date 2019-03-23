@@ -29,10 +29,13 @@ function Router() {
   };
 
   // in case of wrong session of the position
-  let _sessionnotsupport = () => {
-    Utils.TagLog('*ERR*', 'session not support');
-    let err = new Error();
-    throw err;
+  let _sessionnotsupport = (protocol, session, data) => {
+    if(_debug) {
+      Utils.TagLog('*WARN*', 'session not support');
+      Utils.TagLog('*WARN*', protocol);
+      Utils.TagLog('*WARN*', session);
+      Utils.TagLog('*WARN*', data);
+    }
   }
 
   // a convinient function fo sending data
@@ -216,7 +219,7 @@ function Router() {
               }
             }
             else {
-              _sessionnotsupport();
+              _sessionnotsupport(p, session, data);
             }
           });
         }
@@ -224,8 +227,6 @@ function Router() {
     });
 
     _coregateway.NSPS.emitRouter = this.emit;
-
-    _coregateway.Activity.setEmitRouter(this.emit);
 
     _coregateway.Implementation.emitRouter = (connprofile, data, data_sender)=>{
       _coregateway.Connection.getClients((er, clients)=>{

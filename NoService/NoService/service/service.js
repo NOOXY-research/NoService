@@ -310,6 +310,7 @@ function Service() {
         if(theservice)
           theservice.emitSSClose(_entitiesId[i], true);
       }
+
       callback(false);
     }
     else {
