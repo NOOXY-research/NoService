@@ -225,7 +225,6 @@ function Router() {
 
     _coregateway.NSPS.emitRouter = this.emit;
 
-    _coregateway.Service.setEmitRouter(this.emit);
     _coregateway.Activity.setEmitRouter(this.emit);
 
     _coregateway.Implementation.emitRouter = (connprofile, data, data_sender)=>{

@@ -5,42 +5,15 @@
 'use strict';
 const Utils = require('../library').Utilities;
 
-function ServiceSocket(service_name, prototype, emitRouter, debug, entity_module, authorization_module) {
+function ServiceSocket(service_name, prototype, emitter, debug, entity_module, authorization_module) {
   let _socketfunctions = prototype==null?{}:prototype;
   let _holding_entities = [];
   // as on data callback
-  let _emitasdata = (conn_profile, i, d) => {
-    let _data = {
-      "m": "AS",
-      "d": {
-        "i": i,
-        "d": d,
-      }
-    };
-    emitRouter(conn_profile, 'CA', _data);
-  }
+  let _emitasdata = emitter.Data;
 
-  let _emitasevent = (conn_profile, i, n, d) => {
-    let _data = {
-      "m": "EV",
-      "d": {
-        "i": i,
-        "n": n,
-        "d": d,
-      }
-    };
-    emitRouter(conn_profile, 'CA', _data);
-  }
+  let _emitasevent = emitter.Event;
 
-  let _emitasclose = (conn_profile, i) => {
-    let _data = {
-      "m": "CS",
-      "d": {
-        "i": i
-      }
-    };
-    emitRouter(conn_profile, 'CA', _data);
-  }
+  let _emitasclose = emitter.Close;
   // JSON Function
 
   let _send_handler;

@@ -24,8 +24,9 @@ function Service() {
   let _workerd;
   let _master_service;
   let _debug_service;
+  let _on_handler = {};
 
-  let _emitRouter;
+  let _emmiter;
 
   // object for managing service.
   function ServiceObj(service_name) {
@@ -123,7 +124,13 @@ function Service() {
           _entity_id = entity_id;
         });
 
-        _service_socket = new SocketPair.ServiceSocket(_service_name, _service_manifest.servicefunctions, _emitRouter, _debug, _entity_module, _authorization_module); // _onServiceFunctionCAll = on ServiceFunction call
+        _emmiter = {
+          Data: _on_handler['EmitASDataRq'],
+          Event: _on_handler['EmitASEventRq'],
+          Close: _on_handler['EmitASCloseRq'],
+        }
+
+        _service_socket = new SocketPair.ServiceSocket(_service_name, _service_manifest.servicefunctions, _emmiter, _debug, _entity_module, _authorization_module); // _onServiceFunctionCAll = on ServiceFunction call
 
         // create the service for module.
         try {
@@ -291,8 +298,6 @@ function Service() {
     _serviceapi_module = serviceapi_module;
     _workerd.importAPI(serviceapi_module);
   };
-
-  this.setEmitRouter = (emitRouter) => {_emitRouter = emitRouter};
 
   this.emitConnectionClose = (connprofile, callback) => {
     let _entitiesId = connprofile.returnBundle('bundle_entities');
@@ -552,6 +557,10 @@ function Service() {
     return Object.keys(_local_services);
   };
 
+  this.on = (type, callback)=> {
+    _on_handler[type] = callback;
+  };
+
   // service module close
   this.close = (callback) => {
     // move debug service and master back
@@ -579,6 +588,8 @@ function Service() {
       _workerd = null;
       _master_service = null;
       _debug_service = null;
+      _on_handler = {};
+      _emmiter = null;
     };
 
     let _close_next =()=> {

@@ -15,6 +15,40 @@ module.exports = function Protocol(coregateway, emitRouter) {
 
   let Activity = coregateway.Activity;
 
+  coregateway.Service.on('EmitASDataRq', (conn_profile, i, d) => {
+    let _data = {
+      "m": "AS",
+      "d": {
+        "i": i,
+        "d": d,
+      }
+    };
+    emitRouter(conn_profile, 'CA', _data);
+  });
+
+  coregateway.Service.on('EmitASEventRq', (conn_profile, i, n, d) => {
+    let _data = {
+      "m": "EV",
+      "d": {
+        "i": i,
+        "n": n,
+        "d": d,
+      }
+    };
+    emitRouter(conn_profile, 'CA', _data);
+  });
+
+  coregateway.Service.on('EmitASCloseRq', (conn_profile, i) => {
+    let _data = {
+      "m": "CS",
+      "d": {
+        "i": i
+      }
+    };
+    emitRouter(conn_profile, 'CA', _data);
+  });
+
+
   this.RequestHandler = (connprofile, data, response_emit) => {
 
     let methods = {
