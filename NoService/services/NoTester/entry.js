@@ -175,7 +175,7 @@ function Service(Me, NoService) {
       }
     }, (err, model)=>{
       if(err) {
-        log(err)
+        log(err.stack)
       }
       else {
         log('Object Model Create.');
@@ -185,13 +185,13 @@ function Service(Me, NoService) {
           property2: 0
         }, (err)=> {
           if(err) {
-            log(err)
+            log(err.stack)
           }
           else {
             log('Object Model Get.');
             model.get(0, (err, result)=> {
               if(err) {
-                log(err)
+                log(err.stack)
               }
               else {
                 log(result);
@@ -202,14 +202,14 @@ function Service(Me, NoService) {
                   property2: 0
                 }, (err)=> {
                   if(err) {
-                    log(err)
+                    log(err.stack)
                   }
                   else {
                     model.get(0, (err, result)=> {
                       log(result);
                       NoService.Database.Model.remove('ObjectTest', (err)=>{
                         if(err) {
-                          log(err);
+                          log(err.stack);
                         }
                         else {
                           log('Object Model PASS.');
@@ -237,7 +237,7 @@ function Service(Me, NoService) {
       }
     }, (err, model)=>{
       if(err) {
-        log(err)
+        log(err.stack)
       }
       else {
         log('IndexedList Model Append Test.');
@@ -260,13 +260,13 @@ function Service(Me, NoService) {
           }
         ], (err)=> {
           if(err) {
-            log(err)
+            log(err.stack)
           }
           else {
             log('IndexedList Model Get Test.');
             model.getAllRows((err, result)=> {
               if(err) {
-                log(err)
+                log(err.stack)
               }
               else {
                 log(result);
@@ -282,7 +282,7 @@ function Service(Me, NoService) {
                   }
                 ], (err)=> {
                   if(err) {
-                    log(err);
+                    log(err.stack);
                   }
                   else {
                     log('IndexedList Model getRowsFromTo Test.');
@@ -290,7 +290,7 @@ function Service(Me, NoService) {
                       log(result);
                       NoService.Database.Model.remove('IndexedListTest', (err)=>{
                         if(err) {
-                          log(err);
+                          log(err.stack);
                         }
                         else {
                           log('IndexedList Model PASS.');
@@ -317,7 +317,7 @@ function Service(Me, NoService) {
       }
     }, (err, model)=>{
       if(err) {
-        log(err)
+        log(err.stack)
       }
       else {
         log('GroupIndexedList Model Append Test.');
@@ -340,13 +340,13 @@ function Service(Me, NoService) {
           }
         ], (err)=> {
           if(err) {
-            log(err)
+            log(err.st)
           }
           else {
             log('GroupIndexedList Model Get Test.');
             model.getAllRows('Group1' ,(err, result)=> {
               if(err) {
-                log(err)
+                log(err.stack)
               }
               else {
                 log(result);
@@ -370,7 +370,7 @@ function Service(Me, NoService) {
                   }
                 ], (err)=> {
                   if(err) {
-                    log(err)
+                    log(err.stack)
                   }
                   else {
                     log('GroupIndexedList Model Update Test.');
@@ -385,7 +385,7 @@ function Service(Me, NoService) {
                       }
                     ], (err)=> {
                       if(err) {
-                        log(err);
+                        log(err.stack);
                       }
                       else {
                         log('GroupIndexedList Model getRowsFromTo Test.');
@@ -395,12 +395,12 @@ function Service(Me, NoService) {
                           model.searchAllNRows('Group2', '%2', 3, (err, rows)=> {
                             log(rows);
                             if(err) {
-                              log(err);
+                              log(err.stack);
                             }
                             else {
                               NoService.Database.Model.remove('GroupIndexedList', (err)=>{
                                 if(err) {
-                                  log(err);
+                                  log(err.stack);
                                 }
                                 else {
                                   log('GroupIndexedList Model PASS.');

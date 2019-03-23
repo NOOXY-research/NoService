@@ -211,7 +211,7 @@ function Authorization() {
   };
 
   this.close = () =>{
-    _queue_operation = null;
+    
   }
 };
 

@@ -84,7 +84,7 @@ class WorkerClient:
     # onMessage event callback
     async def onMessage(self, message):
         message = json.loads(message)
-        if message['t'] === 0:
+        if message['t'] == 0:
             p = re.compile('.*\/([^\/]*)\/entry')
             self._service_name = p.match(message['p']).group(1)
             self._close_timeout = message['c'];
@@ -96,7 +96,7 @@ class WorkerClient:
                 def getSettingsCallback(err, daemon_setting):
                     if Me['Manifest']['LibraryAPI']:
                         pass
-                    setattr(self._api, 'Constants', json.loads(open(sys.path[0]+'/'+message['cpath']).read()))
+                    setattr(self._api, 'Constants', json.loads(open(message['cpath']).read()))
                     os.chdir(Me['FilesPath'])
                     sys.path.append(message['p'].split('/entry')[0])
                     from entry import Service
@@ -105,25 +105,25 @@ class WorkerClient:
                 self._api.Daemon.getSettings(getSettingsCallback)
             self._api.getMe(getMeCallback)
             # not completed
-        elif message['t'] === 1:
+        elif message['t'] == 1:
             try:
                 self._service_module.start(self._Me, self._api)
                 self.send({'t': 2});
             except Exception as e:
                 self.send({'t': 98, 'e': str(traceback.format_exc())});
-        elif message['t'] === 2:
+        elif message['t'] == 2:
             callObjCallback(self._local_obj_callbacks_dict[message['p'][0]], message['p'][1], message['a'], message['o'], self.emitParentCallback, generateObjCallbacks)
-        elif message['t'] === 3:
+        elif message['t'] == 3:
             del  self._local_obj_callbacks_dict[message['i']]
-        elif message['t'] === 4:
+        elif message['t'] == 4:
             self.send({'t':6, 'i':message['i'], 'c': len(_local_obj_callbacks_dict)})
-        elif message['t'] === 5:
+        elif message['t'] == 5:
             # not implemented
             self.send({'t':7, 'i':message['i'], 'c': {"rss":0}})
-        elif message['t'] === 98:
+        elif message['t'] == 98:
             print(message['e'])
-        elif message['t'] === 99:
-            if self._closed === False:
+        elif message['t'] == 99:
+            if self._closed == False:
                 self._closed = True
                 if self._service_module:
                     try:
@@ -143,7 +143,7 @@ class WorkerClient:
 async def readOneMessege(reader):
     msg_string = ""
     msg_size = (await reader.read(IPC_MSG_SIZE_PREFIX_SIZE)).decode()
-    if msg_size === '':
+    if msg_size == '':
         return None
     else:
         msg_size = int(msg_size)

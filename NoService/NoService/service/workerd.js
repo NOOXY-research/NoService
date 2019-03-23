@@ -438,7 +438,8 @@ function WorkerDaemon() {
       _init_callback = init_callback;
       _child = spawn('python3', [require.resolve('./python/worker.py'), _unix_socket_path, _service_name], {stdio: [process.stdin, process.stdout, process.stderr, 'ipc']});
       _child.on('close', (code)=> {
-        _init_callback(new Error('PythonWorkerClient of "'+_service_name+'" occured error.'));
+        if(code)
+          _init_callback(new Error('PythonWorkerClient of "'+_service_name+'" occured error.'));
       });
       _child_alive = true;
     };

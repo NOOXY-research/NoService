@@ -432,8 +432,8 @@ function Core(NoServiceLibrary, settings) {
       // Import connected db to model module
       _init_model.setTableName(Constants.MODEL_TABLE_NAME);
       _init_model.setTablePrefix(Constants.MODEL_TABLE_PREFIX);
-      _init_model.setIndexkey(Constants.MODEL_INDEXKEY);
-      _init_model.setGroupkey(Constants.MODEL_GROUPKEY);
+      _init_model.setIndexkey(Constants.MODEL_INDEX_KEY);
+      _init_model.setGroupkey(Constants.MODEL_GROUP_KEY);
 
       _init_model.importDatabase(_init_db, (err)=> {
         if(err) {

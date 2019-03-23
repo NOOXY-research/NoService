@@ -4,6 +4,7 @@
 // to keep retyping sql for table.
 // Copyright 2018-2019 NOOXY. All Rights Reserved.
 
+
 'use strict';
 
 const Utils = require('../library').Utilities;
