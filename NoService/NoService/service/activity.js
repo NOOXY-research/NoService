@@ -5,7 +5,6 @@
 'use strict';
 
 const SocketPair = require('./socketpair');
-const Utils = require('../library').Utilities;
 
 function Activity() {
   let ActivitySocketDestroyTimeout = 1000;
@@ -14,7 +13,7 @@ function Activity() {
   let _admin_name = 'admin';
   let _daemon_auth_key;
   let _debug = false;
-  let _ActivityRsCEcallbacks = {};
+  let _on_handler = {};
 
   let _unbindActivitySocketList = (_entity_id)=> {
     setTimeout(()=>{
@@ -25,130 +24,22 @@ function Activity() {
     }, ActivitySocketDestroyTimeout);
   };
 
-  // ClientSide
-  this.ServiceRsRouter =  (connprofile, data) => {
-
-    let methods = {
-      // nooxy service protocol implementation of "Call Service: Vertify Connection"
-      VE: (connprofile, data) => {
-        if(data.d.s === 'OK') {
-          _ASockets[data.d.i].launch();
-        }
-        else {
-          _ASockets[data.d.i]._emitClose();
-        }
-      },
-      // nooxy service protocol implementation of "Call Service: ServiceSocket"
-      SS: (connprofile, data) => {
-
-      },
-      // nooxy service protocol implementation of "Call Service: JSONfunction"
-      JF: (connprofile, data) => {
-        if(data.d.s === 'OK') {
-          _ASockets[data.d.i].sendJFReturn(false, data.d.t, data.d.r);
-        }
-        else {
-          _ASockets[data.d.i].sendJFReturn(true, data.d.t, data.d.r);
-        }
-      },
-      // nooxy service protocol implementation of "Call Activity: createEntity"
-      CE: (connprofile, data) => {
-        // tell server finish create
-        if(data.d.i != null) {
-          // create a description of this service entity.
-          _ActivityRsCEcallbacks[data.d.t](connprofile, data);
-          let _data = {
-            "m": "VE",
-            "d": {
-              "i": data.d.i,
-            }
-          };
-
-          _emitRouter(connprofile, 'CS', _data);
-        }
-        else {
-          _ActivityRsCEcallbacks[data.d.t](connprofile, data);
-          delete  _ActivityRsCEcallbacks[data.d.t];
-          connprofile.closeConnetion();
-        }
-      }
-    }
-
-    // call the callback.
-    methods[data.m](connprofile, data);
-  };
-
-  this.ActivityRqRouter = (connprofile, data, response_emit) => {
-
-    let methods = {
-      // nooxy service protocol implementation of "Call Activity: ActivitySocket"
-      AS: () => {
-        _ASockets[data.d.i]._emitData(data.d.d);
-        let _data = {
-          "m": "AS",
-          "d": {
-            // status
-            "i": data.d.i,
-            "s": "OK"
-          }
-        };
-        response_emit(connprofile, 'CA', 'rs', _data);
-      },
-      // nooxy service protocol implementation of "Call Activity: Event"
-      EV: () => {
-        _ASockets[data.d.i]._emitEvent(data.d.n, data.d.d);
-        let _data = {
-          "m": "EV",
-          "d": {
-            // status
-            "i": data.d.i,
-            "s": "OK"
-          }
-        };
-        response_emit(connprofile, 'CA', 'rs', _data);
-      },
-      // nooxy service protocol implementation of "Call Activity: Close ActivitySocket"
-      CS: () => {
-        _ASockets[data.d.i].remoteClosed = true;
-        _ASockets[data.d.i].close();
-      }
-    }
-    // call the callback.
-    methods[data.m](connprofile, data.d, response_emit);
-  }
-
   this.setEmitRouter = (emitRouter) => {_emitRouter = emitRouter};
 
   // Service module create activity socket
   this.createActivitySocket = (method, targetip, targetport, service, owner, callback) => {
-    let err = false;
-    let _data = {
-      "m": "CE",
-      "d": {
-        t: Utils.generateGUID(),
-        o: owner,
-        m: 'normal',
-        s: service,
-        od: targetip,
-      }
-    };
-
-    this.spawnClient(method, targetip, targetport, (err, connprofile) => {
+    _on_handler['createActivitySocketRq'](method, targetport, owner, 'normal', service, targetip, false, (err, connprofile, entityId)=> {
       let _as = new SocketPair.ActivitySocket(connprofile, _emitRouter, _unbindActivitySocketList, _debug);
-      _ActivityRsCEcallbacks[_data.d.t] = (connprofile, data) => {
-        if(data.d.i) {
-          _as.setEntityId(data.d.i);
-          connprofile.setBundle('entityId', data.d.i);
-          _ASockets[data.d.i] = _as;
-          callback(false, _ASockets[data.d.i]);
-        }
-        else{
-          delete  _ASockets[data.d.i];
-          callback(new Error('Could not create this entity for some reason.'));
-        }
-
+      if(entityId) {
+        _as.setEntityId(entityId);
+        connprofile.setBundle('entityId', entityId);
+        _ASockets[entityId] = _as;
+        callback(false, _ASockets[entityId]);
       }
-      _emitRouter(connprofile, 'CS', _data);
+      else{
+        delete  _ASockets[entityId];
+        callback(new Error('Could not create this entity for some reason.'));
+      }
     });
   };
 
@@ -157,38 +48,44 @@ function Activity() {
   };
 
   this.createDaemonActivitySocket = (method, targetip, targetport, service, owner, callback) => {
-    let err = false;
-    let _data = {
-      "m": "CE",
-      "d": {
-        t: Utils.generateGUID(),
-        m: 'daemon',
-        k: _daemon_auth_key,
-        o: owner,
-        s: service,
-        od: targetip,
-      }
-    };
-
-
-    this.spawnClient(method, targetip, targetport, (err, connprofile) => {
+    _on_handler['createActivitySocketRq'](method, targetport, owner, 'daemon', service, targetip, _daemon_auth_key, (err, connprofile, entityId)=> {
       let _as = new SocketPair.ActivitySocket(connprofile, _emitRouter, _unbindActivitySocketList, _debug);
-      _ActivityRsCEcallbacks[_data.d.t] = (connprofile, data) => {
-        if(data.d.i) {
-          _as.setEntityId(data.d.i);
-          connprofile.setBundle('entityId', data.d.i);
-          _ASockets[data.d.i] = _as;
-          callback(false, _as);
-        }
-        else{
-          delete  _ASockets[data.d.i];
-          callback(true);
-        }
-
+      if(entityId) {
+        _as.setEntityId(entityId);
+        connprofile.setBundle('entityId', entityId);
+        _ASockets[entityId] = _as;
+        callback(false, _ASockets[entityId]);
       }
-      _emitRouter(connprofile, 'CS', _data);
+      else{
+        delete  _ASockets[entityId];
+        callback(new Error('Could not create this entity for some reason.'));
+      }
     });
+  };
 
+  this.emitASClose = (entityId)=> {
+    _ASockets[entityId].remoteClosed = true;
+    _ASockets[entityId]._emitClose();
+  };
+
+  this.emitASData = (entityId, data)=> {
+    _ASockets[entityId]._emitData(data);
+  };
+
+  this.emitSFReturn = (entityId, err, tempid, returnvalue)=> {
+    _ASockets[entityId].emitSFReturn(err, tempid, returnvalue);
+  };
+
+  this.emitASData = (entityId, data)=> {
+    _ASockets[entityId]._emitData(data);
+  };
+
+  this.emitASEvent = (entityId, event, data)=> {
+    _ASockets[entityId]._emitEvent(event, data);
+  };
+
+  this.launchActivitySocketByEntityId = (entityId)=> {
+    _ASockets[entityId].launch();
   };
 
   this.spawnClient = () => {throw new Error('spawnClient not implemented')};
@@ -218,8 +115,18 @@ function Activity() {
     _daemon_auth_key = key;
   };
 
-  this.close = ()=> {
+  this.on = (event, callback)=> {
+    _on_handler[event] = callback;
+  };
 
+  this.close = ()=> {
+    ActivitySocketDestroyTimeout = 1000;
+    _ASockets = {};
+    _emitRouter = null;
+    _admin_name = 'admin';
+    _daemon_auth_key = null;
+    _debug = false;
+     _on_handler = {};
   };
 }
 

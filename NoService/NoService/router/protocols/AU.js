@@ -6,11 +6,6 @@
 'use strict';
 
 module.exports = function Protocol(coregateway, emitRouter) {
-  let _queue_operation = {};
-  let Entity = coregateway.Entity;
-  let Utils = coregateway.Utilities;
-  let _auth_timeout = 180;
-  let Implementation = coregateway.Implementation;
 
   this.Protocol = "AU";
 
@@ -18,6 +13,13 @@ module.exports = function Protocol(coregateway, emitRouter) {
     rq: "Server",
     rs: "Client"
   };
+
+  let Implementation = coregateway.Implementation;
+  let Entity = coregateway.Entity;
+  let Utils = coregateway.Utilities;
+
+  let _queue_operation = {};
+  let _auth_timeout = 180;
 
   // ServerSide
   coregateway.Authorization.on('AuthPasswordRq', (entityId, callback)=> {

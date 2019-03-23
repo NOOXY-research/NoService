@@ -29,7 +29,7 @@ function Service(Me, NoService) {
       log(rows);
     });
 
-    // JSONfunction is a function that can be defined, which others entities can call.
+    // ServiceFunction is a function that can be defined, which others entities can call.
     // It is a NOOXY Service Framework Standard
     log('ServiceSocket Test');
     ss.def('jfunc1', (json, entityId, returnJSON)=>{
@@ -37,7 +37,7 @@ function Service(Me, NoService) {
         log('Auth status: '+pass)
         log(json);
         // Code here for JSONfunciton
-        // Return Value for JSONfunction call. Otherwise remote will not recieve funciton return value.
+        // Return Value for ServiceFunction call. Otherwise remote will not recieve funciton return value.
         let json_be_returned = {
           d: 'Hello! ServiceFunction return from service!'
         }
@@ -46,10 +46,10 @@ function Service(Me, NoService) {
       });
     });
 
-    // Safe define a JSONfunction.
-    ss.sdef('SafeJSONfunction', (json, entityId, returnJSON)=>{
+    // Safe define a ServiceFunction.
+    ss.sdef('SafeServiceFunction', (json, entityId, returnJSON)=>{
       // Code here for JSONfunciton
-      // Return Value for JSONfunction call. Otherwise remote will not recieve funciton return value.
+      // Return Value for ServiceFunction call. Otherwise remote will not recieve funciton return value.
       let json_be_returned = {
         d: 'Hello! NOOXY Service Framework!'
       }

@@ -281,15 +281,15 @@ function ServiceSocket(service_name, prototype, emitRouter, debug, entity_module
     _on_dict[type] = callback;
   };
 
-  this._emitFunctionCall = (entityId, JFname, jsons, callback) => {
+  this._emitFunctionCall = (entityId, SFname, jsons, callback) => {
     try {
-      if(_socketfunctions[JFname]) {
-        _socketfunctions[JFname].obj(JSON.parse(jsons==null?'{}':jsons), entityId, (err, returnVal)=> {
+      if(_socketfunctions[SFname]) {
+        _socketfunctions[SFname].obj(JSON.parse(jsons==null?'{}':jsons), entityId, (err, returnVal)=> {
           callback(err, returnVal);
         });
       }
       else {
-        throw new Error('JSONfunction '+JFname+' not exist');
+        throw new Error('ServiceFunction '+SFname+' not exist');
       }
     }
     catch (err) {
@@ -360,7 +360,7 @@ function ActivitySocket(conn_profile, emitRouter, unbindActivitySocketList, debu
     emitRouter(conn_profile, 'CS', _data);
   }
 
-  let _emitjfunc = (entity_id, name, tempid, Json)=> {
+  let _emit_sfunc = (entity_id, name, tempid, Json)=> {
     let _data = {
       "m": "JF",
       "d": {
@@ -420,7 +420,7 @@ function ActivitySocket(conn_profile, emitRouter, unbindActivitySocketList, debu
     }
   };
 
-  this.sendJFReturn = (err, tempid, returnvalue) => {
+  this.emitSFReturn = (err, tempid, returnvalue) => {
     if(err) {
       _jfqueue[tempid](err);
     }
@@ -429,14 +429,14 @@ function ActivitySocket(conn_profile, emitRouter, unbindActivitySocketList, debu
     }
   };
 
-  // JSONfunction call
+  // ServiceFunction call
   this.call = (name, Json, callback) => {
     let op = ()=> {
       let tempid = Utils.generateUniqueId();
       _jfqueue[tempid] = (err, returnvalue) => {
         callback(err, returnvalue);
       };
-      _emitjfunc(_entity_id, name, tempid, Json);
+      _emit_sfunc(_entity_id, name, tempid, Json);
     };
     exec(op);
   }

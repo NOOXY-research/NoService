@@ -123,7 +123,7 @@ function Service() {
           _entity_id = entity_id;
         });
 
-        _service_socket = new SocketPair.ServiceSocket(_service_name, _service_manifest.servicefunctions, _emitRouter, _debug, _entity_module, _authorization_module); // _onJFCAll = on JSONfunction call
+        _service_socket = new SocketPair.ServiceSocket(_service_name, _service_manifest.servicefunctions, _emitRouter, _debug, _entity_module, _authorization_module); // _onServiceFunctionCAll = on ServiceFunction call
 
         // create the service for module.
         try {
@@ -222,8 +222,8 @@ function Service() {
       _service_socket._emitData(entityId, data);
     };
 
-    this.emitSSJFCall = (entityId, JFname, jsons, callback) => {
-      _service_socket._emitFunctionCall(entityId, JFname, jsons, callback);
+    this.emitSSServiceFunctionCall = (entityId, SFname, jsons, callback) => {
+      _service_socket._emitFunctionCall(entityId, SFname, jsons, callback);
     };
 
     this.returnManifest = () => {

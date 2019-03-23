@@ -14,6 +14,32 @@ module.exports = function Protocol(coregateway, emitRouter) {
   };
 
   let Service = coregateway.Service;
+  let Activity = coregateway.Activity;
+  let Utils = coregateway.Utilities;
+
+  let _ActivityRsCEcallbacks = {};
+
+  Activity.on('createActivitySocketRq', (method, targetport, owner, mode, service, targetip, daemon_authkey, callback)=> {
+    let err = false;
+    let _data = {
+      "m": "CE",
+      "d": {
+        t: Utils.generateGUID(),
+        o: owner,
+        m: mode,
+        s: service,
+        od: targetip,
+        k: daemon_authkey
+      }
+    };
+    coregateway.Connection.createClient(method, targetip, targetport, (err, connprofile) => {
+      _ActivityRsCEcallbacks[_data.d.t] = (connprofile, data) => {
+        callback(false, connprofile, data.d.i);
+      }
+      emitRouter(connprofile, 'CS', _data);
+    });
+
+  });
 
   // Serverside
   this.RequestHandler = (connprofile, data, response_emit) => {
@@ -86,7 +112,7 @@ module.exports = function Protocol(coregateway, emitRouter) {
         JF: (connprofile, data, response_emit) => {
           let _data;
           if(typeof(theservice) != 'undefined') {
-            theservice.emitSSJFCall(data.i, data.n, data.j, (err, returnvalue)=>{
+            theservice.emitSSServiceFunctionCall(data.i, data.n, data.j, (err, returnvalue)=>{
               if(err) {
                 _data = {
                   m: "JF",
@@ -152,6 +178,57 @@ module.exports = function Protocol(coregateway, emitRouter) {
     });
   };
 
-  this.ResponseHandler = coregateway.Activity.ServiceRsRouter;
+  this.ResponseHandler = (connprofile, data) => {
+    let methods = {
+      // nooxy service protocol implementation of "Call Service: Vertify Connection"
+      VE: (connprofile, data) => {
+        if(data.d.s === 'OK') {
+          Activity.launchActivitySocketByEntityId(data.d.i);
+
+        }
+        else {
+          Activity.emitASClose(data.d.i);
+
+        }
+      },
+      // nooxy service protocol implementation of "Call Service: ServiceSocket"
+      SS: (connprofile, data) => {
+
+      },
+      // nooxy service protocol implementation of "Call Service: ServiceFunction"
+      JF: (connprofile, data) => {
+        if(data.d.s === 'OK') {
+          Activity.emitSFReturn(data.d.i, false, data.d.t, data.d.r);
+        }
+        else {
+          Activity.emitSFReturn(data.d.i, true, data.d.t, data.d.r);
+        }
+      },
+      // nooxy service protocol implementation of "Call Activity: createEntity"
+      CE: (connprofile, data) => {
+        // tell server finish create
+        if(data.d.i != null) {
+          // create a description of this service entity.
+          _ActivityRsCEcallbacks[data.d.t](connprofile, data);
+          let _data = {
+            "m": "VE",
+            "d": {
+              "i": data.d.i,
+            }
+          };
+
+          emitRouter(connprofile, 'CS', _data);
+        }
+        else {
+          _ActivityRsCEcallbacks[data.d.t](connprofile, data);
+          delete  _ActivityRsCEcallbacks[data.d.t];
+          connprofile.closeConnetion();
+        }
+      }
+    }
+
+    // call the callback.
+    methods[data.m](connprofile, data);
+  };
 
 }

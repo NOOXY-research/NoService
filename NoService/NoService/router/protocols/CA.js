@@ -9,11 +9,49 @@ module.exports = function Protocol(coregateway, emitRouter) {
   this.Protocol = "CA";
 
   this.Positions = {
-    rq: "Both",
-    rs: "Both"
+    rq: "Server",
+    rs: "Client"
   };
 
-  this.RequestHandler = coregateway.Activity.ActivityRqRouter;
+  let Activity = coregateway.Activity;
+
+  this.RequestHandler = (connprofile, data, response_emit) => {
+
+    let methods = {
+      // nooxy service protocol implementation of "Call Activity: ActivitySocket"
+      AS: () => {
+        Activity.emitASData(data.d.i, data.d.d);
+        let _data = {
+          "m": "AS",
+          "d": {
+            // status
+            "i": data.d.i,
+            "s": "OK"
+          }
+        };
+        response_emit(connprofile, 'CA', 'rs', _data);
+      },
+      // nooxy service protocol implementation of "Call Activity: Event"
+      EV: () => {
+        Activity.emitASEvent(data.d.i, data.d.n, data.d.d);
+        let _data = {
+          "m": "EV",
+          "d": {
+            // status
+            "i": data.d.i,
+            "s": "OK"
+          }
+        };
+        response_emit(connprofile, 'CA', 'rs', _data);
+      },
+      // nooxy service protocol implementation of "Call Activity: Close ActivitySocket"
+      CS: () => {
+        Activity.emitASClose(data.d.i);
+      }
+    }
+    // call the callback.
+    methods[data.m](connprofile, data.d, response_emit);
+  };
 
   // Serverside
   this.ResponseHandler = (connprofile, data) => {
