@@ -350,215 +350,6 @@ function Service() {
       callback(false);
     }
   };
-  // Serverside
-  this.ServiceRqRouter = (connprofile, data, response_emit) => {
-    let theservice;
-    if(data.d.i != null) {
-      theservice = _local_services[_entity_module.returnEntityValue(data.d.i, 'service')];
-    }
-
-    let methods = {
-      // nooxy service protocol implementation of "Call Service: Close ServiceSocket"
-      CS: (connprofile, data, response_emit) => {
-        let _entitiesId = connprofile.returnBundle('bundle_entities');
-        let index = _entitiesId.indexOf(data.i);
-        if (index > -1) {
-          _entitiesId.splice(index, 1);
-        }
-        connprofile.setBundle('bundle_entities', _entitiesId);
-        theservice.emitSSClose(data.i, true);
-      },
-
-      // nooxy service protocol implementation of "Call Service: Vertify Entity"
-      VE: (connprofile, data, response_emit) => {
-        theservice.emitSSConnection(data.i, (err)=> {
-          let _data;
-          if(err) {
-            _data = {
-              m: "VE",
-              d: {
-                i: data.i,
-                "s": "Fail"
-              }
-            }
-          }
-          else {
-            _data = {
-              m: "VE",
-              d: {
-                i: data.i,
-                "s": "OK"
-              }
-            }
-          }
-          response_emit(connprofile, 'CS', 'rs', _data);
-        });
-
-      },
-      // nooxy service protocol implementation of "Call Service: ServiceSocket"
-      SS: (connprofile, data, response_emit) => {
-        let _data;
-        if(typeof(theservice) != 'undefined'||theservice!=null) {
-          theservice.emitSSData(data.i, data.d);
-          _data = {
-            m: "SS",
-            d: {
-              // status
-              "i": data.i,
-              "s": "OK"
-            }
-          };
-        }
-        else {
-          _data = {
-            m: "SS",
-            d: {
-              // status
-              "i": data.i,
-              "s": "Fail"
-            }
-          };
-        }
-        response_emit(connprofile, 'CS', 'rs', _data);
-      },
-      // nooxy service protocol implementation of "Call Service: json function"
-      JF: (connprofile, data, response_emit) => {
-        let _data;
-        if(typeof(theservice) != 'undefined') {
-          theservice.emitSSJFCall(data.i, data.n, data.j, (err, returnvalue)=>{
-            if(err) {
-              _data = {
-                m: "JF",
-                d: {
-                  // status
-                  "t": data.t,
-                  "i": data.i,
-                  "s": err.stack
-                }
-              };
-            }
-            else {
-              _data = {
-                m: "JF",
-                d: {
-                  // status
-                  "t": data.t,
-                  "i": data.i,
-                  "s": "OK",
-                  "r": JSON.stringify(returnvalue)
-                }
-              };
-            }
-            response_emit(connprofile, 'CS', 'rs', _data);
-          });
-        }
-        else {
-          _data = {
-            m: "JF",
-            d: {
-              // status
-              "t": data.t,
-              "i": data.i,
-              "s": "Fail"
-            }
-          };
-          response_emit(connprofile, 'CS', 'rs', _data);
-        }
-      },
-
-      // nooxy service protocol implementation of "Call Service: createEntity"
-      CE: (connprofile, data, response_emit) => {
-        if(_local_services[data.s] != null) {
-          // create a description of this service entity.
-          let _entity_json = {
-            serverid: connprofile.returnServerId(),
-            service: data.s,
-            mode: data.m,
-            daemonauthkey: data.k,
-            type: "Activity",
-            spwandomain: connprofile.returnClientIP(),
-            owner: data.o,
-            ownerdomain: data.od,
-            connectiontype:connprofile.returnConnMethod(),
-            description: data.d
-          };
-
-          if(_entity_json.owner === "") {
-            _entity_json.owner = null;
-          }
-
-          if(!_entity_json.mode) {
-            _entity_json.mode = 'normal';
-          }
-
-          if(!_entity_json.ownerdomain) {
-            _entity_json.ownerdomain === connprofile.returnHostIP();
-          }
-          _authenticity_module.getUserIdByUsername(data.o, (err, ownerid)=> {
-            if(err) {
-              response_emit(connprofile, 'CS', 'rs', {
-                "m": "CE",
-                "d": {
-                  // temp id
-                  "t": data.t,
-                  "i": null
-                }
-              });
-            }
-            else {
-              _entity_json.ownerid = ownerid;
-              _entity_module.registerEntity(_entity_json, connprofile, (err, id) => {
-                if(err) {
-                  response_emit(connprofile, 'CS', 'rs', {
-                    "m": "CE",
-                    "d": {
-                      // temp id
-                      "t": data.t,
-                      "i": null
-                    }
-                  });
-                }
-                else {
-                  let entities_prev = connprofile.returnBundle('bundle_entities');
-                  if(entities_prev != null) {
-                    connprofile.setBundle('bundle_entities', [id].concat(entities_prev));
-                  }
-                  else {
-                    connprofile.setBundle('bundle_entities', [id]);
-                  }
-                  response_emit(connprofile, 'CS', 'rs', {
-                    "m": "CE",
-                    "d": {
-                      // temp id
-                      "t": data.t,
-                      "i": id
-                    }
-                  });
-                }
-              });
-            }
-          });
-        }
-        else {
-          if(_debug) {
-
-          }
-          let _data = {
-            "m": "CE",
-            "d": {
-              // temp id
-              "t": data.t,
-              "i": null
-            }
-          };
-          response_emit(connprofile, 'CS', 'rs', _data);
-        }
-      }
-    }
-
-    // call the callback.
-    methods[data.m](connprofile, data.d, response_emit);
-  };
 
   // ClientSide
   this.ServiceRsRouter =  (connprofile, data) => {
@@ -898,6 +689,71 @@ function Service() {
 
   this.isServiceClosed = (service_name, callback)=> {
     _local_services[service_name].isClosed(callback);
+  };
+
+  this.getServiceInstanceByEntityId = (entityId, callback)=> {
+    let i = _local_services[_entity_module.returnEntityValue(entityId, 'service')];
+    callback((!i)?(new Error('Service not exist.')):false, i);
+  };
+
+  this.createEntity = (connprofile, service_name, mode, daemon_authkey, spawn_domain, owner,
+    owner_domain, serverid, connection_type, description, callback) => {
+    if(_local_services[service_name] != null) {
+      // create a description of this service entity.
+      let _entity_json = {
+        service: service_name,
+        mode: mode,
+        daemonauthkey: daemon_authkey,
+        type: "Activity",
+        spwandomain: spawn_domain,
+        owner: owner,
+        ownerdomain: owner_domain,
+        serverid: serverid,
+        connectiontype: connection_type,
+        description: description
+      };
+
+      if(_entity_json.owner === "") {
+        _entity_json.owner = null;
+      }
+
+      if(!_entity_json.mode) {
+        _entity_json.mode = 'normal';
+      }
+
+      if(!_entity_json.ownerdomain) {
+        _entity_json.ownerdomain === connprofile.returnHostIP();
+      }
+      _authenticity_module.getUserIdByUsername(owner, (err, ownerid)=> {
+        if(err) {
+          callback(err);
+        }
+        else {
+          _entity_json.ownerid = ownerid;
+          _entity_module.registerEntity(_entity_json, connprofile, (err, id) => {
+            if(err) {
+              callback(err);
+            }
+            else {
+              let entities_prev = connprofile.returnBundle('bundle_entities');
+              if(entities_prev != null) {
+                connprofile.setBundle('bundle_entities', [id].concat(entities_prev));
+              }
+              else {
+                connprofile.setBundle('bundle_entities', [id]);
+              }
+              callback(false, id);
+            }
+          });
+        }
+      });
+    }
+    else {
+      if(_debug) {
+
+      }
+      callback(new Error('The service "'+service_name+'" does not exist.'));
+    }
   };
 
 
