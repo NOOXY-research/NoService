@@ -1,6 +1,6 @@
 {
   "version": "aphla-0.5.5",
-  "NSP_version": "aphla 0.4.0",
+  "NSP_version": "aphla 0.4.1",
   "copyright": "copyright(c)2018-2019 NOOXY inc.",
   "default_user": {
     "username": "admin",

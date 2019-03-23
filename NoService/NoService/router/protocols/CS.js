@@ -168,7 +168,7 @@ module.exports = function Protocol(coregateway, emitRouter) {
                     "t": data.t,
                     "i": data.i,
                     "s": "OK",
-                    "r": JSON.stringify(returnvalue)
+                    "r": returnvalue
                   }
                 };
               }

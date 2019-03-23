@@ -107,8 +107,10 @@ function Activity() {
       _ASockets[_entitiesId[i]]._emitClose();
       setTimeout(()=>{
         // for worker abort referance
-        _ASockets[_entitiesId[i]].worker_cancel_refer = true;
-        delete _ASockets[_entitiesId[i]];
+        if(_ASockets_entitiesId[i]) {
+          _ASockets[_entitiesId[i]].worker_cancel_refer = true;
+          delete _ASockets[_entitiesId[i]];
+        }
       }, ActivitySocketDestroyTimeout);
     }
     callback(false);
@@ -132,6 +134,10 @@ function Activity() {
 
   this.close = ()=> {
     ActivitySocketDestroyTimeout = 1000;
+    for(let i in _entitiesId) {
+      _ASockets[_entitiesId[i]].worker_cancel_refer = true;
+      delete _ASockets[_entitiesId[i]];
+    }
     _ASockets = {};
     _emmiter = null;
     _admin_name = 'admin';

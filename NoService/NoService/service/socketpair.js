@@ -369,7 +369,7 @@ function ActivitySocket(conn_profile, emitter, unbindActivitySocketList, debug) 
       _jfqueue[tempid](err);
     }
     else {
-      _jfqueue[tempid](err, JSON.parse(returnvalue));
+      _jfqueue[tempid](err, returnvalue);
     }
   };
 
