@@ -10,6 +10,7 @@ module.exports = function Protocol(coregateway, emitRouter) {
   let Entity = coregateway.Entity;
   let Utils = coregateway.Utilities;
   let _auth_timeout = 180;
+  let Implementation = coregateway.Implementation;
 
   this.Protocol = "AU";
 
@@ -18,6 +19,7 @@ module.exports = function Protocol(coregateway, emitRouter) {
     rs: "Client"
   };
 
+  // ServerSide
   coregateway.Authorization.on('AuthPasswordRq', (entityId, callback)=> {
     Entity.getEntityConnProfile(entityId, (err, connprofile) => {
       let data = {
@@ -67,9 +69,50 @@ module.exports = function Protocol(coregateway, emitRouter) {
       emitRouter(connprofile, 'AU', {m: 'SI'});
     });
   });
+  // ServerSide end
+
+  // ClientSide
+  let AuthorizationHandler = {
+    // Authby password
+    'PW': (connprofile, data, data_sender) => {
+      let AuthbyPassword = Implementation.returnImplement('AuthbyPassword');
+      AuthbyPassword(connprofile, data, data_sender);
+    },
+
+    // Authby password failed
+    'PF': (connprofile, data, data_sender) => {
+      let AuthbyPasswordFailed = Implementation.returnImplement('AuthbyPasswordFailed');
+      AuthbyPasswordFailed(connprofile, data, data_sender);
+    },
+
+    // Authby token
+    'TK': (connprofile, data, data_sender) => {
+      let AuthbyToken = Implementation.returnImplement('AuthbyToken');
+      AuthbyToken(connprofile, data, data_sender);
+    },
+
+    // Authby token failed
+    'TF': (connprofile, data, data_sender) => {
+      let AuthbyTokenFailed = Implementation.returnImplement('AuthbyTokenFailed');
+      AuthbyTokenFailed(connprofile, data, data_sender);
+    },
+
+    // Sign in
+    'SI': (connprofile, data, data_sender) => {
+      let Signin = Implementation.returnImplement('signin');
+      Signin(connprofile, data, data_sender);
+    },
+
+    'AF': ()=>{
+
+    }
+  };
+  // ClientSide End
 
 
-  this.RequestHandler = coregateway.AuthorizationHandler.RqRouter;
+  this.RequestHandler = (connprofile, data, data_sender) => {
+    AuthorizationHandler[data.m](connprofile, data, data_sender);
+  };
 
   this.ResponseHandler = (connprofile, data) => {
     try {

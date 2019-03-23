@@ -299,8 +299,6 @@ function Core(NoServiceLibrary, settings) {
             _authorization.importTrustedDomains(settings.trusted_domains);
             _authorization.importDaemonAuthKey(settings.daemon_authorization_key);
 
-            // setup AuthorizationHandler
-            _authorizationhandler.importImplementationModule(_implementation);
 
             // setup service
             _service.setDebug(settings.debug);
