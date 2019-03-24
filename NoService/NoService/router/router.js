@@ -6,6 +6,8 @@
 
 const Utils = require('../library').Utilities;
 const ProtocolsPath = require("path").join(__dirname, "protocols");
+const Protocols =  require("fs").readdirSync(ProtocolsPath).map((file)=> {
+  return require(ProtocolsPath+"/" + file);});
 
 function Router() {
   let _coregateway;
@@ -201,8 +203,8 @@ function Router() {
     };
 
     // load protocols
-    require("fs").readdirSync(ProtocolsPath).forEach((file)=> {
-      let p = new (require(ProtocolsPath+"/" + file))(_coregateway, this.emit);
+    Protocols.forEach((pt)=> {
+      let p = new pt(_coregateway, this.emit);
       p.emitRouter = this.emit;
       methods[p.Protocol] = {
         emitter : (connprofile, data) => {
