@@ -129,7 +129,6 @@ function Connection(options) {
   }
 
   this.createClient = (conn_method, remoteip, port, callback) => {
-    console.log(conn_method, remoteip, port);
     // Heartbeat
     let onData_wrapped = (connprofile, data)=> {
       if(data!=heartbeat_phrase) {

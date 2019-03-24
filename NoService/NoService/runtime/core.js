@@ -72,7 +72,7 @@ function Core(NoServiceLibrary, settings) {
   let _model;
 
 
-  this.checkandlaunch = () => {
+  this.checkandlaunch = (callback) => {
     // initialize environment
     verbose('Daemon', 'Checking environment...')
 
@@ -82,20 +82,24 @@ function Core(NoServiceLibrary, settings) {
           verbose('*ERR*', 'Error occured during initializing.');
           console.log(err);
           this.onTerminated();
+          if(callback)
+            callback(err);
         }
         else {
           Utils.TagLog('OKAY', 'Initialized. Please restart!');
           process.exit();
+          if(callback)
+            callback('Initialized. Please restart!');
         }
       });
     }
     else {
-      this.launch();
+      this.launch(callback);
     }
     ;
   };
 
-  this.launch = () => {
+  this.launch = (callback) => {
     let launchwrap = ()=>{
 
       process.title = settings.daemon_name;
@@ -373,6 +377,8 @@ function Core(NoServiceLibrary, settings) {
             verbose('Daemon', 'Launching services done.');
             //
             verbose('Daemon', 'NOOXY Service Framework successfully started.');
+            if(callback)
+              callback(false);
             if(!settings.shell_service) {
               verbose('Shell', 'Shell Service not implemented.');
             }
