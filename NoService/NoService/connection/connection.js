@@ -41,8 +41,9 @@ function Connection(options) {
     let _hostport = hostport;
     let _clientip = clientip;
     let _conn = conn; // conn is wrapped!
+
     if(Rpos === 'Server') {
-      _clients[_GUID] = this;
+      _clients[connMethod+hostip+hostport] = this;
     }
 
     this.closeConnetion = () => {
@@ -128,6 +129,7 @@ function Connection(options) {
   }
 
   this.createClient = (conn_method, remoteip, port, callback) => {
+    console.log(conn_method, remoteip, port);
     // Heartbeat
     let onData_wrapped = (connprofile, data)=> {
       if(data!=heartbeat_phrase) {
@@ -137,7 +139,12 @@ function Connection(options) {
       }
     };
 
-    if(conn_method === 'local'||conn_method =='Local') {
+    let _prev_client = _clients[conn_method+remoteip+port];
+
+    if(_prev_client) {
+      callback(false, _prev_client);
+    }
+    else if(conn_method === 'local'||conn_method =='Local') {
       if(_have_local_server === false) {
         Utils.TagLog('*ERR*', 'Local server not started.');
       }

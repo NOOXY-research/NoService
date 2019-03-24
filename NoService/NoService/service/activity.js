@@ -99,15 +99,13 @@ function Activity() {
     _ASockets[entityId].launch();
   };
 
-  this.spawnClient = () => {throw new Error('spawnClient not implemented')};
-
   this.emitConnectionClose = (connprofile, callback) => {
     let _entitiesId = connprofile.returnBundle('bundle_entities');
     for(let i in _entitiesId) {
       _ASockets[_entitiesId[i]]._emitClose();
       setTimeout(()=>{
         // for worker abort referance
-        if(_ASockets_entitiesId[i]) {
+        if(_ASockets[_entitiesId[i]]) {
           _ASockets[_entitiesId[i]].worker_cancel_refer = true;
           delete _ASockets[_entitiesId[i]];
         }

@@ -228,13 +228,7 @@ function Router() {
 
     _coregateway.NSPS.emitRouter = this.emit;
 
-    _coregateway.Implementation.emitRouter = (connprofile, data, data_sender)=>{
-      _coregateway.Connection.getClients((er, clients)=>{
-        connprofile.getGUID((er, id)=>{
-          this.emit(clients[id], data, data_sender);
-        });
-      });
-    };
+    _coregateway.Implementation.emitRouter = this.emit;
 
     _coregateway.Implementation.sendRouterData = _senddata;
   };

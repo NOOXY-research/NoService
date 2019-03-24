@@ -311,11 +311,11 @@ function ServiceSocket(service_name, prototype, emitter, debug, entity_module, a
 
 function ActivitySocket(conn_profile, emitter, unbindActivitySocketList, debug) {
   // Service Socket callback
-  let _emitasdata = emitter.Data;
+  let _emitdata = emitter.Data;
 
   let _emit_sfunc = emitter.ServiceFunction;
 
-  let _emitasclose = emitter.Close;
+  let _emitclose = emitter.Close;
 
   let _entity_id;
   let _launched = false;

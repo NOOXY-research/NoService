@@ -91,7 +91,7 @@ function Authorization() {
                 _on_handler['AuthTokenRq'](entityId, (err, token)=> {
                   _authe_module.checkTokenisValidByUsername(user, token, (err, isValid) => {
                     if(isValid) {
-                      connprofile.setBundle('NSToken', token);
+                      connprofile.setBundle('NSToken_'+entityId, token);
                       callback(false, true);
                     }
                     else {
@@ -103,7 +103,7 @@ function Authorization() {
 
               };
 
-              connprofile.getBundle('NSToken', (err, tk)=>{
+              connprofile.getBundle('NSToken_'+entityId, (err, tk)=> {
                 if(tk != null) {
                   _authe_module.checkTokenisValidByUsername(user, tk, (err, isValid) => {
                     if(isValid) {
@@ -211,7 +211,7 @@ function Authorization() {
   };
 
   this.close = () =>{
-    
+
   }
 };
 
