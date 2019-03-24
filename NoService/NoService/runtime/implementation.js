@@ -74,6 +74,10 @@ function Implementation() {
     return _implts;
   };
 
+  this.getClientConnProfile = ()=> {
+    
+  };
+
   this.close = () => {};
 }
 

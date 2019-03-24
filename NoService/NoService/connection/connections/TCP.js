@@ -11,6 +11,11 @@ function Server(ServerId, ConnectionProfile) {
   let _hostip;
   let _netserver;
   let _myclients = {};
+  let _debug;
+
+  this.setDebug = (d)=> {
+    _debug = d;
+  };
 
   this.closeConnetion = (GUID) => {
     _myclients[GUID].destroy()
@@ -71,6 +76,11 @@ function Server(ServerId, ConnectionProfile) {
 
 function Client(ConnectionProfile) {
   let _netc = null
+  let _debug;
+
+  this.setDebug = (d)=> {
+    _debug = d;
+  };
 
   this.closeConnetion = (GUID) => {_netc.destroy()};
 

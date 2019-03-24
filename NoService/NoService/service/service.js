@@ -509,8 +509,9 @@ function Service() {
       if(!_entity_json.ownerdomain) {
         _entity_json.ownerdomain === connprofile.returnHostIP();
       }
+
       _authenticity_module.getUserIdByUsername(owner, (err, ownerid)=> {
-        if(err) {
+        if(err&&_entity_json.owner) {
           callback(err);
         }
         else {

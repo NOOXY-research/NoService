@@ -13,6 +13,11 @@ function Server(ServerId, ConnectionProfile, ssl_priv_key=null, ssl_cert=null) {
   let _hostip;
   let _wss;
   let _myclients = {};
+  let _debug;
+
+  this.setDebug = (d)=> {
+    _debug = d;
+  };
 
   this.closeConnetion = (GUID) => {
     _myclients[GUID].close()
@@ -75,6 +80,11 @@ function Server(ServerId, ConnectionProfile, ssl_priv_key=null, ssl_cert=null) {
 
 function Client(ConnectionProfile) {
   let _ws = null
+  let _debug;
+
+  this.setDebug = (d)=> {
+    _debug = d;
+  };
 
   this.closeConnetion = () => {
     _ws.close();

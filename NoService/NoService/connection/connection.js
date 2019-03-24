@@ -90,6 +90,7 @@ function Connection(options) {
         let _serverId = "LOCAL";
         let server = new Connections.Local.Server(_serverId, ConnectionProfile);
         _servers[_serverId] = server;
+        server.setDebug(_debug);
         server.start('LOCALIP', 'LOCALPORT');
         server.onData = this.onData;
         server.onClose = this.onClose;
@@ -103,6 +104,7 @@ function Connection(options) {
       let _serverId = Utils.generateUniqueId();
       let server = new Connections[_conn_meth_name_map[conn_method]].Server(_serverId, ConnectionProfile, ssl_priv_key, ssl_cert);
       _servers[_serverId] = server;
+      server.setDebug(_debug);
       server.start(ip, port);
       server.onData = this.onData;
       server.onClose = this.onClose;
@@ -149,6 +151,7 @@ function Connection(options) {
       }
       else {
         let locc = new Connections.Local.Client(ConnectionProfile);
+        locc.setDebug(_debug);
         locc.onData = onData_wrapped;
         locc.onClose = this.onClose;
         locc.connect('LOCALIP', 'LOCALPORT', callback);
@@ -157,6 +160,7 @@ function Connection(options) {
 
     else if(_conn_meth_name_map[conn_method]) {
       let netc = new Connections[_conn_meth_name_map[conn_method]].Client(ConnectionProfile);
+      netc.setDebug(_debug);
       netc.onData = onData_wrapped;
       netc.onClose = this.onClose;
       netc.connect(remoteip, port, callback);

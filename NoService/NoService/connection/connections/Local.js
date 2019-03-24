@@ -11,6 +11,11 @@ const VirtualNet = new (require('../virtualnet'))();
 function Server(ServerId, ConnectionProfile) {
   let _vnets;
   let _myclients= {};
+  let _debug;
+
+  this.setDebug = (d)=> {
+    _debug = d;
+  };
 
   this.closeConnetion = (GUID) => {
     _myclients[GUID].close();
@@ -63,7 +68,12 @@ function Server(ServerId, ConnectionProfile) {
 function Client(ConnectionProfile) {
   // VirtualNet client
   let _vnetc;
-  let _vs = null
+  let _vs = null;
+  let _debug;
+
+  this.setDebug = (d)=> {
+    _debug = d;
+  };
 
   this.closeConnetion = (GUID) => {_vs.close()};
 

@@ -95,7 +95,7 @@ function Authorization() {
                       callback(false, true);
                     }
                     else {
-                      _on_handler['AuthbyPasswordFailed'](entityId);
+                      _on_handler['AuthbyTokenFailed'](entityId);
                       callback(false, false);
                     }
                   });

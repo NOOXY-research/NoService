@@ -12,6 +12,11 @@ function Server(ServerId, ConnectionProfile) {
   let _hostip;
   let _wss;
   let _myclients = {};
+  let _debug;
+
+  this.setDebug = (d)=> {
+    _debug = d;
+  };
 
   this.closeConnetion = (GUID) => {
     _myclients[GUID].close()
@@ -70,6 +75,11 @@ function Server(ServerId, ConnectionProfile) {
 
 function Client(ConnectionProfile) {
   let _ws = null
+  let _debug;
+
+  this.setDebug = (d)=> {
+    _debug = d;
+  };
 
   this.closeConnetion = () => {
     _ws.close();

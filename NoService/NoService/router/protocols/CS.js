@@ -239,7 +239,7 @@ module.exports = function Protocol(coregateway, emitRouter) {
           Activity.emitSFReturn(data.d.i, true, data.d.t, data.d.r);
         }
       },
-      // nooxy service protocol implementation of "Call Activity: createEntity"
+      // nooxy service protocol implementation of "Call Service: createEntity"
       CE: (connprofile, data) => {
         // tell server finish create
         if(data.d.i != null) {
