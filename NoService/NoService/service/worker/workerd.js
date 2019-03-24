@@ -23,7 +23,7 @@
 'use strict';
 
 const {fork, spawn} = require('child_process');
-const Utils = require('../library').Utilities;
+const Utils = require('../../library').Utilities;
 const Net = require('net');
 const fs = require('fs');
 
@@ -224,7 +224,7 @@ function WorkerDaemon() {
 
     this.init = (init_callback)=> {
       _init_callback = init_callback;
-      _child = fork(require.resolve('./worker.js'), {stdio: [process.stdin, process.stdout, process.stderr, 'ipc']});
+      _child = fork(require.resolve('./worker'), {stdio: [process.stdin, process.stdout, process.stderr, 'ipc']});
       _child_alive = true;
       _child.on('message', message => {
         this.onMessage(message);

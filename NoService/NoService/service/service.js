@@ -6,7 +6,7 @@
 
 const fs = require('fs');
 const Utils = require('../library').Utilities;
-const WorkerDaemon = require('./workerd');
+const WorkerDaemon = require('./worker').WorkerDaemon;
 const SocketPair = require('./socketpair');
 
 function Service() {
