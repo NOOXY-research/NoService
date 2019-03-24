@@ -52,7 +52,7 @@
     "NoMailer"
   ],
 
-  "debug": true,
+  "debug": false,
   "verbose": false,
 
   "master_service": "NoServiceManager",

@@ -200,6 +200,7 @@ function Router() {
       }
     };
 
+    // load protocols
     require("fs").readdirSync(ProtocolsPath).forEach((file)=> {
       let p = new (require(ProtocolsPath+"/" + file))(_coregateway, this.emit);
       p.emitRouter = this.emit;
@@ -226,11 +227,8 @@ function Router() {
       };
     });
 
-    _coregateway.NSPS.emitRouter = this.emit;
-
     _coregateway.Implementation.emitRouter = this.emit;
-
-    _coregateway.Implementation.sendRouterData = _senddata;
+    _coregateway.NSPS.emitRouter = this.emit;
   };
 
   this.close = () => {

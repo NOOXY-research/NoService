@@ -261,9 +261,9 @@ function Core(NoServiceLibrary, settings) {
       _connection.importHeartBeatCycle(settings.heartbeat_cycle);
 
 
-
-      // setup implementation
-      _implementation.importConnectionModule(_connection);
+      //
+      // // setup implementation
+      // _implementation.importConnectionModule(_connection);
 
       // connect to database
       verbose('Daemon', 'Connecting to database.')
@@ -304,6 +304,8 @@ function Core(NoServiceLibrary, settings) {
             _authorization.importEntityModule(_entity);
             _authorization.importTrustedDomains(settings.trusted_domains);
             _authorization.importDaemonAuthKey(settings.daemon_authorization_key);
+
+            _authorizationhandler.importImplementation(_implementation);
 
             // setup service: Activity
             _activity.spawnClient = _connection.createClient;
