@@ -11,8 +11,15 @@
 'use strict';
 
 const Utils = require('../library').Utilities;
+const Constants = require('./constants');
 
 function startPlugins(plugins_path, coregateway, isInitialized, settings, callback) {
+  let verbose = (tag, log) => {
+    if(settings.verbose||settings.debug) {
+      Utils.TagLog(tag, log);
+    };
+  };
+
   let Plugins = require("fs").readdirSync(require("path").join(__dirname, "./plugins")).map((file)=> {
     return require('./plugins'+ file);});
 
@@ -23,11 +30,12 @@ function startPlugins(plugins_path, coregateway, isInitialized, settings, callba
 
   let index = 0;
   let load_next = ()=> {
-    Plugins[index](coregateway, isInitialized, settings, (err)=> {
-      if(err) {
-        callback(err);
-      }
-      else {
+    let p = new Plugins[index]();
+    verbose('Plugin', 'Loading plugin "'+p.name+'"...');
+    if(p.noservice) {
+      let biggerthanruntime = Utils.compareVersion(p.noservice, Constants.version);
+      if(biggerthanruntime>0&&!p.allow_older_noservice) {
+        verbose('Plugin', '***** Plugin "'+p.name+'" is not compatible with your NoService('+Constants.version+'). Require ('+p.noservice+'). Skipped.');
         index++;
         if(index<Plugins.length) {
           load_next();
@@ -36,7 +44,24 @@ function startPlugins(plugins_path, coregateway, isInitialized, settings, callba
           callback(false);
         }
       }
-    });
+      else {
+        p.plugin(coregateway, isInitialized, settings, (err)=> {
+          if(err) {
+            callback(err);
+          }
+          else {
+            index++;
+            if(index<Plugins.length) {
+              load_next();
+            }
+            else {
+              callback(false);
+            }
+          }
+        });
+      }
+    }
+
   };
   load_next();
 };
