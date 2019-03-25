@@ -13,14 +13,14 @@
 const Utils = require('../library').Utilities;
 
 function startPlugins(plugins_path, coregateway, isInitialized, settings, callback) {
-  let Plugins = require("fs").readdirSync(require("path").join(__dirname, "../plugins")).map((file)=> {
-    return require('../plugins'+ file);});
+  let Plugins = require("fs").readdirSync(require("path").join(__dirname, "./plugins")).map((file)=> {
+    return require('./plugins'+ file);});
 
   if(plugins_path) {
     Plugins = Plugins.concat(require("fs").readdirSync(plugins_path).map((file)=> {
       return require(plugins_path+"/" + file);}));
   }
-  
+
   let index = 0;
   let load_next = ()=> {
     Plugins[index](coregateway, isInitialized, settings, (err)=> {

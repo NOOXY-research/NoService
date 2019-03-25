@@ -792,6 +792,12 @@ NoService.Database.Model.define('IndexedListTest', {'model_type': "IndexedList",
   ActivitySocket.close()\
   ActivitySocket.onEvent(event, callback);
 
+## Plugin APIs
+  note that NoService do not resolve plugins' dependencies.
+  plugins are injected and be called before native module started.
+  plugins are loaded without order
+  plugins are supposed to be a feature that test the experimental abilities to be integrated into NoService core. You should implement your functions in your service not in the plugins!
+
 ## NoService Protocol
 ### Basic
 1. NSP(NoService Protocol) is based on text, based on Json data structure.
