@@ -48,7 +48,7 @@ NoService provide a API layer that handle backend designer for connection, datab
 NoService is supposed to be a all-in-one framework. But each service is managed by a worker which is separated thread from core. And since multithread, a service's restart doesn't require restarting the whole framework and maintain connection while relaunching. Which is a huge benefit in deploying on a production environment.
 
 ### The missing protocol between TCP layer and Application layer
-We think there are a lot to do between TCP layer and Application layer.
+We think there are a lot to do between TCP layer and Application layer. Which we call it service layer. Provide basic functions for service to be deployed.
 
 ### security
 NoService has built-in secure protocol built by SHA-256, AES and RSA to secure your data. It also has authorization API, provides you ability to authorize user to protect your data. Besides, you can block IPs and domains. The operations on daemon will not be executed until the client has the right response of authorization that emitted from daemon side.
