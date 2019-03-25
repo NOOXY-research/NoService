@@ -29,11 +29,13 @@
 
   "default_server": null,
 
+  "plugins_path": "./plugins",
+
   "local_services_owner" : "admin",
 
-  "services_path": "services/",
+  "services_path": "./services",
 
-  "services_files_path": "service_files/",
+  "services_files_path": "./service_files",
 
   "SHA256_key": "FATFROG",
 

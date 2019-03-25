@@ -235,6 +235,31 @@ function Router() {
     _coregateway.NSPS.emitRouter = this.emit;
   };
 
+  // for plugins
+  this.addProtocol = (pt)=> {
+    methods[p.Protocol] = {
+      emitter : (connprofile, data) => {
+        _senddata(connprofile, p.Protocol, 'rq', data);
+      },
+
+      handler : (connprofile, session, data) => {
+        connprofile.getRemotePosition((err, pos)=> {
+          if(p.Positions[session] === pos || p.Positions[session] === 'Both') {
+            if(session === 'rq') {
+              p.RequestHandler(connprofile, data, _senddata);
+            }
+            else {
+              p.ResponseHandler(connprofile, data);
+            }
+          }
+          else {
+            _sessionnotsupport(p, session, data);
+          }
+        });
+      }
+    };
+  };
+
   this.close = () => {
     _coregateway = null;
     _json_sniffers = [];

@@ -284,8 +284,8 @@ function Service() {
   this.importServicesList = (service_list) => {
     for(let i=0; i<service_list.length; i++) {
       let _s = new ServiceObj(service_list[i]);
-      _s.setupPath(_local_services_path+service_list[i]);
-      _s.setupFilesPath(_local_services_files_path+service_list[i]);
+      _s.setupPath(_local_services_path+'/'+service_list[i]);
+      _s.setupFilesPath(_local_services_files_path+'/'+service_list[i]);
       _local_services[service_list[i]] = _s;
     }
   };

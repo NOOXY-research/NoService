@@ -24,15 +24,31 @@ for(let pkg in Constants.dependencies) {
   }
 }
 
+console.log('NoService runtime process Id: ' + process.pid);
+console.log('NoService runtime starting directory: ' + process.cwd());
+
 process.on('message', (msg)=> {
   if(msg.t === 0) {
+    process.title = msg.settings.daemon_name;
+    if(msg.settings.path)
+      process.chdir(msg.settings.path)
+
     _core = new Core(NoServiceLibaray, msg.settings);
     _core.onTerminated = terminateNoService;
-    _core.checkandlaunch();
+    _core.checkandlaunch((err)=> {
+      if(err) {
+        process.exit();
+      }
+    });
   }
   else if(msg.t === 99) {
     _core.close();
   }
+});
+
+process.on('SIGINT', () => {
+  verbose('Daemon', 'Caught interrupt signal.');
+  _daemon.close();
 });
 
 process.on('SIGTERM', () => {

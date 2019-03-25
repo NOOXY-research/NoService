@@ -11,6 +11,8 @@ const APIUtils = require('./serviceapi_utils');
 function ServiceAPI() {
   let _coregateway;
 
+  let _API_generators = [];
+
   let _addNormalAPIs = (api, service_socket, manifest)=> {
     let _service_name = manifest.name;
     api.addAPI(['Service', 'ServiceSocket'], (LCBO)=> {
@@ -160,7 +162,7 @@ function ServiceAPI() {
           remote_callback_obj.run([], [false, {
             Settings: manifest.settings,
             Manifest: manifest,
-            FilesPath: _coregateway.Daemon.Settings.services_files_path+manifest.name+'/'
+            FilesPath: _coregateway.Daemon.Settings.services_files_path+'/'+manifest.name
           }])
           remote_callback_obj.unbindRemote();
         }
@@ -934,10 +936,17 @@ function ServiceAPI() {
     _coregateway = coregateway;
   };
 
-  this.createServiceAPI = (service_socket, manifest, callback) => {
+  // for plugins
+  this.addAPIGenerator = (callback)=> {
+    _API_generators.push(callback);
+  };
 
+  this.createServiceAPI = (service_socket, manifest, callback) => {
     APIUtils.geneateNormalAPI(_coregateway, (err, api) => {
       _addNormalAPIs(api, service_socket, manifest);
+      for(let i in _API_generators) {
+        _API_generators(api, service_socket, manifest);
+      }
       callback(false, api);
     });
   };
@@ -945,7 +954,9 @@ function ServiceAPI() {
   this.createServiceAPIwithImplementaion = (service_socket, manifest, callback) => {
     APIUtils.geneateNormalAPI(_coregateway, (err, api) => {
       _addNormalAPIs(api, service_socket, manifest);
-
+      for(let i in _API_generators) {
+        _API_generators(api, service_socket, manifest);
+      }
       api.addAPI(['getImplementation'], (LCBO)=> {
         return((remote_callback_obj)=> {
           let Implementation_LCBO = new LCBO(_coregateway.Implementation, null, false, true);
