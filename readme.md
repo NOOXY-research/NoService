@@ -811,11 +811,12 @@ module.exports = function() {
   this.noservice = "0.5.6";
   this.allow_older_noservice = false;
 
-  this.plugin = (coregateway, isInitialized, settings, verbose, next)=> {
-    verbose('Dummy', 'Dummy plugin being executed.');
+  this.plugin = (noservice_coregateway, noservice_isInitialized, deploy_settings, noservice_constants, verbose, next)=> {
+    verbose('Dummy', 'Dummy plugin being executed. NoService version "'+noservice_constants.version+'"');
     next(false);
   };
 }
+
 ```
 ## NoService Protocol
 ### Basic
