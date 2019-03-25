@@ -45,7 +45,7 @@ function startPlugins(plugins_path, coregateway, isInitialized, settings, callba
         }
       }
       else {
-        p.plugin(coregateway, isInitialized, settings, (err)=> {
+        p.plugin(coregateway, isInitialized, settings, verbose, (err)=> {
           if(err) {
             callback(err);
           }

@@ -9,7 +9,8 @@ module.exports = function() {
   this.noservice = "0.5.6";
   this.allow_older_noservice = false;
 
-  this.plugin = (coregateway, isInitialized, settings, next)=> {
+  this.plugin = (coregateway, isInitialized, settings, verbose, next)=> {
+    verbose('Dummy', 'Dummy plugin being executed.');
     next(false);
   };
 }
