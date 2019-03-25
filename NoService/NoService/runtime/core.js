@@ -47,12 +47,16 @@ function Core(NoServiceLibrary, settings) {
   let _runtime_id = Utils.generateGUID();
   let _path = settings['path'];
   verbose('Daemon', 'Path setted as '+ _path);
-  settings.services_path = _path+settings.services_path;
-  settings.plugins_path = _path+settings.plugins_path;
-  settings.services_files_path = _path+settings.services_files_path;
-  settings.rsa_2048_priv_key = settings.rsa_2048_priv_key;
-  settings.rsa_2048_pub_key = settings.rsa_2048_pub_key;
-  settings.database_path = settings.database_path;
+  if(settings.services_path[0] != '/')
+    settings.services_path = _path+settings.services_path;
+  if(settings.plugins_path[0] != '/')
+    settings.plugins_path = _path+settings.plugins_path;
+  if(settings.services_files_path[0] != '/')
+    settings.services_files_path = _path+settings.services_files_path;
+  if(settings.rsa_2048_priv_key[0] != '/')
+    settings.rsa_2048_priv_key = settings.rsa_2048_priv_key;
+  if(settings.rsa_2048_pub_key[0] != '/')
+    settings.rsa_2048_pub_key = settings.rsa_2048_pub_key;
   // initialize variables
   let _connection;
   let _authorization;
