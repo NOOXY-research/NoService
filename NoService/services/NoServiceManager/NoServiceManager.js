@@ -285,30 +285,30 @@ function NoServiceManager() {
     Daemon.getSettings((err, DaemonSettings)=> {
       services_path = DaemonSettings.services_path;
       let services_files_path = DaemonSettings.services_files_path;
-      let prototype_path = services_path+Me.Manifest.name+'/prototypes/normal/';
-      let commons_path = services_path+Me.Manifest.name+'/prototypes/__commons__/';
+      let prototype_path = services_path+'/'+Me.Manifest.name+'/prototypes/normal/';
+      let commons_path = services_path+'/'+Me.Manifest.name+'/prototypes/__commons__/';
 
       let replace_template = {
         servicename: service_name
       };
 
       if(type) {
-        prototype_path = services_path+Me.Manifest.name+'/prototypes/'+type+'/'
+        prototype_path = services_path+'/'+Me.Manifest.name+'/prototypes/'+type+'/'
       }
 
 
-      if(fs.existsSync(services_path+service_name)) {
+      if(fs.existsSync(services_path+'/'+service_name)) {
         callback(new Error("Service existed."));
       }
       else {
         try {
-          fs.mkdirSync(services_path+service_name);
+          fs.mkdirSync(services_path+'/'+service_name);
           try {
-            fs.mkdirSync(services_files_path+service_name);
+            fs.mkdirSync(services_files_path+'/'+service_name);
           }
           catch (err) {} // Skip
 
-          let manifest = JSON.parse(fs.readFileSync(commons_path+'manifest.json', 'utf8'));
+          let manifest = JSON.parse(fs.readFileSync(commons_path+'/'+'manifest.json', 'utf8'));
           manifest.name = service_name;
           if(type == "complete") {
             manifest.servicefunctions['func1'] = {
@@ -329,19 +329,19 @@ function NoServiceManager() {
             manifest.language = "python";
           }
 
-          fs.writeFileSync(services_path+service_name+'/manifest.json', JSON.stringify(manifest, null, 2));
+          fs.writeFileSync(services_path+'/'+service_name+'/manifest.json', JSON.stringify(manifest, null, 2));
 
           fs.readdirSync(prototype_path).forEach(file => {
             console.log(file);
-            let str = fs.readFileSync(prototype_path+file, 'utf8');
+            let str = fs.readFileSync(prototype_path+'/'+file, 'utf8');
             for(let i in replace_template) {
               str = str.replace(new RegExp('{{ '+i+' }}', 'g'), replace_template[i]);
             }
             if(replace_template[file.split('.')[0]]) {
-              fs.writeFileSync(services_path+service_name+'/'+replace_template[file.split('.')[0]]+'.'+file.split('.')[1], str);
+              fs.writeFileSync(services_path+'/'+service_name+'/'+replace_template[file.split('.')[0]]+'.'+file.split('.')[1], str);
             }
             else {
-              fs.writeFileSync(services_path+service_name+'/'+file, str);
+              fs.writeFileSync(services_path+'/'+service_name+'/'+file, str);
             }
           })
 
