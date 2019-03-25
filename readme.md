@@ -41,39 +41,58 @@ NoService is a high level framework for services that provide you "nodejs" and "
 
 ## Why we build NoService? And why you should give it a try?
 
+### Serperating backend applications from physical differences
+NoService provide a API layer that handle backend designer for connection, database and authenticity. Thus you other designer's project can basically deploy on any NoService framework.
+
 ### All-in-one but async multithreaded
 NoService is supposed to be a all-in-one framework. But each service is managed by a worker which is separated thread from core. And since multithread, a service's restart doesn't require restarting the whole framework and maintain connection while relaunching. Which is a huge benefit in deploying on a production environment.
-### Serperating backend applications from physical differences
-NoService provide a layer that handle backend designer for connection, database and authenticity. Thus other designer project can basically install on your NoService.
+
+### The missing protocol between TCP layer and Application layer
+We think there are a lot to do between TCP layer and Application layer.
+
 ### security
 NoService has built-in secure protocol built by SHA-256, AES and RSA to secure your data. It also has authorization API, provides you ability to authorize user to protect your data. Besides, you can block IPs and domains. The operations on daemon will not be executed until the client has the right response of authorization that emitted from daemon side.
+
 ### lightweight + micro-core
 NoService is super-lightweight both in client and daemon. But it has lots of feature. And it's features can be expanded by services.
+
 ### communication between services
 The design of NoService sockets that we called service socket and activity socket. With the characteristic of those sockets, services can communicate each others. By this way each service don't need to sync data to promise the data is the newest.
+
 ### realtime
 NoService is designed for realtime purpose. And it's of course super responsive.
+
 ### deploying services
 NoService is built for service. From it's protocol to it's local structure. It also have user authorization system natively integrated with protocol and software.
+
 ### for general conditions
 NoService is designed for any kind of condition such as game, IoT, text contain. However, we have only implemented game([reversi](https://nooxy.org/noversi)), chat([Talksy](https://talk.nooxy.org)), notification([NOOXY](https://nooxy.org)), shell([NoShell](https://www.nooxy.org/static/nsf/shell.html)). Nevertheless the development of NoService is still in progress. We can fix bugs and add features to confirm other abilities.
+
 ### cross platform client
-Now, NoService can run on browser(javascript) and desktop(javascript). It also supports TCP/IP, websocket connections. Other languages is still on the way.
+Now, NoService can run on browser, react.js(javascript) and desktop(javascript). It also supports TCP/IP, websocket connections. Other languages is still on the way.
+
 ### supporting Python in server-side
 You can write your service in python and it's event-based asyncio module.
 
 ### Make your local scripts online
+With ServiceFunction you can wrap your python or node.js scripts into the function that can be called online natively without implement yourseld. Which is support in natively in our bundled service "NoShell".
 
-### Socket-based+API control
-Socket base+API pattern makes the concept easy to understand. NoService wraps the native TCP/IP, websocket or even http polling mode in the future as transportation layer. Make you no need to consider about integrating features with different connections. And with the advantage of NoService, in theory different activities(clients) can share same the socket in the same time. If the NoService Client is implemented well.
+### ServiceSocket + API = NoService
+Socket base+API pattern makes the concept easy to understand. NoService wraps the native TCP/IP, websocket or even http polling mode in the future as transportation layer. Make you no need to consider about integrating features with different connections. And with the advantage of NoService, in theory different activities(clients) can share same the socket in the same time.
+
+### Integrated ORM
+The intergrated ORM seperate between database interface and your service's logic. Make switching database solution painless. Besides you will need no implement database query yourself.
+
+### Modulizable
+NoService has good software structure which means you can modify the native library to fit your taste. Such as database,  protocol, worker or something else.
 
 ### Bundled Services
 NoService provide bundled services such as NoShell which give you access of NoService. NoUser for user system. And so on.
 
-### Integrated ORM
+
 
 ## Target version
-* daemon: alpha 0.5.2
+* daemon: alpha 0.5.5
 * protocol: NSP alpha 0.4
 
 ## Dependences
