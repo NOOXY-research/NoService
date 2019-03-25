@@ -798,6 +798,25 @@ NoService.Database.Model.define('IndexedListTest', {'model_type': "IndexedList",
 3.  plugins are loaded without order
 4.  plugins are supposed to be a feature that test the experimental abilities to be integrated into NoService core. You should implement your functions in your service not in the plugins!
 
+### here is an example of a plugin
+``` javascript
+// NoService/plugins/dummy.js
+// Description:
+// "dummy.js" create an example of plugin.
+// Copyright 2018-2019 NOOXY. All Rights Reserved.
+
+module.exports = function() {
+  this.name = 'Dummy Plugin';
+  this.version = '0.0.0';
+  this.noservice = "0.5.6";
+  this.allow_older_noservice = false;
+
+  this.plugin = (coregateway, isInitialized, settings, verbose, next)=> {
+    verbose('Dummy', 'Dummy plugin being executed.');
+    next(false);
+  };
+}
+```
 ## NoService Protocol
 ### Basic
 1. NSP(NoService Protocol) is based on text, based on Json data structure.
