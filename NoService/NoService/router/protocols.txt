@@ -1,5 +1,5 @@
-// NoService/NoService/router/protocols.txt
-// Description:
-// "protocols.txt"
-// Protocols module focus only on format. Please do not put too much logic in proptocols.
-// Copyright 2018-2019 NOOXY. All Rights Reserved.
+NoService/NoService/router/protocols.txt
+Description:
+"protocols.txt"
+Protocols module focus only on format. Please do not put too much logic in protocols.
+Copyright 2018-2019 NOOXY. All Rights Reserved.
