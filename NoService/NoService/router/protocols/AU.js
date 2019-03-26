@@ -17,12 +17,15 @@ module.exports = function Protocol(coregateway, emitRequest) {
   let Implementation = coregateway.Implementation;
   let Entity = coregateway.Entity;
   let Utils = coregateway.Utilities;
+  let Authorization = coregateway.Authorization;
+  let AuthorizationHandler = coregateway.AuthorizationHandler;
+
 
   let _queue_operation = {};
   let _auth_timeout = 180;
 
   // ServerSide
-  coregateway.Authorization.on('AuthPasswordRq', (entityId, callback)=> {
+  Authorization.on('AuthPasswordRq', (entityId, callback)=> {
     Entity.getEntityConnProfile(entityId, (err, connprofile) => {
       let data = {
         m: "PW",
@@ -38,13 +41,13 @@ module.exports = function Protocol(coregateway, emitRequest) {
     });
   });
 
-  coregateway.Authorization.on('AuthbyPasswordFailed', (entityId, callback)=> {
+  Authorization.on('AuthbyPasswordFailed', (entityId, callback)=> {
     Entity.getEntityConnProfile(entityId, (err, connprofile) => {
       this.emitRequest(connprofile, 'AU', {m: 'PF'});
     });
   });
 
-  coregateway.Authorization.on('AuthTokenRq', (entityId, callback)=> {
+  Authorization.on('AuthTokenRq', (entityId, callback)=> {
     Entity.getEntityConnProfile(entityId, (err, connprofile) => {
       let data = {
         m: "TK",
@@ -60,22 +63,55 @@ module.exports = function Protocol(coregateway, emitRequest) {
     });
   });
 
-  coregateway.Authorization.on('AuthbyTokenFailed', (entityId, callback)=> {
+  Authorization.on('AuthbyTokenFailed', (entityId, callback)=> {
     Entity.getEntityConnProfile(entityId, (err, connprofile) => {
       this.emitRequest(connprofile, 'AU', {m: 'TF'});
     });
   });
 
-  coregateway.Authorization.on('SigninRq', (entityId)=> {
+  Authorization.on('SigninRq', (entityId)=> {
     Entity.getEntityConnProfile(entityId, (err, connprofile) => {
       emitRequest(connprofile, 'AU', {m: 'SI'});
     });
   });
   // ServerSide end
 
+  // ClientSide
+
+  let _handler = {
+    // Authby password
+    'PW': (connprofile, data, emitResponse) => {
+      AuthorizationHandler.AuthbyPassword(connprofile, data, emitResponse);
+    },
+
+    // Authby password failed
+    'PF': (connprofile, data, emitResponse) => {
+      AuthorizationHandler.AuthbyPasswordFailed(connprofile, data, emitResponse);
+    },
+
+    // Authby token
+    'TK': (connprofile, data, emitResponse) => {
+      AuthorizationHandler.AuthbyToken(connprofile, data, emitResponse);
+    },
+
+    // Authby token failed
+    'TF': (connprofile, data, emitResponse) => {
+      AuthorizationHandler.AuthbyTokenFailed(connprofile, data, emitResponse);
+    },
+
+    // Sign in
+    'SI': (connprofile, data, emitResponse) => {
+      AuthorizationHandler.Signin(connprofile, data, emitResponse);
+    },
+
+    'AF': ()=>{
+
+    }
+  };
+
 
   this.RequestHandler = (connprofile, data, emitResponse) => {
-    coregateway.AuthorizationHandler.handle(data.m, connprofile, data, emitResponse);
+    _handler[method](data.m, connprofile, data, emitResponse);
   };
 
   this.ResponseHandler = (connprofile, data) => {
