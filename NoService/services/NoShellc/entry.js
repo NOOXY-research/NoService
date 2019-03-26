@@ -85,9 +85,9 @@ function Service(Me, NoService) {
           callback(false, p);
         });
       }
-      NoService.getImplementation((err, Implementation)=>{
+      NoService.getImplementationModule((err, Implementation)=>{
         // setup NoService Auth implementation
-        Implementation.setImplement('signin', (connprofile, data, data_sender)=>{
+        Implementation.setImplement('signin', (connprofile, data, emitResponse)=>{
           console.log('Please signin your account.');
           _get_password((err, p)=>{
             let _data = {
@@ -95,14 +95,14 @@ function Service(Me, NoService) {
               p: p
             }
             _username = _data.u;
-            Implementation.emitRouter(connprofile, 'GT', _data);
+            Implementation.emitRequest(connprofile, 'GT', _data);
             commandread();
           });
 
         });
 
         // setup NoService Auth implementation
-        Implementation.setImplement('AuthbyToken', (connprofile, data, data_sender) => {
+        Implementation.setImplement('AuthbyToken', (connprofile, data, emitResponse) => {
           let callback = (err, token)=>{
             let _data = {
               m:'TK',
@@ -111,11 +111,11 @@ function Service(Me, NoService) {
                 v: token
               }
             }
-            data_sender(connprofile, 'AU', 'rs', _data);
+            emitResponse(connprofile, _data);
           };
           if(_token == null) {
             Implementation.getImplement('signin', (err, im)=> {
-              im(connprofile, data, data_sender);
+              im(connprofile, data, emitResponse);
             });
           }
           else {
@@ -129,16 +129,16 @@ function Service(Me, NoService) {
           _token = token;
         });
 
-        Implementation.setImplement('AuthbyTokenFailed', (connprofile, data, data_sender) => {
+        Implementation.setImplement('AuthbyTokenFailed', (connprofile, data, emitResponse) => {
           wait_auth = true;
           Implementation.getImplement('signin', (err, im)=> {
-            im(connprofile, data, data_sender);
+            im(connprofile, data, emitResponse);
           });
 
         });
 
         // setup NoService Auth implementation
-        Implementation.setImplement('AuthbyPassword', (connprofile, data, data_sender) => {
+        Implementation.setImplement('AuthbyPassword', (connprofile, data, emitResponse) => {
           let callback = (err, password)=>{
             let _data = {
               m:'PW',
@@ -147,7 +147,7 @@ function Service(Me, NoService) {
                 v: password
               }
             }
-            data_sender(connprofile, 'AU', 'rs', _data);
+            emitResponse(connprofile, _data);
           };
           _get_password((err, p) => {
             callback(err, p);
