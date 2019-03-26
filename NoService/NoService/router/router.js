@@ -89,7 +89,10 @@ function Router() {
         connprofile.getRemotePosition((err, pos)=> {
           if(rq_rs_pos[session] === pos || rq_rs_pos[session] === 'Both') {
             if(session === 'rq') {
-              actions[session](connprofile, data, _senddata);
+              let _emitResponse = (connprofile, data)=> {
+                _senddata(connprofile,  'SP', 'rs', data);
+              };
+              actions[session](connprofile, data, _emitResponse);
             }
             else {
               actions[session](connprofile, data);

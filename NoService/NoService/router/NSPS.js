@@ -69,7 +69,7 @@ function NSPS() {
       };
       _crypto_module.encryptString('RSA2048', host_rsa_pub, JSON.stringify(_data), (err, encrypted)=>{
         connprofile.setBundle('NSPS', 'finalize');
-        emitResponse(connprofile, 'SP', 'rs', encrypted);
+        emitResponse(connprofile, encrypted);
       });
     });
   };
