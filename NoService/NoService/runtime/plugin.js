@@ -21,7 +21,7 @@ function startPlugins(plugins_path, coregateway, isInitialized, settings, callba
   };
 
   let Plugins = require("fs").readdirSync(require("path").join(__dirname, "./plugins")).map((file)=> {
-    return require('./plugins'+ file);});
+    return require('./plugins/'+ file);});
 
   if(plugins_path) {
     Plugins = Plugins.concat(require("fs").readdirSync(plugins_path).map((file)=> {

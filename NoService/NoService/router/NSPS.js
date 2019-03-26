@@ -11,7 +11,7 @@ function NSPS() {
   let _crypto_module;
   let _operation_timeout = 60; // seconds
 
-  this.emitRouter = () => {console.log('[*ERR*] emit not implemented');};
+  this.emitRequest = () => {console.log('[*ERR*] emitRequest not implemented');};
 
   // daemon side
   this.ResponseHandler = (connprofile, data) => {
@@ -105,7 +105,7 @@ function NSPS() {
       p: _rsa_pub// RSA publicKey
     };
     connprofile.setBundle('NSPS', 'pending');
-    this.emitRouter(connprofile, 'SP', _data);
+    this.emitRequest(connprofile, 'SP', _data);
   }
 
   this.importOperationTimeout = (timeout) => {

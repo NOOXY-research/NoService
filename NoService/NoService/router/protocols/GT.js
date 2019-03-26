@@ -5,7 +5,7 @@
 'use strict';
 
 
-module.exports = function Protocol(coregateway, emitRouter) {
+module.exports = function Protocol(coregateway, emitRequest) {
   this.Protocol = "GT";
 
   this.Positions = {
@@ -23,7 +23,7 @@ module.exports = function Protocol(coregateway, emitRouter) {
       else {
         responsedata['s'] = 'OK';
       }
-      _senddata(connprofile, 'GT', 'rs', responsedata);
+      _senddata(connprofile, responsedata);
     });
   };
 

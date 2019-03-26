@@ -5,7 +5,7 @@
 'use strict';
 
 
-module.exports = function Protocol(coregateway, emitRouter) {
+module.exports = function Protocol(coregateway, emitRequest) {
   this.Protocol = "CA";
 
   this.Positions = {
@@ -23,7 +23,7 @@ module.exports = function Protocol(coregateway, emitRouter) {
         "d": d,
       }
     };
-    emitRouter(conn_profile, 'CA', _data);
+    emitRequest(conn_profile, 'CA', _data);
   });
 
   coregateway.Service.on('EmitASEventRq', (conn_profile, i, n, d) => {
@@ -35,7 +35,7 @@ module.exports = function Protocol(coregateway, emitRouter) {
         "d": d,
       }
     };
-    emitRouter(conn_profile, 'CA', _data);
+    emitRequest(conn_profile, 'CA', _data);
   });
 
   coregateway.Service.on('EmitASCloseRq', (conn_profile, i) => {
@@ -45,11 +45,11 @@ module.exports = function Protocol(coregateway, emitRouter) {
         "i": i
       }
     };
-    emitRouter(conn_profile, 'CA', _data);
+    emitRequest(conn_profile, 'CA', _data);
   });
 
 
-  this.RequestHandler = (connprofile, data, response_emit) => {
+  this.RequestHandler = (connprofile, data, emitResponse) => {
 
     let methods = {
       // nooxy service protocol implementation of "Call Activity: ActivitySocket"
@@ -63,7 +63,7 @@ module.exports = function Protocol(coregateway, emitRouter) {
             "s": "OK"
           }
         };
-        response_emit(connprofile, 'CA', 'rs', _data);
+        emitResponse(connprofile, _data);
       },
       // nooxy service protocol implementation of "Call Activity: Event"
       EV: () => {
@@ -76,7 +76,7 @@ module.exports = function Protocol(coregateway, emitRouter) {
             "s": "OK"
           }
         };
-        response_emit(connprofile, 'CA', 'rs', _data);
+        emitResponse(connprofile, _data);
       },
       // nooxy service protocol implementation of "Call Activity: Close ActivitySocket"
       CS: () => {
@@ -84,7 +84,7 @@ module.exports = function Protocol(coregateway, emitRouter) {
       }
     }
     // call the callback.
-    methods[data.m](connprofile, data.d, response_emit);
+    methods[data.m](connprofile, data.d, emitResponse);
   };
 
   // Serverside

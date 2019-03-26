@@ -11,33 +11,33 @@ function AuthorizationHandler() {
   // Handling responses to authorization requests.
   let _handler = {
     // Authby password
-    'PW': (connprofile, data, data_sender) => {
+    'PW': (connprofile, data, emitResponse) => {
       let AuthbyPassword = Implementation.returnImplement('AuthbyPassword');
-      AuthbyPassword(connprofile, data, data_sender);
+      AuthbyPassword(connprofile, data, emitResponse);
     },
 
     // Authby password failed
-    'PF': (connprofile, data, data_sender) => {
+    'PF': (connprofile, data, emitResponse) => {
       let AuthbyPasswordFailed = Implementation.returnImplement('AuthbyPasswordFailed');
-      AuthbyPasswordFailed(connprofile, data, data_sender);
+      AuthbyPasswordFailed(connprofile, data, emitResponse);
     },
 
     // Authby token
-    'TK': (connprofile, data, data_sender) => {
+    'TK': (connprofile, data, emitResponse) => {
       let AuthbyToken = Implementation.returnImplement('AuthbyToken');
-      AuthbyToken(connprofile, data, data_sender);
+      AuthbyToken(connprofile, data, emitResponse);
     },
 
     // Authby token failed
-    'TF': (connprofile, data, data_sender) => {
+    'TF': (connprofile, data, emitResponse) => {
       let AuthbyTokenFailed = Implementation.returnImplement('AuthbyTokenFailed');
-      AuthbyTokenFailed(connprofile, data, data_sender);
+      AuthbyTokenFailed(connprofile, data, emitResponse);
     },
 
     // Sign in
-    'SI': (connprofile, data, data_sender) => {
+    'SI': (connprofile, data, emitResponse) => {
       let Signin = Implementation.returnImplement('signin');
-      Signin(connprofile, data, data_sender);
+      Signin(connprofile, data, emitResponse);
     },
 
     'AF': ()=>{
@@ -49,8 +49,8 @@ function AuthorizationHandler() {
     Implementation = module;
   };
 
-  this.handle = (method, connprofile, data, data_sender)=> {
-    _handler[method](connprofile, data, data_sender);
+  this.handle = (method, connprofile, data, emitResponse)=> {
+    _handler[method](connprofile, data, emitResponse);
   };
 
   this.close = () =>{

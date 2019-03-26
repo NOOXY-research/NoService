@@ -5,7 +5,7 @@
 'use strict';
 
 
-module.exports = function Protocol(coregateway, emitRouter) {
+module.exports = function Protocol(coregateway, emitRequest) {
   this.Protocol = "CS";
 
   this.Positions = {
@@ -36,7 +36,7 @@ module.exports = function Protocol(coregateway, emitRouter) {
       _ActivityRsCEcallbacks[_data.d.t] = (connprofile, data) => {
         callback(false, connprofile, data.d.i);
       }
-      emitRouter(connprofile, 'CS', _data);
+      emitRequest(connprofile, 'CS', _data);
     });
 
   });
@@ -49,13 +49,13 @@ module.exports = function Protocol(coregateway, emitRouter) {
           "d": d,
         }
       };
-      emitRouter(conn_profile, 'CS', _data);
+      emitRequest(conn_profile, 'CS', _data);
 
   });
 
   coregateway.Activity.on('EmitSSServiceFunctionRq', (conn_profile, entityId, name, data, tempid) => {
       let _data = {
-        "m": "JF",
+        "m": "SF",
         "d": {
           "i": entityId,
           "n": name,
@@ -63,7 +63,7 @@ module.exports = function Protocol(coregateway, emitRouter) {
           "t": tempid
         }
       };
-      emitRouter(conn_profile, 'CS', _data);
+      emitRequest(conn_profile, 'CS', _data);
 
   });
 
@@ -74,15 +74,15 @@ module.exports = function Protocol(coregateway, emitRouter) {
           "i": entityId
         }
       };
-      emitRouter(conn_profile, 'CS', _data);
+      emitRequest(conn_profile, 'CS', _data);
   });
 
   // Serverside
-  this.RequestHandler = (connprofile, data, response_emit) => {
+  this.RequestHandler = (connprofile, data, emitResponse) => {
     Service.getServiceInstanceByEntityId(data.d.i, (err, theservice)=> {
       let methods = {
         // nooxy service protocol implementation of "Call Service: Close ServiceSocket"
-        CS: (connprofile, data, response_emit) => {
+        CS: (connprofile, data, emitResponse) => {
           let _entitiesId = connprofile.returnBundle('bundle_entities');
           let index = _entitiesId.indexOf(data.i);
           if (index > -1) {
@@ -93,7 +93,7 @@ module.exports = function Protocol(coregateway, emitRouter) {
         },
 
         // nooxy service protocol implementation of "Call Service: Vertify Entity"
-        VE: (connprofile, data, response_emit) => {
+        VE: (connprofile, data, emitResponse) => {
           theservice.emitSSConnection(data.i, (err)=> {
             let _data;
             if(err) {
@@ -114,12 +114,12 @@ module.exports = function Protocol(coregateway, emitRouter) {
                 }
               }
             }
-            response_emit(connprofile, 'CS', 'rs', _data);
+            emitResponse(connprofile, _data);
           });
 
         },
         // nooxy service protocol implementation of "Call Service: ServiceSocket"
-        SS: (connprofile, data, response_emit) => {
+        SS: (connprofile, data, emitResponse) => {
           let _data;
           if(typeof(theservice) != 'undefined'||theservice!=null) {
             theservice.emitSSData(data.i, data.d);
@@ -142,16 +142,16 @@ module.exports = function Protocol(coregateway, emitRouter) {
               }
             };
           }
-          response_emit(connprofile, 'CS', 'rs', _data);
+          emitResponse(connprofile, _data);
         },
         // nooxy service protocol implementation of "Call Service: json function"
-        JF: (connprofile, data, response_emit) => {
+        SF: (connprofile, data, emitResponse) => {
           let _data;
           if(typeof(theservice) != 'undefined') {
             theservice.emitSSServiceFunctionCall(data.i, data.n, data.j, (err, returnvalue)=>{
               if(err) {
                 _data = {
-                  m: "JF",
+                  m: "SF",
                   d: {
                     // status
                     "t": data.t,
@@ -162,7 +162,7 @@ module.exports = function Protocol(coregateway, emitRouter) {
               }
               else {
                 _data = {
-                  m: "JF",
+                  m: "SF",
                   d: {
                     // status
                     "t": data.t,
@@ -172,12 +172,12 @@ module.exports = function Protocol(coregateway, emitRouter) {
                   }
                 };
               }
-              response_emit(connprofile, 'CS', 'rs', _data);
+              emitResponse(connprofile, _data);
             });
           }
           else {
             _data = {
-              m: "JF",
+              m: "SF",
               d: {
                 // status
                 "t": data.t,
@@ -185,15 +185,15 @@ module.exports = function Protocol(coregateway, emitRouter) {
                 "s": "Fail"
               }
             };
-            response_emit(connprofile, 'CS', 'rs', _data);
+            emitResponse(connprofile, _data);
           }
         },
 
         // nooxy service protocol implementation of "Call Service: createEntity"
-        CE: (connprofile, data, response_emit) => {
+        CE: (connprofile, data, emitResponse) => {
           Service.createEntity(connprofile, data.s, data.m, data.k, connprofile.returnClientIP(),
            data.o, data.od, connprofile.returnServerId(), connprofile.returnConnMethod(), data.d, (err, Id)=> {
-            response_emit(connprofile, 'CS', 'rs', {
+            emitResponse(connprofile, {
               "m": "CE",
               "d": {
                 // temp id
@@ -208,7 +208,7 @@ module.exports = function Protocol(coregateway, emitRouter) {
 
       if(!err || data.m === 'CE' || data.m === 'VE') {
         // call the callback.
-        methods[data.m](connprofile, data.d, response_emit);
+        methods[data.m](connprofile, data.d, emitResponse);
       }
     });
   };
@@ -231,7 +231,7 @@ module.exports = function Protocol(coregateway, emitRouter) {
 
       },
       // nooxy service protocol implementation of "Call Service: ServiceFunction"
-      JF: (connprofile, data) => {
+      SF: (connprofile, data) => {
         if(data.d.s === 'OK') {
           Activity.emitSFReturn(data.d.i, false, data.d.t, data.d.r);
         }
@@ -252,7 +252,7 @@ module.exports = function Protocol(coregateway, emitRouter) {
             }
           };
 
-          emitRouter(connprofile, 'CS', _data);
+          emitRequest(connprofile, 'CS', _data);
         }
         else {
           _ActivityRsCEcallbacks[data.d.t](connprofile, data);

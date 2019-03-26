@@ -957,7 +957,7 @@ function ServiceAPI() {
       for(let i in _API_generators) {
         _API_generators(api, service_socket, manifest);
       }
-      api.addAPI(['getImplementation'], (LCBO)=> {
+      api.addAPI(['getImplementationModule'], (LCBO)=> {
         return((remote_callback_obj)=> {
           let Implementation_LCBO = new LCBO(_coregateway.Implementation, null, false, true);
           if(remote_callback_obj) {

@@ -72,11 +72,11 @@ function Router() {
   let methods = {
     // nooxy service protocol implementation of "secure protocol"
     SP: {
-      emitter : (connprofile, data) => {
+      emitRequest : (connprofile, data) => {
         _senddata(connprofile, 'SP', 'rq', data);
       },
 
-      handler : (connprofile, session, data) => {
+      RequestHandler : (connprofile, session, data) => {
         let rq_rs_pos = {
           rq: "Server",
           rs: "Client"
@@ -112,8 +112,8 @@ function Router() {
   };
 
   // emit specified method.
-  this.emit = (connprofile, method, data) => {
-    methods[method].emitter(connprofile, data);
+  this.emitRequest = (connprofile, method, data) => {
+    methods[method].emitRequest(connprofile, data);
   };
 
   // import the accessbility of core resource
@@ -130,14 +130,14 @@ function Router() {
           if(connprofile.returnBundle('NSPS') === 'pending') {
             let json = JSON.parse(data);
             _tellJSONSniffers(json);
-            methods[json.m].handler(connprofile, json.s, json.d);
+            methods[json.m].RequestHandler(connprofile, json.s, json.d);
           }
           else if(connprofile.returnBundle('NSPS') != true && connprofile.returnRemotePosition() === 'Client') {
             _coregateway.NSPS.upgradeConnection(connprofile, (err, succeess)=>{
               if(succeess) {
                 let json = JSON.parse(data);
                 _tellJSONSniffers(json);
-                methods[json.m].handler(connprofile, json.s, json.d);
+                methods[json.m].RequestHandler(connprofile, json.s, json.d);
               }
               else {
                 connprofile.closeConnetion();
@@ -150,7 +150,7 @@ function Router() {
           else if(connprofile.returnBundle('NSPS') != true) {
             let json = JSON.parse(data);
             _tellJSONSniffers(json);
-            methods[json.m].handler(connprofile, json.s, json.d);
+            methods[json.m].RequestHandler(connprofile, json.s, json.d);
           }
           else if(connprofile.returnBundle('NSPS') === true) {
             // true
@@ -161,7 +161,7 @@ function Router() {
               }
               let json = JSON.parse(decrypted);
               _tellJSONSniffers(json);
-              methods[json.m].handler(connprofile, json.s, json.d);
+              methods[json.m].RequestHandler(connprofile, json.s, json.d);
 
             });
           }
@@ -169,7 +169,7 @@ function Router() {
         else {
           let json = JSON.parse(data);
           _tellJSONSniffers(json);
-          methods[json.m].handler(connprofile, json.s, json.d);
+          methods[json.m].RequestHandler(connprofile, json.s, json.d);
         }
       }
       catch (er) {
@@ -204,18 +204,20 @@ function Router() {
 
     // load protocols
     Protocols.forEach((pt)=> {
-      let p = new pt(_coregateway, this.emit);
-      p.emitRouter = this.emit;
+      let p = new pt(_coregateway, this.emitRequest);
       methods[p.Protocol] = {
-        emitter : (connprofile, data) => {
+        emitRequest : (connprofile, data) => {
           _senddata(connprofile, p.Protocol, 'rq', data);
         },
 
-        handler : (connprofile, session, data) => {
+        RequestHandler : (connprofile, session, data) => {
           connprofile.getRemotePosition((err, pos)=> {
             if(p.Positions[session] === pos || p.Positions[session] === 'Both') {
+              let _emitRespose = (connprofile, data)=> {
+                _senddata(connprofile,  p.Protocol, 'rs', data);
+              };
               if(session === 'rq') {
-                p.RequestHandler(connprofile, data, _senddata);
+                p.RequestHandler(connprofile, data, emitRespose);
               }
               else {
                 p.ResponseHandler(connprofile, data);
@@ -230,34 +232,17 @@ function Router() {
     });
 
     _coregateway.Implementation.getClientConnProfile = _coregateway.Connection.createClient;
-    _coregateway.Implementation.emitRouter = this.emit;
+    _coregateway.Implementation.emitRequest = this.emitRequest;
     _coregateway.Implementation.sendRouterData = _senddata;
-    _coregateway.NSPS.emitRouter = this.emit;
+    _coregateway.NSPS.emitRequest = this.emitRequest;
   };
 
   // for plugins
   this.addProtocol = (pt)=> {
-    methods[p.Protocol] = {
-      emitter : (connprofile, data) => {
-        _senddata(connprofile, p.Protocol, 'rq', data);
-      },
-
-      handler : (connprofile, session, data) => {
-        connprofile.getRemotePosition((err, pos)=> {
-          if(p.Positions[session] === pos || p.Positions[session] === 'Both') {
-            if(session === 'rq') {
-              p.RequestHandler(connprofile, data, _senddata);
-            }
-            else {
-              p.ResponseHandler(connprofile, data);
-            }
-          }
-          else {
-            _sessionnotsupport(p, session, data);
-          }
-        });
-      }
-    };
+    if(_debug) {
+      Utils.TagLog('Router', 'Added a additional protocol.');
+    }
+    Protocols.push(pt);
   };
 
   this.close = () => {

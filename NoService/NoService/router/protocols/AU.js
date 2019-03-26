@@ -5,7 +5,7 @@
 
 'use strict';
 
-module.exports = function Protocol(coregateway, emitRouter) {
+module.exports = function Protocol(coregateway, emitRequest) {
 
   this.Protocol = "AU";
 
@@ -34,13 +34,13 @@ module.exports = function Protocol(coregateway, emitRouter) {
       _queue_operation[data.d.t] = op;
       // set the timeout of this operation
       setTimeout(() => {if(_queue_operation[data.d.t]) {delete _queue_operation[data.d.t]}}, _auth_timeout*1000);
-      this.emitRouter(connprofile, 'AU', data);
+      this.emitRequest(connprofile, 'AU', data);
     });
   });
 
   coregateway.Authorization.on('AuthbyPasswordFailed', (entityId, callback)=> {
     Entity.getEntityConnProfile(entityId, (err, connprofile) => {
-      this.emitRouter(connprofile, 'AU', {m: 'PF'});
+      this.emitRequest(connprofile, 'AU', {m: 'PF'});
     });
   });
 
@@ -56,26 +56,26 @@ module.exports = function Protocol(coregateway, emitRouter) {
       _queue_operation[data.d.t] = op;
       // set the timeout of this operation
       setTimeout(() => {if(_queue_operation[data.d.t]) {delete _queue_operation[data.d.t]}}, _auth_timeout*1000);
-      emitRouter(connprofile, 'AU', data);
+      emitRequest(connprofile, 'AU', data);
     });
   });
 
   coregateway.Authorization.on('AuthbyTokenFailed', (entityId, callback)=> {
     Entity.getEntityConnProfile(entityId, (err, connprofile) => {
-      this.emitRouter(connprofile, 'AU', {m: 'TF'});
+      this.emitRequest(connprofile, 'AU', {m: 'TF'});
     });
   });
 
   coregateway.Authorization.on('SigninRq', (entityId)=> {
     Entity.getEntityConnProfile(entityId, (err, connprofile) => {
-      emitRouter(connprofile, 'AU', {m: 'SI'});
+      emitRequest(connprofile, 'AU', {m: 'SI'});
     });
   });
   // ServerSide end
 
 
-  this.RequestHandler = (connprofile, data, data_sender) => {
-    coregateway.AuthorizationHandler.handle(data.m, connprofile, data, data_sender);
+  this.RequestHandler = (connprofile, data, emitResponse) => {
+    coregateway.AuthorizationHandler.handle(data.m, connprofile, data, emitResponse);
   };
 
   this.ResponseHandler = (connprofile, data) => {
