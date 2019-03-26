@@ -41,7 +41,7 @@ NoService is a high level framework for services that provide you "nodejs" and "
 
 ## Why we build NoService? And why you should give it a try?
 
-### Serperating backend applications from physical differences
+### Seperating backend applications from physical differences
 NoService provide a API layer that handle backend designer for connection, database and authenticity. Thus you other designer's project can basically deploy on any NoService framework.
 
 ### All-in-one but async multithreaded
@@ -54,7 +54,7 @@ We think there are a lot to do between TCP layer and Application layer. Which we
 NoService has built-in secure protocol built by SHA-256, AES and RSA to secure your data. It also has authorization API, provides you ability to authorize user to protect your data. Besides, you can block IPs and domains. The operations on daemon will not be executed until the client has the right response of authorization that emitted from daemon side.
 
 ### lightweight + micro-core
-NoService is super-lightweight both in client and daemon. But it has lots of feature. And it's features can be expanded by services.
+NoService is super-lightweight both in client and daemon. But it has lots of feature. And it's features can be expanded by services and plugins.
 
 ### communication between services
 The design of NoService sockets that we called service socket and activity socket. With the characteristic of those sockets, services can communicate each others. By this way each service don't need to sync data to promise the data is the newest.
@@ -173,7 +173,7 @@ Objective: A worker daemon will import API and create communication between a wo
 ### Entity(as part of service)
 Objective: Create identity system for Service , Activity or future stuff. Entities are generated and being realtime. So there is no need for databases.
 
-## Clientside module(prototype)
+## Client-side module(prototype)
 
 ### Core
 Objective: setting up environment for NOOXY service client.
@@ -191,7 +191,7 @@ Objective: To handle authoritative actions. Confirming the sensitive data or ope
 Objective: Providing AES, RSA, Hasing abilities for NSPS(NoService Protocol Secured).
 
 ## Service and Sockets
-### Explaination of how service work
+### Explanation of how service work
 Once the core of the NoService is started.
 The core of NoService will navigate the directories of “services” directory which is under the root of NoService files. And in that directory it will exist a file called “entry.js”. The figure below can help you understand the concept.
 ```
