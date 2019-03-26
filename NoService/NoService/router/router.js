@@ -124,6 +124,7 @@ function Router() {
     // while recieve a data from connection
     _coregateway.Connection.onData = (connprofile, data) => {
       _tellRAWSniffers(data);
+
       try {
         if(_coregateway.Settings.secure === true && connprofile.returnConnMethod() != 'Local' && connprofile.returnConnMethod() != 'local') {
           // upgrade protocol
@@ -213,11 +214,11 @@ function Router() {
         RequestHandler : (connprofile, session, data) => {
           connprofile.getRemotePosition((err, pos)=> {
             if(p.Positions[session] === pos || p.Positions[session] === 'Both') {
-              let _emitRespose = (connprofile, data)=> {
+              let _emitResponse = (connprofile, data)=> {
                 _senddata(connprofile,  p.Protocol, 'rs', data);
               };
               if(session === 'rq') {
-                p.RequestHandler(connprofile, data, emitRespose);
+                p.RequestHandler(connprofile, data, _emitResponse);
               }
               else {
                 p.ResponseHandler(connprofile, data);

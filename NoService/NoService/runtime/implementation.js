@@ -12,9 +12,8 @@ function Implementation() {
   let _implts = {
     // NOOXY service protocol sercure end
     // return for Server
-    AuthbyToken: (callback) => {
+    AuthbyToken: () => {
       Utils.TagLog('*ERR*', 'AuthbyToken not implemented');
-      callback(true, 'token');
     },
 
     AuthbyTokenFailed: () => {
@@ -22,9 +21,8 @@ function Implementation() {
     },
 
     // return for Server
-    AuthbyPassword: (callback) => {
+    AuthbyPassword: () => {
       Utils.TagLog('*ERR*', 'AuthbyPassword not implemented');
-      callback(true, 'password');
     },
 
     AuthbyPasswordFailed: () => {
@@ -32,18 +30,16 @@ function Implementation() {
     },
 
     // return for Client
-    signin: (conn_method, remoteip, port, username, password, callback) => {
+    signin: () => {
       Utils.TagLog('*ERR*', 'signin not implemented');
-      callback(true, 'token');
     },
 
     // return for Client
-    signup: (conn_method, remoteip, port, username, password, callback) => {
+    signup: () => {
       Utils.TagLog('*ERR*', 'signup not implemented');
-      callback(true, 'token');
     },
 
-    onToken: (err, token) => {
+    onToken: () => {
       Utils.TagLog('*ERR*', 'onToken not implemented');
     }
   };
@@ -75,7 +71,7 @@ function Implementation() {
   };
 
   this.getClientConnProfile = ()=> {
-    
+
   };
 
   this.close = () => {};

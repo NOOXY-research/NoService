@@ -8,11 +8,11 @@
 function AuthorizationHandler() {
 
   this.importImplementation = (Implementation)=> {
-    this.AuthbyPassword = Implementation.returnImplement('AuthbyPassword');
-    this.AuthbyPasswordFailed = Implementation.returnImplement('AuthbyPasswordFailed');
-    this.AuthbyToken = Implementation.returnImplement('AuthbyToken');
-    this.AuthbyTokenFailed = Implementation.returnImplement('AuthbyTokenFailed');
-    this.Signin = Implementation.returnImplement('signin');
+    this.AuthbyPassword = (...args)=> {Implementation.returnImplement('AuthbyPassword').apply(null, args)};
+    this.AuthbyToken = (...args)=> {Implementation.returnImplement('AuthbyToken').apply(null, args)};
+    this.AuthbyTokenFailed = (...args)=> {Implementation.returnImplement('AuthbyTokenFailed').apply(null, args)};
+    this.Signin = (...args)=> {Implementation.returnImplement('signin').apply(null, args)};
+
   };
 
   this.close = () =>{

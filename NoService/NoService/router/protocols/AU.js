@@ -65,7 +65,7 @@ module.exports = function Protocol(coregateway, emitRequest) {
 
   Authorization.on('AuthbyTokenFailed', (entityId, callback)=> {
     Entity.getEntityConnProfile(entityId, (err, connprofile) => {
-      this.emitRequest(connprofile, 'AU', {m: 'TF'});
+      emitRequest(connprofile, 'AU', {m: 'TF'});
     });
   });
 
@@ -111,7 +111,7 @@ module.exports = function Protocol(coregateway, emitRequest) {
 
 
   this.RequestHandler = (connprofile, data, emitResponse) => {
-    _handler[method](data.m, connprofile, data, emitResponse);
+    _handler[data.m](connprofile, data, emitResponse);
   };
 
   this.ResponseHandler = (connprofile, data) => {

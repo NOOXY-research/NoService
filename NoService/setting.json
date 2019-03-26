@@ -54,7 +54,7 @@
     "NoMailer"
   ],
 
-  "debug": false,
+  "debug": true,
   "verbose": true,
 
   "master_service": "NoServiceManager",
