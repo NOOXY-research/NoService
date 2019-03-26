@@ -83,7 +83,7 @@ Socket base+API pattern makes the concept easy to understand. NoService wraps th
 ### Integrated ORM
 The intergrated ORM seperate between database interface and your service's logic. Make switching database solution painless. Besides you will need no implement database query yourself.
 
-### Modulizable
+### Modulizable and plugins
 NoService has good software structure which means you can modify the native library to fit your taste. Such as database,  protocol, worker or something else.
 
 ### Bundled Services
