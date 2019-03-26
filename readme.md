@@ -89,7 +89,8 @@ NoService has good software structure which means you can modify the native libr
 ### Bundled Services
 NoService provide bundled services such as NoShell which give you access of NoService. NoUser for user system. And so on.
 
-
+## Final goal
+not yet
 
 ## Target version
 * daemon: alpha 0.5.5
