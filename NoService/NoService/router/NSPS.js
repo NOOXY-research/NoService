@@ -57,7 +57,7 @@ function NSPS() {
 
   // Nooxy service protocol secure request ClientSide
   // in client need to be in implementation module
-  this.RequestHandler = (connprofile, data, data_sender) => {
+  this.RequestHandler = (connprofile, data, emitResponse) => {
     let host_rsa_pub = data.p;
     let client_random_num = _crypto_module.returnRandomInt(99999);
     connprofile.setBundle('host_rsa_pub_key', host_rsa_pub);
@@ -69,7 +69,7 @@ function NSPS() {
       };
       _crypto_module.encryptString('RSA2048', host_rsa_pub, JSON.stringify(_data), (err, encrypted)=>{
         connprofile.setBundle('NSPS', 'finalize');
-        data_sender(connprofile, 'SP', 'rs', encrypted);
+        emitResponse(connprofile, 'SP', 'rs', encrypted);
       });
     });
   };
