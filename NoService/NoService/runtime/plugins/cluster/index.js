@@ -1,6 +1,6 @@
-// NoService/NoService/rumtime/plugins/cluster/index.js
+// NoService/NoService/rumtime/plugins/cluster/protocol.js
 // Description:
-// "cluster/index.js" provide clustering ability.
+// "protocol.js" nooxy service protocol implementation of "Cluster"
 // Copyright 2018-2019 NOOXY. All Rights Reserved.
 
 module.exports = function() {

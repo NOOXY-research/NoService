@@ -814,11 +814,44 @@ module.exports = function() {
 
   this.plugin = (noservice_coregateway, noservice_isInitialized, deploy_settings, noservice_constants, verbose, next)=> {
     verbose('Dummy', 'Dummy plugin being executed. NoService version "'+noservice_constants.version+'"');
+    // add a protocol
+    noservice_coregateway.Router.addProtocol(require('./protocol'));
+    // replace native module
+    noservice_coregateway.Database = new (require('./my/own/db'))();
     next(false);
   };
 }
 
 ```
+add your own protocols
+``` javascript
+// NoService/NoService/rumtime/plugins/cluster/protocol.js
+// Description:
+// "protocol.js" nooxy service protocol implementation of "Cluster"
+// Copyright 2018-2019 NOOXY. All Rights Reserved.
+
+'use strict';
+
+module.exports = function Protocol(coregateway, emitRequest) {
+
+  this.Protocol = "CR";
+
+  this.Positions = {
+    rq: "Server",
+    rs: "Client"
+  };
+
+
+  this.RequestHandler = (connprofile, data, data_sender) => {
+
+  };
+
+  this.ResponseHandler = (connprofile, data) => {
+  };
+}
+
+```
+
 ## NoService Protocol
 ### Basic
 1. NSP(NoService Protocol) is based on text, based on Json data structure.

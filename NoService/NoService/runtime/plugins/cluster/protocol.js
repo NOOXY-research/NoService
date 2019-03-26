@@ -1,6 +1,6 @@
-// NoService/NoService/rumtime/plugins/cluster/protocols/CT.js
+// NoService/NoService/rumtime/plugins/cluster/protocols.js
 // Description:
-// "CT.js" nooxy service protocol implementation of "Cluster"
+// "CR.js" nooxy service protocol implementation of "Cluster"
 // Copyright 2018-2019 NOOXY. All Rights Reserved.
 
 'use strict';
@@ -16,6 +16,7 @@ module.exports = function Protocol(coregateway, emitRequest) {
 
 
   this.RequestHandler = (connprofile, data, data_sender) => {
+
   };
 
   this.ResponseHandler = (connprofile, data) => {
