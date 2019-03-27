@@ -5,8 +5,6 @@
 //
 // beware that this client's crypto uses daemon's implementation so it can only be used as local client instead of remote one.
 
-const readline = require('readline');
-var Writable = require('stream').Writable;
 function Service(Me, NoService) {
   // Your service entry point
   // Get the service socket of your service

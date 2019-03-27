@@ -52,9 +52,10 @@ module.exports = function() {
 
   this.plugin = (noservice_coregateway, noservice_isInitialized, deploy_settings, noservice_constants, verbose, next)=> {
     let Implementation = noservice_coregateway.Implementation;
+    let log = noservice_coregateway.Utilities.TagLog;
     // setup NoService Auth implementation
     Implementation.setImplement('signin', (connprofile, data, emitResponse)=>{
-      console.log('Please signin your account. Auth ('+data.d.t+').');
+      log('Client', 'Please signin your account. Auth ('+(data.d?data.d.t:'Signin')+').');
       _get_username_and_password((err, u, p)=>{
         let _data = {
           u: u,
@@ -91,21 +92,20 @@ module.exports = function() {
     });
 
     Implementation.setImplement('onToken', (err, username, token)=>{
-      console.log(token_resumes[username]);
       token_resumes[username](false, token);
       if(!err) tokens[username] = token;
     });
 
     Implementation.setImplement('AuthbyTokenFailed', (connprofile, data, emitResponse) => {
-      Implementation.getImplement('signin', (err, im)=> {
-        im(connprofile, data, emitResponse);
-      });
-
+      // Implementation.getImplement('signin', (err, im)=> {
+      //   im(connprofile, data, emitResponse);
+      // });
+      tokens = {};
     });
 
     // setup NoService Auth implementation
     Implementation.setImplement('AuthbyPassword', (connprofile, data, emitResponse) => {
-      console.log('Please enter your password '+data.d.u+'. Auth ('+data.d.t+').');
+      log('Client', 'Please enter your password '+data.d.u+'. Auth ('+data.d.t+').');
       let callback = (err, password)=>{
         let _data = {
           m:'PW',

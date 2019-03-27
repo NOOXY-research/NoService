@@ -219,12 +219,7 @@ function Router() {
       let p = new pt(_coregateway, this.emitRequest, _debug);
       methods[p.Protocol] = {
         emitRequest : (connprofile, data) => {
-          try {
-            _senddata(connprofile, p.Protocol, 'rq', data);
-          }
-          catch(e) {
-            console.log(connprofile, p.Protocol, 'rq', data)
-          }
+          _senddata(connprofile, p.Protocol, 'rq', data);
         },
 
         RequestHandler : (connprofile, session, data) => {

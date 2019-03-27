@@ -220,7 +220,7 @@ function API(_coregateway) {
             return ({
                 call: (name, Json, remote_callback_obj_2)=> {
                   if(remote_callback_obj_2) {
-                    syncRefer(remote_callback_obj_2);
+                    syncRefer(remote_callback_obj_2&&as);
                     as.call(name, Json, (err, json)=> {
                       if(remote_callback_obj_2) {}
                       remote_callback_obj_2.run([], [err, json]);
@@ -230,7 +230,7 @@ function API(_coregateway) {
                 },
 
                 getEntityId: (remote_callback_obj_2)=> {
-                  if(remote_callback_obj_2) {
+                  if(remote_callback_obj_2&&as) {
                     syncRefer(remote_callback_obj_2);
                     as.getEntityId((err, entityId)=>{
                       remote_callback_obj_2.run([], [err, entityId]);
@@ -240,7 +240,7 @@ function API(_coregateway) {
                 },
 
                 on: (type, remote_callback_obj_2)=> {
-                  if(remote_callback_obj_2) {
+                  if(remote_callback_obj_2&&as) {
                     syncRefer(remote_callback_obj_2);
                     as.on(type, (err, data)=>{
                       remote_callback_obj_2.run([], [err, data]);
@@ -249,7 +249,7 @@ function API(_coregateway) {
                 },
 
                 onEvent: (event, remote_callback_obj_2)=> {
-                  if(remote_callback_obj_2) {
+                  if(remote_callback_obj_2&&as) {
                     syncRefer(remote_callback_obj_2);
                     as.onEvent(event, (err, data)=>{
                       remote_callback_obj_2.run([], [err, data]);
@@ -277,7 +277,7 @@ function API(_coregateway) {
           let local_callback_obj = new LCBO(as, (syncRefer)=> {
             return ({
                 call: (name, Json, remote_callback_obj_2)=> {
-                  if(remote_callback_obj_2) {
+                  if(remote_callback_obj_2&&as) {
                     syncRefer(remote_callback_obj_2);
                     as.call(name, Json, (err, json)=> {
                       remote_callback_obj_2.run([], [err, json]);
@@ -287,7 +287,7 @@ function API(_coregateway) {
                 },
 
                 getEntityId: (remote_callback_obj_2)=> {
-                  if(remote_callback_obj_2) {
+                  if(remote_callback_obj_2&&as) {
                     syncRefer(remote_callback_obj_2);
                     as.getEntityId((err, entityId)=>{
                       remote_callback_obj_2.run([], [err, entityId]);
@@ -297,7 +297,7 @@ function API(_coregateway) {
                 },
 
                 on: (type, remote_callback_obj_2)=> {
-                  if(remote_callback_obj_2) {
+                  if(remote_callback_obj_2&&as) {
                     syncRefer(remote_callback_obj_2);
                     as.on(type, (err, data)=>{
                       remote_callback_obj_2.run([], [err, data]);
@@ -306,7 +306,7 @@ function API(_coregateway) {
                 },
 
                 onEvent: (event, remote_callback_obj_2)=> {
-                  if(remote_callback_obj_2) {
+                  if(remote_callback_obj_2&&as) {
                     syncRefer(remote_callback_obj_2);
                     as.onEvent(event, (err, data)=>{
                       remote_callback_obj_2.run([], [err, data]);
@@ -334,7 +334,7 @@ function API(_coregateway) {
           let local_callback_obj = new LCBO(as, (syncRefer)=> {
             return ({
                 call: (name, Json, remote_callback_obj_2)=> {
-                  if(remote_callback_obj_2) {
+                  if(remote_callback_obj_2&&as) {
                     syncRefer(remote_callback_obj_2);
                     as.call(name, Json, (err, json)=> {
                       remote_callback_obj_2.run([], [err, json]);
@@ -345,7 +345,7 @@ function API(_coregateway) {
                 },
 
                 getEntityId: (remote_callback_obj_2)=> {
-                  if(remote_callback_obj_2) {
+                  if(remote_callback_obj_2&&as) {
                     syncRefer(remote_callback_obj_2);
                     as.getEntityId((err, entityId)=>{
                       remote_callback_obj_2.run([], [err, entityId]);
@@ -356,7 +356,7 @@ function API(_coregateway) {
                 },
 
                 on: (type, remote_callback_obj_2)=> {
-                  if(remote_callback_obj_2) {
+                  if(remote_callback_obj_2&&as) {
                     syncRefer(remote_callback_obj_2);
                     as.on(type, (err, data)=>{
                       remote_callback_obj_2.run([], [err, data]);
@@ -365,7 +365,7 @@ function API(_coregateway) {
                 },
 
                 onEvent: (event, remote_callback_obj_2)=> {
-                  if(remote_callback_obj_2) {
+                  if(remote_callback_obj_2&&as) {
                     syncRefer(remote_callback_obj_2);
                     as.onEvent(event, (err, data)=>{
                       remote_callback_obj_2.run([], [err, data]);
@@ -393,7 +393,7 @@ function API(_coregateway) {
           let local_callback_obj = new LCBO(as, (syncRefer)=> {
             return ({
                 call: (name, Json, remote_callback_obj_2)=> {
-                  if(remote_callback_obj_2) {
+                  if(remote_callback_obj_2&&as) {
                     syncRefer(remote_callback_obj_2);
                     as.call(name, Json, (err, json)=> {
                       remote_callback_obj_2.run([], [err, json]);
@@ -403,7 +403,7 @@ function API(_coregateway) {
                 },
 
                 getEntityId: (remote_callback_obj_2)=> {
-                  if(remote_callback_obj_2) {
+                  if(remote_callback_obj_2&&as) {
                     syncRefer(remote_callback_obj_2);
                     as.getEntityId((err, entityId)=>{
                       remote_callback_obj_2.run([], [err, entityId]);
@@ -413,7 +413,7 @@ function API(_coregateway) {
                 },
 
                 on: (type, remote_callback_obj_2)=> {
-                  if(remote_callback_obj_2) {
+                  if(remote_callback_obj_2&&as) {
                     syncRefer(remote_callback_obj_2);
                     as.on(type, (err, data)=>{
                       remote_callback_obj_2.run([], [err, data]);
@@ -422,7 +422,7 @@ function API(_coregateway) {
                 },
 
                 onEvent: (event, remote_callback_obj_2)=> {
-                  if(remote_callback_obj_2) {
+                  if(remote_callback_obj_2&&as) {
                     syncRefer(remote_callback_obj_2);
                     as.onEvent(event, (err, data)=>{
                       remote_callback_obj_2.run([], [err, data]);
@@ -451,7 +451,7 @@ function API(_coregateway) {
           let local_callback_obj = new LCBO(as, (syncRefer)=> {
             return ({
                 call: (name, Json, remote_callback_obj_2)=> {
-                  if(remote_callback_obj_2) {
+                  if(remote_callback_obj_2&&as) {
                     syncRefer(remote_callback_obj_2);
                     as.call(name, Json, (err, json)=> {
                       remote_callback_obj_2.run([], [err, json]);
@@ -461,7 +461,7 @@ function API(_coregateway) {
                 },
 
                 getEntityId: (remote_callback_obj_2)=> {
-                  if(remote_callback_obj_2) {
+                  if(remote_callback_obj_2&&as) {
                     syncRefer(remote_callback_obj_2);
                     as.getEntityId((err, entityId)=>{
                       remote_callback_obj_2.run([], [err, entityId]);
@@ -471,7 +471,7 @@ function API(_coregateway) {
                 },
 
                 on: (type, remote_callback_obj_2)=> {
-                  if(remote_callback_obj_2) {
+                  if(remote_callback_obj_2&&as) {
                     syncRefer(remote_callback_obj_2);
                     as.on(type, (err, data)=>{
                       remote_callback_obj_2.run([], [err, data]);
@@ -480,7 +480,7 @@ function API(_coregateway) {
                 },
 
                 onEvent: (event, remote_callback_obj_2)=> {
-                  if(remote_callback_obj_2) {
+                  if(remote_callback_obj_2&&as) {
                     syncRefer(remote_callback_obj_2);
                     as.onEvent(event, (err, data)=>{
                       remote_callback_obj_2.run([], [err, data]);

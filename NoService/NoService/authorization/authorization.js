@@ -47,16 +47,21 @@ function Authorization() {
       if(mode === 'normal') {
         _checkhaveusername(entityId, callback, ()=>{
           _on_handler['AuthPasswordRq'](entityId, (err, password)=> {
-            let user = _entity_module.returnEntityValue(entityId, 'owner');
-            _authe_module.checkPasswordisValidByUsername(user, password, (err, isValid) => {
-              if(isValid) {
-                callback(false, true);
-              }
-              else {
-                _on_handler['AuthbyPasswordFailed'](entityId);
-                callback(false, false);
-              }
-            });
+            if(!password) {
+              callback(false, false);
+            }
+            else {
+              let user = _entity_module.returnEntityValue(entityId, 'owner');
+              _authe_module.checkPasswordisValidByUsername(user, password, (err, isValid) => {
+                if(isValid) {
+                  callback(false, true);
+                }
+                else {
+                  _on_handler['AuthbyPasswordFailed'](entityId);
+                  callback(false, false);
+                }
+              });
+            }
           });
         });
       }
@@ -89,16 +94,21 @@ function Authorization() {
             else {
               let _authonline = ()=> {
                 _on_handler['AuthTokenRq'](entityId, (err, token)=> {
-                  _authe_module.checkTokenisValidByUsername(user, token, (err, isValid) => {
-                    if(isValid) {
-                      connprofile.setBundle('NSToken_'+entityId, token);
-                      callback(false, true);
-                    }
-                    else {
-                      _on_handler['AuthbyTokenFailed'](entityId);
-                      callback(false, false);
-                    }
-                  });
+                  if(!token) {
+                    callback(false, false);
+                  }
+                  else {
+                    _authe_module.checkTokenisValidByUsername(user, token, (err, isValid) => {
+                      if(isValid) {
+                        connprofile.setBundle('NSToken_'+entityId, token);
+                        callback(false, true);
+                      }
+                      else {
+                        _on_handler['AuthbyTokenFailed'](entityId);
+                        callback(false, false);
+                      }
+                    });
+                  }
                 });
 
               };

@@ -209,18 +209,7 @@ const callObjCallback = (Obj, Objpath, args, arg_objs_trees, obj_callback_policy
     args[parseInt(i)] = generate_obj_policy(arg_objs_trees[i][0], arg_objs_trees[i][1], obj_callback_policy);
   }
   let f = getTargetObj(Objpath, Obj).bind(Obj);
-  try {
-    f.apply(null, args);
-  }
-  catch (e) {
-    console.log('Target', f);
-    console.log('RootTarget', Obj);
-    console.log('path', Objpath);
-    console.log('args', args);
-    console.log('e', e);
-
-
-  }
+  f.apply(null, args);
 };
 // generate tree from local for remote
 const generateObjCallbacksTree = (obj_raw) => {

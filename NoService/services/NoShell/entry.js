@@ -70,7 +70,7 @@ function Service(Me, NoService) {
                     ss.semit(entityID, 'welcome', msg);
                   }
                   else {
-
+                    ss.emit(entityID, 'welcome', 'Hi you did not authorize.');
                   }
                 });
                 // NoService.Authorization.emitSignin(entityID);
