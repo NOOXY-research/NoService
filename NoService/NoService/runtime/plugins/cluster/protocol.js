@@ -16,7 +16,12 @@ module.exports = function Protocol(coregateway, emitRequest) {
 
 
   this.RequestHandler = (connprofile, data, data_sender) => {
+    let _handlers = {
+      // cross host callback
+      'CC': {
 
+      }
+    };
   };
 
   this.ResponseHandler = (connprofile, data) => {

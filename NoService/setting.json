@@ -27,7 +27,7 @@
     }
   ],
 
-  "default_server": null,
+  "default_server": 2,
 
   "plugins_path": "./plugins",
 
