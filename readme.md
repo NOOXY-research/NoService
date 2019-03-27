@@ -75,7 +75,7 @@ Now, NoService can run on browser, react.js(javascript) and desktop(javascript).
 You can write your service in python and it's event-based asyncio module.
 
 ### Make your local scripts online
-With ServiceFunction you can wrap your python or node.js scripts into the function that can be called online natively without implement yourseld. Which is support in natively in our bundled service "NoShell".
+With ServiceFunction you can wrap your python or node.js scripts into the function that can be called online natively without implement yourself. Which is supported natively in our bundled service "NoShell".
 
 ### ServiceSocket + API = NoService
 Socket base+API pattern makes the concept easy to understand. NoService wraps the native TCP/IP, websocket or even http polling mode in the future as transportation layer. Make you no need to consider about integrating features with different connections. And with the advantage of NoService, in theory different activities(clients) can share same the socket in the same time.
@@ -142,6 +142,7 @@ NOOXY Http Service provide you file upload, oauth and contain control integrated
 
 ## Architecture
 ![](https://i.imgur.com/dA1DNxH.png)
+### Cluster module Architecture
 
 
 ## Serverside module
