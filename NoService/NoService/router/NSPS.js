@@ -14,7 +14,8 @@ function NSPS() {
   this.emitRequest = () => {console.log('[*ERR*] emitRequest not implemented');};
 
   // daemon side
-  this.ResponseHandler = (connprofile, data) => {
+  this.ResponseHandler = (connprofile, blob) => {
+    let data = JSON.parse(blob.toString('utf8'));
     let resume = _resumes[connprofile.returnGUID()];
     if(resume) {
       try{
@@ -57,7 +58,8 @@ function NSPS() {
 
   // Nooxy service protocol secure request ClientSide
   // in client need to be in implementation module
-  this.RequestHandler = (connprofile, data, emitResponse) => {
+  this.RequestHandler = (connprofile, blob, emitResponse) => {
+    let data = JSON.parse(blob.toString('utf8'));
     let host_rsa_pub = data.p;
     let client_random_num = _crypto_module.returnRandomInt(99999);
     connprofile.setBundle('host_rsa_pub_key', host_rsa_pub);
@@ -69,16 +71,22 @@ function NSPS() {
       };
       _crypto_module.encryptString('RSA2048', host_rsa_pub, JSON.stringify(_data), (err, encrypted)=>{
         connprofile.setBundle('NSPS', 'finalize');
-        emitResponse(connprofile, encrypted);
+        emitResponse(connprofile,  Buffer.from(JSON.stringify(encrypted)));
       });
     });
   };
 
-  this.secure = (connprofile, data, callback)=> {
+  this.encrypt = (connprofile, blob, callback)=> {
     connprofile.getBundle('aes_256_cbc_key', (err, key)=>{
-      _crypto_module.encryptString('AESCBC256', key, data, (err, encrypted)=> {
+      _crypto_module.encrypt('AESCBC256', key, blob, (err, encrypted)=> {
         callback(err, encrypted);
       });
+    });
+  };
+
+  this.decrypt = (connprofile, blob, callback)=> {
+    _crypto_module.decrypt('AESCBC256', connprofile.returnBundle('aes_256_cbc_key'), blob, (err, decrypted)=> {
+      callback(err, decrypted);
     });
   };
 
@@ -105,7 +113,7 @@ function NSPS() {
       p: _rsa_pub// RSA publicKey
     };
     connprofile.setBundle('NSPS', 'pending');
-    this.emitRequest(connprofile, 'SP', _data);
+    this.emitRequest(connprofile, 'SP',  Buffer.from(JSON.stringify(_data)));
   }
 
   this.importOperationTimeout = (timeout) => {

@@ -27,6 +27,22 @@ function NoCrypto() {
         let dec = decipher.update(toDecrypt, 'base64', 'utf8');
         dec += decipher.final('utf8');
         callback(false, dec);
+      },
+
+      // For NSPS 2
+      encrypt: (key, toEncrypt, callback) => {
+        let iv = crypto.randomBytes(16);
+        let cipher = crypto.createCipheriv('aes-256-cbc', key, iv);
+        let salt = crypto.randomBytes(64);
+        let crypted = Buffer.concat([iv, cipher.update(Buffer.concat([salt, toEncrypt])), cipher.final()]);
+        callback(false, crypted);
+      },
+      decrypt: (key, toDecrypt, callback) => {
+        let iv = toDecrypt.slice(0, 16);
+        let decipher = crypto.createDecipheriv('aes-256-cbc', key, iv);
+        toDecrypt = toDecrypt.slice(16);
+        let dec = Buffer.concat([decipher.update(toDecrypt), decipher.final()]);
+        callback(false, dec.slice(64));
       }
     },
 
@@ -41,6 +57,16 @@ function NoCrypto() {
         let buffer = new Buffer.from(toDecrypt, "base64");
         let decrypted = crypto.privateDecrypt(privateKey, buffer);
         callback(false, decrypted.toString("utf8"));
+      },
+      encrypt: (publicKey, toEncrypt, callback) => {
+        let buffer = new Buffer.from(toEncrypt);
+        let encrypted = crypto.publicEncrypt(publicKey, buffer);
+        callback(false, encrypted);
+      },
+      decrypt: (privateKey, toDecrypt, callback) => {
+        let buffer = new Buffer.from(toDecrypt);
+        let decrypted = crypto.privateDecrypt(privateKey, buffer);
+        callback(false, decrypted);
       }
     },
 
@@ -71,7 +97,25 @@ function NoCrypto() {
     catch(e) {
       callback(e);
     }
+  };
 
+  this.encrypt = (algo, key, toEncrypt, callback) => {
+    try{
+      _algo[algo].encrypt(key, toEncrypt, callback);
+    }
+    catch(e) {
+      callback(e);
+    }
+
+  };
+
+  this.decrypt = (algo, key, toDecrypt, callback) => {
+    try {
+      _algo[algo].decrypt(key, toDecrypt, callback);
+    }
+    catch(e) {
+      callback(e);
+    }
   };
 
   this.close = () => {};

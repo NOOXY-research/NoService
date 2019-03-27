@@ -5,7 +5,7 @@
 'use strict';
 
 
-module.exports = function Protocol(coregateway, emitRequest) {
+module.exports = function Protocol(coregateway, emitRequest, debug) {
   this.Protocol = "CA";
 
   this.Positions = {
@@ -49,7 +49,8 @@ module.exports = function Protocol(coregateway, emitRequest) {
   });
 
 
-  this.RequestHandler = (connprofile, data, emitResponse) => {
+  this.RequestHandler = (connprofile, blob, emitResponse) => {
+    let data = JSON.parse(blob.toString('utf8'));
 
     let methods = {
       // nooxy service protocol implementation of "Call Activity: ActivitySocket"
@@ -88,7 +89,8 @@ module.exports = function Protocol(coregateway, emitRequest) {
   };
 
   // Serverside
-  this.ResponseHandler = (connprofile, data) => {
+  this.ResponseHandler = (connprofile, blob) => {
+    let data = JSON.parse(blob.toString('utf8'));
 
     let methods = {
       // nooxy service protocol implementation of "Call Activity: ActivitySocket"

@@ -7,7 +7,6 @@
   "Authors": [],
   "git_url": null,
   "upgrade_branch": "master",
-  "implementation_api": false,
   "LibraryAPI": true,
   "DatabaseAPI": true,
   "dependencies": {

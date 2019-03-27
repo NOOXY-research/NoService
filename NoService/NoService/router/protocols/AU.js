@@ -5,7 +5,7 @@
 
 'use strict';
 
-module.exports = function Protocol(coregateway, emitRequest) {
+module.exports = function Protocol(coregateway, emitRequest, debug) {
 
   this.Protocol = "AU";
 
@@ -37,13 +37,13 @@ module.exports = function Protocol(coregateway, emitRequest) {
       _queue_operation[data.d.t] = op;
       // set the timeout of this operation
       setTimeout(() => {if(_queue_operation[data.d.t]) {delete _queue_operation[data.d.t]}}, _auth_timeout*1000);
-      this.emitRequest(connprofile, 'AU', data);
+      this.emitRequest(connprofile, 'AU', Buffer.from(JSON.stringify(data)));
     });
   });
 
   Authorization.on('AuthbyPasswordFailed', (entityId, callback)=> {
     Entity.getEntityConnProfile(entityId, (err, connprofile) => {
-      this.emitRequest(connprofile, 'AU', {m: 'PF'});
+      this.emitRequest(connprofile, 'AU', Buffer.from(JSON.stringify({m: 'PF'})));
     });
   });
 
@@ -59,19 +59,19 @@ module.exports = function Protocol(coregateway, emitRequest) {
       _queue_operation[data.d.t] = op;
       // set the timeout of this operation
       setTimeout(() => {if(_queue_operation[data.d.t]) {delete _queue_operation[data.d.t]}}, _auth_timeout*1000);
-      emitRequest(connprofile, 'AU', data);
+      emitRequest(connprofile, 'AU', Buffer.from(JSON.stringify(data)));
     });
   });
 
   Authorization.on('AuthbyTokenFailed', (entityId, callback)=> {
     Entity.getEntityConnProfile(entityId, (err, connprofile) => {
-      emitRequest(connprofile, 'AU', {m: 'TF'});
+      emitRequest(connprofile, 'AU', Buffer.from(JSON.stringify({m: 'TF'})));
     });
   });
 
   Authorization.on('SigninRq', (entityId)=> {
     Entity.getEntityConnProfile(entityId, (err, connprofile) => {
-      emitRequest(connprofile, 'AU', {m: 'SI'});
+      emitRequest(connprofile, 'AU', Buffer.from(JSON.stringify({m: 'SI'})));
     });
   });
   // ServerSide end
@@ -110,11 +110,16 @@ module.exports = function Protocol(coregateway, emitRequest) {
   };
 
 
-  this.RequestHandler = (connprofile, data, emitResponse) => {
-    _handler[data.m](connprofile, data, emitResponse);
+  this.RequestHandler = (connprofile, blob, emitResponse) => {
+    let data = JSON.parse(blob);
+    let _emitResponse = (connprofile, data)=> {
+      emitResponse(connprofile, Buffer.from(JSON.stringify(data)));
+    };
+    _handler[data.m](connprofile, data, _emitResponse);
   };
 
-  this.ResponseHandler = (connprofile, data) => {
+  this.ResponseHandler = (connprofile, blob) => {
+    let data = JSON.parse(blob);
     try {
       let op = _queue_operation[data.d.t];
       if(op) {

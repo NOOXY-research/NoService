@@ -103,7 +103,7 @@ function Client(ConnectionProfile) {
     _netc.on('data', (data) => {
       while(data.length) {
         let chunks_size = parseInt(data.slice(0, 16).toString());
-        this.onData(connprofile, data.slice(16, 16+chunks_size).toString());
+        this.onData(connprofile, data.slice(16, 16+chunks_size));
         data = data.slice(16+chunks_size);
       }
     });

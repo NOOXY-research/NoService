@@ -5,7 +5,7 @@
 'use strict';
 
 
-module.exports = function Protocol(coregateway, emitRequest) {
+module.exports = function Protocol(coregateway, emitRequest, debug) {
   this.Protocol = "CS";
 
   this.Positions = {
@@ -36,12 +36,12 @@ module.exports = function Protocol(coregateway, emitRequest) {
       _ActivityRsCEcallbacks[_data.d.t] = (connprofile, data) => {
         callback(false, connprofile, data.d.i);
       }
-      emitRequest(connprofile, 'CS', _data);
+      emitRequest(connprofile, 'CS', Buffer.from(JSON.stringify(_data)));
     });
 
   });
 
-  coregateway.Activity.on('EmitSSDataRq', (conn_profile, entityId, d) => {
+  Activity.on('EmitSSDataRq', (conn_profile, entityId, d) => {
       let _data = {
         "m": "SS",
         "d": {
@@ -49,11 +49,11 @@ module.exports = function Protocol(coregateway, emitRequest) {
           "d": d,
         }
       };
-      emitRequest(conn_profile, 'CS', _data);
+      emitRequest(conn_profile, 'CS', Buffer.from(JSON.stringify(_data)));
 
   });
 
-  coregateway.Activity.on('EmitSSServiceFunctionRq', (conn_profile, entityId, name, data, tempid) => {
+  Activity.on('EmitSSServiceFunctionRq', (conn_profile, entityId, name, data, tempid) => {
       let _data = {
         "m": "SF",
         "d": {
@@ -63,22 +63,24 @@ module.exports = function Protocol(coregateway, emitRequest) {
           "t": tempid
         }
       };
-      emitRequest(conn_profile, 'CS', _data);
+      emitRequest(conn_profile, 'CS', Buffer.from(JSON.stringify(_data)));
 
   });
 
-  coregateway.Activity.on('EmitASCloseRq', (conn_profile, entityId) => {
+  Activity.on('EmitASCloseRq', (conn_profile, entityId) => {
       let _data = {
         "m": "CS",
         "d": {
           "i": entityId
         }
       };
-      emitRequest(conn_profile, 'CS', _data);
+      emitRequest(conn_profile, 'CS', Buffer.from(JSON.stringify(_data)));
   });
 
   // Serverside
-  this.RequestHandler = (connprofile, data, emitResponse) => {
+  this.RequestHandler = (connprofile, blob, emitResponse) => {
+    let data = JSON.parse(blob.toString('utf8'));
+    console.log(data);
     Service.getServiceInstanceByEntityId(data.d.i, (err, theservice)=> {
       let methods = {
         // nooxy service protocol implementation of "Call Service: Close ServiceSocket"
@@ -101,7 +103,7 @@ module.exports = function Protocol(coregateway, emitRequest) {
                 m: "VE",
                 d: {
                   i: data.i,
-                  "s": "Fail"
+                  s: "Fail"
                 }
               }
             }
@@ -110,11 +112,11 @@ module.exports = function Protocol(coregateway, emitRequest) {
                 m: "VE",
                 d: {
                   i: data.i,
-                  "s": "OK"
+                  s: "OK"
                 }
               }
             }
-            emitResponse(connprofile, _data);
+            emitResponse(connprofile, Buffer.from(JSON.stringify(_data)));
           });
 
         },
@@ -142,7 +144,7 @@ module.exports = function Protocol(coregateway, emitRequest) {
               }
             };
           }
-          emitResponse(connprofile, _data);
+          emitResponse(connprofile, Buffer.from(JSON.stringify(_data)));
         },
         // nooxy service protocol implementation of "Call Service: json function"
         SF: (connprofile, data, emitResponse) => {
@@ -172,7 +174,7 @@ module.exports = function Protocol(coregateway, emitRequest) {
                   }
                 };
               }
-              emitResponse(connprofile, _data);
+              emitResponse(connprofile, Buffer.from(JSON.stringify(_data)));
             });
           }
           else {
@@ -185,7 +187,7 @@ module.exports = function Protocol(coregateway, emitRequest) {
                 "s": "Fail"
               }
             };
-            emitResponse(connprofile, _data);
+            emitResponse(connprofile, Buffer.from(JSON.stringify(_data)));
           }
         },
 
@@ -193,7 +195,7 @@ module.exports = function Protocol(coregateway, emitRequest) {
         CE: (connprofile, data, emitResponse) => {
           Service.createEntity(connprofile, data.s, data.m, data.k, connprofile.returnClientIP(),
            data.o, data.od, connprofile.returnServerId(), connprofile.returnConnMethod(), data.d, (err, Id)=> {
-            emitResponse(connprofile, {
+            emitResponse(connprofile, Buffer.from(JSON.stringify({
               "m": "CE",
               "d": {
                 // temp id
@@ -201,7 +203,7 @@ module.exports = function Protocol(coregateway, emitRequest) {
                 "i": Id,
                 "e": err
               }
-            });
+            })));
           });
         }
       }
@@ -213,7 +215,9 @@ module.exports = function Protocol(coregateway, emitRequest) {
     });
   };
 
-  this.ResponseHandler = (connprofile, data) => {
+  this.ResponseHandler = (connprofile, blob) => {
+    let data = JSON.parse(blob.toString('utf8'));
+    console.log(data);
     let methods = {
       // nooxy service protocol implementation of "Call Service: Vertify Connection"
       VE: (connprofile, data) => {
@@ -252,7 +256,7 @@ module.exports = function Protocol(coregateway, emitRequest) {
             }
           };
 
-          emitRequest(connprofile, 'CS', _data);
+          emitRequest(connprofile, 'CS', Buffer.from(JSON.stringify(_data)));
         }
         else {
           _ActivityRsCEcallbacks[data.d.t](connprofile, data);

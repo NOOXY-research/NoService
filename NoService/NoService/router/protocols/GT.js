@@ -5,7 +5,7 @@
 'use strict';
 
 
-module.exports = function Protocol(coregateway, emitRequest) {
+module.exports = function Protocol(coregateway, emitRequest, debug) {
   this.Protocol = "GT";
 
   this.Positions = {
@@ -13,10 +13,12 @@ module.exports = function Protocol(coregateway, emitRequest) {
     rs: "Server"
   };
 
-  this.RequestHandler = (connprofile, data, _senddata) => {
+  this.RequestHandler = (connprofile, blob, _senddata) => {
+    let data = JSON.parse(blob.toString('utf8'));
     let responsedata = {};
     coregateway.Authenticity.getUserTokenByUsername(data.u, data.p, (err, token)=>{
       responsedata['t'] = token;
+      responsedata['u'] = data.u;
       if(err) {
         responsedata['s'] = 'Fail';
       }
@@ -27,7 +29,8 @@ module.exports = function Protocol(coregateway, emitRequest) {
     });
   };
 
-  this.ResponseHandler = (connprofile, data) => {
+  this.ResponseHandler = (connprofile, blob) => {
+    let data = JSON.parse(blob.toString('utf8'));
     coregateway.Implementation.onToken(connprofile, data.s, data.t);
   };
 

@@ -20,6 +20,11 @@ module.exports = function Protocol(coregateway, emitRequest) {
       // cross host callback
       'CC': {
 
+      },
+
+      // redirect
+      'RD': {
+
       }
     };
   };

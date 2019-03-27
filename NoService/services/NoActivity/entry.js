@@ -37,14 +37,14 @@ function Service(Me, NoService) {
     NoService.Daemon.getSettings((err, daemon_setting)=>{
       if(daemon_setting.debug) {
         NoService.Sniffer.onRouterJSON((err, Json)=>{
-          NoService.Utils.TagLog('DEGUG', 'Received a Json.');
-          NoService.Utils.TagLog('DEGUG', Json);
+          // NoService.Utils.TagLog('DEGUG', 'Received a Json.');
+          // NoService.Utils.TagLog('DEGUG', Json);
         })
       }
     });
     if(settings.protocol_log) {
       NoService.Sniffer.onRouterJSON((err, Json)=>{
-        let date = new Date();
+        let date = new Date(); 
         date = date.toISOString().replace(/T/, ' ').replace(/\..+/, '') ;
         fs.appendFile('protocol.log', '['+date+'] '+JSON.stringify(Json, null, 0)+'\n', safec((err)=> {
           if (err) throw err;

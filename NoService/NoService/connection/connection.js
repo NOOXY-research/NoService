@@ -141,7 +141,6 @@ function Connection(options) {
     };
 
     let _prev_client = _clients[conn_method+remoteip+port];
-
     if(_prev_client) {
       callback(false, _prev_client);
     }

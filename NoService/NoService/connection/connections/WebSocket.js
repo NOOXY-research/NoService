@@ -76,6 +76,7 @@ function Server(ServerId, ConnectionProfile) {
 function Client(ConnectionProfile) {
   let _ws = null
   let _debug;
+  let _ops = [];
 
   this.setDebug = (d)=> {
     _debug = d;
@@ -89,17 +90,24 @@ function Client(ConnectionProfile) {
 
   this.onClose = () => {Utils.TagLog('*ERR*', 'onClose not implemented');};
 
-  this.send = function(connprofile, data) {
-    _ws.send(data);
+  this.send = (connprofile, data)=> {
+    if (_ws.readyState !== WebSocket.OPEN) {
+      _ops.push(()=>{_ws.send(data)});
+    }
+    else {
+      _ws.send(data);
+    }
   };
 
   this.connect = (ip, port, callback) => {
     let connprofile;
     _ws = new WebSocket('ws://'+ip+':'+port);
     connprofile = new ConnectionProfile(null, 'Server', 'WebSocket', ip, port, 'localhost', this);
-    _ws.on('open', function open() {
+    _ws.on('open', ()=> {
+      for(let i in _ops) {
+        _ops[i]();
+      }
       callback(false, connprofile);
-      // ws.send('something');
     });
     _ws.on('message', (message) => {
       this.onData(connprofile, message);

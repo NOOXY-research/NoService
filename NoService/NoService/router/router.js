@@ -41,28 +41,27 @@ function Router() {
   }
 
   // a convinient function fo sending data
-  let _senddata = (connprofile, method, session, data) => {
-    let wrapped = {
-      m : method,
-      s : session,
-      d : data
-    };
-    let json = JSON.stringify(wrapped);
+  let _senddata = (connprofile, method, session, blob) => {
+    console.log('send '+method+session+blob);
+    // console.log(blob);
+
+    let blobfinal = Buffer.concat([Buffer.from(method+session, 'utf8'), blob]);
     // finally sent the data through the connection.
     if(connprofile) {
       _coregateway.NSPS.isConnectionSecured(connprofile, (secured)=> {
         if(secured === true) {
-          _coregateway.NSPS.secure(connprofile, json, (err, encrypted)=> {
+          _coregateway.NSPS.encrypt(connprofile, blobfinal, (err, encrypted)=> {
             if(!err) {
               _coregateway.Connection.send(connprofile, encrypted);
             }
             else if(_debug) {
-              Utils.TagLog('*WARN*', err.trace);
+              console.log(err);
+              Utils.TagLog('*WARN*', err.stack);
             }
           });
         }
         else {
-          _coregateway.Connection.send(connprofile, json);
+          _coregateway.Connection.send(connprofile, blobfinal);
         }
       });
     }
@@ -115,8 +114,8 @@ function Router() {
   };
 
   // emit specified method.
-  this.emitRequest = (connprofile, method, data) => {
-    methods[method].emitRequest(connprofile, data);
+  this.emitRequest = (connprofile, method, blob) => {
+    methods[method].emitRequest(connprofile, blob);
   };
 
   // import the accessbility of core resource
@@ -131,17 +130,19 @@ function Router() {
       try {
         if(_coregateway.Settings.secure === true && connprofile.returnConnMethod() != 'Local' && connprofile.returnConnMethod() != 'local') {
           // upgrade protocol
+          let method = data.slice(0, 2).toString();
+          let session = data.slice(2, 4).toString();
+          let blob = data.slice(4);
+
           if(connprofile.returnBundle('NSPS') === 'pending') {
-            let json = JSON.parse(data);
-            _tellJSONSniffers(json);
-            methods[json.m].RequestHandler(connprofile, json.s, json.d);
+            _tellJSONSniffers({method: method, session: session, data: blob});
+            methods[method].RequestHandler(connprofile, session, blob);
           }
           else if(connprofile.returnBundle('NSPS') != true && connprofile.returnRemotePosition() === 'Client') {
             _coregateway.NSPS.upgradeConnection(connprofile, (err, succeess)=>{
               if(succeess) {
-                let json = JSON.parse(data);
-                _tellJSONSniffers(json);
-                methods[json.m].RequestHandler(connprofile, json.s, json.d);
+                _tellJSONSniffers({method: method, session: session, data: blob});
+                methods[method].RequestHandler(connprofile, session, blob);
               }
               else {
                 connprofile.closeConnetion();
@@ -152,28 +153,36 @@ function Router() {
             });
           }
           else if(connprofile.returnBundle('NSPS') != true) {
-            let json = JSON.parse(data);
-            _tellJSONSniffers(json);
-            methods[json.m].RequestHandler(connprofile, json.s, json.d);
+            let method = data.slice(0, 2).toString();
+            let session = data.slice(2, 4).toString();
+            let blob = data.slice(4);
+
+            _tellJSONSniffers({method: method, session: session, data: blob});
+            methods[method].RequestHandler(connprofile, session, blob);
           }
           else if(connprofile.returnBundle('NSPS') === true) {
             // true
-
-            _coregateway.NoCrypto.decryptString('AESCBC256', connprofile.returnBundle('aes_256_cbc_key'), data, (err, decrypted)=> {
+            _coregateway.NSPS.decrypt(connprofile, data, (err, decrypted)=> {
               if(err&&_coregateway.Settings.debug) {
                 console.log(err);
               }
-              let json = JSON.parse(decrypted);
-              _tellJSONSniffers(json);
-              methods[json.m].RequestHandler(connprofile, json.s, json.d);
 
+              let method = decrypted.slice(0, 2).toString();
+              let session = decrypted.slice(2, 4).toString();
+              let blob = decrypted.slice(4);
+
+              _tellJSONSniffers({method: method, session: session, data: blob});
+              methods[method].RequestHandler(connprofile, session, blob);
             });
           }
         }
         else {
-          let json = JSON.parse(data);
-          _tellJSONSniffers(json);
-          methods[json.m].RequestHandler(connprofile, json.s, json.d);
+          let method = data.slice(0, 2).toString();
+          let session = data.slice(2, 4).toString();;
+          let blob = data.slice(4);
+
+          _tellJSONSniffers({method: method, session: session, data: blob});
+          methods[method].RequestHandler(connprofile, session, blob);
         }
       }
       catch (er) {
@@ -208,10 +217,15 @@ function Router() {
 
     // load protocols
     Protocols.forEach((pt)=> {
-      let p = new pt(_coregateway, this.emitRequest);
+      let p = new pt(_coregateway, this.emitRequest, _debug);
       methods[p.Protocol] = {
         emitRequest : (connprofile, data) => {
-          _senddata(connprofile, p.Protocol, 'rq', data);
+          try {
+            _senddata(connprofile, p.Protocol, 'rq', data);
+          }
+          catch(e) {
+            console.log(connprofile, p.Protocol, 'rq', data)
+          }
         },
 
         RequestHandler : (connprofile, session, data) => {
@@ -236,7 +250,7 @@ function Router() {
     });
 
     _coregateway.Implementation.getClientConnProfile = _coregateway.Connection.createClient;
-    _coregateway.Implementation.emitRequest = this.emitRequest;
+    _coregateway.Implementation.emitRequest = (connprofile, method, json)=> {this.emitRequest(connprofile, method, Buffer.from(JSON.stringify(json)))};
     _coregateway.Implementation.sendRouterData = _senddata;
     _coregateway.NSPS.emitRequest = this.emitRequest;
   };
