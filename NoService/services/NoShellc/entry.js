@@ -85,7 +85,7 @@ function Service(Me, NoService) {
       };
 
       _new_session();
-    }
+    });
   };
 
   this.close = ()=> {

@@ -26,52 +26,56 @@ module.exports = function Protocol(coregateway, emitRequest, debug) {
 
   // ServerSide
   Authorization.on('AuthPasswordRq', (entityId, callback)=> {
-    Entity.getEntityConnProfile(entityId, (err, connprofile) => {
-      let data = {
-        m: "PW",
-        d: {t: Utils.generateGUID()}
-      }
-      let op = (connprofile, data) => {
-        callback(err, data.d.v);
-      }
-      _queue_operation[data.d.t] = op;
-      // set the timeout of this operation
-      setTimeout(() => {if(_queue_operation[data.d.t]) {delete _queue_operation[data.d.t]}}, _auth_timeout*1000);
-      this.emitRequest(connprofile, 'AU', Buffer.from(JSON.stringify(data)));
+    Entity.getEntityOwner(entityId, (err, owner)=> {
+      Entity.getEntityConnProfile(entityId, (err, connprofile) => {
+        let data = {
+          m: "PW",
+          d: {t: Utils.generateGUID(), u: owner}
+        }
+        let op = (connprofile, data) => {
+          callback(err, data.d.v);
+        }
+        _queue_operation[data.d.t] = op;
+        // set the timeout of this operation
+        setTimeout(() => {if(_queue_operation[data.d.t]) {delete _queue_operation[data.d.t]}}, _auth_timeout*1000);
+        this.emitRequest(connprofile, 'AU', Buffer.from(JSON.stringify(data)));
+      });
     });
   });
 
   Authorization.on('AuthbyPasswordFailed', (entityId, callback)=> {
     Entity.getEntityConnProfile(entityId, (err, connprofile) => {
-      this.emitRequest(connprofile, 'AU', Buffer.from(JSON.stringify({m: 'PF'})));
+      this.emitRequest(connprofile, 'AU', Buffer.from(JSON.stringify({m: 'PF', i: entityId})));
     });
   });
 
   Authorization.on('AuthTokenRq', (entityId, callback)=> {
     Entity.getEntityConnProfile(entityId, (err, connprofile) => {
-      let data = {
-        m: "TK",
-        d: {t: Utils.generateGUID()}
-      }
-      let op = (connprofile, data) => {
-        callback(err, data.d.v);
-      }
-      _queue_operation[data.d.t] = op;
-      // set the timeout of this operation
-      setTimeout(() => {if(_queue_operation[data.d.t]) {delete _queue_operation[data.d.t]}}, _auth_timeout*1000);
-      emitRequest(connprofile, 'AU', Buffer.from(JSON.stringify(data)));
+      Entity.getEntityOwner(entityId, (err, owner)=> {
+        let data = {
+          m: "TK",
+          d: {t: Utils.generateGUID(), u: owner}
+        }
+        let op = (connprofile, data) => {
+          callback(err, data.d.v);
+        }
+        _queue_operation[data.d.t] = op;
+        // set the timeout of this operation
+        setTimeout(() => {if(_queue_operation[data.d.t]) {delete _queue_operation[data.d.t]}}, _auth_timeout*1000);
+        emitRequest(connprofile, 'AU', Buffer.from(JSON.stringify(data)));
+      });
     });
   });
 
   Authorization.on('AuthbyTokenFailed', (entityId, callback)=> {
     Entity.getEntityConnProfile(entityId, (err, connprofile) => {
-      emitRequest(connprofile, 'AU', Buffer.from(JSON.stringify({m: 'TF'})));
+      emitRequest(connprofile, 'AU', Buffer.from(JSON.stringify({m: 'TF', i: entityId})));
     });
   });
 
   Authorization.on('SigninRq', (entityId)=> {
     Entity.getEntityConnProfile(entityId, (err, connprofile) => {
-      emitRequest(connprofile, 'AU', Buffer.from(JSON.stringify({m: 'SI'})));
+      emitRequest(connprofile, 'AU', Buffer.from(JSON.stringify({m: 'SI', i: entityId})));
     });
   });
   // ServerSide end

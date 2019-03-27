@@ -945,7 +945,7 @@ function ServiceAPI() {
     APIUtils.geneateNormalAPI(_coregateway, (err, api) => {
       _addNormalAPIs(api, service_socket, manifest);
       for(let i in _API_generators) {
-        _API_generators(api, service_socket, manifest);
+        _API_generators[i](api, service_socket, manifest);
       }
       callback(false, api);
     });
@@ -955,7 +955,7 @@ function ServiceAPI() {
     APIUtils.geneateNormalAPI(_coregateway, (err, api) => {
       _addNormalAPIs(api, service_socket, manifest);
       for(let i in _API_generators) {
-        _API_generators(api, service_socket, manifest);
+        _API_generators[i](api, service_socket, manifest);
       }
       api.addAPI(['getImplementationModule'], (LCBO)=> {
         return((remote_callback_obj)=> {

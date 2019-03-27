@@ -45,13 +45,8 @@ function Implementation() {
   };
 
 
-  this.onToken = (connprofile, status, token)=> {
-    if(status === 'OK') {
-      _implts['onToken'](false, token);
-    }
-    else {
-      _implts['onToken'](true);
-    }
+  this.onToken = (connprofile, status, username, token)=> {
+    _implts['onToken'](status, username, token);
   };
 
   this.setImplement = (name, callback) => {

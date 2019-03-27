@@ -42,7 +42,6 @@ function Router() {
 
   // a convinient function fo sending data
   let _senddata = (connprofile, method, session, blob) => {
-    console.log('send '+method+session+blob);
     // console.log(blob);
 
     let blobfinal = Buffer.concat([Buffer.from(method+session, 'utf8'), blob]);

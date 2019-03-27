@@ -80,7 +80,6 @@ module.exports = function Protocol(coregateway, emitRequest, debug) {
   // Serverside
   this.RequestHandler = (connprofile, blob, emitResponse) => {
     let data = JSON.parse(blob.toString('utf8'));
-    console.log(data);
     Service.getServiceInstanceByEntityId(data.d.i, (err, theservice)=> {
       let methods = {
         // nooxy service protocol implementation of "Call Service: Close ServiceSocket"
@@ -217,7 +216,6 @@ module.exports = function Protocol(coregateway, emitRequest, debug) {
 
   this.ResponseHandler = (connprofile, blob) => {
     let data = JSON.parse(blob.toString('utf8'));
-    console.log(data);
     let methods = {
       // nooxy service protocol implementation of "Call Service: Vertify Connection"
       VE: (connprofile, data) => {

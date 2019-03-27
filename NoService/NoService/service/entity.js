@@ -130,6 +130,10 @@ function Entity() {
     return _entities[entityId]?true:false;
   };
 
+  this.getEntityOwner = (entityId, callback)=> {
+    callback(false, this.returnEntityValue(entityId, 'owner'));
+  };
+
   this.getEntityConnProfile = (entityId, callback) => {
     try {
       if(!_entities[entityId]) {

@@ -3,8 +3,11 @@ const readline = require('readline');
 module.exports = function() {
   this.name = 'NoService Client Implementation';
   this.version = '0.0.0';
-  this.noservice = "0.5.6";
+  this.noservice = "0.6.0";
   this.allow_older_noservice = false;
+
+  let tokens = {};
+  let token_resumes = {};
 
 
   let rl = readline.createInterface({
@@ -51,14 +54,13 @@ module.exports = function() {
     let Implementation = noservice_coregateway.Implementation;
     // setup NoService Auth implementation
     Implementation.setImplement('signin', (connprofile, data, emitResponse)=>{
-      console.log('Please signin your account.');
+      console.log('Please signin your account. Auth ('+data.d.t+').');
       _get_username_and_password((err, u, p)=>{
         let _data = {
           u: u,
           p: p
         }
         Implementation.emitRequest(connprofile, 'GT', _data);
-        commandread();
       });
 
     });
@@ -75,19 +77,23 @@ module.exports = function() {
         }
         emitResponse(connprofile, _data);
       };
-      if(_token == null) {
+      if(!tokens[data.d.u]) {
+        console.log(data.d.u);
+        token_resumes[data.d.u] = callback;
         Implementation.getImplement('signin', (err, im)=> {
           im(connprofile, data, emitResponse);
         });
       }
       else {
-        callback(false, _token);
+        callback(false, tokens[data.d.u]);
       }
 
     });
 
-    Implementation.setImplement('onToken', (err, token)=>{
-      _token = token;
+    Implementation.setImplement('onToken', (err, username, token)=>{
+      console.log(token_resumes[username]);
+      token_resumes[username](false, token);
+      if(!err) tokens[username] = token;
     });
 
     Implementation.setImplement('AuthbyTokenFailed', (connprofile, data, emitResponse) => {
@@ -99,6 +105,7 @@ module.exports = function() {
 
     // setup NoService Auth implementation
     Implementation.setImplement('AuthbyPassword', (connprofile, data, emitResponse) => {
+      console.log('Please enter your password '+data.d.u+'. Auth ('+data.d.t+').');
       let callback = (err, password)=>{
         let _data = {
           m:'PW',
@@ -114,15 +121,20 @@ module.exports = function() {
       });
     });
 
-    noservice_coregateway.ServiceAPI.addAPIGenerator(['Commandline'], (LCBO)=> {
-      return({
-        question: (question, remote_callback_obj)=> {
-          rl.question();
-          if(remote_callback_obj) {
-            remote_callback_obj.run([], [err, answer]);
+    noservice_coregateway.ServiceAPI.addAPIGenerator((api, service_socket, manifest)=> {
+      api.addAPI(['Commandline'], (LCBO)=> {
+        return({
+          question: (question, remote_callback_obj)=> {
+            rl.question(question, (answer)=> {
+              if(remote_callback_obj) {
+                remote_callback_obj.run([], [answer]);
+              }
+            });
           }
-        }
+        });
       });
     });
+
+    next(false);
   }
 }

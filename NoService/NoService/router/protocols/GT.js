@@ -25,13 +25,18 @@ module.exports = function Protocol(coregateway, emitRequest, debug) {
       else {
         responsedata['s'] = 'OK';
       }
-      _senddata(connprofile, responsedata);
+      _senddata(connprofile, Buffer.from(JSON.stringify(responsedata)));
     });
   };
 
   this.ResponseHandler = (connprofile, blob) => {
     let data = JSON.parse(blob.toString('utf8'));
-    coregateway.Implementation.onToken(connprofile, data.s, data.t);
+    if(data.s === 'OK') {
+      coregateway.Implementation.onToken(connprofile, false, data.u, data.t);
+    }
+    else {
+      coregateway.Implementation.onToken(connprofile, true, data.u, data.t);
+    }
   };
 
 }

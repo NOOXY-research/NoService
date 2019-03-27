@@ -23,7 +23,7 @@ module.exports = function Protocol(coregateway, emitRequest, debug) {
         "d": d,
       }
     };
-    emitRequest(conn_profile, 'CA', _data);
+    emitRequest(conn_profile, 'CA', Buffer.from(JSON.stringify(_data)));
   });
 
   coregateway.Service.on('EmitASEventRq', (conn_profile, i, n, d) => {
@@ -35,7 +35,7 @@ module.exports = function Protocol(coregateway, emitRequest, debug) {
         "d": d,
       }
     };
-    emitRequest(conn_profile, 'CA', _data);
+    emitRequest(conn_profile, 'CA', Buffer.from(JSON.stringify(_data)));
   });
 
   coregateway.Service.on('EmitASCloseRq', (conn_profile, i) => {
@@ -45,7 +45,7 @@ module.exports = function Protocol(coregateway, emitRequest, debug) {
         "i": i
       }
     };
-    emitRequest(conn_profile, 'CA', _data);
+    emitRequest(conn_profile, 'CA', Buffer.from(JSON.stringify(_data)));
   });
 
 
@@ -64,7 +64,7 @@ module.exports = function Protocol(coregateway, emitRequest, debug) {
             "s": "OK"
           }
         };
-        emitResponse(connprofile, _data);
+        emitResponse(connprofile, Buffer.from(JSON.stringify(_data)));
       },
       // nooxy service protocol implementation of "Call Activity: Event"
       EV: () => {
@@ -77,7 +77,7 @@ module.exports = function Protocol(coregateway, emitRequest, debug) {
             "s": "OK"
           }
         };
-        emitResponse(connprofile, _data);
+        emitResponse(connprofile, Buffer.from(JSON.stringify(_data)));
       },
       // nooxy service protocol implementation of "Call Activity: Close ActivitySocket"
       CS: () => {
