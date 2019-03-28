@@ -228,7 +228,7 @@ function Core(NoServiceLibrary, settings) {
       }
 
       // start setting up
-      verbose('Daemon', 'Loading plugins initilalized NoService.');
+      verbose('Daemon', 'Loading plugins with initilalized NoService.');
       Plugin.startPlugins(settings.plugins_path, coregateway, true, settings, (err)=> {
         if(err) {
           callback(err);
