@@ -38,14 +38,14 @@ module.exports = function Protocol(coregateway, emitRequest, debug) {
         _queue_operation[data.d.t] = op;
         // set the timeout of this operation
         setTimeout(() => {if(_queue_operation[data.d.t]) {delete _queue_operation[data.d.t]}}, _auth_timeout*1000);
-        this.emitRequest(connprofile, 'AU', Buffer.from(JSON.stringify(data)));
+        emitRequest(connprofile, 'AU', Buffer.from(JSON.stringify(data)));
       });
     });
   });
 
   Authorization.on('AuthbyPasswordFailed', (entityId, callback)=> {
     Entity.getEntityConnProfile(entityId, (err, connprofile) => {
-      this.emitRequest(connprofile, 'AU', Buffer.from(JSON.stringify({m: 'PF', i: entityId})));
+      emitRequest(connprofile, 'AU', Buffer.from(JSON.stringify({m: 'PF', i: entityId})));
     });
   });
 
