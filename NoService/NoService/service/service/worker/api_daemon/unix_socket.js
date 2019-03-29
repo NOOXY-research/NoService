@@ -16,6 +16,7 @@ function UnixSocketAPI() {
   let _unix_socket_path;
   let _close_worker_timeout = 3000;
   let _clear_obj_garbage_timeout = 1000*60*10;
+  let _worker_clients = {};
 
 
   function APISocket(sock) {
@@ -51,7 +52,6 @@ function UnixSocketAPI() {
     let _serviceapi;
     let _child;
     let _api_sock;
-    let _service_name =  /.*\/([^\/]*)\/entry/g.exec(path)[1];
     let _InfoRq = {};
     let _init_callback;
     let _launch_callback;
@@ -256,7 +256,8 @@ function UnixSocketAPI() {
 
   this.generateWorker = (servicename, path, lang)=> {
     if(lang === 'python') {
-      return new PythonWorkerClient(servicename, path);
+      _worker_clients[servicename] = new PythonWorkerClient(servicename, path);
+      return _worker_clients[servicename];
     }
     else {
       return null;
@@ -271,9 +272,7 @@ function UnixSocketAPI() {
     _unix_sock_server = Net.createServer((socket)=>{
       let _api_sock = new APISocket(socket);
       socket.on('data', (data)=> {
-
         while(data.length) {
-
           let chunks_size = parseInt(data.slice(0, 16).toString());
           let msg = JSON.parse(data.slice(16, 16+chunks_size).toString());
           if(msg.t === 0) {
