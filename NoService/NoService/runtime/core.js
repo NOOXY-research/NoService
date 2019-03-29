@@ -26,7 +26,7 @@ function Core(NoServiceLibrary, settings) {
 
   // service
   const Service = NoServiceLibrary.Service.Service;
-  const WorkerDaemon = NoServiceLibrary.Service.WorkerDaemon;
+  const Worker = NoServiceLibrary.Service.Worker;
   const ServiceAPI = NoServiceLibrary.Service.ServiceAPI;
   const Entity = NoServiceLibrary.Service.Entity;
   const Activty = NoServiceLibrary.Service.Activty;
@@ -70,7 +70,7 @@ function Core(NoServiceLibrary, settings) {
   let _implementation;
   let _nocrypto;
   let _nsps;
-  let _workerd;
+  let _worker;
   let _database;
   let _model;
 
@@ -134,7 +134,7 @@ function Core(NoServiceLibrary, settings) {
       _nsps = new NSPS();
       _database = new Database(settings.database);
       _model = new Model();
-      _workerd = new WorkerDaemon()
+      _worker = new Worker()
 
       //
       let _daemon = {
@@ -154,7 +154,7 @@ function Core(NoServiceLibrary, settings) {
               _implementation.close();
               _nocrypto.close();
               _nsps.close();
-              _workerd.close();
+              _worker.close();
               verbose('Daemon', 'Stopping daemon in '+settings.kill_daemon_timeout+'ms.');
               setTimeout(this.onTerminated, settings.kill_daemon_timeout);
             });
@@ -175,7 +175,7 @@ function Core(NoServiceLibrary, settings) {
               _implementation.close();
               _nocrypto.close();
               _nsps.close();
-              _workerd.close();
+              _worker.close();
               verbose('Daemon', 'Relaunching daemon in '+settings.kill_daemon_timeout+'ms.');
               setTimeout(this.onTerminated, settings.kill_daemon_timeout);
             });
@@ -320,7 +320,7 @@ function Core(NoServiceLibrary, settings) {
 
                 // setup service: Service
                 _service.setDebug(settings.debug);
-                _service.importWorkerDaemon(_workerd);
+                _service.importWorkerModule(_worker);
                 _service.setDebugService(settings.debug_service);
                 _service.setMasterService(settings.master_service);
                 _service.setupServicesPath(settings.services_path);
@@ -354,12 +354,12 @@ function Core(NoServiceLibrary, settings) {
                 _service.importEntity(_entity);
                 _service.importAPI(_serviceAPI);
                 _service.importOwner(settings.local_services_owner);
-                // setup WorkerDaemon
-                _workerd.importCloseTimeout(settings.kill_daemon_timeout);
-                _workerd.importClearGarbageTimeout(settings.clear_garbage_timeout);
-                _workerd.setConstantsPath(require("path").join(__dirname, './constants.json'));
-                _workerd.setUnixSocketPath(Constants.WORKER_UNIX_SOCK_PATH);
-                _workerd.start();
+                // setup Worker
+                _worker.importCloseTimeout(settings.kill_daemon_timeout);
+                _worker.importClearGarbageTimeout(settings.clear_garbage_timeout);
+                _worker.setConstantsPath(require("path").join(__dirname, './constants.json'));
+                _worker.setUnixSocketPath(Constants.WORKER_UNIX_SOCK_PATH);
+                _worker.start();
 
                 //
 

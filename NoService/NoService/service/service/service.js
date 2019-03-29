@@ -6,7 +6,6 @@
 
 const fs = require('fs');
 const Utils = require('../library').Utilities;
-const WorkerDaemon = require('./worker').WorkerDaemon;
 const SocketPair = require('./socketpair');
 
 function Service() {
@@ -21,7 +20,7 @@ function Service() {
   let _authenticity_module;
 
   let _debug = false;
-  let _workerd;
+  let _worker_module;
   let _master_service;
   let _debug_service;
   let _on_handler = {};
@@ -103,7 +102,7 @@ function Service() {
         return err;
       }
 
-      _worker = _workerd.generateWorker(_service_path+'/entry', _service_manifest.language);
+      _worker = _worker_module.generateWorker(_service_manifest.name, _service_path+'/entry', _service_manifest.language);
       // load module from local service directory
       _authenticity_module.getUserIdByUsername(_local_service_owner, (err, ownerid)=> {
         // create a description of this service entity.
@@ -263,8 +262,8 @@ function Service() {
     _debug = boolean;
   };
 
-  this.importWorkerDaemon = (wd)=> {
-    _workerd = wd;
+  this.importWorkerModule = (wd)=> {
+    _worker_module = wd;
   };
 
 
@@ -296,7 +295,7 @@ function Service() {
 
   this.importAPI = (serviceapi_module) => {
     _serviceapi_module = serviceapi_module;
-    _workerd.importAPI(serviceapi_module);
+    _worker_module.importAPI(serviceapi_module);
   };
 
   this.emitConnectionClose = (connprofile, callback) => {
@@ -547,12 +546,12 @@ function Service() {
 
   // get Callback Obj count
   this.getCBOCount = (callback)=> {
-    _workerd.getCBOCount(callback);
+    _worker_module.getCBOCount(callback);
   };
 
   // get Callback Obj count
   this.getWorkerMemoryUsage = (callback)=> {
-    _workerd.getMemoryUsage(callback);
+    _worker_module.getMemoryUsage(callback);
   };
 
   this.returnList = () => {
@@ -587,7 +586,7 @@ function Service() {
       _authorization_module = null;
       _authenticity_module = null;
       _debug = false;
-      _workerd = null;
+      _worker_module = null;
       _master_service = null;
       _debug_service = null;
       _on_handler = {};
