@@ -4,6 +4,7 @@ node_modules/
 *.pem
 *.sqlite3
 eula.txt
+package-lock.json
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
