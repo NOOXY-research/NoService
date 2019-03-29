@@ -45,23 +45,36 @@ function startPlugins(plugins_path, coregateway, isInitialized, settings, callba
         }
       }
       else {
-        p.plugin(coregateway, isInitialized, settings, Constants, verbose, (err)=> {
-          if(err) {
-            callback(err);
+        let proceed = true;
+        // Checking dependencies
+        for(let i in p.dependencies) {
+          try {
+            require.resolve(p.dependencies[i]);
+          } catch (e) {
+            verbose('Plugin', '***** Plugin "'+p.name+'" needs package "'+p.dependencies[i]+'".');
+            callback(true);
+            proceed = false;
+            break;
           }
-          else {
-            index++;
-            if(index<Plugins.length) {
-              load_next();
+        }
+        if(proceed) {
+          p.plugin(coregateway, isInitialized, settings, Constants, verbose, (err)=> {
+            if(err) {
+              callback(err);
             }
             else {
-              callback(false);
+              index++;
+              if(index<Plugins.length) {
+                load_next();
+              }
+              else {
+                callback(false);
+              }
             }
-          }
-        });
+          });
+        }
       }
     }
-
   };
   load_next();
 };

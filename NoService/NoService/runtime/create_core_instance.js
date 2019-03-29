@@ -37,7 +37,7 @@ process.on('message', (msg)=> {
     _core.onTerminated = terminateNoService;
     _core.checkandlaunch((err)=> {
       if(err) {
-        process.exit();
+        process.exit(1);
       }
     });
   }
