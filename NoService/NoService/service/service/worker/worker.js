@@ -4,22 +4,6 @@
 // services is multithreaded.
 // Copyright 2018-2019 NOOXY. All Rights Reserved.
 
-// NOOXY Service WorkerClient protocol
-// message.t
-// 0 worker established {t}
-// 1 successfully inited
-// 2 successfully launched
-// 3 successfully closed
-// 4 api call {t, p, a: arguments, o:{arg_index, [obj_id, callback_tree]}}
-// 5 accessobj {t, p, a: arguments, o:{arg_index, [obj_id, callback_tree]}}
-// 6 returnLCBOcount
-// 7 returnMemoryUsage
-
-// 96 close error
-// 97 runtime error
-// 98 launch error
-// 99 init error
-
 'use strict';
 
 const Utils = require('../../../library').Utilities;
