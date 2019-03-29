@@ -89,6 +89,9 @@ NoService has good software structure which means you can modify the native libr
 ### Bundled Services
 NoService provide bundled services such as NoShell which give you access of NoService. NoUser for user system. And so on.
 
+### Clustering
+Including ORM models. Still working on it.
+
 ## Final goal
 not yet
 
