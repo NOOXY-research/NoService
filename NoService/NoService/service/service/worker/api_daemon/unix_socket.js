@@ -7,6 +7,7 @@
 
 const Net = require('net');
 const {fork, spawn} = require('child_process');
+const fs = require('fs');
 
 
 function UnixSocketAPI() {

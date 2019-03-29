@@ -24,7 +24,6 @@
 
 const Utils = require('../../../library').Utilities;
 const APIDaemon = require('./api_daemon');
-const fs = require('fs');
 
 function WorkerDaemon() {
   let _worker_clients = {};
