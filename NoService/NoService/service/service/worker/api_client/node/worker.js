@@ -14,11 +14,11 @@
 // 99 close
 'use strict';
 
-const Library = require('../../library');
+const Library = require('../../../../../library');
 const Utils = Library.Utilities;
 // For injecting database to api
-const Database = require('../../database').Database;
-const Model = require('../../database').Model;
+const Database = require('../../../../../database').Database;
+const Model = require('../../../../../database').Model;
 const fs = require('fs');
 
 process.title = 'NoService_worker';

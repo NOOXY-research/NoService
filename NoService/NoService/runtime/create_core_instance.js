@@ -47,7 +47,7 @@ process.on('message', (msg)=> {
 });
 
 process.on('SIGINT', () => {
-  verbose('Daemon', 'Caught interrupt signal.');
+  console.log('NoService runtime Caught interrupt signal.');
   _daemon.close();
 });
 

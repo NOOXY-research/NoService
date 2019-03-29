@@ -5,7 +5,7 @@
 // Copyright 2018-2019 NOOXY. All Rights Reserved.
 // All api tree's top should be callable! For worker calling.
 
-const Utils = require('../../library').Utilities;
+const Utils = require('../../../../../library').Utilities;
 
 function API(_coregateway) {
   let _clear_obj_garbage_timeout = 30000;

@@ -7,7 +7,7 @@
 
 'use strict';
 
-const APIUtils = require('./serviceapi_utils');
+const APIUtils = require('./api_prototype');
 function ServiceAPI() {
   let _coregateway;
 

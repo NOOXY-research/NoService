@@ -355,8 +355,8 @@ function Core(NoServiceLibrary, settings) {
                 _service.importAPI(_serviceAPI);
                 _service.importOwner(settings.local_services_owner);
                 // setup Worker
-                _worker.importCloseTimeout(settings.kill_daemon_timeout);
-                _worker.importClearGarbageTimeout(settings.clear_garbage_timeout);
+                _worker.setCloseTimeout(settings.kill_daemon_timeout);
+                _worker.setClearGarbageTimeout(settings.clear_garbage_timeout);
                 _worker.setConstantsPath(require("path").join(__dirname, './constants.json'));
                 _worker.setUnixSocketPath(Constants.WORKER_UNIX_SOCK_PATH);
                 _worker.start();

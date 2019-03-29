@@ -3,8 +3,20 @@
 // "unix_socket.js" is a service worker daemon for NOOXY service framework. With workers the
 // services is multithreaded.
 // Copyright 2018-2019 NOOXY. All Rights Reserved.
+'use strict';
+
+const Net = require('net');
+const {fork, spawn} = require('child_process');
+
 
 function UnixSocketAPI() {
+  let _unix_sock_server;
+  let _const_path;
+  let _unix_socket_path;
+  let _close_worker_timeout = 3000;
+  let _clear_obj_garbage_timeout = 1000*60*10;
+
+
   function APISocket(sock) {
     let _on_callbacks = {};
 
@@ -199,7 +211,7 @@ function UnixSocketAPI() {
 
     this.init = (init_callback)=> {
       _init_callback = init_callback;
-      _child = spawn('python3', [require.resolve('./python/worker.py'), _unix_socket_path, _service_name], {stdio: [process.stdin, process.stdout, process.stderr, 'ipc']});
+      _child = spawn('python3', [require.resolve('../api_client/python/worker.py'), _unix_socket_path, _service_name], {stdio: [process.stdin, process.stdout, process.stderr, 'ipc']});
       _child.on('close', (code)=> {
         if(code)
           _init_callback(new Error('PythonWorkerClient of "'+_service_name+'" occured error.'));
@@ -285,6 +297,26 @@ function UnixSocketAPI() {
       });
 
     }).listen(_unix_socket_path);
+  };
+
+  this.setClearGarbageTimeout = (timeout)=> {
+    if(timeout)
+      _clear_obj_garbage_timeout = timeout;
+  }
+
+  this.setCloseTimeout = (timeout)=> {
+    _close_worker_timeout = timeout;
+  }
+
+  this.setConstantsPath = (path)=> {_const_path = path};
+
+  this.setUnixSocketPath = (path)=> {_unix_socket_path = path};
+
+  this.close = ()=> {
+    _unix_sock_server.close();
+    try {
+      fs.unlinkSync(_unix_socket_path);
+    } catch(e) {}
   };
 }
 

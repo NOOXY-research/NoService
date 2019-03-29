@@ -5,8 +5,8 @@
 'use strict';
 
 const fs = require('fs');
-const Utils = require('../library').Utilities;
-const SocketPair = require('./socketpair');
+const Utils = require('../../library').Utilities;
+const SocketPair = require('../socketpair');
 
 function Service() {
   // need add service event system

@@ -3,13 +3,19 @@
 // "node.js" is a service worker daemon for NOOXY service framework. With workers the
 // services is multithreaded.
 // Copyright 2018-2019 NOOXY. All Rights Reserved.
+'use strict';
+
+const {fork, spawn} = require('child_process');
 
 
 function NodeAPI() {
+  let _const_path;
+  let _close_worker_timeout = 3000;
+  let _clear_obj_garbage_timeout = 1000*60*10;
+
   function WorkerClient(_service_name, path) {
     let _serviceapi;
     let _child;
-    let _service_name =  /.*\/([^\/]*)\/entry/g.exec(path)[1];
     let _InfoRq = {};
     let _init_callback;
     let _launch_callback;
@@ -157,7 +163,7 @@ function NodeAPI() {
 
     this.init = (init_callback)=> {
       _init_callback = init_callback;
-      _child = fork(require.resolve('./worker'), {stdio: [process.stdin, process.stdout, process.stderr, 'ipc']});
+      _child = fork(require.resolve('../api_client/node/worker'), {stdio: [process.stdin, process.stdout, process.stderr, 'ipc']});
       _child_alive = true;
       _child.on('message', message => {
         this.onMessage(message);
@@ -197,9 +203,25 @@ function NodeAPI() {
       this.emitChildClose();
     };
   };
+
+  this.setClearGarbageTimeout = (timeout)=> {
+    if(timeout)
+      _clear_obj_garbage_timeout = timeout;
+  }
+
+  this.setCloseTimeout = (timeout)=> {
+    _close_worker_timeout = timeout;
+  }
+
+  this.setConstantsPath = (path)=> {_const_path = path};
+
   this.generateWorker = (servicename, path)=> {
     return new WorkerClient(servicename, path);
   };
+
+  this.start = ()=> {};
+
+  this.close = ()=> {};
 };
 
 module.exports = NodeAPI;

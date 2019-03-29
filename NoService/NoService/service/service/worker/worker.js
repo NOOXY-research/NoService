@@ -22,19 +22,12 @@
 
 'use strict';
 
-const {fork, spawn} = require('child_process');
-const Utils = require('../../library').Utilities;
+const Utils = require('../../../library').Utilities;
 const APIDaemon = require('./api_daemon');
-const Net = require('net');
 const fs = require('fs');
 
 function WorkerDaemon() {
   let _worker_clients = {};
-  let _close_worker_timeout = 3000;
-  let _clear_obj_garbage_timeout = 1000*60*10;
-  let _unix_socket_path;
-  let _const_path;
-  let _unix_sock_server;
   // let _services_relaunch_cycle = 1000*60*60*24;
   let _serviceapi_module;
 
@@ -69,15 +62,6 @@ function WorkerDaemon() {
     }
   }
 
-  this.importCloseTimeout = (timeout)=> {
-    _close_worker_timeout = timeout;
-  }
-
-  this.importClearGarbageTimeout = (timeout)=> {
-    if(timeout)
-      _clear_obj_garbage_timeout = timeout;
-  }
-
   this.generateWorker = (servicename, path, lang) => {
     if(!lang || lang === 'js' || lang === 'javascript') {
       _worker_clients[servicename] = _node_daemon.generateWorker(servicename, path);
@@ -93,9 +77,24 @@ function WorkerDaemon() {
     _serviceapi_module = serviceapi_module;
   };
 
-  this.setConstantsPath = (path)=> {_const_path = path};
+  this.setClearGarbageTimeout = (timeout)=> {
+    _node_daemon.setClearGarbageTimeout(timeout);
+    _unix_daemon.setClearGarbageTimeout(timeout);
+  }
 
-  this.setUnixSocketPath = (path)=> {_unix_socket_path = path};
+  this.setCloseTimeout = (timeout)=> {
+    _node_daemon.setCloseTimeout(timeout);
+    _unix_daemon.setCloseTimeout(timeout);
+  }
+
+  this.setConstantsPath = (path)=> {
+    _node_daemon.setConstantsPath(path);
+    _unix_daemon.setConstantsPath(path);
+  };
+
+  this.setUnixSocketPath = (path)=> {
+    _unix_daemon.setUnixSocketPath(path);
+  };
 
   this.start = ()=> {
     _node_daemon.start();
@@ -103,10 +102,8 @@ function WorkerDaemon() {
   };
 
   this.close = ()=> {
-    _unix_sock_server.close();
-    try {
-      fs.unlinkSync(_unix_socket_path);
-    } catch(e) {}
+    _node_daemon.close();
+    _unix_daemon.close();
   }
 }
 

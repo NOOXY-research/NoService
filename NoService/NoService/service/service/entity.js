@@ -4,7 +4,7 @@
 // Copyright 2018-2019 NOOXY. All Rights Reserved.
 'use strict';
 
-const Utils = require('../library').Utilities;
+const Utils = require('../../library').Utilities;
 
 function Entity() {
   let _seed = Utils.generateGUID();
