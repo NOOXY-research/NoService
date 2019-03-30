@@ -102,7 +102,7 @@ function Service() {
         return err;
       }
 
-      _worker = _worker_module.generateWorker(_service_manifest.name, _service_path+'/entry', _service_manifest.language);
+      _worker = _worker_module.generateWorker(_service_manifest, _service_path+'/entry', _service_manifest.language);
       // load module from local service directory
       _authenticity_module.getUserIdByUsername(_local_service_owner, (err, ownerid)=> {
         // create a description of this service entity.
@@ -163,28 +163,15 @@ function Service() {
               callback(err);
             }
           }
-          if(_service_manifest.implementation_api === false) {
-            _serviceapi_module.createServiceAPI(_service_socket, _service_manifest, (err, api) => {
-              _worker.importAPI(api);
-              _worker.init((err)=> {
-                if(!err) {
-                  _isInitialized = true;
-                }
-                callback(err);
-              });
+          
+          _worker.createServiceAPI(_service_socket, (err) => {
+            _worker.init((err)=> {
+              if(!err) {
+                _isInitialized = true;
+              }
+              callback(err);
             });
-          }
-          else {
-            _serviceapi_module.createServiceAPIwithImplementaion(_service_socket, _service_manifest, (err, api) => {
-              _worker.importAPI(api);
-              _worker.init((err)=> {
-                if(!err) {
-                  _isInitialized = true;
-                }
-                callback(err);
-              });
-            });
-          }
+          });
         }
         catch(err) {
           erreport = new Error('Launching service "'+_service_name+'" ended with failure.\n'+err.stack);

@@ -26,6 +26,8 @@ const Net = require('net');
 const {fork, spawn} = require('child_process');
 const fs = require('fs');
 
+const API = require('./api');
+
 
 function UnixSocketAPI() {
   let _unix_sock_server;
@@ -34,6 +36,8 @@ function UnixSocketAPI() {
   let _close_worker_timeout = 3000;
   let _clear_obj_garbage_timeout = 1000*60*10;
   let _worker_clients = {};
+
+  let API;
 
 
   function APISocket(sock) {
@@ -65,7 +69,7 @@ function UnixSocketAPI() {
     };
   }
 
-  function PythonWorkerClient(_service_name, path) {
+  function PythonWorkerClient(_manifest, path) {
     let _serviceapi;
     let _child;
     let _api_sock;
@@ -75,6 +79,7 @@ function UnixSocketAPI() {
     let _close_callback;
     let _child_alive = false;
     let _init = false;
+    let _service_name = _manifest.name;
 
     this.getCBOCount = (callback)=> {
       if(_child_alive&&_child) {
@@ -258,10 +263,14 @@ function UnixSocketAPI() {
       });
     };
 
-    this.importAPI = (api) => {
-      _serviceapi = api;
-      _serviceapi.setRemoteCallbackEmitter(this.emitChildCallback);
-      _serviceapi.setRemoteUnbindEmitter(this.emitRemoteUnbind);
+    this.createServiceAPI = (_service_socket, callback)=> {
+      API.createServiceAPI(_service_socket, _manifest, (err, api)=> {
+        _serviceapi = api;
+        _serviceapi.setRemoteCallbackEmitter(this.emitChildCallback);
+        _serviceapi.setRemoteUnbindEmitter(this.emitRemoteUnbind);
+        _serviceapi.setRemoteUnbindEmitter(this.emitRemoteUnbind);
+        callback(false);
+      })
     };
 
     this.close = (callback)=> {
@@ -271,10 +280,10 @@ function UnixSocketAPI() {
     };
   };
 
-  this.generateWorker = (servicename, path, lang)=> {
+  this.generateWorker = (manifest, path, lang)=> {
     if(lang === 'python') {
-      _worker_clients[servicename] = new PythonWorkerClient(servicename, path);
-      return _worker_clients[servicename];
+      _worker_clients[manifest.name] = new PythonWorkerClient(manifest, path);
+      return _worker_clients[manifest.name];
     }
     else {
       return null;
@@ -314,6 +323,10 @@ function UnixSocketAPI() {
       });
 
     }).listen(_unix_socket_path);
+  };
+
+  this.importAPI = (api)=> {
+    API = api;
   };
 
   this.setClearGarbageTimeout = (timeout)=> {

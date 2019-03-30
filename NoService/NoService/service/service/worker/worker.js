@@ -12,7 +12,6 @@ const APIDaemon = require('./api_daemon');
 function WorkerDaemon() {
   let _worker_clients = {};
   // let _services_relaunch_cycle = 1000*60*60*24;
-  let _serviceapi_module;
 
   let _node_daemon = new (APIDaemon.Node)();
   let _unix_daemon = new (APIDaemon.UnixSocket)();
@@ -45,19 +44,20 @@ function WorkerDaemon() {
     }
   }
 
-  this.generateWorker = (servicename, path, lang) => {
+  this.generateWorker = (manifest, path, lang) => {
     if(!lang || lang === 'js' || lang === 'javascript') {
-      _worker_clients[servicename] = _node_daemon.generateWorker(servicename, path);
-      return _worker_clients[servicename];
+      _worker_clients[manifest.name] = _node_daemon.generateWorker(manifest, path);
+      return _worker_clients[manifest.name];
     }
     else {
-      _worker_clients[servicename] =  _unix_daemon.generateWorker(servicename, path, lang);
-      return _worker_clients[servicename];
+      _worker_clients[manifest.name] =  _unix_daemon.generateWorker(manifest, path, lang);
+      return _worker_clients[manifest.name];
     }
   }
 
   this.importAPI = (serviceapi_module) => {
-    _serviceapi_module = serviceapi_module;
+    _node_daemon.importAPI(serviceapi_module);
+    _unix_daemon.importAPI(serviceapi_module);
   };
 
   this.setClearGarbageTimeout = (timeout)=> {

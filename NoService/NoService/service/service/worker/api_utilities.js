@@ -1,6 +1,6 @@
-// NoService/NoService/service/worker/api_daemon/utils.js
+// NoService/NoService/service/worker/api_utilities.js
 // Description:
-// "utils.js" provide interface of interacting with core. This module is desgined
+// "api_utilities.js" provide interface of interacting with core. This module is desgined
 // for multithreading.
 // Copyright 2018-2019 NOOXY. All Rights Reserved.
 // All api tree's top should be callable! For worker calling.

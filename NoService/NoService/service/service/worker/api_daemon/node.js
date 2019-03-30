@@ -24,13 +24,14 @@
 
 const {fork, spawn} = require('child_process');
 
-
 function NodeAPI() {
   let _const_path;
   let _close_worker_timeout = 3000;
   let _clear_obj_garbage_timeout = 1000*60*10;
 
-  function WorkerClient(_service_name, path) {
+  let API;
+
+  function WorkerClient(_manifest, path) {
     let _serviceapi;
     let _child;
     let _InfoRq = {};
@@ -39,6 +40,7 @@ function NodeAPI() {
     let _close_callback;
     let _child_alive = false;
     let _init = false;
+    let _service_name = _manifest.name;
 
     this.getCBOCount = (callback)=> {
       if(_child_alive&&_child) {
@@ -208,10 +210,14 @@ function NodeAPI() {
       });
     };
 
-    this.importAPI = (api) => {
-      _serviceapi = api;
-      _serviceapi.setRemoteCallbackEmitter(this.emitChildCallback);
-      _serviceapi.setRemoteUnbindEmitter(this.emitRemoteUnbind);
+    this.createServiceAPI = (_service_socket, callback)=> {
+      API.createServiceAPI(_service_socket, _manifest, (err, api)=> {
+        _serviceapi = api;
+        _serviceapi.setRemoteCallbackEmitter(this.emitChildCallback);
+        _serviceapi.setRemoteUnbindEmitter(this.emitRemoteUnbind);
+        _serviceapi.setRemoteUnbindEmitter(this.emitRemoteUnbind);
+        callback(false);
+      })
     };
 
     this.close = (callback)=> {
@@ -219,6 +225,10 @@ function NodeAPI() {
       _serviceapi.reset();
       this.emitChildClose();
     };
+  };
+
+  this.importAPI = (api)=> {
+    API = api;
   };
 
   this.setClearGarbageTimeout = (timeout)=> {
@@ -232,8 +242,8 @@ function NodeAPI() {
 
   this.setConstantsPath = (path)=> {_const_path = path};
 
-  this.generateWorker = (servicename, path)=> {
-    return new WorkerClient(servicename, path);
+  this.generateWorker = (manifest, path)=> {
+    return new WorkerClient(manifest, path);
   };
 
   this.start = ()=> {};

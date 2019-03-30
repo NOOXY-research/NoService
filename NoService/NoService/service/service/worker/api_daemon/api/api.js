@@ -952,25 +952,25 @@ function ServiceAPI() {
     });
   };
 
-  this.createServiceAPIwithImplementaion = (service_socket, manifest, callback) => {
-    APIPrototype.geneateNormalAPI(_coregateway, (err, api) => {
-      _addNormalAPIs(api, service_socket, manifest);
-      for(let i in _API_generators) {
-        _API_generators[i](api, service_socket, manifest);
-      }
-      api.addAPI(['getImplementationModule'], (LCBO)=> {
-        return((remote_callback_obj)=> {
-          let Implementation_LCBO = new LCBO(_coregateway.Implementation, null, false, true);
-          if(remote_callback_obj) {
-            remote_callback_obj.run([], [false, Implementation_LCBO]);
-            remote_callback_obj.unbindRemote();
-          }
-        });
-      });
-
-      callback(false, api);
-    });
-  }
+  // this.createServiceAPIwithImplementaion = (service_socket, manifest, callback) => {
+  //   APIPrototype.geneateNormalAPI(_coregateway, (err, api) => {
+  //     _addNormalAPIs(api, service_socket, manifest);
+  //     for(let i in _API_generators) {
+  //       _API_generators[i](api, service_socket, manifest);
+  //     }
+  //     api.addAPI(['getImplementationModule'], (LCBO)=> {
+  //       return((remote_callback_obj)=> {
+  //         let Implementation_LCBO = new LCBO(_coregateway.Implementation, null, false, true);
+  //         if(remote_callback_obj) {
+  //           remote_callback_obj.run([], [false, Implementation_LCBO]);
+  //           remote_callback_obj.unbindRemote();
+  //         }
+  //       });
+  //     });
+  //
+  //     callback(false, api);
+  //   });
+  // }
 
   this.close = () => {
     _coregateway = null;
