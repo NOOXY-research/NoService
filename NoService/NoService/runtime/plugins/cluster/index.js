@@ -22,7 +22,11 @@ module.exports = function() {
 
   this.plugin = (noservice_coregateway, noservice_isInitialized, deploy_settings, noservice_constants, verbose, next)=> {
     verbose('Cluster', 'Loading cluster plugin...');
-
+    if(!noservice_isInitialized) {
+      next(false);
+      return 0;
+    }
+    
     const Sntp = require('sntp');
 
     let exec = async ()=> {

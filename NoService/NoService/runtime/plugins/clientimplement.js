@@ -51,6 +51,10 @@ module.exports = function() {
   }
 
   this.plugin = (noservice_coregateway, noservice_isInitialized, deploy_settings, noservice_constants, verbose, next)=> {
+    if(!noservice_isInitialized) {
+      next(false);
+      return 0;
+    }
     let Implementation = noservice_coregateway.Implementation;
     let log = noservice_coregateway.Utilities.TagLog;
     // setup NoService Auth implementation
