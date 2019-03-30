@@ -163,7 +163,7 @@ function Service() {
               callback(err);
             }
           }
-          
+
           _worker.createServiceAPI(_service_socket, (err) => {
             _worker.init((err)=> {
               if(!err) {
@@ -192,7 +192,7 @@ function Service() {
     this.setupPath = (path) => {
       _service_path = path;
       try{
-        _service_manifest = Utils.returnJSONfromFile(_service_path+'/manifest.json');
+        _service_manifest = require(_service_path+'/manifest.json');
       }
       catch(err) {
         throw new Error('Service "'+_service_name+'" load manifest.json with failure.');
@@ -220,7 +220,7 @@ function Service() {
     };
 
     this.returnManifest = () => {
-      _service_manifest = Utils.returnJSONfromFile(_service_path+'/manifest.json');
+      _service_manifest = require(_service_path+'/manifest.json');
       return _service_manifest;
     };
 

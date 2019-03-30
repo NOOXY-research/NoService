@@ -4,7 +4,7 @@
 // Copyright 2018-2019 NOOXY. All Rights Reserved.
 'use strict';
 
-Utils = require('../../../library').Utilities;
+let Utils = require('../../../library').Utilities;
 
 // For something like messages or logs need ordered index.
 function IndexedListModel(db, table_name, model_key, structure, do_timestamp) {

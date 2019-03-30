@@ -174,60 +174,9 @@ let validateEmail = (email)=> {
     return re.test(String(email).toLowerCase());
 };
 
-let returnPassword = (prompt)=> {
-    if (prompt) {
-      process.stdout.write(prompt);
-    }
-
-    let stdin = process.stdin;
-    stdin.resume();
-    stdin.setRawMode(true);
-    stdin.resume();
-    stdin.setEncoding('utf8');
-
-    let password = '';
-    stdin.on('data', function (ch) {
-        ch = ch.toString('utf8');
-
-        switch (ch) {
-        case "\n":
-        case "\r":
-        case "\u0004":
-            // They've finished typing their password
-            process.stdout.write('\n');
-            stdin.setRawMode(false);
-            stdin.pause();
-            return password;
-            break;
-        case "\u0003":
-            // Ctrl-C
-            return null;
-            break;
-        case BACKSPACE:
-            password = password.slice(0, password.length - 1);
-            process.stdout.clearLine();
-            process.stdout.cursorTo(0);
-            process.stdout.write(prompt);
-            process.stdout.write(password.split('').map(function () {
-              return '*';
-            }).join(''));
-            break;
-        default:
-            // More passsword characters
-            process.stdout.write('*');
-            password += ch;
-            break;
-        }
-    });
-}
 
 let isEnglish = (string) => {
   return /^[A-Za-z0-9]*$/.test(string);
-};
-
-// read a file and return a parsed JSON obj
-let returnJSONfromFile = (filename) => {
-  return JSON.parse(fs.readFileSync(filename, 'utf8'));;
 };
 
 String.prototype.replaceAll = function(search, replacement) {
@@ -269,17 +218,6 @@ let TagLog = (tag, logstring) => {
 // generateGUID
 let generateUniqueId = () => {
   return '_' + Math.random().toString(36).substr(2, 9);
-};
-
-let hashString = (s) => {
-  let i, chr;
-  if (s.length === 0) return hash;
-  for (i = 0; i < s.length; i++) {
-    chr   = s.charCodeAt(i);
-    hash  = ((hash << 5) - hash) + chr;
-    hash |= 0; // Convert to 32bit integer
-  }
-  return hash;
 };
 
 let removeHTML = function(str) {
@@ -414,12 +352,9 @@ module.exports = {
   compareVersion: compareVersion,
   validateEmail: validateEmail,
   isEnglish: isEnglish,
-  returnPassword: returnPassword,
-  returnJSONfromFile: returnJSONfromFile,
   printLOGO: printLOGO,
   TagLog: TagLog,
   generateUniqueId: generateUniqueId,
-  hashString: hashString,
   removeHTML: removeHTML,
   generateGUID: generateGUID,
   searchObject: searchObject,

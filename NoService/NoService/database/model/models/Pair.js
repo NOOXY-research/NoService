@@ -5,7 +5,7 @@
 'use strict';
 
 
-Utils = require('../../../library').Utilities;
+let Utils = require('../../../library').Utilities;
 
 
 function PairModel(db, table_name, model_key, structure, do_timestamp) {
