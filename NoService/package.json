@@ -4,6 +4,8 @@
   "description": "NOOXY Service Framework",
   "private": true,
   "dependencies": {
+    "nodemailer": "^6.0.0",
+    "sntp": "^3.0.2",
     "sqlite3": "^4.0.6",
     "ws": "^4.1.0"
   }

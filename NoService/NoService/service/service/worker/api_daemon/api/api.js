@@ -1,13 +1,14 @@
-// NoService/NoService/service/serviceapi.js
+// NoService/NoService/service/worker/api_daemon/api.js
 // Description:
-// "serviceapi.js" provide interface of interacting with core. This module is desgined
+// "api.js" provide interface of interacting with core. This module is desgined
 // for multithreading.
 // Copyright 2018-2019 NOOXY. All Rights Reserved.
 // All api tree's top should be callable! For worker calling.
 
 'use strict';
 
-const APIUtils = require('./api_prototype');
+const APIPrototype = require('./prototype');
+
 function ServiceAPI() {
   let _coregateway;
 
@@ -942,7 +943,7 @@ function ServiceAPI() {
   };
 
   this.createServiceAPI = (service_socket, manifest, callback) => {
-    APIUtils.geneateNormalAPI(_coregateway, (err, api) => {
+    APIPrototype.geneateNormalAPI(_coregateway, (err, api) => {
       _addNormalAPIs(api, service_socket, manifest);
       for(let i in _API_generators) {
         _API_generators[i](api, service_socket, manifest);
@@ -952,7 +953,7 @@ function ServiceAPI() {
   };
 
   this.createServiceAPIwithImplementaion = (service_socket, manifest, callback) => {
-    APIUtils.geneateNormalAPI(_coregateway, (err, api) => {
+    APIPrototype.geneateNormalAPI(_coregateway, (err, api) => {
       _addNormalAPIs(api, service_socket, manifest);
       for(let i in _API_generators) {
         _API_generators[i](api, service_socket, manifest);

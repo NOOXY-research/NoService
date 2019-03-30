@@ -16,6 +16,7 @@
 
 const Library = require('../../../../../library');
 const Utils = Library.Utilities;
+const APIUtils = require('../../api_utilities');
 // For injecting database to api
 const Database = require('../../../../../database').Database;
 const Model = require('../../../../../database').Model;
@@ -56,11 +57,11 @@ function WorkerClient() {
         o: {}
       };
       for(let i in args) {
-        if(Utils.hasFunction(args[i])) {
+        if(APIUtils.hasFunction(args[i])) {
           let _Id = Utils.generateUniqueId();
           _local_obj_callbacks_dict[_Id] = args[i];
           // console.log(Object.keys(_local_obj_callbacks_dict).length);
-          _data.o[i] = [_Id, Utils.generateObjCallbacksTree(args[i])];
+          _data.o[i] = [_Id, APIUtils.generateObjCallbacksTree(args[i])];
         }
       }
       process.send(_data);
@@ -75,12 +76,12 @@ function WorkerClient() {
       }
 
       for(let i in args) {
-        if(Utils.hasFunction(args[i])) {
+        if(APIUtils.hasFunction(args[i])) {
           let _Id = Utils.generateUniqueId();
           _local_obj_callbacks_dict[_Id] = args[i];
           // console.log(Object.keys(_local_obj_callbacks_dict).length);
 
-          _data.o[i] = [_Id, Utils.generateObjCallbacksTree(args[i])];
+          _data.o[i] = [_Id, APIUtils.generateObjCallbacksTree(args[i])];
         }
       }
       process.send(_data);
@@ -97,7 +98,7 @@ function WorkerClient() {
         process.title = 'NoService_worker: '+_service_name;
         _close_timeout = message.c;
         _clear_obj_garbage_timeout = message.g;
-        _api = Utils.generateObjCallbacks('API', message.a, callParentAPI);
+        _api = APIUtils.generateObjCallbacks('API', message.a, callParentAPI);
         _api.getMe((err, Me)=>{
           // add api
           _api.SafeCallback = (callback) => {
@@ -243,7 +244,7 @@ function WorkerClient() {
       // function return
       else if(message.t === 2) {
         try {
-          Utils.callObjCallback(_local_obj_callbacks_dict[message.p[0]], message.p[1], message.a, message.o, this.emitParentCallback, Utils.generateObjCallbacks);
+          APIUtils.callObjCallback(_local_obj_callbacks_dict[message.p[0]], message.p[1], message.a, message.o, this.emitParentCallback, APIUtils.generateObjCallbacks);
         }
         catch (e) {
           Utils.TagLog('*ERR*', 'Callback error occured on service "'+_service_name+'".');

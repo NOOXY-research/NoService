@@ -1,11 +1,12 @@
-// NoService/NoService/service/serviceapi_utils.js
+// NoService/NoService/service/worker/api_daemon/prototype.js
 // Description:
-// "serviceapi_utils.js" provide interface of interacting with core. This module is desgined
+// "prototype.js" provide interface of interacting with core. This module is desgined
 // for multithreading.
 // Copyright 2018-2019 NOOXY. All Rights Reserved.
 // All api tree's top should be callable! For worker calling.
 
 const Utils = require('../../../../../library').Utilities;
+const APIUtils = require('../../api_utilities');
 
 function API(_coregateway) {
   let _clear_obj_garbage_timeout = 30000;
@@ -81,10 +82,10 @@ function API(_coregateway) {
     this.callCallback = (path, args, arg_objs_trees)=>{
       try {
         if(isNastyCallback) {
-          Utils.callObjCallback(obj, path, args, arg_objs_trees, ([r_obj_id, r_path], r_args)=> {
+          APIUtils.callObjCallback(obj, path, args, arg_objs_trees, ([r_obj_id, r_path], r_args)=> {
             let _args_objs = {};
             for(let i in r_args) {
-              if(Utils.hasFunction(r_args[i])) {
+              if(APIUtils.hasFunction(r_args[i])) {
                 let _arg_LCBO = new LCBO(r_args[i], null, false, true);
                 _LCBOs[_arg_LCBO.returnId()] = _arg_LCBO;
                 r_args[i] = null;
@@ -93,10 +94,10 @@ function API(_coregateway) {
               }
             }
             _emitRemoteCallback([r_obj_id, r_path], r_args, _args_objs);
-          }, Utils.generateObjCallbacks);
+          }, APIUtils.generateObjCallbacks);
         }
         else {
-          Utils.callObjCallback(_callbacks, path, args, arg_objs_trees, null,
+          APIUtils.callObjCallback(_callbacks, path, args, arg_objs_trees, null,
           (remoteobjid, remoteobjtree)=>{
               return(new RCBO(remoteobjid, remoteobjtree));
           });
@@ -109,7 +110,7 @@ function API(_coregateway) {
         Utils.TagLog('*ERR*', 'Object: ');
         console.log(obj);
         Utils.TagLog('*ERR*', 'Tree: ');
-        console.log(Utils.generateObjCallbacksTree(obj));
+        console.log(APIUtils.generateObjCallbacksTree(obj));
         Utils.TagLog('*ERR*', 'Arguments: ');
         console.log(path, args, arg_objs_trees);
       }
@@ -120,10 +121,10 @@ function API(_coregateway) {
 
     this.returnTree = ()=> {
       if(isNastyCallback) {
-        return [_id, Utils.generateObjCallbacksTree(obj)];
+        return [_id, APIUtils.generateObjCallbacksTree(obj)];
       }
       else {
-        return [_id, Utils.generateObjCallbacksTree(_callbacks)];
+        return [_id, APIUtils.generateObjCallbacksTree(_callbacks)];
       }
 
     }
@@ -138,7 +139,7 @@ function API(_coregateway) {
     // };
 
     this.run = (path, args)=> {
-      let _runable = Utils.generateObjCallbacks(obj_id, obj_tree, ([obj_id, path], args)=> {
+      let _runable = APIUtils.generateObjCallbacks(obj_id, obj_tree, ([obj_id, path], args)=> {
         let _arg_objs_trees = {};
         for(let i in args) {
           if(args[i]) {
@@ -163,7 +164,7 @@ function API(_coregateway) {
   }
 
   this.emitAPIRq = (path, args, argsobj)=> {
-    Utils.callObjCallback(_api, path, args, argsobj, null,
+    APIUtils.callObjCallback(_api, path, args, argsobj, null,
     (remoteobjid, remoteobjtree)=>{
       return(new RCBO(remoteobjid, remoteobjtree));
     });
@@ -205,7 +206,7 @@ function API(_coregateway) {
 
     _target[list[list.length-1]] = construct_function(LCBO);
     // generate API Tree
-    _api_tree = Utils.generateObjCallbacksTree(_api);
+    _api_tree = APIUtils.generateObjCallbacksTree(_api);
   }
 
   _api.getVariables = (callback)=> {
@@ -1185,7 +1186,7 @@ function API(_coregateway) {
   }
 
   // generate API Tree
-  _api_tree = Utils.generateObjCallbacksTree(_api);
+  _api_tree = APIUtils.generateObjCallbacksTree(_api);
 }
 
 module.exports.geneateNormalAPI = (_coregateway, callback)=> {

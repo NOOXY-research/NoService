@@ -3,6 +3,7 @@
 // "socketpair.js" provide functions of socket.
 // Copyright 2018-2019 NOOXY. All Rights Reserved.
 'use strict';
+
 const Utils = require('../library').Utilities;
 
 function ServiceSocket(service_name, prototype, emitter, debug, entity_module, authorization_module) {
