@@ -3,6 +3,7 @@
 // "GroupIndexedList.js" For something like different and huge amount of groups
 // of messages or logs need ordered index.
 // Copyright 2018-2019 NOOXY. All Rights Reserved.
+'use strict';
 
 Utils = require('../../../library').Utilities;
 

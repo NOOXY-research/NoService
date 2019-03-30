@@ -2,6 +2,7 @@
 // Description:
 // "IndexedList.js" For something like messages or logs need ordered index.
 // Copyright 2018-2019 NOOXY. All Rights Reserved.
+'use strict';
 
 Utils = require('../../../library').Utilities;
 

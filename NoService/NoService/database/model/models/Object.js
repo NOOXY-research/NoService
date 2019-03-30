@@ -2,6 +2,8 @@
 // Description:
 // "Object.js" For storing objects
 // Copyright 2018-2019 NOOXY. All Rights Reserved.
+'use strict';
+
 
 Utils = require('../../../library').Utilities;
 
