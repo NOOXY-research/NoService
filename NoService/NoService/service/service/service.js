@@ -498,26 +498,24 @@ function Service() {
 
       _authenticity_module.getUserIdByUsername(owner, (err, ownerid)=> {
         if(err&&_entity_json.owner) {
-          callback(err);
+          _entity_json.owner = null;
         }
-        else {
-          _entity_json.ownerid = ownerid;
-          _entity_module.registerEntity(_entity_json, connprofile, (err, id) => {
-            if(err) {
-              callback(err);
+        _entity_json.ownerid = ownerid;
+        _entity_module.registerEntity(_entity_json, connprofile, (err, id) => {
+          if(err) {
+            callback(err);
+          }
+          else {
+            let entities_prev = connprofile.returnBundle('bundle_entities');
+            if(entities_prev != null) {
+              connprofile.setBundle('bundle_entities', [id].concat(entities_prev));
             }
             else {
-              let entities_prev = connprofile.returnBundle('bundle_entities');
-              if(entities_prev != null) {
-                connprofile.setBundle('bundle_entities', [id].concat(entities_prev));
-              }
-              else {
-                connprofile.setBundle('bundle_entities', [id]);
-              }
-              callback(false, id);
+              connprofile.setBundle('bundle_entities', [id]);
             }
-          });
-        }
+            callback(false, id);
+          }
+        });
       });
     }
     else {
