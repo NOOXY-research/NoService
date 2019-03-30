@@ -89,9 +89,6 @@ NoService has good software structure which means you can modify the native libr
 ### Bundled Services
 NoService provide bundled services such as NoShell which give you access of NoService. NoUser for user system. And so on.
 
-### Clustering
-Including ORM models. Still working on it.
-
 ## Final goal
 not yet
 
@@ -856,7 +853,7 @@ module.exports = function Protocol(coregateway, emitRequest) {
 
 ```
 
-## NoService Protocol
+## NoService Protocol (outdated for NSP 0.4.1 and below)
 ### Basic
 1. NSP(NoService Protocol) is based on text, based on Json data structure.
 2. It’s communication style is like http. Existing a method, a request and a response.
