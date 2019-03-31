@@ -389,15 +389,15 @@ function UnixSocketAPI() {
           _serviceapi.emitCallbackRq(message.p, message.a, message.o);
         }
         catch (e) {
-          _child.send({
-            t:98,
+          let _data = {
             d:{
               obj_path: message.p,
               call_args: message.a,
               args_obj_tree: message.o
             },
             e: e.stack
-          });
+          };
+          _emitChildMessage(98, Buffer.from(JSON.stringify(_data)));
         }
       }
       else if(type === 6) {
