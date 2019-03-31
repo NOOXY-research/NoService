@@ -27,7 +27,7 @@
     }
   ],
 
-  "default_server": 1,
+  "default_server": null,
 
   "plugins_path": "./plugins",
 
@@ -51,7 +51,8 @@
     "NoServiceManager",
     "NoUser",
     "NoTalk",
-    "NoMailer"
+    "NoMailer",
+    "NoTester"
   ],
 
   "debug": false,
