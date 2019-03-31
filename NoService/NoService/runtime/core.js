@@ -359,35 +359,32 @@ function Core(NoServiceLibrary, settings) {
                 _worker.setClearGarbageTimeout(settings.clear_garbage_timeout);
                 _worker.setConstantsPath(require("path").join(__dirname, './constants.json'));
                 _worker.setUnixSocketPath(Constants.WORKER_UNIX_SOCK_PATH);
-                _worker.start();
+                _worker.start(()=> {
+                  // setup api
+                  _serviceAPI.importCore(coregateway);
 
-                //
+                  verbose('Daemon', 'Setting up variables done.');
 
-                // setup api
-                _serviceAPI.importCore(coregateway);
+                  // launch services
+                  verbose('Daemon', 'Launching services...');
+                  _service.launch((err)=> {
+                    if(err) {
+                      _daemon.close();
+                    }
+                  });
+                  verbose('Daemon', 'Launching services done.');
+                  //
+                  verbose('Daemon', 'NOOXY Service Framework successfully started.');
+                  if(callback)
+                    callback(false);
+                  if(!settings.shell_service) {
+                    verbose('Shell', 'Shell Service not implemented.');
+                  }
 
-                verbose('Daemon', 'Setting up variables done.');
-
-                // launch services
-                verbose('Daemon', 'Launching services...');
-                _service.launch((err)=> {
-                  if(err) {
-                    _daemon.close();
+                  if(!settings.shell_client_service) {
+                    verbose('Shellc', 'Local Shell not implemented.');
                   }
                 });
-                verbose('Daemon', 'Launching services done.');
-                //
-                verbose('Daemon', 'NOOXY Service Framework successfully started.');
-                if(callback)
-                  callback(false);
-                if(!settings.shell_service) {
-                  verbose('Shell', 'Shell Service not implemented.');
-                }
-
-                if(!settings.shell_client_service) {
-                  verbose('Shellc', 'Local Shell not implemented.');
-                }
-
               });
             });
           });

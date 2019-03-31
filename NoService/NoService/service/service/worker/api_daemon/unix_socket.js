@@ -53,11 +53,8 @@ function UnixSocketAPI() {
         _on_callbacks['message'](message);
     };
 
-    this.send = (data, callback)=> {
-      if(typeof(data) != 'string') {
-        data = JSON.stringify(data);
-      }
-      sock.write(('0000000000000000'+Buffer.from(data).length).slice(-16)+data);
+    this.send = (blob, callback)=> {
+      sock.write(Buffer.concat([Buffer.from(('0000000000000000'+blob.length).slice(-16)), blob]));
     }
 
     this.on = (eventname, callback)=> {
@@ -280,9 +277,228 @@ function UnixSocketAPI() {
     };
   };
 
+  function NodeWorkerClient(_manifest, path) {
+    let _serviceapi;
+    let _child;
+    let _InfoRq = {};
+    let _init_callback;
+    let _launch_callback;
+    let _close_callback;
+    let _child_alive = false;
+    let _init = false;
+    let _service_name = _manifest.name;
+    let _api_sock;
+
+    let _emitChildMessage = (type, blob)=> {
+      if(blob) {
+        let t = Buffer.alloc(1, type);
+        _api_sock.send(Buffer.concat([t, blob]));
+      }
+      else {
+        let t = Buffer.alloc(1, type);
+        _api_sock.send(t);
+      }
+    };
+
+    this.getCBOCount = (callback)=> {
+      if(_child_alive&&_child) {
+        let _rqid = Utils.generateUniqueId();
+        _InfoRq[_rqid] = callback;
+        _emitChildMessage(4, Buffer.from(JSON.stringify({i: _rqid})));
+      }
+      else {
+        callback(new Error("Child is not alive."));
+      }
+    };
+
+    this.getMemoryUsage = (callback)=> {
+      if(_child_alive&&_child) {
+        let _rqid = Utils.generateUniqueId();
+        _InfoRq[_rqid] = callback;
+        _emitChildMessage(5, Buffer.from(JSON.stringify({i: _rqid})));
+      }
+      else {
+        callback(new Error("Child is not alive."));
+      }
+    }
+
+    this.emitChildClose = ()=> {
+      if(_child_alive&&_child)
+        _emitChildMessage(99);
+    }
+
+    this.emitRemoteUnbind = (id)=> {
+      if(_child_alive&&_child)
+        _emitChildMessage(3, Buffer.from(JSON.stringify({i: id})));
+    }
+
+    this.emitChildCallback = ([obj_id, path], args, argsobj) => {
+      let _data = {
+        p: [obj_id, path],
+        a: args,
+        o: argsobj
+      }
+
+      try {
+        if(_child_alive&&_api_sock)
+          _emitChildMessage(2, Buffer.from(JSON.stringify(_data)));
+      }
+      catch(err) {
+        Utils.TagLog('*ERR*' , 'Occured error on "'+_service_name+'".');
+        console.log(err);
+      }
+    }
+
+    this.onMessage = (type, blob)=> {
+      if(type === 0) {
+        _emitChildMessage(0, Buffer.from(JSON.stringify({p: path, a: _serviceapi.returnAPITree(), c: _close_worker_timeout, g: _clear_obj_garbage_timeout, cpath: _const_path})));
+      }
+      else if(type === 1) {
+        _init_callback(false);
+      }
+      else if(type === 2) {
+        _launch_callback(false);
+      }
+      else if(type === 3) {
+        _close_callback(false);
+        _child.kill();
+        _child = null;
+        _child_alive = false;
+      }
+      else if(type === 4) {
+        try {
+          let message = JSON.parse(blob.toString());
+          _serviceapi.emitAPIRq(message.p, message.a, message.o);
+        }
+        catch (e) {
+          let message = JSON.parse(blob.toString());
+          let _data = {
+            d:{
+              api_path: message.p,
+              call_args: message.a,
+              args_obj_tree: message.o
+            },
+            e: e.stack
+          };
+          _emitChildMessage(98, Buffer.from(JSON.stringify(_data)));
+        }
+      }
+      else if(type === 5) {
+        try {
+          let message = JSON.parse(blob.toString());
+          _serviceapi.emitCallbackRq(message.p, message.a, message.o);
+        }
+        catch (e) {
+          _child.send({
+            t:98,
+            d:{
+              obj_path: message.p,
+              call_args: message.a,
+              args_obj_tree: message.o
+            },
+            e: e.stack
+          });
+        }
+      }
+      else if(type === 6) {
+        let message = JSON.parse(blob.toString());
+        _InfoRq[message.i](false, {daemon: _serviceapi.returnLCBOCount(), client: message.c})
+        delete _InfoRq[message.i];
+      }
+      else if(type === 7) {
+        let message = JSON.parse(blob.toString());
+        _InfoRq[message.i](false, message.c)
+        delete _InfoRq[message.i];
+      }
+      else if(type === 96){
+        let message = JSON.parse(blob.toString());
+        _close_callback(new Error('Worker closing error:\n'+message.e));
+        _child.kill();
+        _child = null;
+        _child_alive = false;
+      }
+      else if(type === 97){
+        // _launch_callback(new Error('Worker runtime error:\n'+message.e));
+      }
+      else if(type === 98){
+        let message = JSON.parse(blob.toString());
+        _launch_callback(new Error('Worker launching error:\n'+message.e));
+      }
+      else if(type === 99){
+        let message = JSON.parse(blob.toString());
+        _init_callback(new Error('Worker initializing error:\n'+message.e));
+      }
+    };
+
+    this.launch = (launch_callback)=> {
+      _launch_callback = launch_callback;
+      _emitChildMessage(1);
+    };
+
+    this.init = (init_callback)=> {
+      _init_callback = init_callback;
+      _child = spawn('node', [require.resolve('../api_client/node/worker'), _unix_socket_path, _service_name], {encoding: 'binary', stdio: [process.stdin, process.stdout, process.stderr, 'ipc']});
+      _child.on('close', (code)=> {
+        if(code)
+          _init_callback(new Error('NodeWorkerClient of "'+_service_name+'" occured error.'));
+      });
+      _child_alive = true;
+    };
+
+    this.relaunch = (relaunch_callback)=> {
+      Utils.TagLog('Workerd', 'Relaunching service "'+_service_name+'"');
+      this.close((err)=> {
+        if(err) {
+          relaunch_callback(err);
+        }
+        else {
+          setTimeout(()=>{
+            this.init((err)=> {
+              if(err) {
+                relaunch_callback(err);
+              }
+              else {
+                this.launch(relaunch_callback);
+              }
+            });
+          }, _close_worker_timeout+10);
+        }
+      });
+    };
+
+    this.pairSocket = (APIsock)=> {
+      _api_sock = APIsock;
+      APIsock.on('message', (message)=> {
+        let type = message[0];
+        this.onMessage(type, message.slice(1));
+      });
+      this.onMessage(0);
+    };
+
+    this.createServiceAPI = (_service_socket, callback)=> {
+      API.createServiceAPI(_service_socket, _manifest, (err, api)=> {
+        _serviceapi = api;
+        _serviceapi.setRemoteCallbackEmitter(this.emitChildCallback);
+        _serviceapi.setRemoteUnbindEmitter(this.emitRemoteUnbind);
+        _serviceapi.setRemoteUnbindEmitter(this.emitRemoteUnbind);
+        callback(false);
+      })
+    };
+
+    this.close = (callback)=> {
+      _close_callback = callback;
+      _serviceapi.reset();
+      this.emitChildClose();
+    };
+  };
+
   this.generateWorker = (manifest, path, lang)=> {
     if(lang === 'python') {
       _worker_clients[manifest.name] = new PythonWorkerClient(manifest, path);
+      return _worker_clients[manifest.name];
+    }
+    else if(!lang || lang === 'js' || lang === 'javascript') {
+      _worker_clients[manifest.name] = new NodeWorkerClient(manifest, path);
       return _worker_clients[manifest.name];
     }
     else {
@@ -290,7 +506,7 @@ function UnixSocketAPI() {
     }
   };
 
-  this.start = ()=> {
+  this.start = (callback)=> {
     try {
       fs.unlinkSync(_unix_socket_path);
     } catch(e) {}
@@ -300,12 +516,14 @@ function UnixSocketAPI() {
       socket.on('data', (data)=> {
         while(data.length) {
           let chunks_size = parseInt(data.slice(0, 16).toString());
-          let msg = JSON.parse(data.slice(16, 16+chunks_size).toString());
-          if(msg.t === 0) {
+          let message = data.slice(16, 16+chunks_size);
+          let type = message[0];
+          if(type === 0) {
+            let msg = JSON.parse(message.slice(1).toString());
             _worker_clients[msg.s].pairSocket(_api_sock);
           }
           else {
-            _api_sock._onMessege(msg);
+            _api_sock._onMessege(message);
           }
           data = data.slice(16+chunks_size);
         }
@@ -322,7 +540,7 @@ function UnixSocketAPI() {
         _api_sock._onClose();
       });
 
-    }).listen(_unix_socket_path);
+    }).listen(_unix_socket_path, callback);
   };
 
   this.importAPI = (api)=> {

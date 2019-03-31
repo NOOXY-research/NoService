@@ -45,14 +45,8 @@ function WorkerDaemon() {
   }
 
   this.generateWorker = (manifest, path, lang) => {
-    if(!lang || lang === 'js' || lang === 'javascript') {
-      _worker_clients[manifest.name] = _node_daemon.generateWorker(manifest, path);
-      return _worker_clients[manifest.name];
-    }
-    else {
-      _worker_clients[manifest.name] =  _unix_daemon.generateWorker(manifest, path, lang);
-      return _worker_clients[manifest.name];
-    }
+    _worker_clients[manifest.name] = _unix_daemon.generateWorker(manifest, path, lang);
+    return _worker_clients[manifest.name];
   }
 
   this.importAPI = (serviceapi_module) => {
@@ -79,9 +73,9 @@ function WorkerDaemon() {
     _unix_daemon.setUnixSocketPath(path);
   };
 
-  this.start = ()=> {
+  this.start = (callback)=> {
     _node_daemon.start();
-    _unix_daemon.start();
+    _unix_daemon.start(callback);
   };
 
   this.close = ()=> {
