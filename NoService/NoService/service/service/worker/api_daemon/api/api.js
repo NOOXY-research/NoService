@@ -952,26 +952,6 @@ function ServiceAPI() {
     });
   };
 
-  // this.createServiceAPIwithImplementaion = (service_socket, manifest, callback) => {
-  //   APIPrototype.geneateNormalAPI(_coregateway, (err, api) => {
-  //     _addNormalAPIs(api, service_socket, manifest);
-  //     for(let i in _API_generators) {
-  //       _API_generators[i](api, service_socket, manifest);
-  //     }
-  //     api.addAPI(['getImplementationModule'], (LocalCallbackTree)=> {
-  //       return((remote_callback)=> {
-  //         let Implementation_LocalCallbackTree = new LocalCallbackTree(_coregateway.Implementation, null, false, true);
-  //         if(remote_callback) {
-  //           remote_callback.apply([false, Implementation_LocalCallbackTree]);
-  //           remote_callback.destory();
-  //         }
-  //       });
-  //     });
-  //
-  //     callback(false, api);
-  //   });
-  // }
-
   this.close = () => {
     _coregateway = null;
   };

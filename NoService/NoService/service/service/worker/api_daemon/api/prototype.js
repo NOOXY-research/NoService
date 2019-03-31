@@ -41,7 +41,7 @@ function API(_coregateway) {
     _LocalCallbackTrees = [];
   };
   // Local callback tree
-  function LocalCallbackTree(obj, obj_contructor, isOneTimeObj, isNastyCallback) {
+  function LocalCallbackTree(obj, obj_contructor, isOneTimeObj) {
     let _RemoteCallbacks = [];
     let _id = Utils.generateUniqueId();
     _LocalCallbackTrees[_id] = this;
@@ -81,27 +81,10 @@ function API(_coregateway) {
 
     this.callCallback = (path, args, arg_objs_trees)=>{
       try {
-        if(isNastyCallback) {
-          APIUtils.callObjCallback(obj, path, args, arg_objs_trees, ([r_obj_id, r_path], r_args)=> {
-            let _args_objs = {};
-            for(let i in r_args) {
-              if(APIUtils.hasFunction(r_args[i])) {
-                let _arg_LocalCallbackTree = new LocalCallbackTree(r_args[i], null, false, true);
-                _LocalCallbackTrees[_arg_LocalCallbackTree.returnId()] = _arg_LocalCallbackTree;
-                r_args[i] = null;
-                // console.log(Object.keys(_local_obj_callbacks_dict).length);
-                _args_objs[i] = _arg_LocalCallbackTree.returnTree();
-              }
-            }
-            _emitRemoteCallback([r_obj_id, r_path], r_args, _args_objs);
-          }, APIUtils.generateObjCallbacks);
-        }
-        else {
-          APIUtils.callObjCallback(_callbacks, path, args, arg_objs_trees, null,
-          (remoteobjid, remoteobjtree)=>{
-              return(new RemoteCallback(remoteobjid, remoteobjtree));
-          });
-        }
+        APIUtils.callObjCallback(_callbacks, path, args, arg_objs_trees, null,
+        (remoteobjid, remoteobjtree)=>{
+            return(new RemoteCallback(remoteobjid, remoteobjtree));
+        });
       }
       catch(e) {
         Utils.TagLog('*ERR*', 'LocalCallbackTree occured error.');
@@ -120,13 +103,7 @@ function API(_coregateway) {
     }
 
     this.returnTree = ()=> {
-      if(isNastyCallback) {
-        return [_id, APIUtils.generateObjCallbacksTree(obj)];
-      }
-      else {
-        return [_id, APIUtils.generateObjCallbacksTree(_callbacks)];
-      }
-
+      return [_id, APIUtils.generateObjCallbacksTree(_callbacks)];
     }
   };
 
