@@ -513,19 +513,71 @@ function UnixSocketAPI() {
 
     _unix_sock_server = Net.createServer((socket)=>{
       let _api_sock = new APISocket(socket);
+      let _onMessege = (message)=> {
+        let type = message[0];
+        if(type === 0) {
+          let msg = JSON.parse(message.slice(1).toString());
+          _worker_clients[msg.s].pairSocket(_api_sock);
+        }
+        else {
+          _api_sock._onMessege(message);
+        }
+      };
+
+      let chunks_size;
+      let message;
+      let resume_data;
+
       socket.on('data', (data)=> {
+        if(resume_data) {
+          data = Buffer.concat([resume_data, data]);
+          // console.log('resume');
+        };
+
         while(data.length) {
-          let chunks_size = parseInt(data.slice(0, 16).toString());
-          let message = data.slice(16, 16+chunks_size);
-          let type = message[0];
-          if(type === 0) {
-            let msg = JSON.parse(message.slice(1).toString());
-            _worker_clients[msg.s].pairSocket(_api_sock);
+          // console.log('>', !message, data.length, chunks_size);
+          if(!message) {
+            chunks_size = parseInt(data.slice(0, 16).toString());
+            message = data.slice(16, 16+chunks_size);
+            data = data.slice(16+chunks_size);
+            if(message.length === chunks_size) {
+              _onMessege(message);
+              chunks_size = null;
+              message = null;
+            }
+            // in case chunks_size data is not complete
+            if(data.length < 16) {
+              resume_data = data;
+              break;
+            }
+          }
+          else if(data.length > chunks_size - message.length) {
+            let left_size = chunks_size - message.length;
+            // console.log('>', !message, data.length, chunks_size, message.length);
+            message = Buffer.concat([message, data.slice(0, left_size)]);
+            data = data.slice(left_size);
+            // console.log('>', !message, data.length, chunks_size, message.length);
+            if(message.length === chunks_size) {
+              _onMessege(message);
+              chunks_size = null;
+              message = null;
+            }
+            // in case chunks_size data is not complete
+            if(data.length < 16) {
+              resume_data = data;
+              break;
+            }
           }
           else {
-            _api_sock._onMessege(message);
+            message = Buffer.concat([message, data]);
+            data = [];
+            if(message.length === chunks_size) {
+              _onMessege(message);
+              chunks_size = null;
+              message = null;
+              resume_data = null;
+            }
           }
-          data = data.slice(16+chunks_size);
         }
       });
 

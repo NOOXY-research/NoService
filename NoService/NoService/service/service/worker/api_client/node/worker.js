@@ -361,42 +361,76 @@ process.on('SIGINT', () => {
 
 });
 
-process.on('disconnect', ()=> {
-  console.log('Disconnect from NoService Core. "'+process.title+'" forced to exit. Your state may not be saved!');
-  process.exit();
-});
 
 let client = Net.createConnection(process.argv[2]);
 client.on("connect", ()=> {
   let _api_sock = new APISocket(client);
   let w = new WorkerClient(_api_sock);
   w.established();
-  let message;
+
+  let _onMessege = (message)=> {
+    _api_sock._onMessege(message);
+  };
+
   let chunks_size;
+  let message;
+  let resume_data;
+
   client.on("data", (data)=> {
-    if(!message) {
-      chunks_size = parseInt(data.slice(0, 16).toString());
-      message = data.slice(16, 16+chunks_size);
-      if(message.length === chunks_size) {
-        _api_sock._onMessege(message);
-        message = null;
-      }
-    }
-    else {
-      if(data.length > chunks_size - message.length) {
-        message = Buffer.concat([message, data]);
+    if(resume_data) {
+      data = Buffer.concat([resume_data, data]);
+      // console.log('resume');
+    };
+
+    while(data.length) {
+      // console.log('>', !message, data.length, chunks_size);
+      if(!message) {
+        chunks_size = parseInt(data.slice(0, 16).toString());
+        message = data.slice(16, 16+chunks_size);
+        data = data.slice(16+chunks_size);
         if(message.length === chunks_size) {
-          _api_sock._onMessege(message);
+          _onMessege(message);
+          chunks_size = null;
           message = null;
+        }
+        // in case chunks_size data is not complete
+        if(data.length < 16) {
+          resume_data = data;
+          break;
+        }
+      }
+      else if(data.length > chunks_size - message.length) {
+        let left_size = chunks_size - message.length;
+        // console.log('>', !message, data.length, chunks_size, message.length);
+        message = Buffer.concat([message, data.slice(0, left_size)]);
+        data = data.slice(left_size);
+        // console.log('>', !message, data.length, chunks_size, message.length);
+        if(message.length === chunks_size) {
+          _onMessege(message);
+          chunks_size = null;
+          message = null;
+        }
+        // in case chunks_size data is not complete
+        if(data.length < 16) {
+          resume_data = data;
+          break;
         }
       }
       else {
         message = Buffer.concat([message, data]);
+        data = [];
         if(message.length === chunks_size) {
-          _api_sock._onMessege(message);
+          _onMessege(message);
+          chunks_size = null;
           message = null;
+          resume_data = null;
         }
       }
     }
   });
+});
+
+client.on("close", ()=> {
+  console.log('Disconnect from NoService Core. "'+process.title+'" forced to exit. Your state may not be saved!');
+  process.exit();
 });
