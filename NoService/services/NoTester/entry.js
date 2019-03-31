@@ -95,14 +95,14 @@ function Service(Me, NoService) {
         ss.emitToGroups(['superuser', 'good'], 'event1', 'Event msg. SHOULD APPEAR(2/3)');
         ss.emitToIncludingGroups(['superuser', 'good'], 'event1', 'Event msg. SHOULD APPEAR(3/3)');
         ss.emitToIncludingGroups(['superuser', 'good', 'excluded'], 'event1', 'Event msg. SHOULD NOT APPEAR');
-        log('Starting stress test on emiting event. In 5 sec.');
-        setTimeout(()=> {
-          for(let i=0; i< 20000; i++) {
-            ss.emitToGroups(['superuser', 'good', 'excluded'], 'stress', 'Event msg. SHOULD NOT APPEAR');
-            ss.emitToGroups(['superuser', 'good'], 'stress', 'Event msg. SHOULD APPEAR(2/3)');
-          };
-          ss.emit(entityId, 'stressOK');
-        }, 5000);
+        // log('Starting stress test on emiting event. In 5 sec.');
+        // setTimeout(()=> {
+        //   for(let i=0; i< 20000; i++) {
+        //     ss.emitToGroups(['superuser', 'good', 'excluded'], 'stress', 'Event msg. SHOULD NOT APPEAR');
+        //     ss.emitToGroups(['superuser', 'good'], 'stress', 'Event msg. SHOULD APPEAR(2/3)');
+        //   };
+        //   ss.emit(entityId, 'stressOK');
+        // }, 5000);
       });
       // Do something.
       // report error;
