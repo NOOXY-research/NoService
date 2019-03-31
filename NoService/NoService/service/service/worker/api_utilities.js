@@ -99,15 +99,16 @@ module.exports.hasFunction = (obj_raw) => {
 }
 
 // generate Arguments binary
-// format:
-// [1 bytes type string] [15 bytes len string]
+// format(concat):
+// [1 bytes type string] [15 bytes len string][contain]
+// contain
 // type 0 Json:  [Json utf8]
 // type 1 Callback Object:  [Json utf8]
 // type 2 binary:  [Binary]
 module.exports.encodeArgumentsToBinary = (args)=> {
   let result = Buffer.alloc(0);
   for(let i in args) {
-    if(args[i].isBeMirroredObject) {
+    if(args[i].isLocalCallbackTree) {
 
     }
     else if (Buffer.isBuffer(args[i])) {
@@ -123,7 +124,7 @@ module.exports.encodeArgumentsToBinary = (args)=> {
 module.exports.decodeArgumentsFromBinary = (args)=> {
   let result = [];
   for(let i in args) {
-    if(args[i].isBeMirroredObject) {
+    if(args[i].isLocalCallbackTree) {
 
     }
     else if (Buffer.isBuffer(args[i])) {

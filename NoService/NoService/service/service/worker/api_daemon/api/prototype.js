@@ -17,7 +17,7 @@ function API(_coregateway) {
   let DAEMONPORT = _coregateway.Daemon.Settings.connection_servers[DEFAULT_SERVER].port;
 
   let _api = {};
-  let _BeMirroredObjects = {};
+  let _LocalCallbackTrees = {};
   let _emitRemoteCallback;
   let _emitRemoteUnbind;
   let _api_tree = {};
@@ -25,9 +25,9 @@ function API(_coregateway) {
   // garbage cleaning
   setInterval(()=>{
     try {
-      for(let key in _BeMirroredObjects) {
-        if(_BeMirroredObjects[key].isReferCanceled() === false) {
-          _BeMirroredObjects[key].destroy();
+      for(let key in _LocalCallbackTrees) {
+        if(_LocalCallbackTrees[key].isReferCanceled() === false) {
+          _LocalCallbackTrees[key].destroy();
         }
       }
     }
@@ -38,16 +38,16 @@ function API(_coregateway) {
   }, _clear_obj_garbage_timeout);
 
   this.reset = ()=> {
-    _BeMirroredObjects = [];
+    _LocalCallbackTrees = [];
   };
-  // Local callback object
-  function BeMirroredObject(obj, obj_contructor, isOneTimeObj, isNastyCallback) {
-    let _MirroredObjects = [];
+  // Local callback tree
+  function LocalCallbackTree(obj, obj_contructor, isOneTimeObj, isNastyCallback) {
+    let _RemoteCallbacks = [];
     let _id = Utils.generateUniqueId();
-    _BeMirroredObjects[_id] = this;
+    _LocalCallbackTrees[_id] = this;
 
-    let _syncRefer = (MyMirroredObject)=> {
-      _MirroredObjects.push(MyMirroredObject);
+    let _syncRefer = (MyRemoteCallback)=> {
+      _RemoteCallbacks.push(MyRemoteCallback);
     }
 
     let _obj = obj;
@@ -55,7 +55,7 @@ function API(_coregateway) {
     if(obj_contructor)
       _callbacks = obj_contructor(_syncRefer);
 
-    this.isBeMirroredObject = true;
+    this.isLocalCallbackTree = true;
 
     this.returnId = ()=> {return _id};
 
@@ -70,10 +70,10 @@ function API(_coregateway) {
     }
 
     this.destroy = ()=> {
-      delete _BeMirroredObjects[_id];
-      for(let id in _MirroredObjects) {
-        _MirroredObjects[id].destory();
-        delete _MirroredObjects[id];
+      delete _LocalCallbackTrees[_id];
+      for(let id in _RemoteCallbacks) {
+        _RemoteCallbacks[id].destory();
+        delete _RemoteCallbacks[id];
       }
       obj = null;
       _obj = null;
@@ -86,11 +86,11 @@ function API(_coregateway) {
             let _args_objs = {};
             for(let i in r_args) {
               if(APIUtils.hasFunction(r_args[i])) {
-                let _arg_BeMirroredObject = new BeMirroredObject(r_args[i], null, false, true);
-                _BeMirroredObjects[_arg_BeMirroredObject.returnId()] = _arg_BeMirroredObject;
+                let _arg_LocalCallbackTree = new LocalCallbackTree(r_args[i], null, false, true);
+                _LocalCallbackTrees[_arg_LocalCallbackTree.returnId()] = _arg_LocalCallbackTree;
                 r_args[i] = null;
                 // console.log(Object.keys(_local_obj_callbacks_dict).length);
-                _args_objs[i] = _arg_BeMirroredObject.returnTree();
+                _args_objs[i] = _arg_LocalCallbackTree.returnTree();
               }
             }
             _emitRemoteCallback([r_obj_id, r_path], r_args, _args_objs);
@@ -99,14 +99,14 @@ function API(_coregateway) {
         else {
           APIUtils.callObjCallback(_callbacks, path, args, arg_objs_trees, null,
           (remoteobjid, remoteobjtree)=>{
-              return(new MirroredObject(remoteobjid, remoteobjtree));
+              return(new RemoteCallback(remoteobjid, remoteobjtree));
           });
         }
       }
       catch(e) {
-        Utils.TagLog('*ERR*', 'BeMirroredObject occured error.');
+        Utils.TagLog('*ERR*', 'LocalCallbackTree occured error.');
         console.log(e);
-        Utils.TagLog('*ERR*', 'BeMirroredObject detail.');
+        Utils.TagLog('*ERR*', 'LocalCallbackTree detail.');
         Utils.TagLog('*ERR*', 'Object: ');
         console.log(obj);
         Utils.TagLog('*ERR*', 'Tree: ');
@@ -130,20 +130,20 @@ function API(_coregateway) {
     }
   };
 
-  // Remote callback object
-  function MirroredObject(obj_id, obj_tree) {
-    // let _My_BeMirroredObjects = [];
+  // Remote callback
+  function RemoteCallback(obj_id, obj_tree) {
+    // let _My_LocalCallbackTrees = [];
     //
-    // this.syncRefer = (MyBeMirroredObject)=> {
-    //   _My_BeMirroredObjects.push(MyBeMirroredObject);
+    // this.syncRefer = (MyLocalCallbackTree)=> {
+    //   _My_LocalCallbackTrees.push(MyLocalCallbackTree);
     // };
 
-    this.run = (path, args)=> {
+    this.apply = (args)=> {
       let _runable = APIUtils.generateObjCallbacks(obj_id, obj_tree, ([obj_id, path], args)=> {
         let _arg_objs_trees = {};
         for(let i in args) {
           if(args[i]) {
-            if(args[i].isBeMirroredObject) {
+            if(args[i].isLocalCallbackTree) {
               _arg_objs_trees[i] = args[i].returnTree();
               args[i] = null;
             }
@@ -166,18 +166,18 @@ function API(_coregateway) {
   this.emitAPIRq = (path, args, argsobj)=> {
     APIUtils.callObjCallback(_api, path, args, argsobj, null,
     (remoteobjid, remoteobjtree)=>{
-      return(new MirroredObject(remoteobjid, remoteobjtree));
+      return(new RemoteCallback(remoteobjid, remoteobjtree));
     });
   }
 
-  this.returnBeMirroredObjectCount = ()=> {
-    return Object.keys(_BeMirroredObjects).length;
+  this.returnLocalCallbackTreeCount = ()=> {
+    return Object.keys(_LocalCallbackTrees).length;
   };
 
   this.emitCallbackRq = ([id, path], args, argsobj)=> {
-    let _BeMirroredObject = _BeMirroredObjects[id];
-    if(_BeMirroredObject)
-      _BeMirroredObject.callCallback(path, args, argsobj);
+    let _LocalCallbackTree = _LocalCallbackTrees[id];
+    if(_LocalCallbackTree)
+      _LocalCallbackTree.callCallback(path, args, argsobj);
   }
 
   this.returnObj = ()=> {
@@ -204,7 +204,7 @@ function API(_coregateway) {
       _target = _target[key];
     }
 
-    _target[list[list.length-1]] = construct_function(BeMirroredObject);
+    _target[list[list.length-1]] = construct_function(LocalCallbackTree);
     // generate API Tree
     _api_tree = APIUtils.generateObjCallbacksTree(_api);
   }
@@ -215,45 +215,45 @@ function API(_coregateway) {
 
   _api.Service = {
     ActivitySocket: {
-      createSocket: (method, targetip, targetport, service, owner, mirrored_object) => {
+      createSocket: (method, targetip, targetport, service, owner, remote_callback) => {
         _coregateway.Activity.createActivitySocket(method, targetip, targetport, service, owner, (err, as)=> {
-          let be_mirrored_object = new BeMirroredObject(as, (syncRefer)=> {
+          let local_callback_tree = new LocalCallbackTree(as, (syncRefer)=> {
             return ({
-                call: (name, Json, mirrored_object_2)=> {
-                  if(mirrored_object_2) {
-                    syncRefer(mirrored_object_2&&as);
+                call: (name, Json, remote_callback_2)=> {
+                  if(remote_callback_2) {
+                    syncRefer(remote_callback_2&&as);
                     as.call(name, Json, (err, json)=> {
-                      if(mirrored_object_2) {}
-                      mirrored_object_2.run([], [err, json]);
-                      mirrored_object_2.destory();
+                      if(remote_callback_2) {}
+                      remote_callback_2.apply([err, json]);
+                      remote_callback_2.destory();
                     });
                   }
                 },
 
-                getEntityId: (mirrored_object_2)=> {
-                  if(mirrored_object_2&&as) {
-                    syncRefer(mirrored_object_2);
+                getEntityId: (remote_callback_2)=> {
+                  if(remote_callback_2&&as) {
+                    syncRefer(remote_callback_2);
                     as.getEntityId((err, entityId)=>{
-                      mirrored_object_2.run([], [err, entityId]);
-                      mirrored_object_2.destory();
+                      remote_callback_2.apply([err, entityId]);
+                      remote_callback_2.destory();
                     });
                   }
                 },
 
-                on: (type, mirrored_object_2)=> {
-                  if(mirrored_object_2&&as) {
-                    syncRefer(mirrored_object_2);
+                on: (type, remote_callback_2)=> {
+                  if(remote_callback_2&&as) {
+                    syncRefer(remote_callback_2);
                     as.on(type, (err, data)=>{
-                      mirrored_object_2.run([], [err, data]);
+                      remote_callback_2.apply([err, data]);
                     });
                   }
                 },
 
-                onEvent: (event, mirrored_object_2)=> {
-                  if(mirrored_object_2&&as) {
-                    syncRefer(mirrored_object_2);
+                onEvent: (event, remote_callback_2)=> {
+                  if(remote_callback_2&&as) {
+                    syncRefer(remote_callback_2);
                     as.onEvent(event, (err, data)=>{
-                      mirrored_object_2.run([], [err, data]);
+                      remote_callback_2.apply([err, data]);
                     });
                   }
                 },
@@ -267,50 +267,50 @@ function API(_coregateway) {
                 }
             })
           });
-          if(mirrored_object) {
-            mirrored_object.run([], [err, be_mirrored_object]);
-            mirrored_object.destory();
+          if(remote_callback) {
+            remote_callback.apply([err, local_callback_tree]);
+            remote_callback.destory();
           }
         });
       },
-      createDefaultDeamonSocket: (service, owner, mirrored_object) => {
+      createDefaultDeamonSocket: (service, owner, remote_callback) => {
         _coregateway.Activity.createDaemonActivitySocket(DAEMONTYPE, DAEMONIP, DAEMONPORT, service, owner, (err, as)=> {
-          let be_mirrored_object = new BeMirroredObject(as, (syncRefer)=> {
+          let local_callback_tree = new LocalCallbackTree(as, (syncRefer)=> {
             return ({
-                call: (name, Json, mirrored_object_2)=> {
-                  if(mirrored_object_2&&as) {
-                    syncRefer(mirrored_object_2);
+                call: (name, Json, remote_callback_2)=> {
+                  if(remote_callback_2&&as) {
+                    syncRefer(remote_callback_2);
                     as.call(name, Json, (err, json)=> {
-                      mirrored_object_2.run([], [err, json]);
-                      mirrored_object_2.destory();
+                      remote_callback_2.apply([err, json]);
+                      remote_callback_2.destory();
                     });
                   }
                 },
 
-                getEntityId: (mirrored_object_2)=> {
-                  if(mirrored_object_2&&as) {
-                    syncRefer(mirrored_object_2);
+                getEntityId: (remote_callback_2)=> {
+                  if(remote_callback_2&&as) {
+                    syncRefer(remote_callback_2);
                     as.getEntityId((err, entityId)=>{
-                      mirrored_object_2.run([], [err, entityId]);
-                      mirrored_object_2.destory();
+                      remote_callback_2.apply([err, entityId]);
+                      remote_callback_2.destory();
                     });
                   }
                 },
 
-                on: (type, mirrored_object_2)=> {
-                  if(mirrored_object_2&&as) {
-                    syncRefer(mirrored_object_2);
+                on: (type, remote_callback_2)=> {
+                  if(remote_callback_2&&as) {
+                    syncRefer(remote_callback_2);
                     as.on(type, (err, data)=>{
-                      mirrored_object_2.run([], [err, data]);
+                      remote_callback_2.apply([err, data]);
                     });
                   }
                 },
 
-                onEvent: (event, mirrored_object_2)=> {
-                  if(mirrored_object_2&&as) {
-                    syncRefer(mirrored_object_2);
+                onEvent: (event, remote_callback_2)=> {
+                  if(remote_callback_2&&as) {
+                    syncRefer(remote_callback_2);
                     as.onEvent(event, (err, data)=>{
-                      mirrored_object_2.run([], [err, data]);
+                      remote_callback_2.apply([err, data]);
                     });
                   }
                 },
@@ -324,52 +324,52 @@ function API(_coregateway) {
                 }
             })
           });
-          if(mirrored_object) {
-            mirrored_object.run([], [err, be_mirrored_object]);
-            mirrored_object.destory();
+          if(remote_callback) {
+            remote_callback.apply([err, local_callback_tree]);
+            remote_callback.destory();
           }
         });
       },
-      createDeamonSocket: (method, targetip, targetport, service, owner, mirrored_object) => {
+      createDeamonSocket: (method, targetip, targetport, service, owner, remote_callback) => {
         _coregateway.Activity.createDaemonActivitySocket(method, targetip, targetport, service, owner, (err, as)=> {
-          let be_mirrored_object = new BeMirroredObject(as, (syncRefer)=> {
+          let local_callback_tree = new LocalCallbackTree(as, (syncRefer)=> {
             return ({
-                call: (name, Json, mirrored_object_2)=> {
-                  if(mirrored_object_2&&as) {
-                    syncRefer(mirrored_object_2);
+                call: (name, Json, remote_callback_2)=> {
+                  if(remote_callback_2&&as) {
+                    syncRefer(remote_callback_2);
                     as.call(name, Json, (err, json)=> {
-                      mirrored_object_2.run([], [err, json]);
-                      mirrored_object_2.destory();
+                      remote_callback_2.apply([err, json]);
+                      remote_callback_2.destory();
                     });
                   }
 
                 },
 
-                getEntityId: (mirrored_object_2)=> {
-                  if(mirrored_object_2&&as) {
-                    syncRefer(mirrored_object_2);
+                getEntityId: (remote_callback_2)=> {
+                  if(remote_callback_2&&as) {
+                    syncRefer(remote_callback_2);
                     as.getEntityId((err, entityId)=>{
-                      mirrored_object_2.run([], [err, entityId]);
-                      mirrored_object_2.destory();
+                      remote_callback_2.apply([err, entityId]);
+                      remote_callback_2.destory();
                     });
                   }
 
                 },
 
-                on: (type, mirrored_object_2)=> {
-                  if(mirrored_object_2&&as) {
-                    syncRefer(mirrored_object_2);
+                on: (type, remote_callback_2)=> {
+                  if(remote_callback_2&&as) {
+                    syncRefer(remote_callback_2);
                     as.on(type, (err, data)=>{
-                      mirrored_object_2.run([], [err, data]);
+                      remote_callback_2.apply([err, data]);
                     });
                   }
                 },
 
-                onEvent: (event, mirrored_object_2)=> {
-                  if(mirrored_object_2&&as) {
-                    syncRefer(mirrored_object_2);
+                onEvent: (event, remote_callback_2)=> {
+                  if(remote_callback_2&&as) {
+                    syncRefer(remote_callback_2);
                     as.onEvent(event, (err, data)=>{
-                      mirrored_object_2.run([], [err, data]);
+                      remote_callback_2.apply([err, data]);
                     });
                   }
                 },
@@ -383,50 +383,50 @@ function API(_coregateway) {
                 }
             })
           });
-          if(mirrored_object) {
-            mirrored_object.run([], [err, be_mirrored_object]);
-            mirrored_object.destory();
+          if(remote_callback) {
+            remote_callback.apply([err, local_callback_tree]);
+            remote_callback.destory();
           }
         });
       },
-      createAdminDeamonSocket: (method, targetip, targetport, service, mirrored_object) => {
+      createAdminDeamonSocket: (method, targetip, targetport, service, remote_callback) => {
         _coregateway.Activity.createAdminDaemonActivitySocket(method, targetip, targetport, service, (err, as)=> {
-          let be_mirrored_object = new BeMirroredObject(as, (syncRefer)=> {
+          let local_callback_tree = new LocalCallbackTree(as, (syncRefer)=> {
             return ({
-                call: (name, Json, mirrored_object_2)=> {
-                  if(mirrored_object_2&&as) {
-                    syncRefer(mirrored_object_2);
+                call: (name, Json, remote_callback_2)=> {
+                  if(remote_callback_2&&as) {
+                    syncRefer(remote_callback_2);
                     as.call(name, Json, (err, json)=> {
-                      mirrored_object_2.run([], [err, json]);
-                      mirrored_object_2.destory();
+                      remote_callback_2.apply([err, json]);
+                      remote_callback_2.destory();
                     });
                   }
                 },
 
-                getEntityId: (mirrored_object_2)=> {
-                  if(mirrored_object_2&&as) {
-                    syncRefer(mirrored_object_2);
+                getEntityId: (remote_callback_2)=> {
+                  if(remote_callback_2&&as) {
+                    syncRefer(remote_callback_2);
                     as.getEntityId((err, entityId)=>{
-                      mirrored_object_2.run([], [err, entityId]);
-                      mirrored_object_2.destory();
+                      remote_callback_2.apply([err, entityId]);
+                      remote_callback_2.destory();
                     });
                   }
                 },
 
-                on: (type, mirrored_object_2)=> {
-                  if(mirrored_object_2&&as) {
-                    syncRefer(mirrored_object_2);
+                on: (type, remote_callback_2)=> {
+                  if(remote_callback_2&&as) {
+                    syncRefer(remote_callback_2);
                     as.on(type, (err, data)=>{
-                      mirrored_object_2.run([], [err, data]);
+                      remote_callback_2.apply([err, data]);
                     });
                   }
                 },
 
-                onEvent: (event, mirrored_object_2)=> {
-                  if(mirrored_object_2&&as) {
-                    syncRefer(mirrored_object_2);
+                onEvent: (event, remote_callback_2)=> {
+                  if(remote_callback_2&&as) {
+                    syncRefer(remote_callback_2);
                     as.onEvent(event, (err, data)=>{
-                      mirrored_object_2.run([], [err, data]);
+                      remote_callback_2.apply([err, data]);
                     });
                   }
                 },
@@ -440,51 +440,51 @@ function API(_coregateway) {
                 }
             })
           });
-          if(mirrored_object) {
-            mirrored_object.run([], [err, be_mirrored_object]);
-            mirrored_object.destory();
+          if(remote_callback) {
+            remote_callback.apply([err, local_callback_tree]);
+            remote_callback.destory();
           }
         });
       },
 
-      createDefaultAdminDeamonSocket: (service, mirrored_object) => {
+      createDefaultAdminDeamonSocket: (service, remote_callback) => {
         _coregateway.Activity.createAdminDaemonActivitySocket(DAEMONTYPE, DAEMONIP, DAEMONPORT, service, (err, as)=> {
-          let be_mirrored_object = new BeMirroredObject(as, (syncRefer)=> {
+          let local_callback_tree = new LocalCallbackTree(as, (syncRefer)=> {
             return ({
-                call: (name, Json, mirrored_object_2)=> {
-                  if(mirrored_object_2&&as) {
-                    syncRefer(mirrored_object_2);
+                call: (name, Json, remote_callback_2)=> {
+                  if(remote_callback_2&&as) {
+                    syncRefer(remote_callback_2);
                     as.call(name, Json, (err, json)=> {
-                      mirrored_object_2.run([], [err, json]);
-                      mirrored_object_2.destory();
+                      remote_callback_2.apply([err, json]);
+                      remote_callback_2.destory();
                     });
                   }
                 },
 
-                getEntityId: (mirrored_object_2)=> {
-                  if(mirrored_object_2&&as) {
-                    syncRefer(mirrored_object_2);
+                getEntityId: (remote_callback_2)=> {
+                  if(remote_callback_2&&as) {
+                    syncRefer(remote_callback_2);
                     as.getEntityId((err, entityId)=>{
-                      mirrored_object_2.run([], [err, entityId]);
-                      mirrored_object_2.destory();
+                      remote_callback_2.apply([err, entityId]);
+                      remote_callback_2.destory();
                     });
                   }
                 },
 
-                on: (type, mirrored_object_2)=> {
-                  if(mirrored_object_2&&as) {
-                    syncRefer(mirrored_object_2);
+                on: (type, remote_callback_2)=> {
+                  if(remote_callback_2&&as) {
+                    syncRefer(remote_callback_2);
                     as.on(type, (err, data)=>{
-                      mirrored_object_2.run([], [err, data]);
+                      remote_callback_2.apply([err, data]);
                     });
                   }
                 },
 
-                onEvent: (event, mirrored_object_2)=> {
-                  if(mirrored_object_2&&as) {
-                    syncRefer(mirrored_object_2);
+                onEvent: (event, remote_callback_2)=> {
+                  if(remote_callback_2&&as) {
+                    syncRefer(remote_callback_2);
                     as.onEvent(event, (err, data)=>{
-                      mirrored_object_2.run([], [err, data]);
+                      remote_callback_2.apply([err, data]);
                     });
                   }
                 },
@@ -498,144 +498,144 @@ function API(_coregateway) {
                 }
             })
           });
-          if(mirrored_object) {
-            mirrored_object.run([], [err, be_mirrored_object]);
-            mirrored_object.destory();
+          if(remote_callback) {
+            remote_callback.apply([err, local_callback_tree]);
+            remote_callback.destory();
           }
         });
       },
     },
 
     Entity: {
-      getFilteredEntitiesMetaData: (key, value, mirrored_object) => {
+      getFilteredEntitiesMetaData: (key, value, remote_callback) => {
         _coregateway.Entity.getFilteredEntitiesMetaData(key, value, (err, metatdata)=> {
-          if(mirrored_object) {
-            mirrored_object.run([], [err, metatdata])
-            mirrored_object.destory();
+          if(remote_callback) {
+            remote_callback.apply([err, metatdata])
+            remote_callback.destory();
           }
         });
       },
-      getFilteredEntitiesList: (query, mirrored_object) => {
+      getFilteredEntitiesList: (query, remote_callback) => {
         _coregateway.Entity.getFilteredEntitiesList(query, (err, list)=> {
-          if(mirrored_object) {
-            mirrored_object.run([], [err, list])
-            mirrored_object.destory();
+          if(remote_callback) {
+            remote_callback.apply([err, list])
+            remote_callback.destory();
           }
         });
       },
-      getEntityValue: (entityId, key, mirrored_object) => {
-        if(mirrored_object) {
-          mirrored_object.run([], [false, _coregateway.Entity.returnEntityValue(entityId, key)])
-          mirrored_object.destory();
+      getEntityValue: (entityId, key, remote_callback) => {
+        if(remote_callback) {
+          remote_callback.apply([false, _coregateway.Entity.returnEntityValue(entityId, key)])
+          remote_callback.destory();
         }
       },
-      getEntityOwner: (entityId, mirrored_object) => {
-        if(mirrored_object) {
-          mirrored_object.run([], [false, _coregateway.Entity.returnEntityOwner(entityId)])
-          mirrored_object.destory();
+      getEntityOwner: (entityId, remote_callback) => {
+        if(remote_callback) {
+          remote_callback.apply([false, _coregateway.Entity.returnEntityOwner(entityId)])
+          remote_callback.destory();
         }
       },
-      getEntityOwnerId: (entityId, mirrored_object) => {
-        if(mirrored_object) {
-          mirrored_object.run([], [false, _coregateway.Entity.returnEntityOwnerId(entityId)])
-          mirrored_object.destory();
+      getEntityOwnerId: (entityId, remote_callback) => {
+        if(remote_callback) {
+          remote_callback.apply([false, _coregateway.Entity.returnEntityOwnerId(entityId)])
+          remote_callback.destory();
         }
       },
-      getEntitiesMetaData: (mirrored_object) => {
+      getEntitiesMetaData: (remote_callback) => {
         _coregateway.Entity.getEntitiesMeta((err, metatdata)=> {
-          if(mirrored_object) {
-            mirrored_object.run([], [err, metatdata])
-            mirrored_object.destory();
+          if(remote_callback) {
+            remote_callback.apply([err, metatdata])
+            remote_callback.destory();
           }
         });
       },
-      getEntityMetaData: (entityId, mirrored_object) => {
-        if(mirrored_object) {
-          mirrored_object.run([], [false, _coregateway.Entity.returnEntityMetaData(entityId)])
-          mirrored_object.destory();
+      getEntityMetaData: (entityId, remote_callback) => {
+        if(remote_callback) {
+          remote_callback.apply([false, _coregateway.Entity.returnEntityMetaData(entityId)])
+          remote_callback.destory();
         }
       },
-      getCount: (mirrored_object) => {
-        if(mirrored_object) {
-          mirrored_object.run([], [false, _coregateway.Entity.returnEntitycount()])
-          mirrored_object.destory();
+      getCount: (remote_callback) => {
+        if(remote_callback) {
+          remote_callback.apply([false, _coregateway.Entity.returnEntitycount()])
+          remote_callback.destory();
         }
       },
-      getEntities: (mirrored_object) => {
+      getEntities: (remote_callback) => {
         _coregateway.Entity.getEntitiesMeta((err, meta)=> {
-          if(mirrored_object) {
-            mirrored_object.run([], [err, meta]);
-            mirrored_object.destory();
+          if(remote_callback) {
+            remote_callback.apply([err, meta]);
+            remote_callback.destory();
           }
         });
       },
-      getEntitiesId: (mirrored_object) => {
-        if(mirrored_object) {
-          mirrored_object.run([], [false, _coregateway.Entity.returnEntitiesId()]);
-          mirrored_object.destory();
+      getEntitiesId: (remote_callback) => {
+        if(remote_callback) {
+          remote_callback.apply([false, _coregateway.Entity.returnEntitiesId()]);
+          remote_callback.destory();
         }
       },
-      getEntityConnProfile: (entityId, mirrored_object)=> {
+      getEntityConnProfile: (entityId, remote_callback)=> {
         _coregateway.Entity.getEntityConnProfile(entityId, (err, conn_profile)=> {
-          let be_mirrored_object = new BeMirroredObject(conn_profile, (conn_profile_syncRefer)=> {
+          let local_callback_tree = new LocalCallbackTree(conn_profile, (conn_profile_syncRefer)=> {
             return ({
-                getServerId: (mirrored_object_2)=> {
-                  if(mirrored_object_2) {
-                    conn_profile_syncRefer(mirrored_object_2);
+                getServerId: (remote_callback_2)=> {
+                  if(remote_callback_2) {
+                    conn_profile_syncRefer(remote_callback_2);
                     conn_profile.getServerId((err, serverid)=> {
-                      if(mirrored_object_2) {}
-                      mirrored_object_2.run([], [err, serverid]);
-                      mirrored_object_2.destory();
+                      if(remote_callback_2) {}
+                      remote_callback_2.apply([err, serverid]);
+                      remote_callback_2.destory();
                     });
                   }
                 },
 
-                getHostIP: (mirrored_object_2)=> {
-                  if(mirrored_object_2) {
-                    conn_profile_syncRefer(mirrored_object_2);
+                getHostIP: (remote_callback_2)=> {
+                  if(remote_callback_2) {
+                    conn_profile_syncRefer(remote_callback_2);
                     conn_profile.getHostIP((err, hostip)=> {
-                      mirrored_object_2.run([], [err, hostip]);
-                      mirrored_object_2.destory();
+                      remote_callback_2.apply([err, hostip]);
+                      remote_callback_2.destory();
                     });
                   }
                 },
 
-                getHostPort: (mirrored_object_2)=> {
-                  if(mirrored_object_2) {
-                    conn_profile_syncRefer(mirrored_object_2);
+                getHostPort: (remote_callback_2)=> {
+                  if(remote_callback_2) {
+                    conn_profile_syncRefer(remote_callback_2);
                     conn_profile.getHostPort((err, hostport)=> {
-                      mirrored_object_2.run([], [err, hostport]);
-                      mirrored_object_2.destory();
+                      remote_callback_2.apply([err, hostport]);
+                      remote_callback_2.destory();
                     });
                   }
                 },
 
-                getClientIP: (mirrored_object_2)=> {
-                  if(mirrored_object_2) {
-                    conn_profile_syncRefer(mirrored_object_2);
+                getClientIP: (remote_callback_2)=> {
+                  if(remote_callback_2) {
+                    conn_profile_syncRefer(remote_callback_2);
                     conn_profile.getClientIP((err, clientip)=> {
-                      mirrored_object_2.run([], [err, clientip]);
-                      mirrored_object_2.destory();
+                      remote_callback_2.apply([err, clientip]);
+                      remote_callback_2.destory();
                     });
                   }
                 },
 
-                getConnMethod: (mirrored_object_2)=> {
-                  if(mirrored_object_2) {
-                    conn_profile_syncRefer(mirrored_object_2);
+                getConnMethod: (remote_callback_2)=> {
+                  if(remote_callback_2) {
+                    conn_profile_syncRefer(remote_callback_2);
                     conn_profile.getConnMethod((err, connMethod)=> {
-                      mirrored_object_2.run([], [err, connMethod]);
-                      mirrored_object_2.destory();
+                      remote_callback_2.apply([err, connMethod]);
+                      remote_callback_2.destory();
                     });
                   }
                 },
 
-                getRemotePosition: (mirrored_object_2)=> {
-                  if(mirrored_object_2) {
-                    conn_profile_syncRefer(mirrored_object_2);
+                getRemotePosition: (remote_callback_2)=> {
+                  if(remote_callback_2) {
+                    conn_profile_syncRefer(remote_callback_2);
                     conn_profile.getRemotePosition((err, remotepos)=> {
-                      mirrored_object_2.run([], [err, remotepos]);
-                      mirrored_object_2.destory();
+                      remote_callback_2.apply([err, remotepos]);
+                      remote_callback_2.destory();
                     });
                   }
                 },
@@ -644,204 +644,204 @@ function API(_coregateway) {
                   conn_profile.setBundle(key, value);
                 },
 
-                getBundle: (key, mirrored_object_2)=> {
-                  if(mirrored_object_2) {
-                    conn_profile_syncRefer(mirrored_object_2);
+                getBundle: (key, remote_callback_2)=> {
+                  if(remote_callback_2) {
+                    conn_profile_syncRefer(remote_callback_2);
                     conn_profile.getBundle(key, (err, bundle)=> {
-                      mirrored_object_2.run([], [err, bundle]);
-                      mirrored_object_2.destory();
+                      remote_callback_2.apply([err, bundle]);
+                      remote_callback_2.destory();
                     });
                   }
                 },
 
-                getGUID: (mirrored_object_2)=> {
-                  if(mirrored_object_2) {
-                    conn_profile_syncRefer(mirrored_object_2);
+                getGUID: (remote_callback_2)=> {
+                  if(remote_callback_2) {
+                    conn_profile_syncRefer(remote_callback_2);
                     conn_profile.getGUID((err, guid)=> {
-                      mirrored_object_2.run([], [err, guid]);
-                      mirrored_object_2.destory();
+                      remote_callback_2.apply([err, guid]);
+                      remote_callback_2.destory();
                     });
                   }
                 }
             })
           });
-          if(mirrored_object) {
-            mirrored_object.run([], [err, be_mirrored_object]);
-            mirrored_object.destory();
+          if(remote_callback) {
+            remote_callback.apply([err, local_callback_tree]);
+            remote_callback.destory();
           }
         });
       },
 
-      on: (type, mirrored_object)=> {
+      on: (type, remote_callback)=> {
         _coregateway.Entity.on(type, (entityId, entityJson)=> {
-          if(mirrored_object) {
-            mirrored_object.run([], [entityId, entityJson])
+          if(remote_callback) {
+            remote_callback.apply([entityId, entityJson])
           }
         });
       },
 
-      addEntityToGroups:(entityId, grouplist, mirrored_object)=> {
+      addEntityToGroups:(entityId, grouplist, remote_callback)=> {
         _coregateway.Entity.addEntityToGroups(entityId, grouplist, (err)=> {
-          if(mirrored_object) {
-            mirrored_object.run([], [err]);
-            mirrored_object.destory();
+          if(remote_callback) {
+            remote_callback.apply([err]);
+            remote_callback.destory();
           }
         });
       },
 
-      deleteEntityFromGroups:(entityId, grouplist, mirrored_object)=> {
+      deleteEntityFromGroups:(entityId, grouplist, remote_callback)=> {
         _coregateway.Entity.deleteEntityFromGroups(entityId, grouplist, (err)=> {
-          if(mirrored_object) {
-            mirrored_object.run([], [err]);
-            mirrored_object.destory();
+          if(remote_callback) {
+            remote_callback.apply([err]);
+            remote_callback.destory();
           }
         });
       },
 
-      clearAllGroupsOfEntity:(entityId, mirrored_object)=> {
+      clearAllGroupsOfEntity:(entityId, remote_callback)=> {
         _coregateway.Entity.clearAllGroupsOfEntity(entityId, (err)=> {
-          if(mirrored_object) {
-            mirrored_object.run([], [err]);
-            mirrored_object.destory();
+          if(remote_callback) {
+            remote_callback.apply([err]);
+            remote_callback.destory();
           }
         });
       },
 
-      isEntityIncludingGroups:(entityId, grouplist, mirrored_object)=> {
+      isEntityIncludingGroups:(entityId, grouplist, remote_callback)=> {
         _coregateway.Entity.isEntityIncludingGroups(entityId, grouplist, (err)=> {
-          if(mirrored_object) {
-            mirrored_object.run([], [err]);
-            mirrored_object.destory();
+          if(remote_callback) {
+            remote_callback.apply([err]);
+            remote_callback.destory();
           }
         });
       },
 
-      isEntityInGroup:(entityId, grouplist, mirrored_object)=> {
+      isEntityInGroup:(entityId, grouplist, remote_callback)=> {
         _coregateway.Entity.isEntityInGroup(entityId, grouplist, (err)=> {
-          if(mirrored_object) {
-            mirrored_object.run([], [err]);
-            mirrored_object.destory();
+          if(remote_callback) {
+            remote_callback.apply([err]);
+            remote_callback.destory();
           }
         });
       },
 
-      getGroupsofEntity:(entityId, mirrored_object)=> {
+      getGroupsofEntity:(entityId, remote_callback)=> {
         _coregateway.Entity.getGroupsofEntity(entityId, (err, results)=> {
-          if(mirrored_object) {
-            mirrored_object.run([], [err, results]);
-            mirrored_object.destory();
+          if(remote_callback) {
+            remote_callback.apply([err, results]);
+            remote_callback.destory();
           }
         });
       }
     },
 
-    getList: (mirrored_object) => {
-      if(mirrored_object) {
-        mirrored_object.run([], [false, _coregateway.Service.returnList()]);
-        mirrored_object.destory();
+    getList: (remote_callback) => {
+      if(remote_callback) {
+        remote_callback.apply([false, _coregateway.Service.returnList()]);
+        remote_callback.destory();
       }
     },
 
-    getServiceManifest: (service_name, mirrored_object)=> {
-      if(mirrored_object) {
-        mirrored_object.run([], [false, _coregateway.Service.returnServiceManifest(service_name)]);
-        mirrored_object.destory();
+    getServiceManifest: (service_name, remote_callback)=> {
+      if(remote_callback) {
+        remote_callback.apply([false, _coregateway.Service.returnServiceManifest(service_name)]);
+        remote_callback.destory();
       }
     },
 
-    getServicesManifest: (mirrored_object)=> {
+    getServicesManifest: (remote_callback)=> {
       _coregateway.Service.getServicesManifest((err, manifest)=> {
-        if(mirrored_object) {
-          mirrored_object.run([], [err, manifest]);
-          mirrored_object.destory();
+        if(remote_callback) {
+          remote_callback.apply([err, manifest]);
+          remote_callback.destory();
         }
       });
     },
 
-    getServiceFunctionList: (service_name, mirrored_object)=> {
-      if(mirrored_object) {
-        mirrored_object.run([], [false, _coregateway.Service.returnServiceFunctionList(service_name)]);
-        mirrored_object.destory();
+    getServiceFunctionList: (service_name, remote_callback)=> {
+      if(remote_callback) {
+        remote_callback.apply([false, _coregateway.Service.returnServiceFunctionList(service_name)]);
+        remote_callback.destory();
       }
     },
 
-    getServiceFunctionDict: (service_name, mirrored_object)=> {
-      if(mirrored_object) {
-        mirrored_object.run([], [false, _coregateway.Service.returnServiceFunctionDict(service_name)]);
-        mirrored_object.destory();
+    getServiceFunctionDict: (service_name, remote_callback)=> {
+      if(remote_callback) {
+        remote_callback.apply([false, _coregateway.Service.returnServiceFunctionDict(service_name)]);
+        remote_callback.destory();
       }
     },
 
-    launch: (service_name, mirrored_object)=> {
+    launch: (service_name, remote_callback)=> {
       _coregateway.Service.launchService(service_name, (err)=> {
-        if(mirrored_object) {
-          mirrored_object.run([], [err]);
-          mirrored_object.destory();
+        if(remote_callback) {
+          remote_callback.apply([err]);
+          remote_callback.destory();
         }
       });
     },
 
-    initialize: (service_name, mirrored_object)=> {
+    initialize: (service_name, remote_callback)=> {
       _coregateway.Service.initializeService(service_name, (err)=> {
-        if(mirrored_object) {
-          mirrored_object.run([], [err]);
-          mirrored_object.destory();
+        if(remote_callback) {
+          remote_callback.apply([err]);
+          remote_callback.destory();
         }
       });
     },
 
-    relaunch: (service_name, mirrored_object)=> {
+    relaunch: (service_name, remote_callback)=> {
       _coregateway.Service.relaunchService(service_name, (err)=> {
-        if(mirrored_object) {
-          mirrored_object.run([], [err]);
-          mirrored_object.destory();
+        if(remote_callback) {
+          remote_callback.apply([err]);
+          remote_callback.destory();
         }
       });
     },
 
-    close: (service_name, mirrored_object)=> {
+    close: (service_name, remote_callback)=> {
       _coregateway.Service.closeService(service_name, (err)=> {
-        if(mirrored_object) {
-          mirrored_object.run([], [err]);
-          mirrored_object.destory();
+        if(remote_callback) {
+          remote_callback.apply([err]);
+          remote_callback.destory();
         }
       });
     },
 
-    isServiceLaunched: (service_name, mirrored_object)=> {
+    isServiceLaunched: (service_name, remote_callback)=> {
       _coregateway.Service.isServiceLaunched(service_name, (err)=> {
-        if(mirrored_object) {
-          mirrored_object.run([], [err]);
-          mirrored_object.destory();
+        if(remote_callback) {
+          remote_callback.apply([err]);
+          remote_callback.destory();
         }
       });
     },
 
-    isServiceInitialized: (service_name, mirrored_object)=> {
+    isServiceInitialized: (service_name, remote_callback)=> {
       _coregateway.Service.isServiceInitialized(service_name, (err)=> {
-        if(mirrored_object) {
-          mirrored_object.run([], [err]);
-          mirrored_object.destory();
+        if(remote_callback) {
+          remote_callback.apply([err]);
+          remote_callback.destory();
         }
       });
     },
 
     // CBO is designed for prevent memleak
-    getCBOCount: (mirrored_object)=> {
+    getCBOCount: (remote_callback)=> {
       _coregateway.Service.getCBOCount((err, count)=> {
-        if(mirrored_object) {
-          mirrored_object.run([], [err, count]);
-          mirrored_object.destory();
+        if(remote_callback) {
+          remote_callback.apply([err, count]);
+          remote_callback.destory();
         }
       });
     },
 
     // CBO is designed for prevent memleak
-    getWorkerMemoryUsage: (mirrored_object)=> {
+    getWorkerMemoryUsage: (remote_callback)=> {
       _coregateway.Service.getWorkerMemoryUsage((err, usage)=> {
-        if(mirrored_object) {
-          mirrored_object.run([], [err, usage]);
-          mirrored_object.destory();
+        if(remote_callback) {
+          remote_callback.apply([err, usage]);
+          remote_callback.destory();
         }
       });
     }
@@ -849,46 +849,46 @@ function API(_coregateway) {
 
   _api.Authorization = {
     Authby: {
-      Token: (entityId, mirrored_object) => {
+      Token: (entityId, remote_callback) => {
         _coregateway.Authorization.Authby.Token(entityId, (err, pass)=> {
-          if(mirrored_object) {
-            mirrored_object.run([], [err, pass]);
-            mirrored_object.destory();
+          if(remote_callback) {
+            remote_callback.apply([err, pass]);
+            remote_callback.destory();
           }
         });
       },
-      Password: (entityId, mirrored_object) => {
+      Password: (entityId, remote_callback) => {
         _coregateway.Authorization.Authby.Password(entityId, (err, pass)=> {
-          if(mirrored_object) {
-            mirrored_object.run([], [err, pass]);
-            mirrored_object.destory();
+          if(remote_callback) {
+            remote_callback.apply([err, pass]);
+            remote_callback.destory();
           }
         });
       },
       Action: (entityId, action_meta_data, callback)=> {
 
       },
-      isSuperUser: (entityId, mirrored_object) => {
+      isSuperUser: (entityId, remote_callback) => {
         _coregateway.Authorization.Authby.isSuperUser(entityId, (err, pass)=> {
-          if(mirrored_object) {
-            mirrored_object.run([], [err, pass]);
-            mirrored_object.destory();
+          if(remote_callback) {
+            remote_callback.apply([err, pass]);
+            remote_callback.destory();
           }
         });
       },
-      Domain: (entityId, mirrored_object) => {
+      Domain: (entityId, remote_callback) => {
         _coregateway.Authorization.Authby.Domain(entityId, (err, pass)=> {
-          if(mirrored_object) {
-            mirrored_object.run([], [err, pass]);
-            mirrored_object.destory();
+          if(remote_callback) {
+            remote_callback.apply([err, pass]);
+            remote_callback.destory();
           }
         });
       },
-      DaemonAuthKey: (entityId, mirrored_object) => {
+      DaemonAuthKey: (entityId, remote_callback) => {
         _coregateway.Authorization.Authby.DaemonAuthKey(entityId, (err, pass)=> {
-          if(mirrored_object) {
-            mirrored_object.run([], [err, pass]);
-            mirrored_object.destory();
+          if(remote_callback) {
+            remote_callback.apply([err, pass]);
+            remote_callback.destory();
           }
         });
       }
@@ -904,17 +904,17 @@ function API(_coregateway) {
   };
 
   _api.Daemon = {
-    getSettings: (mirrored_object)=>{
-      if(mirrored_object) {
-        mirrored_object.run([], [false, _coregateway.Daemon.Settings]);
-        mirrored_object.destory();
+    getSettings: (remote_callback)=>{
+      if(remote_callback) {
+        remote_callback.apply([false, _coregateway.Daemon.Settings]);
+        remote_callback.destory();
       }
     },
 
-    getVariables: (mirrored_object)=>{
-      if(mirrored_object) {
-        mirrored_object.run([], [false, _coregateway.Daemon.Variables]);
-        mirrored_object.destory();
+    getVariables: (remote_callback)=>{
+      if(remote_callback) {
+        remote_callback.apply([false, _coregateway.Daemon.Variables]);
+        remote_callback.destory();
       }
     },
 
@@ -924,211 +924,211 @@ function API(_coregateway) {
   };
 
   _api.Authenticity = {
-    getUsernameByUserId: (userid, mirrored_object) => {
+    getUsernameByUserId: (userid, remote_callback) => {
       _coregateway.Authenticity.getUsernameByUserId(userid, (err, username)=> {
-        if(mirrored_object) {
-          mirrored_object.run([], [err, username]);
-          mirrored_object.destory();
+        if(remote_callback) {
+          remote_callback.apply([err, username]);
+          remote_callback.destory();
         }
       });
     },
 
-    createUser: (username, displayname, password, privilege, detail, firstname, lastname, mirrored_object) => {
+    createUser: (username, displayname, password, privilege, detail, firstname, lastname, remote_callback) => {
       _coregateway.Authenticity.createUser(username, displayname, password, privilege, detail, firstname, lastname, (err)=> {
-        if(mirrored_object) {
-          mirrored_object.run([], [err]);
-          mirrored_object.destory();
+        if(remote_callback) {
+          remote_callback.apply([err]);
+          remote_callback.destory();
         }
       });
     },
 
-    deleteUserByUsername: (username, mirrored_object) => {
+    deleteUserByUsername: (username, remote_callback) => {
       _coregateway.Authenticity.deleteUserByUsername(username, (err)=> {
-        if(mirrored_object) {
-          mirrored_object.run([], [err]);
-          mirrored_object.destory();
+        if(remote_callback) {
+          remote_callback.apply([err]);
+          remote_callback.destory();
         }
       });
     },
 
-    updatePasswordByUsername: (username, newpassword, mirrored_object) => {
+    updatePasswordByUsername: (username, newpassword, remote_callback) => {
       _coregateway.Authenticity.updatePasswordByUsername(username, newpassword, (err)=> {
-        if(mirrored_object) {
-          mirrored_object.run([], [err]);
-          mirrored_object.destory();
+        if(remote_callback) {
+          remote_callback.apply([err]);
+          remote_callback.destory();
         }
       });
     },
 
-    updateTokenByUsername: (username, mirrored_object) => {
+    updateTokenByUsername: (username, remote_callback) => {
       _coregateway.Authenticity.updateTokenByUsername(username, (err)=> {
-        if(mirrored_object) {
-          mirrored_object.run([], [err]);
-          mirrored_object.destory();
+        if(remote_callback) {
+          remote_callback.apply([err]);
+          remote_callback.destory();
         }
       });
     },
 
-    updatePrivilegeByUsername: (username, privilege, mirrored_object) => {
+    updatePrivilegeByUsername: (username, privilege, remote_callback) => {
       _coregateway.Authenticity.updatePrivilegeByUsername(username, privilege, (err)=> {
-        if(mirrored_object) {
-          mirrored_object.run([], [err]);
-          mirrored_object.destory();
+        if(remote_callback) {
+          remote_callback.apply([err]);
+          remote_callback.destory();
         }
       });
     },
 
-    updateNameByUsername: (username, firstname, lastname, mirrored_object) => {
+    updateNameByUsername: (username, firstname, lastname, remote_callback) => {
       _coregateway.Authenticity.updateNameByUsername(username, firstname, lastname, (err)=> {
-        if(mirrored_object) {
-          mirrored_object.run([], [err]);
-          mirrored_object.destory();
+        if(remote_callback) {
+          remote_callback.apply([err]);
+          remote_callback.destory();
         }
       });
     },
 
-    getUserMetaByUsername: (username, mirrored_object) => {
+    getUserMetaByUsername: (username, remote_callback) => {
       _coregateway.Authenticity.getUserMetaByUsername(username, (err, usermeta)=> {
-        if(mirrored_object) {
-          mirrored_object.run([], [err, usermeta]);
-          mirrored_object.destory();
+        if(remote_callback) {
+          remote_callback.apply([err, usermeta]);
+          remote_callback.destory();
         }
       });
     },
 
-    getUserIdByUsername: (username, mirrored_object) => {
+    getUserIdByUsername: (username, remote_callback) => {
       _coregateway.Authenticity.getUserIdByUsername(username, (err, userid)=> {
-        if(mirrored_object) {
-          mirrored_object.run([], [err, userid]);
-          mirrored_object.destory();
+        if(remote_callback) {
+          remote_callback.apply([err, userid]);
+          remote_callback.destory();
         }
       });
     },
 
-    getUserExistenceByUsername: (username, mirrored_object)=>{
+    getUserExistenceByUsername: (username, remote_callback)=>{
       _coregateway.Authenticity.getUserExistenceByUsername(username, (err, exisitence)=> {
-        if(mirrored_object) {
-          mirrored_object.run([], [err, exisitence]);
-          mirrored_object.destory();
+        if(remote_callback) {
+          remote_callback.apply([err, exisitence]);
+          remote_callback.destory();
         }
       });
     },
 
-    getUserTokenByUsername: (username, mirrored_object)=>{
+    getUserTokenByUsername: (username, remote_callback)=>{
       _coregateway.Authenticity.getUserTokenByUsername(username, (err, token)=> {
-        if(mirrored_object) {
-          mirrored_object.run([], [err, token]);
-          mirrored_object.destory();
+        if(remote_callback) {
+          remote_callback.apply([err, token]);
+          remote_callback.destory();
         }
       });
     },
 
-    getUserPrivilegeByUsername: (username, mirrored_object)=>{
+    getUserPrivilegeByUsername: (username, remote_callback)=>{
       _coregateway.Authenticity.getUserPrivilegeByUsername(username, (err, privilege)=> {
-        if(mirrored_object) {
-          mirrored_object.run([], [err, privilege]);
-          mirrored_object.destory();
+        if(remote_callback) {
+          remote_callback.apply([err, privilege]);
+          remote_callback.destory();
         }
       });
     },
 
-    searchUsersByUsernameNRows: (username, N, mirrored_object)=>{
+    searchUsersByUsernameNRows: (username, N, remote_callback)=>{
       _coregateway.Authenticity.searchUsersByUsernameNRows(username, N, (err, rows)=> {
-        if(mirrored_object) {
-          mirrored_object.run([], [err, rows]);
-          mirrored_object.destory();
+        if(remote_callback) {
+          remote_callback.apply([err, rows]);
+          remote_callback.destory();
         }
       });
     },
 
 
     // By Id
-    deleteUserByUserId: (userid, mirrored_object) => {
+    deleteUserByUserId: (userid, remote_callback) => {
       _coregateway.Authenticity.deleteUserByUserId(userid, (err)=> {
-        if(mirrored_object) {
-          mirrored_object.run([], [err]);
-          mirrored_object.destory();
+        if(remote_callback) {
+          remote_callback.apply([err]);
+          remote_callback.destory();
         }
       });
     },
 
-    updatePasswordByUserId: (userid, newpassword, mirrored_object) => {
+    updatePasswordByUserId: (userid, newpassword, remote_callback) => {
       _coregateway.Authenticity.updatePasswordByUserId(userid, newpassword, (err)=> {
-        if(mirrored_object) {
-          mirrored_object.run([], [err]);
-          mirrored_object.destory();
+        if(remote_callback) {
+          remote_callback.apply([err]);
+          remote_callback.destory();
         }
       });
     },
 
-    updateTokenByUserId: (userid, mirrored_object) => {
+    updateTokenByUserId: (userid, remote_callback) => {
       _coregateway.Authenticity.updateTokenByUserId(userid, (err)=> {
-        if(mirrored_object) {
-          mirrored_object.run([], [err]);
-          mirrored_object.destory();
+        if(remote_callback) {
+          remote_callback.apply([err]);
+          remote_callback.destory();
         }
       });
     },
 
-    updatePrivilegeByUserId: (userid, privilege, mirrored_object) => {
+    updatePrivilegeByUserId: (userid, privilege, remote_callback) => {
       _coregateway.Authenticity.updatePrivilegeByUserId(userid, privilege, (err)=> {
-        if(mirrored_object) {
-          mirrored_object.run([], [err]);
-          mirrored_object.destory();
+        if(remote_callback) {
+          remote_callback.apply([err]);
+          remote_callback.destory();
         }
       });
     },
 
-    updateNameByUserId: (userid, firstname, lastname, mirrored_object) => {
+    updateNameByUserId: (userid, firstname, lastname, remote_callback) => {
       _coregateway.Authenticity.updateNameByUserId(userid, firstname, lastname, (err)=> {
-        if(mirrored_object) {
-          mirrored_object.run([], [err]);
-          mirrored_object.destory();
+        if(remote_callback) {
+          remote_callback.apply([err]);
+          remote_callback.destory();
         }
       });
     },
 
-    getUserMetaByUserId: (userid, mirrored_object) => {
+    getUserMetaByUserId: (userid, remote_callback) => {
       _coregateway.Authenticity.getUserMetaByUserId(userid, (err, usermeta)=> {
-        if(mirrored_object) {
-          mirrored_object.run([], [err, usermeta]);
-          mirrored_object.destory();
+        if(remote_callback) {
+          remote_callback.apply([err, usermeta]);
+          remote_callback.destory();
         }
       });
     },
 
-    // getUsernameByUserId: (userid, mirrored_object) => {
+    // getUsernameByUserId: (userid, remote_callback) => {
     //   _coregateway.Authenticity.getUsernameByUserId(userid, (err, userid)=> {
-    //     if(mirrored_object) {
-    //       mirrored_object.run([], [err, userid]);
-    //       mirrored_object.destory();
+    //     if(remote_callback) {
+    //       remote_callback.apply([err, userid]);
+    //       remote_callback.destory();
     //     }
     //   });
     // },
 
-    getUserExistenceByUserId: (userid, mirrored_object)=>{
+    getUserExistenceByUserId: (userid, remote_callback)=>{
       _coregateway.Authenticity.getUserExistenceByUserId(userid, (err, exisitence)=> {
-        if(mirrored_object) {
-          mirrored_object.run([], [err, exisitence]);
-          mirrored_object.destory();
+        if(remote_callback) {
+          remote_callback.apply([err, exisitence]);
+          remote_callback.destory();
         }
       });
     },
 
-    getUserTokenByUserId: (username, mirrored_object)=>{
+    getUserTokenByUserId: (username, remote_callback)=>{
       _coregateway.Authenticity.getUserTokenByUsername(username, (err, token)=> {
-        if(mirrored_object) {
-          mirrored_object.run([], [err, token]);
-          mirrored_object.destory();
+        if(remote_callback) {
+          remote_callback.apply([err, token]);
+          remote_callback.destory();
         }
       });
     },
 
-    getUserPrivilegeByUserId: (username, mirrored_object)=>{
+    getUserPrivilegeByUserId: (username, remote_callback)=>{
       _coregateway.Authenticity.getUserPrivilegeByUsername(username, (err, privilege)=> {
-        if(mirrored_object) {
-          mirrored_object.run([], [err, privilege]);
-          mirrored_object.destory();
+        if(remote_callback) {
+          remote_callback.apply([err, privilege]);
+          remote_callback.destory();
         }
       });
     }
@@ -1141,27 +1141,27 @@ function API(_coregateway) {
   };
 
   _api.Crypto = {
-    generateAESCBC256KeyByHash: (string1, string2, mirrored_object)=>{
+    generateAESCBC256KeyByHash: (string1, string2, remote_callback)=>{
       _coregateway.NoCrypto.generateAESCBC256KeyByHash(string1, string2, (err, key)=> {
-        if(mirrored_object) {
-          mirrored_object.run([], [err, key]);
-          mirrored_object.destory();
+        if(remote_callback) {
+          remote_callback.apply([err, key]);
+          remote_callback.destory();
         }
       });
     },
-    encryptString: (algo, key, toEncrypt, mirrored_object)=>{
+    encryptString: (algo, key, toEncrypt, remote_callback)=>{
       _coregateway.NoCrypto.encryptString(algo, key, toEncrypt, (err, enstr)=> {
-        if(mirrored_object) {
-          mirrored_object.run([], [err, enstr]);
-          mirrored_object.destory();
+        if(remote_callback) {
+          remote_callback.apply([err, enstr]);
+          remote_callback.destory();
         }
       });
     },
-    decryptString: (algo, key, toDecrypt, mirrored_object) =>{
+    decryptString: (algo, key, toDecrypt, remote_callback) =>{
       _coregateway.NoCrypto.decryptString(algo, key, toDecrypt, (err, destr)=> {
-        if(mirrored_object) {
-          mirrored_object.run([], [err, destr]);
-          mirrored_object.destory();
+        if(remote_callback) {
+          remote_callback.apply([err, destr]);
+          remote_callback.destory();
         }
       });
     }
@@ -1169,17 +1169,17 @@ function API(_coregateway) {
 
   // for sniffing data
   _api.Sniffer = {
-    onRouterJSON: (mirrored_object)=> {
+    onRouterJSON: (remote_callback)=> {
       _coregateway.Router.addJSONSniffer((err, data)=> {
-        if(mirrored_object) {
-          mirrored_object.run([], [err, data]);
+        if(remote_callback) {
+          remote_callback.apply([err, data]);
         }
       });
     },
-    onRouterRawData: (mirrored_object)=> {
+    onRouterRawData: (remote_callback)=> {
       _coregateway.Router.addRAWSniffer((err, data)=> {
-        if(mirrored_object) {
-          mirrored_object.run([], [err, data]);
+        if(remote_callback) {
+          remote_callback.apply([err, data]);
         }
       });
     },
