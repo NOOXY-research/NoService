@@ -50,7 +50,6 @@ function API(_coregateway) {
       _RemoteCallbacks.push(MyRemoteCallback);
     }
 
-    let _obj = obj;
     let _callbacks;
     if(obj_contructor)
       _callbacks = obj_contructor(_syncRefer);
@@ -76,15 +75,14 @@ function API(_coregateway) {
         delete _RemoteCallbacks[id];
       }
       obj = null;
-      _obj = null;
     };
 
     this.callCallback = (path, args, arg_objs_trees)=>{
       try {
-        APIUtils.callObjCallback(_callbacks, path, args, arg_objs_trees, null,
-        (remoteobjid, remoteobjtree)=>{
-            return(new RemoteCallback(remoteobjid, remoteobjtree));
-        });
+        for(let i in arg_objs_trees) {
+          args[parseInt(i)] = new RemoteCallback(arg_objs_trees[i][0]);
+        }
+        APIUtils.callObjCallback(_callbacks, path, args);
       }
       catch(e) {
         Utils.TagLog('*ERR*', 'LocalCallbackTree occured error.');
@@ -108,31 +106,18 @@ function API(_coregateway) {
   };
 
   // Remote callback
-  function RemoteCallback(obj_id, obj_tree) {
-    // let _My_LocalCallbackTrees = [];
-    //
-    // this.syncRefer = (MyLocalCallbackTree)=> {
-    //   _My_LocalCallbackTrees.push(MyLocalCallbackTree);
-    // };
-
+  function RemoteCallback(obj_id) {
     this.apply = (args)=> {
-      let _runable = APIUtils.generateObjCallbacks(obj_id, obj_tree, ([obj_id, path], args)=> {
-        let _arg_objs_trees = {};
-        for(let i in args) {
-          if(args[i]) {
-            if(args[i].isLocalCallbackTree) {
-              _arg_objs_trees[i] = args[i].returnTree();
-              args[i] = null;
-            }
-            else if (args[i] instanceof Error) {
-              args[i] = args[i].toString();
-            }
-          }
+      let _local_callback_trees = {};
+      for(let i in args) {
+        if(args[i]&&args[i].isLocalCallbackTree) {
+          _local_callback_trees[i] = args[i].returnTree();
         }
-        _emitRemoteCallback([obj_id, path], args, _arg_objs_trees);
-      });
-
-      _runable.apply(null, args);
+        if(args[i]&&(args[i] instanceof Error)) {
+          args[i] = args[i].toString();
+        }
+      }
+      _emitRemoteCallback([obj_id, ''], args, _local_callback_trees);
     };
 
     this.destory = ()=> {
@@ -140,11 +125,11 @@ function API(_coregateway) {
     };
   }
 
-  this.emitAPIRq = (path, args, argsobj)=> {
-    APIUtils.callObjCallback(_api, path, args, argsobj, null,
-    (remoteobjid, remoteobjtree)=>{
-      return(new RemoteCallback(remoteobjid, remoteobjtree));
-    });
+  this.emitAPIRq = (path, args, arg_objs_trees)=> {
+    for(let i in arg_objs_trees) {
+      args[parseInt(i)] = new RemoteCallback(arg_objs_trees[i][0]);
+    }
+    APIUtils.callObjCallback(_api, path, args);
   }
 
   this.returnLocalCallbackTreeCount = ()=> {

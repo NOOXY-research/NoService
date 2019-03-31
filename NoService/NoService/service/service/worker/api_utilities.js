@@ -33,7 +33,7 @@ module.exports.generateObjCallbacks = (callback_id, obj_tree, callparent) => {
   }
 }
 // route remote call to local obj callback
-module.exports.callObjCallback = (Obj, Objpath, args, arg_objs_trees, obj_callback_policy, generate_obj_policy)=> {
+module.exports.callObjCallback = (Obj, Objpath, args)=> {
   let getTargetObj = (path, subobj)=> {
     if(path.length) {
       return getTargetObj(path.slice(1), subobj[path[0]]);
@@ -41,9 +41,6 @@ module.exports.callObjCallback = (Obj, Objpath, args, arg_objs_trees, obj_callba
     else {
       return subobj;
     }
-  }
-  for(let i in arg_objs_trees) {
-    args[parseInt(i)] = generate_obj_policy(arg_objs_trees[i][0], arg_objs_trees[i][1], obj_callback_policy);
   }
   let f = getTargetObj(Objpath, Obj).bind(Obj);
   f.apply(null, args);

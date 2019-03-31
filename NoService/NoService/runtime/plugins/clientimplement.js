@@ -131,7 +131,7 @@ module.exports = function() {
           question: (question, remote_callback_obj)=> {
             rl.question(question, (answer)=> {
               if(remote_callback_obj) {
-                remote_callback_obj.run([], [answer]);
+                remote_callback_obj.apply([], [answer]);
               }
             });
           }

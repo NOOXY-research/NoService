@@ -244,7 +244,10 @@ function WorkerClient() {
       // function return
       else if(message.t === 2) {
         try {
-          APIUtils.callObjCallback(_local_obj_callbacks_dict[message.p[0]], message.p[1], message.a, message.o, this.emitParentCallback, APIUtils.generateObjCallbacks);
+          for(let i in message.o) {
+            message.a[parseInt(i)] = APIUtils.generateObjCallbacks(message.o[i][0], message.o[i][1], this.emitParentCallback);
+          }
+          _local_obj_callbacks_dict[message.p[0]].apply(null, message.a);
         }
         catch (e) {
           Utils.TagLog('*ERR*', 'Callback error occured on service "'+_service_name+'".');
