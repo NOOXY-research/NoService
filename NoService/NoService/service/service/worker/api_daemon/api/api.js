@@ -16,97 +16,97 @@ function ServiceAPI() {
 
   let _addNormalAPIs = (api, service_socket, manifest)=> {
     let _service_name = manifest.name;
-    api.addAPI(['Service', 'ServiceSocket'], (LCBO)=> {
+    api.addAPI(['Service', 'ServiceSocket'], (BeMirroredObject)=> {
       return ({
-        def: (name, remote_callback_obj)=> {
+        def: (name, mirrored_object)=> {
           service_socket.def(name, (json, entityId, returnJSON)=> {
-            let returnJSON_LCBO = new LCBO(returnJSON, (returnJSON_syncRefer)=> {
+            let returnJSON_BeMirroredObject = new BeMirroredObject(returnJSON, (returnJSON_syncRefer)=> {
               return ((err, json_be_returned)=>{
                 returnJSON(err, json_be_returned);
               });
             }, true);
-            if(remote_callback_obj) {
-              remote_callback_obj.run([], [json, entityId, returnJSON_LCBO]);
+            if(mirrored_object) {
+              mirrored_object.run([], [json, entityId, returnJSON_BeMirroredObject]);
             }
           });
         },
 
-        define: (name, remote_callback_obj)=> {
+        define: (name, mirrored_object)=> {
           service_socket.def(name, (json, entityId, returnJSON)=> {
-            let returnJSON_LCBO = new LCBO(returnJSON, (returnJSON_syncRefer)=> {
+            let returnJSON_BeMirroredObject = new BeMirroredObject(returnJSON, (returnJSON_syncRefer)=> {
               return ((err, json_be_returned)=>{
                 returnJSON(err, json_be_returned);
               });
             }, true);
-            if(remote_callback_obj) {
-              remote_callback_obj.run([], [json, entityId, returnJSON_LCBO]);
+            if(mirrored_object) {
+              mirrored_object.run([], [json, entityId, returnJSON_BeMirroredObject]);
             }
           });
         },
 
-        sdef: (name, remote_callback_obj, remote_callback_obj_2)=> {
+        sdef: (name, mirrored_object, mirrored_object_2)=> {
           service_socket.sdef(name, (json, entityId, returnJSON)=> {
-            let returnJSON_LCBO = new LCBO(returnJSON, (returnJSON_syncRefer)=> {
+            let returnJSON_BeMirroredObject = new BeMirroredObject(returnJSON, (returnJSON_syncRefer)=> {
               return ((err, json_be_returned)=>{
                 returnJSON(err, json_be_returned);
               });
             }, true);
-            if(remote_callback_obj) {
-              remote_callback_obj.run([], [json, entityId, returnJSON_LCBO]);
+            if(mirrored_object) {
+              mirrored_object.run([], [json, entityId, returnJSON_BeMirroredObject]);
             }
           },
           (json, entityId, returnJSON)=> {
-            let returnJSON_LCBO = new LCBO(returnJSON, (returnJSON_syncRefer)=> {
+            let returnJSON_BeMirroredObject = new BeMirroredObject(returnJSON, (returnJSON_syncRefer)=> {
               return ((err, json_be_returned)=>{
                 returnJSON(err, json_be_returned);
               });
             }, true);
-            if(remote_callback_obj_2) {
-              remote_callback_obj_2.run([], [json, entityId, returnJSON_LCBO]);
+            if(mirrored_object_2) {
+              mirrored_object_2.run([], [json, entityId, returnJSON_BeMirroredObject]);
             }
           });
         },
 
-        sdefine: (name, remote_callback_obj, remote_callback_obj_2)=> {
+        sdefine: (name, mirrored_object, mirrored_object_2)=> {
           service_socket.sdef(name, (json, entityId, returnJSON)=> {
-            let returnJSON_LCBO = new LCBO(returnJSON, (returnJSON_syncRefer)=> {
+            let returnJSON_BeMirroredObject = new BeMirroredObject(returnJSON, (returnJSON_syncRefer)=> {
               return ((err, json_be_returned)=>{
                 returnJSON(err, json_be_returned);
               });
             }, true);
-            if(remote_callback_obj) {
-              remote_callback_obj.run([], [json, entityId, returnJSON_LCBO]);
+            if(mirrored_object) {
+              mirrored_object.run([], [json, entityId, returnJSON_BeMirroredObject]);
             }
           },
           (json, entityId, returnJSON)=> {
-            let returnJSON_LCBO = new LCBO(returnJSON, (returnJSON_syncRefer)=> {
+            let returnJSON_BeMirroredObject = new BeMirroredObject(returnJSON, (returnJSON_syncRefer)=> {
               return ((err, json_be_returned)=>{
                 returnJSON(err, json_be_returned);
               });
             }, true);
-            if(remote_callback_obj_2) {
-              remote_callback_obj_2.run([], [json, entityId, returnJSON_LCBO]);
+            if(mirrored_object_2) {
+              mirrored_object_2.run([], [json, entityId, returnJSON_BeMirroredObject]);
             }
           });
         },
 
-        on: (type, remote_callback_obj)=> {
+        on: (type, mirrored_object)=> {
           if(type === 'data') {
             service_socket.on('data', (entityId, data)=> {
-              if(remote_callback_obj) {
-                remote_callback_obj.run([], [entityId, data]);
+              if(mirrored_object) {
+                mirrored_object.run([], [entityId, data]);
               }
             });
           }
           else {
             service_socket.on(type, (entityId, callback)=> {
-              let callback_LCBO = new LCBO(callback, (callback_syncRefer)=> {
+              let callback_BeMirroredObject = new BeMirroredObject(callback, (callback_syncRefer)=> {
                 return ((err)=>{
                   callback(err);
                 });
               }, true);
-              if(remote_callback_obj) {
-                remote_callback_obj.run([], [entityId, callback_LCBO]);
+              if(mirrored_object) {
+                mirrored_object.run([], [entityId, callback_BeMirroredObject]);
               }
             });
           }
@@ -157,122 +157,122 @@ function ServiceAPI() {
         },
       })
     });
-    api.addAPI(['getMe'], (LCBO)=> {
-      return((remote_callback_obj)=> {
-        if(remote_callback_obj) {
-          remote_callback_obj.run([], [false, {
+    api.addAPI(['getMe'], (BeMirroredObject)=> {
+      return((mirrored_object)=> {
+        if(mirrored_object) {
+          mirrored_object.run([], [false, {
             Settings: manifest.settings,
             Manifest: manifest,
             FilesPath: _coregateway.Daemon.Settings.services_files_path+'/'+manifest.name
           }])
-          remote_callback_obj.unbindRemote();
+          mirrored_object.destory();
         }
       });
     });
 
-    let _turn_model_to_local_callback_obj = (model, LCBO)=> {
+    let _turn_model_to_local_callback_obj = (model, BeMirroredObject)=> {
       if(!model){
         return null;
       }
       else if(model.ModelType === 'Object') {
-        return(new LCBO(model, (model_syncRefer)=> {
+        return(new BeMirroredObject(model, (model_syncRefer)=> {
           return ({
-              getModelType: (remote_callback_obj)=> {
-                if(remote_callback_obj) {
-                  model_syncRefer(remote_callback_obj);
-                  remote_callback_obj.run([], [err, model.ModelType]);
-                  remote_callback_obj.unbindRemote();
+              getModelType: (mirrored_object)=> {
+                if(mirrored_object) {
+                  model_syncRefer(mirrored_object);
+                  mirrored_object.run([], [err, model.ModelType]);
+                  mirrored_object.destory();
                 }
               },
-              get: (key_value, remote_callback_obj)=> {
+              get: (key_value, mirrored_object)=> {
                 model.get(key_value, (...args)=> {
-                  model_syncRefer(remote_callback_obj);
-                  remote_callback_obj.run([], args);
-                  remote_callback_obj.unbindRemote();
+                  model_syncRefer(mirrored_object);
+                  mirrored_object.run([], args);
+                  mirrored_object.destory();
                 });
               },
-              getAll: (remote_callback_obj)=> {
+              getAll: (mirrored_object)=> {
                 model.getAll(key_value, (...args)=> {
-                  model_syncRefer(remote_callback_obj);
-                  remote_callback_obj.run([], args);
-                  remote_callback_obj.unbindRemote();
+                  model_syncRefer(mirrored_object);
+                  mirrored_object.run([], args);
+                  mirrored_object.destory();
                 });
               },
-              getWhere: (where, query_values, remote_callback_obj)=> {
+              getWhere: (where, query_values, mirrored_object)=> {
                 model.getWhere(where, query_values, (...args)=> {
-                  model_syncRefer(remote_callback_obj);
-                  remote_callback_obj.run([], args);
-                  remote_callback_obj.unbindRemote();
+                  model_syncRefer(mirrored_object);
+                  mirrored_object.run([], args);
+                  mirrored_object.destory();
                 });
               },
-              searchAll: (keyword, remote_callback_obj)=> {
+              searchAll: (keyword, mirrored_object)=> {
                 model.searchAll(keyword, (...args)=> {
-                  model_syncRefer(remote_callback_obj);
-                  remote_callback_obj.run([], args);
-                  remote_callback_obj.unbindRemote();
+                  model_syncRefer(mirrored_object);
+                  mirrored_object.run([], args);
+                  mirrored_object.destory();
                 });
               },
-              searchColumns: (column_list, keyword, remote_callback_obj)=> {
+              searchColumns: (column_list, keyword, mirrored_object)=> {
                 model.searchColumns(column_list, keyword, (...args)=> {
-                  model_syncRefer(remote_callback_obj);
-                  remote_callback_obj.run([], args);
-                  remote_callback_obj.unbindRemote();
+                  model_syncRefer(mirrored_object);
+                  mirrored_object.run([], args);
+                  mirrored_object.destory();
                 });
               },
-              searchAllNRows: (keyword, N, remote_callback_obj)=> {
+              searchAllNRows: (keyword, N, mirrored_object)=> {
                 model.searchAllNRows(keyword, N, (...args)=> {
-                  model_syncRefer(remote_callback_obj);
-                  remote_callback_obj.run([], args);
-                  remote_callback_obj.unbindRemote();
+                  model_syncRefer(mirrored_object);
+                  mirrored_object.run([], args);
+                  mirrored_object.destory();
                 });
               },
-              searchColumnsNRows: (column_list, keyword, N, remote_callback_obj)=> {
+              searchColumnsNRows: (column_list, keyword, N, mirrored_object)=> {
                 model.searchColumnsNRows(column_list, keyword, N, (...args)=> {
-                  model_syncRefer(remote_callback_obj);
-                  remote_callback_obj.run([], args);
-                  remote_callback_obj.unbindRemote();
+                  model_syncRefer(mirrored_object);
+                  mirrored_object.run([], args);
+                  mirrored_object.destory();
                 });
               },
-              create: (properties_dict, remote_callback_obj)=> {
+              create: (properties_dict, mirrored_object)=> {
                 model.create(properties_dict, (...args)=> {
-                  model_syncRefer(remote_callback_obj);
-                  remote_callback_obj.run([], args);
-                  remote_callback_obj.unbindRemote();
+                  model_syncRefer(mirrored_object);
+                  mirrored_object.run([], args);
+                  mirrored_object.destory();
                 });
               },
-              replace: (properties_dict, remote_callback_obj)=> {
+              replace: (properties_dict, mirrored_object)=> {
                 model.replace(properties_dict, (...args)=> {
-                  model_syncRefer(remote_callback_obj);
-                  remote_callback_obj.run([], args);
-                  remote_callback_obj.unbindRemote();
+                  model_syncRefer(mirrored_object);
+                  mirrored_object.run([], args);
+                  mirrored_object.destory();
                 });
               },
-              update: (properties_dict, remote_callback_obj)=> {
+              update: (properties_dict, mirrored_object)=> {
                 model.update(properties_dict, (...args)=> {
-                  model_syncRefer(remote_callback_obj);
-                  remote_callback_obj.run([], args);
-                  remote_callback_obj.unbindRemote();
+                  model_syncRefer(mirrored_object);
+                  mirrored_object.run([], args);
+                  mirrored_object.destory();
                 });
               },
-              addProperties: (properties_dict, remote_callback_obj)=> {
+              addProperties: (properties_dict, mirrored_object)=> {
                 model.addProperties(properties_dict, (...args)=> {
-                  model_syncRefer(remote_callback_obj);
-                  remote_callback_obj.run([], args);
-                  remote_callback_obj.unbindRemote();
+                  model_syncRefer(mirrored_object);
+                  mirrored_object.run([], args);
+                  mirrored_object.destory();
                 });
               },
-              existProperty: (property_name, remote_callback_obj)=> {
+              existProperty: (property_name, mirrored_object)=> {
                 model.existProperty(property_name, (...args)=> {
-                  model_syncRefer(remote_callback_obj);
-                  remote_callback_obj.run([], args);
-                  remote_callback_obj.unbindRemote();
+                  model_syncRefer(mirrored_object);
+                  mirrored_object.run([], args);
+                  mirrored_object.destory();
                 });
               },
-              removeProperties: (properties_list, remote_callback_obj)=> {
+              removeProperties: (properties_list, mirrored_object)=> {
                 model.removeProperties(properties_list, (...args)=> {
-                  model_syncRefer(remote_callback_obj);
-                  remote_callback_obj.run([], args);
-                  remote_callback_obj.unbindRemote();
+                  model_syncRefer(mirrored_object);
+                  mirrored_object.run([], args);
+                  mirrored_object.destory();
                 });
               },
               remove: ()=> {},
@@ -280,192 +280,192 @@ function ServiceAPI() {
         }));
       }
       else if(model.ModelType === 'Pair') {
-        return(new LCBO(model, (model_syncRefer)=> {
+        return(new BeMirroredObject(model, (model_syncRefer)=> {
           return ({
-              getModelType: (remote_callback_obj)=> {
-                if(remote_callback_obj) {
-                  model_syncRefer(remote_callback_obj);
-                  remote_callback_obj.run([], [err, model.ModelType]);
-                  remote_callback_obj.unbindRemote();
+              getModelType: (mirrored_object)=> {
+                if(mirrored_object) {
+                  model_syncRefer(mirrored_object);
+                  mirrored_object.run([], [err, model.ModelType]);
+                  mirrored_object.destory();
                 }
               },
-              create: (properties_dict, remote_callback_obj)=> {
+              create: (properties_dict, mirrored_object)=> {
                 model.create(properties_dict, (...args)=> {
-                  if(remote_callback_obj) {
-                    model_syncRefer(remote_callback_obj);
-                    remote_callback_obj.run([], args);
-                    remote_callback_obj.unbindRemote();
+                  if(mirrored_object) {
+                    model_syncRefer(mirrored_object);
+                    mirrored_object.run([], args);
+                    mirrored_object.destory();
                   }
                 });
               },
-              searchAll: (keyword, remote_callback_obj)=> {
+              searchAll: (keyword, mirrored_object)=> {
                 model.searchAll(keyword, (...args)=> {
-                  if(remote_callback_obj) {
-                    model_syncRefer(remote_callback_obj);
-                    remote_callback_obj.run([], args);
-                    remote_callback_obj.unbindRemote();
+                  if(mirrored_object) {
+                    model_syncRefer(mirrored_object);
+                    mirrored_object.run([], args);
+                    mirrored_object.destory();
                   }
                 });
               },
-              searchColumns: (column_list, keyword, remote_callback_obj)=> {
+              searchColumns: (column_list, keyword, mirrored_object)=> {
                 model.searchColumns(column_list, keyword, (...args)=> {
-                  if(remote_callback_obj) {
-                    model_syncRefer(remote_callback_obj);
-                    remote_callback_obj.run([], args);
-                    remote_callback_obj.unbindRemote();
+                  if(mirrored_object) {
+                    model_syncRefer(mirrored_object);
+                    mirrored_object.run([], args);
+                    mirrored_object.destory();
                   }
                 });
               },
-              searchAllNRows: (keyword, N, remote_callback_obj)=> {
+              searchAllNRows: (keyword, N, mirrored_object)=> {
                 model.searchAllNRows(keyword, N, (...args)=> {
-                  if(remote_callback_obj) {
-                    model_syncRefer(remote_callback_obj);
-                    remote_callback_obj.run([], args);
-                    remote_callback_obj.unbindRemote();
+                  if(mirrored_object) {
+                    model_syncRefer(mirrored_object);
+                    mirrored_object.run([], args);
+                    mirrored_object.destory();
                   }
                 });
               },
-              searchColumnsNRows: (column_list, keyword, N, remote_callback_obj)=> {
+              searchColumnsNRows: (column_list, keyword, N, mirrored_object)=> {
                 model.searchColumnsNRows(column_list, keyword, N, (...args)=> {
-                  if(remote_callback_obj) {
-                    model_syncRefer(remote_callback_obj);
-                    remote_callback_obj.run([], args);
-                    remote_callback_obj.unbindRemote();
+                  if(mirrored_object) {
+                    model_syncRefer(mirrored_object);
+                    mirrored_object.run([], args);
+                    mirrored_object.destory();
                   }
                 });
               },
-              getWhere: (where, query_values, remote_callback_obj)=> {
+              getWhere: (where, query_values, mirrored_object)=> {
                 model.getWhere(where, query_values, (...args)=> {
-                  if(remote_callback_obj) {
-                    model_syncRefer(remote_callback_obj);
-                    remote_callback_obj.run([], args);
-                    remote_callback_obj.unbindRemote();
+                  if(mirrored_object) {
+                    model_syncRefer(mirrored_object);
+                    mirrored_object.run([], args);
+                    mirrored_object.destory();
                   }
                 });
               },
-              getAll: (remote_callback_obj)=> {
+              getAll: (mirrored_object)=> {
                 model.whatever((...args)=> {
-                  if(remote_callback_obj) {
-                    model_syncRefer(remote_callback_obj);
-                    remote_callback_obj.run([], args);
-                    remote_callback_obj.unbindRemote();
+                  if(mirrored_object) {
+                    model_syncRefer(mirrored_object);
+                    mirrored_object.run([], args);
+                    mirrored_object.destory();
                   }
                 });
               },
-              getByPair: (pair, remote_callback_obj)=> {
+              getByPair: (pair, mirrored_object)=> {
                 model.getByPair(pair, (...args)=> {
-                  if(remote_callback_obj) {
-                    model_syncRefer(remote_callback_obj);
-                    remote_callback_obj.run([], args);
-                    remote_callback_obj.unbindRemote();
+                  if(mirrored_object) {
+                    model_syncRefer(mirrored_object);
+                    mirrored_object.run([], args);
+                    mirrored_object.destory();
                   }
                 });
               },
-              getByBoth: (both, remote_callback_obj)=> {
+              getByBoth: (both, mirrored_object)=> {
                 model.getByBoth(both, (...args)=> {
-                  if(remote_callback_obj) {
-                    model_syncRefer(remote_callback_obj);
-                    remote_callback_obj.run([], args);
-                    remote_callback_obj.unbindRemote();
+                  if(mirrored_object) {
+                    model_syncRefer(mirrored_object);
+                    mirrored_object.run([], args);
+                    mirrored_object.destory();
                   }
                 });
               },
-              getByFirst: (first, remote_callback_obj)=> {
+              getByFirst: (first, mirrored_object)=> {
                 model.getByFirst(first, (...args)=> {
-                  if(remote_callback_obj) {
-                    model_syncRefer(remote_callback_obj);
-                    remote_callback_obj.run([], args);
-                    remote_callback_obj.unbindRemote();
+                  if(mirrored_object) {
+                    model_syncRefer(mirrored_object);
+                    mirrored_object.run([], args);
+                    mirrored_object.destory();
                   }
                 });
               },
-              getBySecond: (second, remote_callback_obj)=> {
+              getBySecond: (second, mirrored_object)=> {
                 model.getBySecond(second, (...args)=> {
-                  if(remote_callback_obj) {
-                    model_syncRefer(remote_callback_obj);
-                    remote_callback_obj.run([], args);
-                    remote_callback_obj.unbindRemote();
+                  if(mirrored_object) {
+                    model_syncRefer(mirrored_object);
+                    mirrored_object.run([], args);
+                    mirrored_object.destory();
                   }
                 });
               },
-              replace: (properties_dict, remote_callback_obj)=> {
+              replace: (properties_dict, mirrored_object)=> {
                 model.replace(properties_dict, (...args)=> {
-                  if(remote_callback_obj) {
-                    model_syncRefer(remote_callback_obj);
-                    remote_callback_obj.run([], args);
-                    remote_callback_obj.unbindRemote();
+                  if(mirrored_object) {
+                    model_syncRefer(mirrored_object);
+                    mirrored_object.run([], args);
+                    mirrored_object.destory();
                   }
                 });
               },
-              update: (properties_dict, remote_callback_obj)=> {
+              update: (properties_dict, mirrored_object)=> {
                 model.update(properties_dict, (...args)=> {
-                  if(remote_callback_obj) {
-                    model_syncRefer(remote_callback_obj);
-                    remote_callback_obj.run([], args);
-                    remote_callback_obj.unbindRemote();
+                  if(mirrored_object) {
+                    model_syncRefer(mirrored_object);
+                    mirrored_object.run([], args);
+                    mirrored_object.destory();
                   }
                 });
               },
-              removeByPair: (pair, remote_callback_obj)=> {
+              removeByPair: (pair, mirrored_object)=> {
                 model.removeByPair(pair, (...args)=> {
-                  if(remote_callback_obj) {
-                    model_syncRefer(remote_callback_obj);
-                    remote_callback_obj.run([], args);
-                    remote_callback_obj.unbindRemote();
+                  if(mirrored_object) {
+                    model_syncRefer(mirrored_object);
+                    mirrored_object.run([], args);
+                    mirrored_object.destory();
                   }
                 });
               },
-              removeByBoth: (both, remote_callback_obj)=> {
+              removeByBoth: (both, mirrored_object)=> {
                 model.removeByBoth(both, (...args)=> {
-                  if(remote_callback_obj) {
-                    model_syncRefer(remote_callback_obj);
-                    remote_callback_obj.run([], args);
-                    remote_callback_obj.unbindRemote();
+                  if(mirrored_object) {
+                    model_syncRefer(mirrored_object);
+                    mirrored_object.run([], args);
+                    mirrored_object.destory();
                   }
                 });
               },
-              removeByFirst: (first, remote_callback_obj)=> {
+              removeByFirst: (first, mirrored_object)=> {
                 model.removeByFirst(first, (...args)=> {
-                  if(remote_callback_obj) {
-                    model_syncRefer(remote_callback_obj);
-                    remote_callback_obj.run([], args);
-                    remote_callback_obj.unbindRemote();
+                  if(mirrored_object) {
+                    model_syncRefer(mirrored_object);
+                    mirrored_object.run([], args);
+                    mirrored_object.destory();
                   }
                 });
               },
-              removeBySecond: (second, remote_callback_obj)=> {
+              removeBySecond: (second, mirrored_object)=> {
                 model.removeBySecond(second, (...args)=> {
-                  if(remote_callback_obj) {
-                    model_syncRefer(remote_callback_obj);
-                    remote_callback_obj.run([], args);
-                    remote_callback_obj.unbindRemote();
+                  if(mirrored_object) {
+                    model_syncRefer(mirrored_object);
+                    mirrored_object.run([], args);
+                    mirrored_object.destory();
                   }
                 });
               },
-              addProperties: (properties_dict, remote_callback_obj)=> {
+              addProperties: (properties_dict, mirrored_object)=> {
                 model.addProperties(properties_dict, (...args)=> {
-                  if(remote_callback_obj) {
-                    model_syncRefer(remote_callback_obj);
-                    remote_callback_obj.run([], args);
-                    remote_callback_obj.unbindRemote();
+                  if(mirrored_object) {
+                    model_syncRefer(mirrored_object);
+                    mirrored_object.run([], args);
+                    mirrored_object.destory();
                   }
                 });
               },
-              existProperty: (property_name, remote_callback_obj)=> {
+              existProperty: (property_name, mirrored_object)=> {
                 model.existProperty(property_name, (...args)=> {
-                  if(remote_callback_obj) {
-                    model_syncRefer(remote_callback_obj);
-                    remote_callback_obj.run([], args);
-                    remote_callback_obj.unbindRemote();
+                  if(mirrored_object) {
+                    model_syncRefer(mirrored_object);
+                    mirrored_object.run([], args);
+                    mirrored_object.destory();
                   }
                 });
               },
-              removeProperty: (properties_list, remote_callback_obj)=> {
+              removeProperty: (properties_list, mirrored_object)=> {
                 model.removeProperty(properties_list, (...args)=> {
-                  if(remote_callback_obj) {
-                    model_syncRefer(remote_callback_obj);
-                    remote_callback_obj.run([], args);
-                    remote_callback_obj.unbindRemote();
+                  if(mirrored_object) {
+                    model_syncRefer(mirrored_object);
+                    mirrored_object.run([], args);
+                    mirrored_object.destory();
                   }
                 });
               }
@@ -473,165 +473,165 @@ function ServiceAPI() {
         }));
       }
       else if(model.ModelType === 'IndexedList') {
-        return(new LCBO(model, (model_syncRefer)=> {
+        return(new BeMirroredObject(model, (model_syncRefer)=> {
           return ({
-            getModelType: (remote_callback_obj)=> {
-              if(remote_callback_obj) {
-                model_syncRefer(remote_callback_obj);
-                remote_callback_obj.run([], [err, model.ModelType]);
-                remote_callback_obj.unbindRemote();
+            getModelType: (mirrored_object)=> {
+              if(mirrored_object) {
+                model_syncRefer(mirrored_object);
+                mirrored_object.run([], [err, model.ModelType]);
+                mirrored_object.destory();
               }
             },
-            searchAll: (keyword, remote_callback_obj)=> {
+            searchAll: (keyword, mirrored_object)=> {
               model.searchAll(keyword, (...args)=> {
-                if(remote_callback_obj) {
-                  model_syncRefer(remote_callback_obj);
-                  remote_callback_obj.run([], args);
-                  remote_callback_obj.unbindRemote();
+                if(mirrored_object) {
+                  model_syncRefer(mirrored_object);
+                  mirrored_object.run([], args);
+                  mirrored_object.destory();
                 }
               });
             },
-            searchColumns: (column_list, remote_callback_obj)=> {
+            searchColumns: (column_list, mirrored_object)=> {
               model.searchColumns(column_list, (...args)=> {
-                if(remote_callback_obj) {
-                  model_syncRefer(remote_callback_obj);
-                  remote_callback_obj.run([], args);
-                  remote_callback_obj.unbindRemote();
+                if(mirrored_object) {
+                  model_syncRefer(mirrored_object);
+                  mirrored_object.run([], args);
+                  mirrored_object.destory();
                 }
               });
             },
-            searchAllNRows: (keyword, N, remote_callback_obj)=> {
+            searchAllNRows: (keyword, N, mirrored_object)=> {
               model.searchAllNRows(keyword, N, (...args)=> {
-                if(remote_callback_obj) {
-                  model_syncRefer(remote_callback_obj);
-                  remote_callback_obj.run([], args);
-                  remote_callback_obj.unbindRemote();
+                if(mirrored_object) {
+                  model_syncRefer(mirrored_object);
+                  mirrored_object.run([], args);
+                  mirrored_object.destory();
                 }
               });
             },
-            searchColumnsNRows: (column_list, keyword, N, remote_callback_obj)=> {
+            searchColumnsNRows: (column_list, keyword, N, mirrored_object)=> {
               model.searchColumnsNRows(column_list, keyword, N, (...args)=> {
-                if(remote_callback_obj) {
-                  model_syncRefer(remote_callback_obj);
-                  remote_callback_obj.run([], args);
-                  remote_callback_obj.unbindRemote();
+                if(mirrored_object) {
+                  model_syncRefer(mirrored_object);
+                  mirrored_object.run([], args);
+                  mirrored_object.destory();
                 }
               });
             },
-            get: (key_value, remote_callback_obj)=> {
+            get: (key_value, mirrored_object)=> {
               model.get(key_value, (...args)=> {
-                if(remote_callback_obj) {
-                  model_syncRefer(remote_callback_obj);
-                  remote_callback_obj.run([], args);
-                  remote_callback_obj.unbindRemote();
+                if(mirrored_object) {
+                  model_syncRefer(mirrored_object);
+                  mirrored_object.run([], args);
+                  mirrored_object.destory();
                 }
               });
             },
-            getWhere: (where, query_values, remote_callback_obj)=> {
+            getWhere: (where, query_values, mirrored_object)=> {
               model.getWhere(where, query_values, (...args)=> {
-                if(remote_callback_obj) {
-                  model_syncRefer(remote_callback_obj);
-                  remote_callback_obj.run([], args);
-                  remote_callback_obj.unbindRemote();
+                if(mirrored_object) {
+                  model_syncRefer(mirrored_object);
+                  mirrored_object.run([], args);
+                  mirrored_object.destory();
                 }
               });
             },
-            replaceRows: (rows, remote_callback_obj)=> {
+            replaceRows: (rows, mirrored_object)=> {
               model.replaceRows(rows, (...args)=> {
-                if(remote_callback_obj) {
-                  model_syncRefer(remote_callback_obj);
-                  remote_callback_obj.run([], args);
-                  remote_callback_obj.unbindRemote();
+                if(mirrored_object) {
+                  model_syncRefer(mirrored_object);
+                  mirrored_object.run([], args);
+                  mirrored_object.destory();
                 }
               });
             },
-            updateRows: (rows, remote_callback_obj)=> {
+            updateRows: (rows, mirrored_object)=> {
               model.updateRows(rows, (...args)=> {
-                if(remote_callback_obj) {
-                  model_syncRefer(remote_callback_obj);
-                  remote_callback_obj.run([], args);
-                  remote_callback_obj.unbindRemote();
+                if(mirrored_object) {
+                  model_syncRefer(mirrored_object);
+                  mirrored_object.run([], args);
+                  mirrored_object.destory();
                 }
               });
             },
-            deleteRows: (begin, end, remote_callback_obj)=> {
+            deleteRows: (begin, end, mirrored_object)=> {
               model.deleteRows(begin, end, (...args)=> {
-                if(remote_callback_obj) {
-                  model_syncRefer(remote_callback_obj);
-                  remote_callback_obj.run([], args);
-                  remote_callback_obj.unbindRemote();
+                if(mirrored_object) {
+                  model_syncRefer(mirrored_object);
+                  mirrored_object.run([], args);
+                  mirrored_object.destory();
                 }
               });
             },
-            appendRows: (rows, remote_callback_obj)=> {
+            appendRows: (rows, mirrored_object)=> {
               model.appendRows(rows, (...args)=> {
-                if(remote_callback_obj) {
-                  model_syncRefer(remote_callback_obj);
-                  remote_callback_obj.run([], args);
-                  remote_callback_obj.unbindRemote();
+                if(mirrored_object) {
+                  model_syncRefer(mirrored_object);
+                  mirrored_object.run([], args);
+                  mirrored_object.destory();
                 }
               });
             },
-            getLatestNRows: (n, remote_callback_obj)=> {
+            getLatestNRows: (n, mirrored_object)=> {
               model.getLatestNRows(n, (...args)=> {
-                if(remote_callback_obj) {
-                  model_syncRefer(remote_callback_obj);
-                  remote_callback_obj.run([], args);
-                  remote_callback_obj.unbindRemote();
+                if(mirrored_object) {
+                  model_syncRefer(mirrored_object);
+                  mirrored_object.run([], args);
+                  mirrored_object.destory();
                 }
               });
             },
-            getRowsFromTo: (begin, end, remote_callback_obj)=> {
+            getRowsFromTo: (begin, end, mirrored_object)=> {
               model.getRowsFromTo(begin, end, (...args)=> {
-                if(remote_callback_obj) {
-                  model_syncRefer(remote_callback_obj);
-                  remote_callback_obj.run([], args);
-                  remote_callback_obj.unbindRemote();
+                if(mirrored_object) {
+                  model_syncRefer(mirrored_object);
+                  mirrored_object.run([], args);
+                  mirrored_object.destory();
                 }
               });
             },
-            getAllRows: (remote_callback_obj)=> {
+            getAllRows: (mirrored_object)=> {
               model.getAllRows((...args)=> {
-                if(remote_callback_obj) {
-                  model_syncRefer(remote_callback_obj);
-                  remote_callback_obj.run([], args);
-                  remote_callback_obj.unbindRemote();
+                if(mirrored_object) {
+                  model_syncRefer(mirrored_object);
+                  mirrored_object.run([], args);
+                  mirrored_object.destory();
                 }
               });
             },
-            getLatestIndex: (remote_callback_obj)=> {
+            getLatestIndex: (mirrored_object)=> {
               model.getLatestIndex((...args)=> {
-                if(remote_callback_obj) {
-                  model_syncRefer(remote_callback_obj);
-                  remote_callback_obj.run([], args);
-                  remote_callback_obj.unbindRemote();
+                if(mirrored_object) {
+                  model_syncRefer(mirrored_object);
+                  mirrored_object.run([], args);
+                  mirrored_object.destory();
                 }
               });
             },
-            addFields: (fields_dict, remote_callback_obj)=> {
+            addFields: (fields_dict, mirrored_object)=> {
               model.addFields(fields_dict, (...args)=> {
-                if(remote_callback_obj) {
-                  model_syncRefer(remote_callback_obj);
-                  remote_callback_obj.run([], args);
-                  remote_callback_obj.unbindRemote();
+                if(mirrored_object) {
+                  model_syncRefer(mirrored_object);
+                  mirrored_object.run([], args);
+                  mirrored_object.destory();
                 }
               });
             },
-            existField: (field_name, remote_callback_obj)=> {
+            existField: (field_name, mirrored_object)=> {
               model.existField(field_name, (...args)=> {
-                if(remote_callback_obj) {
-                  model_syncRefer(remote_callback_obj);
-                  remote_callback_obj.run([], args);
-                  remote_callback_obj.unbindRemote();
+                if(mirrored_object) {
+                  model_syncRefer(mirrored_object);
+                  mirrored_object.run([], args);
+                  mirrored_object.destory();
                 }
               });
             },
-            removeFields: (fields_dict, remote_callback_obj)=> {
+            removeFields: (fields_dict, mirrored_object)=> {
               model.removeFields(fields_dict, (...args)=> {
-                if(remote_callback_obj) {
-                  model_syncRefer(remote_callback_obj);
-                  remote_callback_obj.run([], args);
-                  remote_callback_obj.unbindRemote();
+                if(mirrored_object) {
+                  model_syncRefer(mirrored_object);
+                  mirrored_object.run([], args);
+                  mirrored_object.destory();
                 }
               });
             }
@@ -639,183 +639,183 @@ function ServiceAPI() {
         }));
       }
       else if(model.ModelType === 'GroupIndexedList') {
-        return(new LCBO(model, (model_syncRefer)=> {
+        return(new BeMirroredObject(model, (model_syncRefer)=> {
           return ({
-            getModelType: (remote_callback_obj)=> {
-              if(remote_callback_obj) {
-                model_syncRefer(remote_callback_obj);
-                remote_callback_obj.run([], [err, model.ModelType]);
-                remote_callback_obj.unbindRemote();
+            getModelType: (mirrored_object)=> {
+              if(mirrored_object) {
+                model_syncRefer(mirrored_object);
+                mirrored_object.run([], [err, model.ModelType]);
+                mirrored_object.destory();
               }
             },
-            existGroup: (group_name, remote_callback_obj)=> {
+            existGroup: (group_name, mirrored_object)=> {
               model.existGroup(group_name, (...args)=> {
-                if(remote_callback_obj) {
-                  model_syncRefer(remote_callback_obj);
-                  remote_callback_obj.run([], args);
-                  remote_callback_obj.unbindRemote();
+                if(mirrored_object) {
+                  model_syncRefer(mirrored_object);
+                  mirrored_object.run([], args);
+                  mirrored_object.destory();
                 }
               });
             },
-            searchAll: (group_name, keyword, remote_callback_obj)=> {
+            searchAll: (group_name, keyword, mirrored_object)=> {
               model.searchAll(group_name, keyword, (...args)=> {
-                if(remote_callback_obj) {
-                  model_syncRefer(remote_callback_obj);
-                  remote_callback_obj.run([], args);
-                  remote_callback_obj.unbindRemote();
+                if(mirrored_object) {
+                  model_syncRefer(mirrored_object);
+                  mirrored_object.run([], args);
+                  mirrored_object.destory();
                 }
               });
             },
-            searchColumns: (group_name, column_list, remote_callback_obj)=> {
+            searchColumns: (group_name, column_list, mirrored_object)=> {
               model.searchColumns(group_name, column_list, (...args)=> {
-                if(remote_callback_obj) {
-                  model_syncRefer(remote_callback_obj);
-                  remote_callback_obj.run([], args);
-                  remote_callback_obj.unbindRemote();
+                if(mirrored_object) {
+                  model_syncRefer(mirrored_object);
+                  mirrored_object.run([], args);
+                  mirrored_object.destory();
                 }
               });
             },
-            searchAllNRows: (group_name, keyword, N, remote_callback_obj)=> {
+            searchAllNRows: (group_name, keyword, N, mirrored_object)=> {
               model.searchAllNRows(group_name, keyword, N, (...args)=> {
-                if(remote_callback_obj) {
-                  model_syncRefer(remote_callback_obj);
-                  remote_callback_obj.run([], args);
-                  remote_callback_obj.unbindRemote();
+                if(mirrored_object) {
+                  model_syncRefer(mirrored_object);
+                  mirrored_object.run([], args);
+                  mirrored_object.destory();
                 }
               });
             },
-            searchColumnsNRows: (group_name, column_list, keyword, N, remote_callback_obj)=> {
+            searchColumnsNRows: (group_name, column_list, keyword, N, mirrored_object)=> {
               model.searchColumnsNRows(group_name, column_list, keyword, N, (...args)=> {
-                if(remote_callback_obj) {
-                  model_syncRefer(remote_callback_obj);
-                  remote_callback_obj.run([], args);
-                  remote_callback_obj.unbindRemote();
+                if(mirrored_object) {
+                  model_syncRefer(mirrored_object);
+                  mirrored_object.run([], args);
+                  mirrored_object.destory();
                 }
               });
             },
-            get: (group_name, key_value, remote_callback_obj)=> {
+            get: (group_name, key_value, mirrored_object)=> {
               model.get(group_name, key_value, (...args)=> {
-                if(remote_callback_obj) {
-                  model_syncRefer(remote_callback_obj);
-                  remote_callback_obj.run([], args);
-                  remote_callback_obj.unbindRemote();
+                if(mirrored_object) {
+                  model_syncRefer(mirrored_object);
+                  mirrored_object.run([], args);
+                  mirrored_object.destory();
                 }
               });
             },
-            getWhere: (where, query_values, remote_callback_obj)=> {
+            getWhere: (where, query_values, mirrored_object)=> {
               model.getWhere(where, query_values, (...args)=> {
-                if(remote_callback_obj) {
-                  model_syncRefer(remote_callback_obj);
-                  remote_callback_obj.run([], args);
-                  remote_callback_obj.unbindRemote();
+                if(mirrored_object) {
+                  model_syncRefer(mirrored_object);
+                  mirrored_object.run([], args);
+                  mirrored_object.destory();
                 }
               });
             },
-            replaceRows: (group_name, rows, remote_callback_obj)=> {
+            replaceRows: (group_name, rows, mirrored_object)=> {
               model.replaceRows(group_name, rows, (...args)=> {
-                if(remote_callback_obj) {
-                  model_syncRefer(remote_callback_obj);
-                  remote_callback_obj.run([], args);
-                  remote_callback_obj.unbindRemote();
+                if(mirrored_object) {
+                  model_syncRefer(mirrored_object);
+                  mirrored_object.run([], args);
+                  mirrored_object.destory();
                 }
               });
             },
-            updateRows: (group_name, rows, remote_callback_obj)=> {
+            updateRows: (group_name, rows, mirrored_object)=> {
               model.updateRows(group_name, rows, (...args)=> {
-                if(remote_callback_obj) {
-                  model_syncRefer(remote_callback_obj);
-                  remote_callback_obj.run([], args);
-                  remote_callback_obj.unbindRemote();
+                if(mirrored_object) {
+                  model_syncRefer(mirrored_object);
+                  mirrored_object.run([], args);
+                  mirrored_object.destory();
                 }
               });
             },
-            deleteRows: (group_name, begin, end, remote_callback_obj)=> {
+            deleteRows: (group_name, begin, end, mirrored_object)=> {
               model.deleteRows(group_name, begin, end, (...args)=> {
-                if(remote_callback_obj) {
-                  model_syncRefer(remote_callback_obj);
-                  remote_callback_obj.run([], args);
-                  remote_callback_obj.unbindRemote();
+                if(mirrored_object) {
+                  model_syncRefer(mirrored_object);
+                  mirrored_object.run([], args);
+                  mirrored_object.destory();
                 }
               });
             },
-            appendRows: (group_name, rows, remote_callback_obj)=> {
+            appendRows: (group_name, rows, mirrored_object)=> {
               model.appendRows(group_name, rows, (...args)=> {
-                if(remote_callback_obj) {
-                  model_syncRefer(remote_callback_obj);
-                  remote_callback_obj.run([], args);
-                  remote_callback_obj.unbindRemote();
+                if(mirrored_object) {
+                  model_syncRefer(mirrored_object);
+                  mirrored_object.run([], args);
+                  mirrored_object.destory();
                 }
               });
             },
-            appendRowsAllGroup: (rows, remote_callback_obj)=> {
+            appendRowsAllGroup: (rows, mirrored_object)=> {
               model.appendRowsAllGroup(rows, (...args)=> {
-                if(remote_callback_obj) {
-                  model_syncRefer(remote_callback_obj);
-                  remote_callback_obj.run([], args);
-                  remote_callback_obj.unbindRemote();
+                if(mirrored_object) {
+                  model_syncRefer(mirrored_object);
+                  mirrored_object.run([], args);
+                  mirrored_object.destory();
                 }
               });
             },
-            getLatestNRows: (group_name, n, remote_callback_obj)=> {
+            getLatestNRows: (group_name, n, mirrored_object)=> {
               model.getLatestNRows(group_name, n, (...args)=> {
-                if(remote_callback_obj) {
-                  model_syncRefer(remote_callback_obj);
-                  remote_callback_obj.run([], args);
-                  remote_callback_obj.unbindRemote();
+                if(mirrored_object) {
+                  model_syncRefer(mirrored_object);
+                  mirrored_object.run([], args);
+                  mirrored_object.destory();
                 }
               });
             },
-            getRowsFromTo: (group_name, begin, end, remote_callback_obj)=> {
+            getRowsFromTo: (group_name, begin, end, mirrored_object)=> {
               model.getRowsFromTo(group_name, begin, end, (...args)=> {
-                if(remote_callback_obj) {
-                  model_syncRefer(remote_callback_obj);
-                  remote_callback_obj.run([], args);
-                  remote_callback_obj.unbindRemote();
+                if(mirrored_object) {
+                  model_syncRefer(mirrored_object);
+                  mirrored_object.run([], args);
+                  mirrored_object.destory();
                 }
               });
             },
-            getAllRows: (group_name, remote_callback_obj)=> {
+            getAllRows: (group_name, mirrored_object)=> {
               model.getAllRows(group_name, (...args)=> {
-                if(remote_callback_obj) {
-                  model_syncRefer(remote_callback_obj);
-                  remote_callback_obj.run([], args);
-                  remote_callback_obj.unbindRemote();
+                if(mirrored_object) {
+                  model_syncRefer(mirrored_object);
+                  mirrored_object.run([], args);
+                  mirrored_object.destory();
                 }
               });
             },
-            getLatestIndex: (group_name, remote_callback_obj)=> {
+            getLatestIndex: (group_name, mirrored_object)=> {
               model.getLatestIndex(group_name, (...args)=> {
-                if(remote_callback_obj) {
-                  model_syncRefer(remote_callback_obj);
-                  remote_callback_obj.run([], args);
-                  remote_callback_obj.unbindRemote();
+                if(mirrored_object) {
+                  model_syncRefer(mirrored_object);
+                  mirrored_object.run([], args);
+                  mirrored_object.destory();
                 }
               });
             },
-            addFields: (fields_dict, remote_callback_obj)=> {
+            addFields: (fields_dict, mirrored_object)=> {
               model.addFields(fields_dict, (...args)=> {
-                if(remote_callback_obj) {
-                  model_syncRefer(remote_callback_obj);
-                  remote_callback_obj.run([], args);
-                  remote_callback_obj.unbindRemote();
+                if(mirrored_object) {
+                  model_syncRefer(mirrored_object);
+                  mirrored_object.run([], args);
+                  mirrored_object.destory();
                 }
               });
             },
-            existField: (field_name, remote_callback_obj)=> {
+            existField: (field_name, mirrored_object)=> {
               model.existField(field_name, (...args)=> {
-                if(remote_callback_obj) {
-                  model_syncRefer(remote_callback_obj);
-                  remote_callback_obj.run([], args);
-                  remote_callback_obj.unbindRemote();
+                if(mirrored_object) {
+                  model_syncRefer(mirrored_object);
+                  mirrored_object.run([], args);
+                  mirrored_object.destory();
                 }
               });
             },
-            removeFields: (fields_dict, remote_callback_obj)=> {
+            removeFields: (fields_dict, mirrored_object)=> {
               model.removeFields(fields_dict, (...args)=> {
-                if(remote_callback_obj) {
-                  model_syncRefer(remote_callback_obj);
-                  remote_callback_obj.run([], args);
-                  remote_callback_obj.unbindRemote();
+                if(mirrored_object) {
+                  model_syncRefer(mirrored_object);
+                  mirrored_object.run([], args);
+                  mirrored_object.destory();
                 }
               });
             }
@@ -824,97 +824,97 @@ function ServiceAPI() {
       }
 
     };
-    api.addAPI(['Database', 'Database'], (LCBO)=> {
+    api.addAPI(['Database', 'Database'], (BeMirroredObject)=> {
       return({
-        query: (query, remote_callback_obj)=> {
+        query: (query, mirrored_object)=> {
           _coregateway.Database.Database.query(query, (...args)=> {
-            if(remote_callback_obj) {
-              remote_callback_obj.run([], args);
-              remote_callback_obj.unbindRemote();
+            if(mirrored_object) {
+              mirrored_object.run([], args);
+              mirrored_object.destory();
             }
           });
         }
       })
     });
-    api.addAPI(['Database', 'Model'], (LCBO)=> {
+    api.addAPI(['Database', 'Model'], (BeMirroredObject)=> {
       return({
-        remove: (model_name, remote_callback_obj)=> {
+        remove: (model_name, mirrored_object)=> {
           _coregateway.Model.remove(_service_name+'_'+model_name, (err)=> {
-            if(remote_callback_obj) {
-              remote_callback_obj.run([], [err]);
-              remote_callback_obj.unbindRemote();
+            if(mirrored_object) {
+              mirrored_object.run([], [err]);
+              mirrored_object.destory();
             }
           });
         },
 
-        exist: (model_name, remote_callback_obj)=> {
+        exist: (model_name, mirrored_object)=> {
           _coregateway.Model.get(_service_name+'_'+model_name, (err, exist)=> {
-            if(remote_callback_obj) {
-              remote_callback_obj.run([], [err, exist]);
-              remote_callback_obj.unbindRemote();
+            if(mirrored_object) {
+              mirrored_object.run([], [err, exist]);
+              mirrored_object.destory();
             }
           });
         },
 
-        get: (model_name, remote_callback_obj)=> {
+        get: (model_name, mirrored_object)=> {
           _coregateway.Model.get(_service_name+'_'+model_name, (err, the_model)=> {
-            if(remote_callback_obj) {
-              remote_callback_obj.run([], [err, _turn_model_to_local_callback_obj(the_model, LCBO)]);
-              remote_callback_obj.unbindRemote();
+            if(mirrored_object) {
+              mirrored_object.run([], [err, _turn_model_to_local_callback_obj(the_model, BeMirroredObject)]);
+              mirrored_object.destory();
             }
           });
         },
 
-        define: (model_name, model_structure, remote_callback_obj)=> {
+        define: (model_name, model_structure, mirrored_object)=> {
           _coregateway.Model.define(_service_name+'_'+model_name, model_structure, (err, the_model)=> {
-            if(remote_callback_obj) {
-              remote_callback_obj.run([], [err, _turn_model_to_local_callback_obj(the_model, LCBO)]);
-              remote_callback_obj.unbindRemote();
+            if(mirrored_object) {
+              mirrored_object.run([], [err, _turn_model_to_local_callback_obj(the_model, BeMirroredObject)]);
+              mirrored_object.destory();
             }
           });
         },
 
-        doBatchSetup: (models_dict, remote_callback_obj)=> {
+        doBatchSetup: (models_dict, mirrored_object)=> {
           _new_model_dict = {}
           for(let model_name in models_dict) {
             _new_model_dict[_service_name+'_'+model_name] = models_dict[model_name];
           }
           _coregateway.Model.doBatchSetup(_new_model_dict, (err, models)=> {
-            let local_callback_obj = new LCBO(models, (models_syncRefer)=> {
+            let local_callback_obj = new BeMirroredObject(models, (models_syncRefer)=> {
               let dict = {};
               for(let key in models) {
-                dict[key] = _turn_model_to_local_callback_obj(models[key], LCBO);
+                dict[key] = _turn_model_to_local_callback_obj(models[key], BeMirroredObject);
               };
               return dict;
             });
-            if(remote_callback_obj) {
-              remote_callback_obj.run([], [err, local_callback_obj]);
-              remote_callback_obj.unbindRemote();
+            if(mirrored_object) {
+              mirrored_object.run([], [err, local_callback_obj]);
+              mirrored_object.destory();
             }
           })
         }
       });
       // close cannot be implemented this time compare to worker.js
     });
-    api.addAPI(['Database', 'RAWModel'], (LCBO)=> {
+    api.addAPI(['Database', 'RAWModel'], (BeMirroredObject)=> {
       return({
-        get: (model_name, remote_callback_obj)=> {
+        get: (model_name, mirrored_object)=> {
           _coregateway.Model.get(model_name, (err, the_model)=> {
-            if(remote_callback_obj) {
+            if(mirrored_object) {
               let local_callback_obj;
-              local_callback_obj = new LCBO(the_model, (the_model_syncRefer)=> {
+              local_callback_obj = new BeMirroredObject(the_model, (the_model_syncRefer)=> {
                 return ({
-                    getModelType: (remote_callback_obj_2)=> {
-                      if(remote_callback_obj_2) {
-                        the_model_syncRefer(remote_callback_obj_2);
-                        remote_callback_obj_2.run([], [err, the_model.ModelType]);
-                        remote_callback_obj_2.unbindRemote();
+                    getModelType: (mirrored_object_2)=> {
+                      if(mirrored_object_2) {
+                        the_model_syncRefer(mirrored_object_2);
+                        mirrored_object_2.run([], [err, the_model.ModelType]);
+                        mirrored_object_2.destory();
                       }
                     }
                 })
               });
-              remote_callback_obj.run([], [err, local_callback_obj]);
-              remote_callback_obj.unbindRemote();
+              mirrored_object.run([], [err, local_callback_obj]);
+              mirrored_object.destory();
             }
           });
         }
@@ -958,12 +958,12 @@ function ServiceAPI() {
   //     for(let i in _API_generators) {
   //       _API_generators[i](api, service_socket, manifest);
   //     }
-  //     api.addAPI(['getImplementationModule'], (LCBO)=> {
-  //       return((remote_callback_obj)=> {
-  //         let Implementation_LCBO = new LCBO(_coregateway.Implementation, null, false, true);
-  //         if(remote_callback_obj) {
-  //           remote_callback_obj.run([], [false, Implementation_LCBO]);
-  //           remote_callback_obj.unbindRemote();
+  //     api.addAPI(['getImplementationModule'], (BeMirroredObject)=> {
+  //       return((mirrored_object)=> {
+  //         let Implementation_BeMirroredObject = new BeMirroredObject(_coregateway.Implementation, null, false, true);
+  //         if(mirrored_object) {
+  //           mirrored_object.run([], [false, Implementation_BeMirroredObject]);
+  //           mirrored_object.destory();
   //         }
   //       });
   //     });
