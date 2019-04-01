@@ -229,8 +229,8 @@ function NodeAPI() {
       API.createServiceAPI(_service_socket, _manifest, (err, api)=> {
         _serviceapi = api;
         _serviceapi.setRemoteCallbackEmitter(this.emitChildCallback);
-        _serviceapi.setRemoteUnbindEmitter(this.emitRemoteUnbind);
-        _serviceapi.setRemoteUnbindEmitter(this.emitRemoteUnbind);
+        _serviceapi.setRemoteCallbakcDestroyer(this.emitRemoteUnbind);
+        _serviceapi.setRemoteCallbakcDestroyer(this.emitRemoteUnbind);
         callback(false);
       })
     };

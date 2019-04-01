@@ -19,6 +19,12 @@ const Net = require('net');
 const Library = require('../../../../../library');
 const Utils = Library.Utilities;
 const APIUtils = require('../../api_utilities');
+const LocalCallbackTree = APIUtils.LocalCallbackTree;
+const encodeArgumentsToBinary = APIUtils.encodeArgumentsToBinary;
+const decodeArgumentsFromBinary = APIUtils.decodeArgumentsFromBinary;
+const RemoteCallbackTree = APIUtils.RemoteCallbackTree;
+
+
 // For injecting database to api
 const Database = require('../../../../../database').Database;
 const Model = require('../../../../../database').Model;
@@ -82,49 +88,32 @@ function WorkerClient(_api_sock) {
       return _Id;
     };
 
-    let onLocalCallback = (Id, args)=> {
-      _local_callbacks[Id].apply(null, args);
-      delete _local_callbacks[Id];
-    };
-
     let callRemoteObjCallback = ()=> {
 
     };
 
-    const callParentAPI = ([id, APIpath], args) => {
-      let _data = {
-        p: APIpath,
-        a: args,
-        o: {}
-      };
+    const emitParentAPI = ([id, APIpath], args) => {
+      let _data = APIpath;
       for(let i in args) {
         if(APIUtils.hasFunction(args[i])) {
-          let _Id = Utils.generateUniqueId();
-          _local_obj_callbacks_dict[_Id] = args[i];
-          // console.log(Object.keys(_local_obj_callbacks_dict).length);
-          _data.o[i] = [_Id, APIUtils.generateObjCallbacksTree(args[i])];
+          let id = Utils.generateUniqueId();
+          _local_obj_callbacks_dict[id] = new LocalCallbackTree(id, args[i], ()=>{return args[i]},);
+          args[i] = _local_obj_callbacks_dict[id];
         }
       }
-      _emitParentMessage(4,  Buffer.from(JSON.stringify(_data)));
+      _emitParentMessage(4,  Buffer.concat([Buffer.alloc(1, JSON.stringify(_data).length), Buffer.from(JSON.stringify(_data)), encodeArgumentsToBinary(args)]));
     }
 
-    this.emitParentCallback = ([obj_id, path], args) => {
-      let _data = {
-        p: [obj_id, path],
-        a: args,
-        o: {}
-      }
-
+    const emitParentCallback = ([obj_id, path], args) => {
+      let _data = [obj_id, path];
       for(let i in args) {
         if(APIUtils.hasFunction(args[i])) {
-          let _Id = Utils.generateUniqueId();
-          _local_obj_callbacks_dict[_Id] = args[i];
-          // console.log(Object.keys(_local_obj_callbacks_dict).length);
-
-          _data.o[i] = [_Id, APIUtils.generateObjCallbacksTree(args[i])];
+          let id = Utils.generateUniqueId();
+          _local_obj_callbacks_dict[id] = new LocalCallbackTree(id, args[i], ()=>{return args[i]});
+          args[i] = _local_obj_callbacks_dict[id];
         }
       }
-      _emitParentMessage(5,  Buffer.from(JSON.stringify(_data)));
+      _emitParentMessage(5,  Buffer.concat([Buffer.alloc(1, JSON.stringify(_data).length), Buffer.from(JSON.stringify(_data)), encodeArgumentsToBinary(args)]));
     }
 
     _api_sock.on('message', message => {
@@ -140,7 +129,7 @@ function WorkerClient(_api_sock) {
         process.title = 'NoService_worker: '+_service_name;
         _close_timeout = message.c;
         _clear_obj_garbage_timeout = message.g;
-        _api = APIUtils.generateObjCallbacks('API', message.a, callParentAPI);
+        _api = APIUtils.generateObjCallbacks('API', message.a, emitParentAPI);
         _api.getMe((err, Me)=>{
           // add api
           _api.SafeCallback = (callback) => {
@@ -286,11 +275,15 @@ function WorkerClient(_api_sock) {
       // function return
       else if(type === 2) {
         try {
-          let message = JSON.parse(blob.toString());
-          for(let i in message.o) {
-            message.a[parseInt(i)] = APIUtils.generateObjCallbacks(message.o[i][0], message.o[i][1], this.emitParentCallback);
+          let id_path = JSON.parse(blob.slice(1, 1+blob[0]).toString());
+          let args = decodeArgumentsFromBinary(blob.slice(1+blob[0]));
+          for(let i in args) {
+            if(args[i] instanceof RemoteCallbackTree) {
+              args[i].emitRemoteCallback = emitParentCallback;
+              args[i] = args[i].returnCallbacks();
+            }
           }
-          _local_obj_callbacks_dict[message.p[0]].apply(null, message.a);
+          _local_obj_callbacks_dict[id_path[0]].callCallback([], args);
         }
         catch (e) {
           let message = blob.toString();

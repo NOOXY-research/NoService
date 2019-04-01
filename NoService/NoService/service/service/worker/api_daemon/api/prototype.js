@@ -8,7 +8,7 @@
 const Utils = require('../../../../../library').Utilities;
 const APIUtils = require('../../api_utilities');
 const LocalCallbackTree = APIUtils.LocalCallbackTree;
-const RemoteCallback = APIUtils.RemoteCallback;
+const RemoteCallbackTree = APIUtils.RemoteCallbackTree;
 
 
 function API(_coregateway) {
@@ -22,7 +22,7 @@ function API(_coregateway) {
   let _api = {};
   let _LocalCallbackTrees = {};
   let _emitRemoteCallback;
-  let _emitRemoteUnbind;
+  let _destroyRemoteCallback;
   let _api_tree = {};
 
   // garbage cleaning
@@ -52,34 +52,38 @@ function API(_coregateway) {
   };
 
 
-  this.emitAPIRq = (path, args, arg_objs_trees)=> {
-    for(let i in arg_objs_trees) {
-      args[parseInt(i)] = new RemoteCallback(arg_objs_trees[i][0]);
-      args[parseInt(i)].emitRemoteCallback = _emitRemoteCallback;
-      args[parseInt(i)].destroyRemoteCallback = _emitRemoteUnbind;
+  this.emitAPIRq = (path, argsblob)=> {
+    let args = APIUtils.decodeArgumentsFromBinary(argsblob);
+    for(let i in args) {
+      if(args[i] instanceof RemoteCallbackTree) {
+        args[i].destroyRemoteCallback = _destroyRemoteCallback;
+        args[i].emitRemoteCallback = _emitRemoteCallback;
+      }
     }
     APIUtils.callObjCallback(_api, path, args);
   }
 
-  this.returnLocalCallbackTreeCount = ()=> {
-    return Object.keys(_LocalCallbackTrees).length;
-  };
-
-  this.emitCallbackRq = ([id, path], args, arg_objs_trees)=> {
-    let _LocalCallbackTree = _LocalCallbackTrees[id];
+  this.emitCallbackRq = (cbtree, argsblob)=> {
+    let _LocalCallbackTree = _LocalCallbackTrees[cbtree[0]];
     try {
-      for(let i in arg_objs_trees) {
-        args[parseInt(i)] = new RemoteCallback(arg_objs_trees[i][0]);
-        args[parseInt(i)].emitRemoteCallback = _emitRemoteCallback;
-        args[parseInt(i)].destroyRemoteCallback = _emitRemoteUnbind;
+      let args = APIUtils.decodeArgumentsFromBinary(argsblob);
+      for(let i in args) {
+        if(args[i] instanceof RemoteCallbackTree) {
+          args[i].destroyRemoteCallback = _destroyRemoteCallback;
+          args[i].emitRemoteCallback = _emitRemoteCallback;
+        }
       }
       if(_LocalCallbackTree)
-        _LocalCallbackTree.callCallback(path, args);
+        _LocalCallbackTree.callCallback(cbtree[1], args);
     }
     catch(e) {
       console.log(e);
     }
   }
+
+  this.returnLocalCallbackTreeCount = ()=> {
+    return Object.keys(_LocalCallbackTrees).length;
+  };
 
   this.returnObj = ()=> {
     return _api;
@@ -89,8 +93,8 @@ function API(_coregateway) {
     _emitRemoteCallback = emitter;
   };
 
-  this.setRemoteUnbindEmitter = (emitter)=> {
-    _emitRemoteUnbind = emitter;
+  this.setRemoteCallbakcDestroyer = (emitter)=> {
+    _destroyRemoteCallback = emitter;
   };
 
   this.returnAPITree = () => {
@@ -121,10 +125,9 @@ function API(_coregateway) {
           let local_callback_tree = createLocalCallbackTree(as, (syncRefer)=> {
             return ({
                 call: (name, Json, remote_callback_2)=> {
-                  if(remote_callback_2) {
-                    syncRefer(remote_callback_2&&as);
+                  if(remote_callback_2&&as) {
+                    syncRefer(remote_callback_2);
                     as.call(name, Json, (err, json)=> {
-                      if(remote_callback_2) {}
                       remote_callback_2.apply([err, json]);
                       remote_callback_2.destory();
                     });

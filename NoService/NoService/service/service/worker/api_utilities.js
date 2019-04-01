@@ -14,12 +14,12 @@ let generateObjCallbacks = (callback_id, obj_tree, callparent) => {
     let deeper = (sub_obj_tree, walked_path_list)=> {
       if(typeof(sub_obj_tree) === 'object' && sub_obj_tree!=null) {
         for(let key in sub_obj_tree) {
-          sub_obj_tree[key]=deeper(sub_obj_tree[key], walked_path_list.concat([key]));
+          sub_obj_tree[key] = deeper(sub_obj_tree[key], walked_path_list.concat([key]));
         }
       }
       else {
         sub_obj_tree = (...args)=> {
-          callparent([callback_id, walked_path_list], args)
+          callparent([callback_id, walked_path_list], args);
         };
       }
       return sub_obj_tree;
@@ -34,7 +34,7 @@ let generateObjCallbacks = (callback_id, obj_tree, callparent) => {
 }
 module.exports.generateObjCallbacks = generateObjCallbacks;
 
-
+// for daemon
 // route remote call to local obj callback
 let callObjCallback = (Obj, Objpath, args)=> {
   let getTargetObj = (path, subobj)=> {
@@ -51,7 +51,7 @@ let callObjCallback = (Obj, Objpath, args)=> {
 module.exports.callObjCallback = callObjCallback;
 
 
-
+// for daemon
 // generate tree from local for remote
 let generateObjCallbacksTree = (obj_raw) => {
   if(typeof(obj_raw)!='function') {
@@ -105,108 +105,118 @@ module.exports.hasFunction = (obj_raw) => {
   }
 }
 
-module.exports.RemoteCallback = function(obj_id) {
+// for daemon and worker
+function RemoteCallbackTree(cbtree) {
+  let obj_id = cbtree[0];
+  let tree = cbtree[1];
+
   this.destroyRemoteCallback;
   this.emitRemoteCallback;
 
+  // for worker
+  this.returnCallbacks = ()=> {
+    return generateObjCallbacks(obj_id, tree, this.emitRemoteCallback);
+  };
+
   this.apply = (args)=> {
-    let _local_callback_trees = {};
-    for(let i in args) {
-      if(args[i]&&args[i].isLocalCallbackTree) {
-        _local_callback_trees[i] = args[i].returnTree();
-      }
-      if(args[i]&&(args[i] instanceof Error)) {
-        args[i] = args[i].toString();
-      }
-    }
-    this.emitRemoteCallback([obj_id, ''], args, _local_callback_trees);
+    this.emitRemoteCallback([obj_id, []], encodeArgumentsToBinary(args));
   };
 
   this.destory = ()=> {
     this.destroyRemoteCallback(obj_id);
   };
 }
+module.exports.RemoteCallbackTree = RemoteCallbackTree;
 
-module.exports.LocalCallbackTree = function (id, obj, obj_contructor, isOneTimeObj) {
-    let _RemoteCallbacks = [];
-    
-    let _syncRefer = (MyRemoteCallback)=> {
-      _RemoteCallbacks.push(MyRemoteCallback);
+
+// both daemon and worker
+function LocalCallbackTree(id, obj, obj_contructor, isOneTimeObj) {
+  let _RemoteCallbacks = [];
+
+  let _syncRefer = (MyRemoteCallback)=> {
+    _RemoteCallbacks.push(MyRemoteCallback);
+  }
+
+  let _callbacks;
+  if(obj_contructor)
+    _callbacks = obj_contructor(_syncRefer);
+
+  this.returnId = ()=> {return _id};
+
+  this.isReferCanceled = ()=>{
+    if(obj) {
+      return obj.worker_cancel_refer;
     }
-
-    let _callbacks;
-    if(obj_contructor)
-      _callbacks = obj_contructor(_syncRefer);
-
-    this.isLocalCallbackTree = true;
-
-    this.returnId = ()=> {return _id};
-
-    this.isReferCanceled = ()=>{
-      if(obj) {
-        return obj.worker_cancel_refer;
-      }
-      else {
-        return true;
-      }
-
+    else {
+      return true;
     }
+  }
 
-    this.destroy = ()=> {
-      for(let id in _RemoteCallbacks) {
-        _RemoteCallbacks[id].destory();
-        delete _RemoteCallbacks[id];
-      }
-      obj = null;
-    };
-
-    this.callCallback = (path, args)=>{
-      try {
-        callObjCallback(_callbacks, path, args);
-      }
-      catch(e) {
-        throw new Error('LocalCallbackTree occured error.\n'+e.stack+'\nObject: \n'+JSON.stringify(generateObjCallbacksTree(obj))+'\nArguments: \n'+JSON.stringify((path, args, arg_objs_trees)));
-      }
-      if(isOneTimeObj) {
-        this.destroy();
-      }
+  this.destroy = ()=> {
+    for(let id in _RemoteCallbacks) {
+      _RemoteCallbacks[id].destory();
+      delete _RemoteCallbacks[id];
     }
-
-    this.returnTree = ()=> {
-      return [id, generateObjCallbacksTree(_callbacks)];
-    }
+    obj = null;
   };
+
+  this.callCallback = (path, args)=>{
+    try {
+      callObjCallback(_callbacks, path, args);
+    }
+    catch(e) {
+      throw new Error('LocalCallbackTree occured error.\n'+e.stack+'\nObject: \n'+JSON.stringify(generateObjCallbacksTree(obj))+'\nArguments: \n'+JSON.stringify((path, args)));
+    }
+    if(isOneTimeObj) {
+      this.destroy();
+    }
+  }
+
+  this.returnTree = ()=> {
+    return [id, generateObjCallbacksTree(_callbacks)];
+  }
+};
+module.exports.LocalCallbackTree = LocalCallbackTree;
 
 // generate Arguments binary
 // format(concat):
 // [1 bytes type] [15 bytes len string][contain]
 // contain
-// type 0 Json:  [Json utf8]
-// type 1 Callback Object:  [Json utf8]
-// type 2 binary:  [Binary]
-module.exports.encodeArgumentsToBinary = (args)=> {
+// type 0 Error:
+// type 1 Json:  [Json utf8]
+// type 2 Callback Object:  [Json utf8]
+// type 3 binary:  [Binary]
+
+let encodeArgumentsToBinary = (args)=> {
   let result = Buffer.alloc(0);
   for(let i in args) {
-    // type 1
-    if(args[i].isLocalCallbackTree) {
-      let blob = Buffer.from(JSON.stringify(args[i].returnTree()));
-      result = Buffer.concat([result, Buffer.alloc(1, 1), Buffer.from(('000000000000000'+blob.length).slice(-15)), blob]);
+    // type 0
+    if(args[i] instanceof Error) {
+      let blob = Buffer.from(args[i].toString());
+      result = Buffer.concat([result, Buffer.alloc(1, 0), Buffer.from(('000000000000000'+blob.length).slice(-15)), blob]);
     }
     // type 2
-    else if (Buffer.isBuffer(args[i])) {
-      let blob = args[i];
+    else if(args[i] instanceof LocalCallbackTree) {
+      let blob = Buffer.from(JSON.stringify(args[i].returnTree()));
       result = Buffer.concat([result, Buffer.alloc(1, 2), Buffer.from(('000000000000000'+blob.length).slice(-15)), blob]);
     }
-    // type 0
+    // type 3
+    else if (Buffer.isBuffer(args[i])) {
+      let blob = args[i];
+      result = Buffer.concat([result, Buffer.alloc(1, 3), Buffer.from(('000000000000000'+blob.length).slice(-15)), blob]);
+    }
+    // type 1
     else {
-      let blob = Buffer.from(JSON.stringify(args[i]));
-      result = Buffer.concat([result, Buffer.alloc(1, 0), Buffer.from(('000000000000000'+blob.length).slice(-15)), blob]);
+      let blob = Buffer.from(JSON.stringify(args[i]?args[i]:null));
+      result = Buffer.concat([result, Buffer.alloc(1, 1), Buffer.from(('000000000000000'+blob.length).slice(-15)), blob]);
     }
   }
   return result;
 }
+module.exports.encodeArgumentsToBinary = encodeArgumentsToBinary;
 
-module.exports.decodeArgumentsFromBinary = (blob)=> {
+
+let decodeArgumentsFromBinary = (blob)=> {
   let result = [];
   while(blob.length) {
     let type = blob[0];
@@ -214,13 +224,16 @@ module.exports.decodeArgumentsFromBinary = (blob)=> {
     let token = blob.slice(16, 16+length);
     blob = blob.slice(16+length);
     if(type === 0) {
-      result.push(JSON.parse(token.toString()));
+      result.push(new Error(token.toString()));
     }
     else if(type === 1) {
-      result.push(null);
+      result.push(JSON.parse(token.toString()));
     }
     else if(type === 2) {
-      result.push(null);
+      result.push(new RemoteCallbackTree(JSON.parse(token.toString())));
+    }
+    else if(type === 3) {
+      result.push(token);
     }
     else {
       result.push(null);
@@ -228,3 +241,4 @@ module.exports.decodeArgumentsFromBinary = (blob)=> {
   }
   return result;
 }
+module.exports.decodeArgumentsFromBinary = decodeArgumentsFromBinary;

@@ -26,6 +26,7 @@ const Net = require('net');
 const {fork, spawn} = require('child_process');
 const fs = require('fs');
 
+const Utils = require('../../../../library').Utilities;
 const API = require('./api');
 
 
@@ -105,7 +106,7 @@ function UnixSocketAPI() {
         _api_sock.send({t:99});
     }
 
-    this.emitRemoteUnbind = (id)=> {
+    this.destroyChildCallback = (id)=> {
        if(_child_alive&&_child&&_api_sock)
          _api_sock.send({t:3, i: id}, (err)=> {
            if (err) {
@@ -264,8 +265,7 @@ function UnixSocketAPI() {
       API.createServiceAPI(_service_socket, _manifest, (err, api)=> {
         _serviceapi = api;
         _serviceapi.setRemoteCallbackEmitter(this.emitChildCallback);
-        _serviceapi.setRemoteUnbindEmitter(this.emitRemoteUnbind);
-        _serviceapi.setRemoteUnbindEmitter(this.emitRemoteUnbind);
+        _serviceapi.setRemoteCallbakcDestroyer(this.destroyChildCallback);
         callback(false);
       })
     };
@@ -327,21 +327,16 @@ function UnixSocketAPI() {
         _emitChildMessage(99);
     }
 
-    this.emitRemoteUnbind = (id)=> {
+    this.destroyChildCallback = (id)=> {
       if(_child_alive&&_child)
         _emitChildMessage(3, Buffer.from(JSON.stringify({i: id})));
     }
 
-    this.emitChildCallback = ([obj_id, path], args, argsobj) => {
-      let _data = {
-        p: [obj_id, path],
-        a: args,
-        o: argsobj
-      }
-
+    this.emitChildCallback = ([obj_id, path], argsblob) => {
+      let _data = JSON.stringify([obj_id, path]);
       try {
         if(_child_alive&&_api_sock)
-          _emitChildMessage(2, Buffer.from(JSON.stringify(_data)));
+          _emitChildMessage(2, Buffer.concat([Buffer.alloc(1, _data.length), Buffer.from(_data), argsblob]));
       }
       catch(err) {
         Utils.TagLog('*ERR*' , 'Occured error on "'+_service_name+'".');
@@ -367,16 +362,18 @@ function UnixSocketAPI() {
       }
       else if(type === 4) {
         try {
-          let message = JSON.parse(blob.toString());
-          _serviceapi.emitAPIRq(message.p, message.a, message.o);
+          let APIpath = JSON.parse(blob.slice(1, 1+blob[0]).toString());
+          _serviceapi.emitAPIRq(APIpath, blob.slice(1+blob[0]));
         }
         catch (e) {
-          let message = JSON.parse(blob.toString());
+          console.log(blob[0]);
+
+          console.log(blob.slice(1, 1+blob[0]).toString());
+          let APIpath = JSON.parse(blob.slice(1, 1+blob[0]).toString());
           let _data = {
             d:{
-              api_path: message.p,
-              call_args: message.a,
-              args_obj_tree: message.o
+              api_path: APIpath,
+              args_string: blob.slice(1+blob[0]).toString()
             },
             e: e.stack
           };
@@ -385,8 +382,8 @@ function UnixSocketAPI() {
       }
       else if(type === 5) {
         try {
-          let message = JSON.parse(blob.toString());
-          _serviceapi.emitCallbackRq(message.p, message.a, message.o);
+          let cbtree = JSON.parse(blob.slice(1, 1+blob[0]).toString());
+          _serviceapi.emitCallbackRq(cbtree, blob.slice(1+blob[0]));
         }
         catch (e) {
           let message = JSON.parse(blob.toString());
@@ -480,8 +477,8 @@ function UnixSocketAPI() {
       API.createServiceAPI(_service_socket, _manifest, (err, api)=> {
         _serviceapi = api;
         _serviceapi.setRemoteCallbackEmitter(this.emitChildCallback);
-        _serviceapi.setRemoteUnbindEmitter(this.emitRemoteUnbind);
-        _serviceapi.setRemoteUnbindEmitter(this.emitRemoteUnbind);
+        _serviceapi.setRemoteCallbakcDestroyer(this.destroyChildCallback);
+        _serviceapi.setRemoteCallbakcDestroyer(this.destroyChildCallback);
         callback(false);
       })
     };
