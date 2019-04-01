@@ -38,7 +38,7 @@ function Service(Me, NoService) {
       if(daemon_setting.debug) {
         NoService.Sniffer.onRouterJSON((err, Json)=>{
           NoService.Utils.TagLog('DEGUG', 'Received a Json.');
-          NoService.Utils.TagLog('DEGUG', {method: Json.method, session: Json.session, toString: Buf.from(Json.data)+''});
+          NoService.Utils.TagLog('DEGUG', {method: Json.method, session: Json.session, toString: Buffer.from(Json.data)+''});
         })
       }
     });

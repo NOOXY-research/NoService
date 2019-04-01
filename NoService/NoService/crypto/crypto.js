@@ -5,7 +5,7 @@
 'use strict';
 
 const crypto = require('crypto');
-
+const Buf = require('../buffer');
 // NOOXY crypto
 function NoCrypto() {
   // to base64
@@ -49,22 +49,22 @@ function NoCrypto() {
     // Keys is in pem format
     RSA2048: {
       encryptString: (publicKey, toEncrypt, callback) => {
-        let buffer = new Buf.from(toEncrypt);
+        let buffer = Buf.from(toEncrypt);
         let encrypted = crypto.publicEncrypt(publicKey, buffer);
         callback(false, encrypted.toString("base64"));
       },
       decryptString: (privateKey, toDecrypt, callback) => {
-        let buffer = new Buf.from(toDecrypt, "base64");
+        let buffer = Buf.from(toDecrypt, "base64");
         let decrypted = crypto.privateDecrypt(privateKey, buffer);
         callback(false, decrypted.toString("utf8"));
       },
       encrypt: (publicKey, toEncrypt, callback) => {
-        let buffer = new Buf.from(toEncrypt);
+        let buffer = Buf.from(toEncrypt);
         let encrypted = crypto.publicEncrypt(publicKey, buffer);
         callback(false, encrypted);
       },
       decrypt: (privateKey, toDecrypt, callback) => {
-        let buffer = new Buf.from(toDecrypt);
+        let buffer = Buf.from(toDecrypt);
         let decrypted = crypto.privateDecrypt(privateKey, buffer);
         callback(false, decrypted);
       }

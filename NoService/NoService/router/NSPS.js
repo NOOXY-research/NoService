@@ -2,6 +2,8 @@
 // Description:
 // "NSPS.js" NOOXY service protocol secure.
 // Copyright 2018-2019 NOOXY. All Rights Reserved.
+'use strict';
+const Buf = require('../buffer');
 
 // NOOXY service protocol secure
 function NSPS() {
@@ -69,7 +71,7 @@ function NSPS() {
         r: client_random_num,
         a: aes_key// aes key to vertify
       };
-      _crypto_module.encryptString('RSA2048', host_rsa_pub, JSON.stringify(_data), (err, encrypted)=>{
+      _crypto_module.encryptString('RSA2048', host_rsa_pub, JSON.stringify(_data), (err, encrypted)=> {
         connprofile.setBundle('NSPS', 'finalize');
         emitResponse(connprofile,  Buf.from(JSON.stringify(encrypted)));
       });
