@@ -310,7 +310,7 @@ function ServiceSocket(service_name, prototype, emitter, debug, entity_module, a
 
 };
 
-function ActivitySocket(conn_profile, emitter, unbindActivitySocketList, debug) {
+function ActivitySocket(service_name, conn_profile, emitter, unbindActivitySocketList, debug) {
   // Service Socket callback
   let _emitdata = emitter.Data;
 
@@ -326,10 +326,10 @@ function ActivitySocket(conn_profile, emitter, unbindActivitySocketList, debug) 
   let _jfqueue = {};
   let _on_dict = {
     data: ()=> {
-      if(debug) Utils.TagLog('*WARN*', 'ActivitySocket on "data" not implemented')
+      if(debug) Utils.TagLog('*WARN*', 'ActivitySocket of service "'+service_name+'" on "data" not implemented')
     },
     close: ()=> {
-      if(debug) Utils.TagLog('*WARN*', 'ActivitySocket on "close" not implemented')
+      if(debug) Utils.TagLog('*WARN*', 'ActivitySocket of service "'+service_name+'" on "close" not implemented')
     }
   };
 

@@ -1,0 +1,32 @@
+{
+  "name": "NoCluster",
+  "version": "0.0.0",
+  "displayname": "Service fullname",
+  "description": "Service description",
+  "language": null,
+  "Authors": [],
+  "git_url": null,
+  "upgrade_branch": "master",
+  "LibraryAPI": true,
+  "DatabaseAPI": true,
+  "dependencies": {
+    "node_packages": {},
+    "services": {}
+  },
+  "servicefunctions": {
+    "func1": {
+      "displayname": "servicefunction 1",
+      "description": "ServiceFunciton description.",
+      "secure": false,
+      "protocol": {
+        "call": {
+          "p1": "Hello from activity!"
+        },
+        "return": {
+          "p1": "Hello from service!"
+        }
+      }
+    }
+  },
+  "settings": {}
+}

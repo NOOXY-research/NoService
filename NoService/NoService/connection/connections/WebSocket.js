@@ -91,7 +91,7 @@ function Client(ConnectionProfile) {
   this.onClose = () => {Utils.TagLog('*ERR*', 'onClose not implemented');};
 
   this.send = (connprofile, data)=> {
-    if (_ws.readyState !== WebSocket.OPEN) {
+    if (_ws.readyState === WebSocket.CONNECTING) {
       _ops.push(()=>{_ws.send(data)});
     }
     else {

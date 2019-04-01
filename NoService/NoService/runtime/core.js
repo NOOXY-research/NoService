@@ -229,7 +229,16 @@ function Core(NoServiceLibrary, settings) {
 
       // start setting up
       verbose('Daemon', 'Loading plugins with initilalized NoService.');
-      Plugin.startPlugins(settings.plugins_path, coregateway, true, settings, (err)=> {
+
+      let plugins = require("fs").readdirSync(settings.plugins_path).map((file)=> { return require(settings.plugins_path+"/" + file);});
+      let plugins_from_services = [];
+      settings.services.forEach((file)=> {
+        if(require("fs").existsSync(settings.services_path+"/" + file+'/plugin')) {
+          plugins_from_services.push( require(settings.services_path+"/" + file+'/plugin'));
+        }
+      })
+
+      Plugin.startPlugins(plugins.concat(plugins_from_services), coregateway, true, settings, (err)=> {
         if(err) {
           callback(err);
         }
@@ -430,7 +439,15 @@ function Core(NoServiceLibrary, settings) {
     let _init_auth = new Authenticity();
 
     verbose('Daemon', 'Loading plugins without initilalized NoService.');
-    Plugin.startPlugins(settings.plugins_path, null, false, settings, (err)=> {
+
+    let plugins = require("fs").readdirSync(settings.plugins_path).map((file)=> { return require(settings.plugins_path+"/" + file);});
+    let plugins_from_services = [];
+    settings.services.forEach((file)=> {
+      if(require("fs").existsSync(settings.services_path+"/" + file+'/plugin')) {
+        plugins_from_services.push( require(settings.services_path+"/" + file+'/plugin'));
+      }
+    })
+    Plugin.startPlugins(plugins, null, false, settings, (err)=> {
       if(err) {
         callback(err);
       }

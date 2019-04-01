@@ -35,15 +35,14 @@ function Activity() {
       Close: _on_handler['EmitASCloseRq'],
     }
     _on_handler['createActivitySocketRq'](method, targetport, owner, 'normal', service, targetip, false, (err, connprofile, entityId)=> {
-      let _as = new SocketPair.ActivitySocket(connprofile, _emmiter, _unbindActivitySocketList, _debug);
       if(entityId) {
+        let _as = new SocketPair.ActivitySocket(service, connprofile, _emmiter, _unbindActivitySocketList, _debug);
         _as.setEntityId(entityId);
         connprofile.setBundle('entityId', entityId);
         _ASockets[entityId] = _as;
         callback(false, _ASockets[entityId]);
       }
       else{
-        delete  _ASockets[entityId];
         callback(new Error('Could not create this entity for some reason.'));
       }
     });
@@ -60,15 +59,14 @@ function Activity() {
       Close: _on_handler['EmitASCloseRq'],
     }
     _on_handler['createActivitySocketRq'](method, targetport, owner, 'daemon', service, targetip, _daemon_auth_key, (err, connprofile, entityId)=> {
-      let _as = new SocketPair.ActivitySocket(connprofile, _emmiter, _unbindActivitySocketList, _debug);
       if(entityId) {
+        let _as = new SocketPair.ActivitySocket(service, connprofile, _emmiter, _unbindActivitySocketList, _debug);
         _as.setEntityId(entityId);
         connprofile.setBundle('entityId', entityId);
         _ASockets[entityId] = _as;
         callback(false, _ASockets[entityId]);
       }
       else{
-        delete  _ASockets[entityId];
         callback(new Error('Could not create this entity for some reason.'));
       }
     });

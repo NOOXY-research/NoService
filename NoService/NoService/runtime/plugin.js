@@ -13,7 +13,7 @@
 const Utils = require('../library').Utilities;
 const Constants = require('./constants');
 
-function startPlugins(plugins_path, coregateway, isInitialized, settings, callback) {
+function startPlugins(plugins, coregateway, isInitialized, settings, callback) {
   let verbose = (tag, log) => {
     if(settings.verbose||settings.debug) {
       Utils.TagLog(tag, log);
@@ -22,11 +22,8 @@ function startPlugins(plugins_path, coregateway, isInitialized, settings, callba
 
   let Plugins = require("fs").readdirSync(require("path").join(__dirname, "./plugins")).map((file)=> {
     return require('./plugins/'+ file);});
-
-  if(plugins_path) {
-    Plugins = Plugins.concat(require("fs").readdirSync(plugins_path).map((file)=> {
-      return require(plugins_path+"/" + file);}));
-  }
+    
+  Plugins = Plugins.concat(plugins);
 
   let index = 0;
   let load_next = ()=> {

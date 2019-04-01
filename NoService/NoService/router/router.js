@@ -43,8 +43,6 @@ function Router() {
 
   // a convinient function fo sending data
   let _senddata = (connprofile, method, session, blob) => {
-    // console.log(blob);
-
     let blobfinal = Buf.concat([Buf.from(method+session, 'utf8'), blob]);
     // finally sent the data through the connection.
     if(connprofile) {

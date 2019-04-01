@@ -259,7 +259,6 @@ module.exports = function Protocol(coregateway, emitRequest, debug) {
         else {
           _ActivityRsCEcallbacks[data.d.t](connprofile, data);
           delete  _ActivityRsCEcallbacks[data.d.t];
-          connprofile.closeConnetion();
         }
       }
     }
