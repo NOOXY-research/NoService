@@ -39,6 +39,12 @@ core.checkandlaunch();
 ## What is NoService?
 NoService is a high level framework for services that provide you "nodejs" and "python3" environment and eliminate service designer to care about low level part of your project.Such as authorization, user system, database, protocol and so on. It also run multiple services integrated and we also provide a manager and shell to manipulate all of them.
 
+## Examples
+1. Game that combine our neuralnet lib and NoService. ([noversi](https://nooxy.org/noversi))
+2. Chat service. ([Talksy](https://talk.nooxy.org))
+3. Notification([NOOXY](https://nooxy.org))
+4. Shell that access NoService. ([NoShell](https://www.nooxy.org/static/nsf/shell.html))
+
 ## Why we build NoService? And why you should give it a try?
 
 ### Seperating backend applications from physical differences
