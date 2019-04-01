@@ -126,7 +126,7 @@ module.exports = function() {
     });
 
     noservice_coregateway.ServiceAPI.addAPIGenerator((api, service_socket, manifest)=> {
-      api.addAPI(['Commandline'], (LCBO)=> {
+      api.addAPI(['Commandline'], (createLocalCallbackTree)=> {
         return({
           question: (question, remote_callback_obj)=> {
             rl.question(question, (answer)=> {

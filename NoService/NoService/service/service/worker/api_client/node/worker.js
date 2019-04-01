@@ -317,6 +317,7 @@ function WorkerClient(_api_sock) {
       }
 
       else if(type === 98) {
+        let message = JSON.parse(blob.toString());
         Utils.TagLog('*ERR*', 'Service "'+_service_name+'" occured error on API call.');
         console.log('Details: ');
         console.log(message.d);

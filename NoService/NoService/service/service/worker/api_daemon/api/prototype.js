@@ -7,6 +7,9 @@
 
 const Utils = require('../../../../../library').Utilities;
 const APIUtils = require('../../api_utilities');
+const LocalCallbackTree = APIUtils.LocalCallbackTree;
+const RemoteCallback = APIUtils.RemoteCallback;
+
 
 function API(_coregateway) {
   let _clear_obj_garbage_timeout = 30000;
@@ -27,6 +30,7 @@ function API(_coregateway) {
     try {
       for(let key in _LocalCallbackTrees) {
         if(_LocalCallbackTrees[key].isReferCanceled() === false) {
+          delete _LocalCallbackTrees[_id];
           _LocalCallbackTrees[key].destroy();
         }
       }
@@ -38,96 +42,21 @@ function API(_coregateway) {
   }, _clear_obj_garbage_timeout);
 
   this.reset = ()=> {
-    _LocalCallbackTrees = [];
-  };
-  // Local callback tree
-  function LocalCallbackTree(obj, obj_contructor, isOneTimeObj) {
-    let _RemoteCallbacks = [];
-    let _id = Utils.generateUniqueId();
-    _LocalCallbackTrees[_id] = this;
-
-    let _syncRefer = (MyRemoteCallback)=> {
-      _RemoteCallbacks.push(MyRemoteCallback);
-    }
-
-    let _callbacks;
-    if(obj_contructor)
-      _callbacks = obj_contructor(_syncRefer);
-
-    this.isLocalCallbackTree = true;
-
-    this.returnId = ()=> {return _id};
-
-    this.isReferCanceled = ()=>{
-      if(obj) {
-        return obj.worker_cancel_refer;
-      }
-      else {
-        return true;
-      }
-
-    }
-
-    this.destroy = ()=> {
-      delete _LocalCallbackTrees[_id];
-      for(let id in _RemoteCallbacks) {
-        _RemoteCallbacks[id].destory();
-        delete _RemoteCallbacks[id];
-      }
-      obj = null;
-    };
-
-    this.callCallback = (path, args, arg_objs_trees)=>{
-      try {
-        for(let i in arg_objs_trees) {
-          args[parseInt(i)] = new RemoteCallback(arg_objs_trees[i][0]);
-        }
-        APIUtils.callObjCallback(_callbacks, path, args);
-      }
-      catch(e) {
-        Utils.TagLog('*ERR*', 'LocalCallbackTree occured error.');
-        console.log(e);
-        Utils.TagLog('*ERR*', 'LocalCallbackTree detail.');
-        Utils.TagLog('*ERR*', 'Object: ');
-        console.log(obj);
-        Utils.TagLog('*ERR*', 'Tree: ');
-        console.log(APIUtils.generateObjCallbacksTree(obj));
-        Utils.TagLog('*ERR*', 'Arguments: ');
-        console.log(path, args, arg_objs_trees);
-      }
-      if(isOneTimeObj) {
-        this.destroy();
-      }
-    }
-
-    this.returnTree = ()=> {
-      return [_id, APIUtils.generateObjCallbacksTree(_callbacks)];
-    }
+    _LocalCallbackTrees = {};
   };
 
-  // Remote callback
-  function RemoteCallback(obj_id) {
-    this.apply = (args)=> {
-      let _local_callback_trees = {};
-      for(let i in args) {
-        if(args[i]&&args[i].isLocalCallbackTree) {
-          _local_callback_trees[i] = args[i].returnTree();
-        }
-        if(args[i]&&(args[i] instanceof Error)) {
-          args[i] = args[i].toString();
-        }
-      }
-      _emitRemoteCallback([obj_id, ''], args, _local_callback_trees);
-    };
+  let createLocalCallbackTree = (obj, obj_contructor, isOneTimeObj) => {
+    let id = Utils.generateUniqueId();
+    _LocalCallbackTrees[id] = new LocalCallbackTree(id, obj, obj_contructor, isOneTimeObj);
+    return _LocalCallbackTrees[id];
+  };
 
-    this.destory = ()=> {
-      _emitRemoteUnbind(obj_id);
-    };
-  }
 
   this.emitAPIRq = (path, args, arg_objs_trees)=> {
     for(let i in arg_objs_trees) {
       args[parseInt(i)] = new RemoteCallback(arg_objs_trees[i][0]);
+      args[parseInt(i)].emitRemoteCallback = _emitRemoteCallback;
+      args[parseInt(i)].destroyRemoteCallback = _emitRemoteUnbind;
     }
     APIUtils.callObjCallback(_api, path, args);
   }
@@ -136,10 +65,20 @@ function API(_coregateway) {
     return Object.keys(_LocalCallbackTrees).length;
   };
 
-  this.emitCallbackRq = ([id, path], args, argsobj)=> {
+  this.emitCallbackRq = ([id, path], args, arg_objs_trees)=> {
     let _LocalCallbackTree = _LocalCallbackTrees[id];
-    if(_LocalCallbackTree)
-      _LocalCallbackTree.callCallback(path, args, argsobj);
+    try {
+      for(let i in arg_objs_trees) {
+        args[parseInt(i)] = new RemoteCallback(arg_objs_trees[i][0]);
+        args[parseInt(i)].emitRemoteCallback = _emitRemoteCallback;
+        args[parseInt(i)].destroyRemoteCallback = _emitRemoteUnbind;
+      }
+      if(_LocalCallbackTree)
+        _LocalCallbackTree.callCallback(path, args);
+    }
+    catch(e) {
+      console.log(e);
+    }
   }
 
   this.returnObj = ()=> {
@@ -166,7 +105,7 @@ function API(_coregateway) {
       _target = _target[key];
     }
 
-    _target[list[list.length-1]] = construct_function(LocalCallbackTree);
+    _target[list[list.length-1]] = construct_function(createLocalCallbackTree);
     // generate API Tree
     _api_tree = APIUtils.generateObjCallbacksTree(_api);
   }
@@ -179,7 +118,7 @@ function API(_coregateway) {
     ActivitySocket: {
       createSocket: (method, targetip, targetport, service, owner, remote_callback) => {
         _coregateway.Activity.createActivitySocket(method, targetip, targetport, service, owner, (err, as)=> {
-          let local_callback_tree = new LocalCallbackTree(as, (syncRefer)=> {
+          let local_callback_tree = createLocalCallbackTree(as, (syncRefer)=> {
             return ({
                 call: (name, Json, remote_callback_2)=> {
                   if(remote_callback_2) {
@@ -237,7 +176,7 @@ function API(_coregateway) {
       },
       createDefaultDeamonSocket: (service, owner, remote_callback) => {
         _coregateway.Activity.createDaemonActivitySocket(DAEMONTYPE, DAEMONIP, DAEMONPORT, service, owner, (err, as)=> {
-          let local_callback_tree = new LocalCallbackTree(as, (syncRefer)=> {
+          let local_callback_tree = createLocalCallbackTree(as, (syncRefer)=> {
             return ({
                 call: (name, Json, remote_callback_2)=> {
                   if(remote_callback_2&&as) {
@@ -294,7 +233,7 @@ function API(_coregateway) {
       },
       createDeamonSocket: (method, targetip, targetport, service, owner, remote_callback) => {
         _coregateway.Activity.createDaemonActivitySocket(method, targetip, targetport, service, owner, (err, as)=> {
-          let local_callback_tree = new LocalCallbackTree(as, (syncRefer)=> {
+          let local_callback_tree = createLocalCallbackTree(as, (syncRefer)=> {
             return ({
                 call: (name, Json, remote_callback_2)=> {
                   if(remote_callback_2&&as) {
@@ -353,7 +292,7 @@ function API(_coregateway) {
       },
       createAdminDeamonSocket: (method, targetip, targetport, service, remote_callback) => {
         _coregateway.Activity.createAdminDaemonActivitySocket(method, targetip, targetport, service, (err, as)=> {
-          let local_callback_tree = new LocalCallbackTree(as, (syncRefer)=> {
+          let local_callback_tree = createLocalCallbackTree(as, (syncRefer)=> {
             return ({
                 call: (name, Json, remote_callback_2)=> {
                   if(remote_callback_2&&as) {
@@ -411,7 +350,7 @@ function API(_coregateway) {
 
       createDefaultAdminDeamonSocket: (service, remote_callback) => {
         _coregateway.Activity.createAdminDaemonActivitySocket(DAEMONTYPE, DAEMONIP, DAEMONPORT, service, (err, as)=> {
-          let local_callback_tree = new LocalCallbackTree(as, (syncRefer)=> {
+          let local_callback_tree = createLocalCallbackTree(as, (syncRefer)=> {
             return ({
                 call: (name, Json, remote_callback_2)=> {
                   if(remote_callback_2&&as) {
@@ -539,7 +478,7 @@ function API(_coregateway) {
       },
       getEntityConnProfile: (entityId, remote_callback)=> {
         _coregateway.Entity.getEntityConnProfile(entityId, (err, conn_profile)=> {
-          let local_callback_tree = new LocalCallbackTree(conn_profile, (conn_profile_syncRefer)=> {
+          let local_callback_tree = createLocalCallbackTree(conn_profile, (conn_profile_syncRefer)=> {
             return ({
                 getServerId: (remote_callback_2)=> {
                   if(remote_callback_2) {

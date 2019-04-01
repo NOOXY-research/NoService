@@ -389,6 +389,7 @@ function UnixSocketAPI() {
           _serviceapi.emitCallbackRq(message.p, message.a, message.o);
         }
         catch (e) {
+          let message = JSON.parse(blob.toString());
           let _data = {
             d:{
               obj_path: message.p,

@@ -16,11 +16,11 @@ function ServiceAPI() {
 
   let _addNormalAPIs = (api, service_socket, manifest)=> {
     let _service_name = manifest.name;
-    api.addAPI(['Service', 'ServiceSocket'], (LocalCallbackTree)=> {
+    api.addAPI(['Service', 'ServiceSocket'], (createLocalCallbackTree)=> {
       return ({
         def: (name, remote_callback)=> {
           service_socket.def(name, (json, entityId, returnJSON)=> {
-            let returnJSON_LocalCallbackTree = new LocalCallbackTree(returnJSON, (returnJSON_syncRefer)=> {
+            let returnJSON_LocalCallbackTree = createLocalCallbackTree(returnJSON, (returnJSON_syncRefer)=> {
               return ((err, json_be_returned)=>{
                 returnJSON(err, json_be_returned);
               });
@@ -33,7 +33,7 @@ function ServiceAPI() {
 
         define: (name, remote_callback)=> {
           service_socket.def(name, (json, entityId, returnJSON)=> {
-            let returnJSON_LocalCallbackTree = new LocalCallbackTree(returnJSON, (returnJSON_syncRefer)=> {
+            let returnJSON_LocalCallbackTree = createLocalCallbackTree(returnJSON, (returnJSON_syncRefer)=> {
               return ((err, json_be_returned)=>{
                 returnJSON(err, json_be_returned);
               });
@@ -46,7 +46,7 @@ function ServiceAPI() {
 
         sdef: (name, remote_callback, remote_callback_2)=> {
           service_socket.sdef(name, (json, entityId, returnJSON)=> {
-            let returnJSON_LocalCallbackTree = new LocalCallbackTree(returnJSON, (returnJSON_syncRefer)=> {
+            let returnJSON_LocalCallbackTree = createLocalCallbackTree(returnJSON, (returnJSON_syncRefer)=> {
               return ((err, json_be_returned)=>{
                 returnJSON(err, json_be_returned);
               });
@@ -56,7 +56,7 @@ function ServiceAPI() {
             }
           },
           (json, entityId, returnJSON)=> {
-            let returnJSON_LocalCallbackTree = new LocalCallbackTree(returnJSON, (returnJSON_syncRefer)=> {
+            let returnJSON_LocalCallbackTree = createLocalCallbackTree(returnJSON, (returnJSON_syncRefer)=> {
               return ((err, json_be_returned)=>{
                 returnJSON(err, json_be_returned);
               });
@@ -69,7 +69,7 @@ function ServiceAPI() {
 
         sdefine: (name, remote_callback, remote_callback_2)=> {
           service_socket.sdef(name, (json, entityId, returnJSON)=> {
-            let returnJSON_LocalCallbackTree = new LocalCallbackTree(returnJSON, (returnJSON_syncRefer)=> {
+            let returnJSON_LocalCallbackTree = createLocalCallbackTree(returnJSON, (returnJSON_syncRefer)=> {
               return ((err, json_be_returned)=>{
                 returnJSON(err, json_be_returned);
               });
@@ -79,7 +79,7 @@ function ServiceAPI() {
             }
           },
           (json, entityId, returnJSON)=> {
-            let returnJSON_LocalCallbackTree = new LocalCallbackTree(returnJSON, (returnJSON_syncRefer)=> {
+            let returnJSON_LocalCallbackTree = createLocalCallbackTree(returnJSON, (returnJSON_syncRefer)=> {
               return ((err, json_be_returned)=>{
                 returnJSON(err, json_be_returned);
               });
@@ -100,7 +100,7 @@ function ServiceAPI() {
           }
           else {
             service_socket.on(type, (entityId, callback)=> {
-              let callback_LocalCallbackTree = new LocalCallbackTree(callback, (callback_syncRefer)=> {
+              let callback_LocalCallbackTree = createLocalCallbackTree(callback, (callback_syncRefer)=> {
                 return ((err)=>{
                   callback(err);
                 });
@@ -175,7 +175,7 @@ function ServiceAPI() {
         return null;
       }
       else if(model.ModelType === 'Object') {
-        return(new LocalCallbackTree(model, (model_syncRefer)=> {
+        return(createLocalCallbackTree(model, (model_syncRefer)=> {
           return ({
               getModelType: (remote_callback)=> {
                 if(remote_callback) {
@@ -280,7 +280,7 @@ function ServiceAPI() {
         }));
       }
       else if(model.ModelType === 'Pair') {
-        return(new LocalCallbackTree(model, (model_syncRefer)=> {
+        return(createLocalCallbackTree(model, (model_syncRefer)=> {
           return ({
               getModelType: (remote_callback)=> {
                 if(remote_callback) {
@@ -473,7 +473,7 @@ function ServiceAPI() {
         }));
       }
       else if(model.ModelType === 'IndexedList') {
-        return(new LocalCallbackTree(model, (model_syncRefer)=> {
+        return(createLocalCallbackTree(model, (model_syncRefer)=> {
           return ({
             getModelType: (remote_callback)=> {
               if(remote_callback) {
@@ -639,7 +639,7 @@ function ServiceAPI() {
         }));
       }
       else if(model.ModelType === 'GroupIndexedList') {
-        return(new LocalCallbackTree(model, (model_syncRefer)=> {
+        return(createLocalCallbackTree(model, (model_syncRefer)=> {
           return ({
             getModelType: (remote_callback)=> {
               if(remote_callback) {
@@ -880,7 +880,7 @@ function ServiceAPI() {
             _new_model_dict[_service_name+'_'+model_name] = models_dict[model_name];
           }
           _coregateway.Model.doBatchSetup(_new_model_dict, (err, models)=> {
-            let local_callback_obj = new LocalCallbackTree(models, (models_syncRefer)=> {
+            let local_callback_obj = createLocalCallbackTree(models, (models_syncRefer)=> {
               let dict = {};
               for(let key in models) {
                 dict[key] = _turn_model_to_local_callback_obj(models[key], LocalCallbackTree);
@@ -902,7 +902,7 @@ function ServiceAPI() {
           _coregateway.Model.get(model_name, (err, the_model)=> {
             if(remote_callback) {
               let local_callback_obj;
-              local_callback_obj = new LocalCallbackTree(the_model, (the_model_syncRefer)=> {
+              local_callback_obj = createLocalCallbackTree(the_model, (the_model_syncRefer)=> {
                 return ({
                     getModelType: (remote_callback_2)=> {
                       if(remote_callback_2) {
