@@ -51,7 +51,8 @@
     "NoServiceManager",
     "NoUser",
     "NoTalk",
-    "NoMailer"
+    "NoMailer",
+    "NoCluster"
   ],
 
   "debug": false,

@@ -215,7 +215,7 @@ function NoServiceManager() {
 
           init_from_level(0, (err)=> {
             if(err) {
-              Utils.TagLog('*ERR*', '****** An error occured on initializing service. Closeing... ******');
+              Utils.TagLog('*ERR*', '****** An error occured on initializing service. Closing... ******');
               console.log(err);
               Daemon.close();
             }
@@ -245,7 +245,7 @@ function NoServiceManager() {
             }
             launch_from_level(0, (err)=> {
               if(err) {
-                Utils.TagLog('*ERR*', '****** An error occured on lauching service. Closeing...  ******');
+                Utils.TagLog('*ERR*', '****** An error occured on lauching service. Closing...  ******');
                 console.log(err);
                 Daemon.close();
               }

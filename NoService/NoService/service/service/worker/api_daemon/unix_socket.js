@@ -55,6 +55,11 @@ function UnixSocketAPI() {
         _on_callbacks['message'](message);
     };
 
+    this._onError = (err)=> {
+      if(_on_callbacks['error'])
+        _on_callbacks['error'](err);
+    };
+
     this.send = (blob, callback)=> {
       sock.write(Buf.concat([Buf.from(('0000000000000000'+blob.length).slice(-16)), blob]));
     }
@@ -223,6 +228,12 @@ function UnixSocketAPI() {
       APIsock.on('message', (message)=> {
         this.onMessage(message);
       });
+      APIsock.on('error', ()=> {
+        console.log('err');
+        _child.kill();
+        _child = null;
+        _child_alive = false;
+      });
       this.onMessage({t: 0});
     };
 
@@ -241,27 +252,6 @@ function UnixSocketAPI() {
       _child_alive = true;
     };
 
-    this.relaunch = (relaunch_callback)=> {
-      Utils.TagLog('Workerd', 'Relaunching service "'+_service_name+'"');
-      this.close((err)=> {
-        if(err) {
-          relaunch_callback(err);
-        }
-        else {
-          setTimeout(()=>{
-            this.init((err)=> {
-              if(err) {
-                relaunch_callback(err);
-              }
-              else {
-                this.launch(relaunch_callback);
-              }
-            });
-          }, _close_worker_timeout+10);
-        }
-      });
-    };
-
     this.createServiceAPI = (_service_socket, callback)=> {
       API.createServiceAPI(_service_socket, _manifest, (err, api)=> {
         _serviceapi = api;
@@ -272,9 +262,14 @@ function UnixSocketAPI() {
     };
 
     this.close = (callback)=> {
-      _close_callback = callback;
-      _serviceapi.reset();
-      this.emitChildClose();
+      if(!_child_alive) {
+        callback();
+      }
+      else {
+        _close_callback = callback;
+        _serviceapi.reset();
+        this.emitChildClose();
+      }
     };
   };
 
@@ -416,9 +411,11 @@ function UnixSocketAPI() {
         _child = null;
         _child_alive = false;
       }
+
       else if(type === 97){
         // _launch_callback(new Error('Worker runtime error:\n'+message.e));
       }
+
       else if(type === 98){
         let message = JSON.parse(blob.toString());
         _launch_callback(new Error('Worker launching error:\n'+message.e));
@@ -471,6 +468,14 @@ function UnixSocketAPI() {
         let type = message[0];
         this.onMessage(type, message.slice(1));
       });
+      APIsock.on('error', ()=> {
+        _child.kill();
+        _child = null;
+        _child_alive = false;
+        if(_close_callback) {
+          _close_callback();
+        }
+      });
       this.onMessage(0);
     };
 
@@ -485,9 +490,14 @@ function UnixSocketAPI() {
     };
 
     this.close = (callback)=> {
-      _close_callback = callback;
-      _serviceapi.reset();
-      this.emitChildClose();
+      if(!_child_alive) {
+        callback();
+      }
+      else {
+        _close_callback = callback;
+        _serviceapi.reset();
+        this.emitChildClose();
+      }
     };
   };
 
@@ -581,10 +591,8 @@ function UnixSocketAPI() {
       });
 
       socket.on('error', (error) => {
-        Utils.TagLog('*ERR*', 'An error occured on worker daemon module.');
-        Utils.TagLog('*ERR*', error);
         socket.destroy();
-        _api_sock._onClose();
+        _api_sock._onError();
       });
 
       socket.on('close', ()=> {
