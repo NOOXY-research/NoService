@@ -145,7 +145,7 @@ module.exports = function Protocol(coregateway, emitRequest, debug) {
           }
           emitResponse(connprofile, Buffer.from(JSON.stringify(_data)));
         },
-        // nooxy service protocol implementation of "Call Service: json function"
+        // nooxy service protocol implementation of "Call Service: service function"
         SF: (connprofile, data, emitResponse) => {
           let _data;
           if(typeof(theservice) != 'undefined') {
