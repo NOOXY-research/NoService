@@ -3,7 +3,7 @@
 // "CS.js" nooxy service protocol implementation of "call service"
 // Copyright 2018-2019 NOOXY. All Rights Reserved.
 'use strict';
-
+const Buf = require('../../buffer');
 
 module.exports = function Protocol(coregateway, emitRequest, debug) {
   this.Protocol = "CS";
@@ -36,7 +36,7 @@ module.exports = function Protocol(coregateway, emitRequest, debug) {
       _ActivityRsCEcallbacks[_data.d.t] = (connprofile, data) => {
         callback(false, connprofile, data.d.i);
       }
-      emitRequest(connprofile, 'CS', Buffer.from(JSON.stringify(_data)));
+      emitRequest(connprofile, 'CS', Buf.from(JSON.stringify(_data)));
     });
 
   });
@@ -49,7 +49,7 @@ module.exports = function Protocol(coregateway, emitRequest, debug) {
           "d": d,
         }
       };
-      emitRequest(conn_profile, 'CS', Buffer.from(JSON.stringify(_data)));
+      emitRequest(conn_profile, 'CS', Buf.from(JSON.stringify(_data)));
 
   });
 
@@ -63,7 +63,7 @@ module.exports = function Protocol(coregateway, emitRequest, debug) {
           "t": tempid
         }
       };
-      emitRequest(conn_profile, 'CS', Buffer.from(JSON.stringify(_data)));
+      emitRequest(conn_profile, 'CS', Buf.from(JSON.stringify(_data)));
 
   });
 
@@ -74,7 +74,7 @@ module.exports = function Protocol(coregateway, emitRequest, debug) {
           "i": entityId
         }
       };
-      emitRequest(conn_profile, 'CS', Buffer.from(JSON.stringify(_data)));
+      emitRequest(conn_profile, 'CS', Buf.from(JSON.stringify(_data)));
   });
 
   // Serverside
@@ -115,7 +115,7 @@ module.exports = function Protocol(coregateway, emitRequest, debug) {
                 }
               }
             }
-            emitResponse(connprofile, Buffer.from(JSON.stringify(_data)));
+            emitResponse(connprofile, Buf.from(JSON.stringify(_data)));
           });
 
         },
@@ -143,7 +143,7 @@ module.exports = function Protocol(coregateway, emitRequest, debug) {
               }
             };
           }
-          emitResponse(connprofile, Buffer.from(JSON.stringify(_data)));
+          emitResponse(connprofile, Buf.from(JSON.stringify(_data)));
         },
         // nooxy service protocol implementation of "Call Service: service function"
         SF: (connprofile, data, emitResponse) => {
@@ -173,7 +173,7 @@ module.exports = function Protocol(coregateway, emitRequest, debug) {
                   }
                 };
               }
-              emitResponse(connprofile, Buffer.from(JSON.stringify(_data)));
+              emitResponse(connprofile, Buf.from(JSON.stringify(_data)));
             });
           }
           else {
@@ -186,7 +186,7 @@ module.exports = function Protocol(coregateway, emitRequest, debug) {
                 "s": "Fail"
               }
             };
-            emitResponse(connprofile, Buffer.from(JSON.stringify(_data)));
+            emitResponse(connprofile, Buf.from(JSON.stringify(_data)));
           }
         },
 
@@ -194,7 +194,7 @@ module.exports = function Protocol(coregateway, emitRequest, debug) {
         CE: (connprofile, data, emitResponse) => {
           Service.createEntity(connprofile, data.s, data.m, data.k, connprofile.returnClientIP(),
            data.o, data.od, connprofile.returnServerId(), connprofile.returnConnMethod(), data.d, (err, Id)=> {
-            emitResponse(connprofile, Buffer.from(JSON.stringify({
+            emitResponse(connprofile, Buf.from(JSON.stringify({
               "m": "CE",
               "d": {
                 // temp id
@@ -254,7 +254,7 @@ module.exports = function Protocol(coregateway, emitRequest, debug) {
             }
           };
 
-          emitRequest(connprofile, 'CS', Buffer.from(JSON.stringify(_data)));
+          emitRequest(connprofile, 'CS', Buf.from(JSON.stringify(_data)));
         }
         else {
           _ActivityRsCEcallbacks[data.d.t](connprofile, data);

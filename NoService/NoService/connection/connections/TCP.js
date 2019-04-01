@@ -6,6 +6,7 @@
 
 const Net = require('net');
 const Utils = require('../../library').Utilities;
+const Buf = require('../../buffer');
 
 function Server(ServerId, ConnectionProfile) {
   let _hostip;
@@ -27,12 +28,12 @@ function Server(ServerId, ConnectionProfile) {
   this.onClose = (connprofile) => {Utils.TagLog('*ERR*', 'onClose not implemented');};
 
   this.send = (connprofile, blob)=> {
-    _myclients[connprofile.returnGUID()].write(Buffer.concat([Buffer.from(('0000000000000000'+blob.length).slice(-16)), blob]));
+    _myclients[connprofile.returnGUID()].write(Buf.concat([Buf.from(('0000000000000000'+blob.length).slice(-16)), blob]));
   };
 
   this.broadcast = (blob) => {
     for(let i in _myclients) {
-      _myclients[i].write(Buffer.concat([Buffer.from(('0000000000000000'+blob.length).slice(-16)), blob]));
+      _myclients[i].write(Buf.concat([Buf.from(('0000000000000000'+blob.length).slice(-16)), blob]));
     }
   };
 
@@ -53,7 +54,7 @@ function Server(ServerId, ConnectionProfile) {
 
       socket.on('data', (data) => {
         if(resume_data) {
-          data = Buffer.concat([resume_data, data]);
+          data = Buf.concat([resume_data, data]);
           // console.log('resume');
         };
 
@@ -77,7 +78,7 @@ function Server(ServerId, ConnectionProfile) {
           else if(data.length > chunks_size - message.length) {
             let left_size = chunks_size - message.length;
             // console.log('>', !message, data.length, chunks_size, message.length);
-            message = Buffer.concat([message, data.slice(0, left_size)]);
+            message = Buf.concat([message, data.slice(0, left_size)]);
             data = data.slice(left_size);
             // console.log('>', !message, data.length, chunks_size, message.length);
             if(message.length === chunks_size) {
@@ -92,7 +93,7 @@ function Server(ServerId, ConnectionProfile) {
             }
           }
           else {
-            message = Buffer.concat([message, data]);
+            message = Buf.concat([message, data]);
             data = [];
             if(message.length === chunks_size) {
               _onMessege(message);
@@ -142,7 +143,7 @@ function Client(ConnectionProfile) {
   this.onClose = () => {Utils.TagLog('*ERR*', 'onClose not implemented');};
 
   this.send = (connprofile, blob) => {
-    _netc.write(Buffer.concat([Buffer.from(('0000000000000000'+blob.length).slice(-16)), blob]));
+    _netc.write(Buf.concat([Buf.from(('0000000000000000'+blob.length).slice(-16)), blob]));
   };
 
   this.connect = (ip, port, callback) => {
@@ -163,7 +164,7 @@ function Client(ConnectionProfile) {
 
     _netc.on('data', (data) => {
       if(resume_data) {
-        data = Buffer.concat([resume_data, data]);
+        data = Buf.concat([resume_data, data]);
         // console.log('resume');
       };
 
@@ -187,7 +188,7 @@ function Client(ConnectionProfile) {
         else if(data.length > chunks_size - message.length) {
           let left_size = chunks_size - message.length;
           // console.log('>', !message, data.length, chunks_size, message.length);
-          message = Buffer.concat([message, data.slice(0, left_size)]);
+          message = Buf.concat([message, data.slice(0, left_size)]);
           data = data.slice(left_size);
           // console.log('>', !message, data.length, chunks_size, message.length);
           if(message.length === chunks_size) {
@@ -202,7 +203,7 @@ function Client(ConnectionProfile) {
           }
         }
         else {
-          message = Buffer.concat([message, data]);
+          message = Buf.concat([message, data]);
           data = [];
           if(message.length === chunks_size) {
             _onMessege(message);

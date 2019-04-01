@@ -21,7 +21,7 @@ function NoCrypto() {
         callback(false, crypted);
       },
       decryptString: (key, toDecrypt, callback) => {
-        let iv = new Buffer.from(toDecrypt.substring(0, 24), "base64");
+        let iv = new Buf.from(toDecrypt.substring(0, 24), "base64");
         let decipher = crypto.createDecipheriv('aes-256-cbc', key, iv);
         toDecrypt = toDecrypt.substring(24);
         let dec = decipher.update(toDecrypt, 'base64', 'utf8');
@@ -34,14 +34,14 @@ function NoCrypto() {
         let iv = crypto.randomBytes(16);
         let cipher = crypto.createCipheriv('aes-256-cbc', key, iv);
         let salt = crypto.randomBytes(64);
-        let crypted = Buffer.concat([iv, cipher.update(Buffer.concat([salt, toEncrypt])), cipher.final()]);
+        let crypted = Buf.concat([iv, cipher.update(Buf.concat([salt, toEncrypt])), cipher.final()]);
         callback(false, crypted);
       },
       decrypt: (key, toDecrypt, callback) => {
         let iv = toDecrypt.slice(0, 16);
         let decipher = crypto.createDecipheriv('aes-256-cbc', key, iv);
         toDecrypt = toDecrypt.slice(16);
-        let dec = Buffer.concat([decipher.update(toDecrypt), decipher.final()]);
+        let dec = Buf.concat([decipher.update(toDecrypt), decipher.final()]);
         callback(false, dec.slice(64));
       }
     },
@@ -49,22 +49,22 @@ function NoCrypto() {
     // Keys is in pem format
     RSA2048: {
       encryptString: (publicKey, toEncrypt, callback) => {
-        let buffer = new Buffer.from(toEncrypt);
+        let buffer = new Buf.from(toEncrypt);
         let encrypted = crypto.publicEncrypt(publicKey, buffer);
         callback(false, encrypted.toString("base64"));
       },
       decryptString: (privateKey, toDecrypt, callback) => {
-        let buffer = new Buffer.from(toDecrypt, "base64");
+        let buffer = new Buf.from(toDecrypt, "base64");
         let decrypted = crypto.privateDecrypt(privateKey, buffer);
         callback(false, decrypted.toString("utf8"));
       },
       encrypt: (publicKey, toEncrypt, callback) => {
-        let buffer = new Buffer.from(toEncrypt);
+        let buffer = new Buf.from(toEncrypt);
         let encrypted = crypto.publicEncrypt(publicKey, buffer);
         callback(false, encrypted);
       },
       decrypt: (privateKey, toDecrypt, callback) => {
-        let buffer = new Buffer.from(toDecrypt);
+        let buffer = new Buf.from(toDecrypt);
         let decrypted = crypto.privateDecrypt(privateKey, buffer);
         callback(false, decrypted);
       }

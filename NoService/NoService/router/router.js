@@ -8,6 +8,7 @@ const Utils = require('../library').Utilities;
 const ProtocolsPath = require("path").join(__dirname, "protocols");
 const Protocols =  require("fs").readdirSync(ProtocolsPath).map((file)=> {
   return require(ProtocolsPath+"/" + file);});
+const Buf = require('../buffer');
 
 function Router() {
   let _coregateway;
@@ -44,7 +45,7 @@ function Router() {
   let _senddata = (connprofile, method, session, blob) => {
     // console.log(blob);
 
-    let blobfinal = Buffer.concat([Buffer.from(method+session, 'utf8'), blob]);
+    let blobfinal = Buf.concat([Buf.from(method+session, 'utf8'), blob]);
     // finally sent the data through the connection.
     if(connprofile) {
       _coregateway.NSPS.isConnectionSecured(connprofile, (secured)=> {
@@ -244,7 +245,7 @@ function Router() {
     });
 
     _coregateway.Implementation.getClientConnProfile = _coregateway.Connection.createClient;
-    _coregateway.Implementation.emitRequest = (connprofile, method, json)=> {this.emitRequest(connprofile, method, Buffer.from(JSON.stringify(json)))};
+    _coregateway.Implementation.emitRequest = (connprofile, method, json)=> {this.emitRequest(connprofile, method, Buf.from(JSON.stringify(json)))};
     _coregateway.Implementation.sendRouterData = _senddata;
     _coregateway.NSPS.emitRequest = this.emitRequest;
   };

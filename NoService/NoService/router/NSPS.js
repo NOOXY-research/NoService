@@ -71,7 +71,7 @@ function NSPS() {
       };
       _crypto_module.encryptString('RSA2048', host_rsa_pub, JSON.stringify(_data), (err, encrypted)=>{
         connprofile.setBundle('NSPS', 'finalize');
-        emitResponse(connprofile,  Buffer.from(JSON.stringify(encrypted)));
+        emitResponse(connprofile,  Buf.from(JSON.stringify(encrypted)));
       });
     });
   };
@@ -113,7 +113,7 @@ function NSPS() {
       p: _rsa_pub// RSA publicKey
     };
     connprofile.setBundle('NSPS', 'pending');
-    this.emitRequest(connprofile, 'SP',  Buffer.from(JSON.stringify(_data)));
+    this.emitRequest(connprofile, 'SP',  Buf.from(JSON.stringify(_data)));
   }
 
   this.importOperationTimeout = (timeout) => {

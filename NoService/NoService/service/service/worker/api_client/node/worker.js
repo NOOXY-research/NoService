@@ -28,6 +28,7 @@ const RemoteCallbackTree = APIUtils.RemoteCallbackTree;
 // For injecting database to api
 const Database = require('../../../../../database').Database;
 const Model = require('../../../../../database').Model;
+const Buf = require('../../../../../buffer');
 const fs = require('fs');
 
 process.title = 'NoService_worker';
@@ -49,7 +50,7 @@ function APISocket(sock) {
   };
 
   this.send = (blob, callback)=> {
-    sock.write(Buffer.concat([Buffer.from(('0000000000000000'+blob.length).slice(-16)), blob]));
+    sock.write(Buf.concat([Buf.from(('0000000000000000'+blob.length).slice(-16)), blob]));
   }
 
   this.on = (eventname, callback)=> {
@@ -73,11 +74,11 @@ function WorkerClient(_api_sock) {
 
     let _emitParentMessage = (type, blob)=> {
       if(blob) {
-        let t = Buffer.alloc(1, type);
-        _api_sock.send(Buffer.concat([t, blob]));
+        let t = Buf.alloc(1, type);
+        _api_sock.send(Buf.concat([t, blob]));
       }
       else {
-        let t = Buffer.alloc(1, type);
+        let t = Buf.alloc(1, type);
         _api_sock.send(t);
       }
     };
@@ -101,7 +102,7 @@ function WorkerClient(_api_sock) {
           args[i] = _local_obj_callbacks_dict[id];
         }
       }
-      _emitParentMessage(4,  Buffer.concat([Buffer.alloc(1, JSON.stringify(_data).length), Buffer.from(JSON.stringify(_data)), encodeArgumentsToBinary(args)]));
+      _emitParentMessage(4,  Buf.concat([Buf.alloc(1, JSON.stringify(_data).length), Buf.from(JSON.stringify(_data)), encodeArgumentsToBinary(args)]));
     }
 
     const emitParentCallback = ([obj_id, path], args) => {
@@ -113,7 +114,7 @@ function WorkerClient(_api_sock) {
           args[i] = _local_obj_callbacks_dict[id];
         }
       }
-      _emitParentMessage(5,  Buffer.concat([Buffer.alloc(1, JSON.stringify(_data).length), Buffer.from(JSON.stringify(_data)), encodeArgumentsToBinary(args)]));
+      _emitParentMessage(5,  Buf.concat([Buf.alloc(1, JSON.stringify(_data).length), Buf.from(JSON.stringify(_data)), encodeArgumentsToBinary(args)]));
     }
 
     _api_sock.on('message', message => {
@@ -244,7 +245,7 @@ function WorkerClient(_api_sock) {
                   }
                   catch(e) {
                     console.log(e);
-                    _emitParentMessage(99,  Buffer.from(JSON.stringify({e:e.toString()})));
+                    _emitParentMessage(99,  Buf.from(JSON.stringify({e:e.toString()})));
                   }
                 });
               });
@@ -257,7 +258,7 @@ function WorkerClient(_api_sock) {
               }
               catch(e) {
                 console.log(e);
-                _emitParentMessage(99,  Buffer.from(JSON.stringify({e:e.toString()})));
+                _emitParentMessage(99,  Buf.from(JSON.stringify({e:e.toString()})));
               }
             }
           });
@@ -269,7 +270,7 @@ function WorkerClient(_api_sock) {
           _emitParentMessage(2);
         }
         catch(err) {
-          _emitParentMessage(98,  Buffer.from(JSON.stringify({e: err.stack})));
+          _emitParentMessage(98,  Buf.from(JSON.stringify({e: err.stack})));
         }
       }
       // function return
@@ -301,12 +302,12 @@ function WorkerClient(_api_sock) {
       }
       else if(type === 4) {
         let message = JSON.parse(blob.toString());
-        _emitParentMessage(6,  Buffer.from(JSON.stringify({i:message.i, c:Object.keys(_local_obj_callbacks_dict).length})));
+        _emitParentMessage(6,  Buf.from(JSON.stringify({i:message.i, c:Object.keys(_local_obj_callbacks_dict).length})));
       }
       // memory
       else if(type === 5) {
         let message = JSON.parse(blob.toString());
-        _emitParentMessage(7,  Buffer.from(JSON.stringify({i:message.i, c: process.memoryUsage()})));
+        _emitParentMessage(7,  Buf.from(JSON.stringify({i:message.i, c: process.memoryUsage()})));
       }
 
       else if(type === 98) {
@@ -326,11 +327,11 @@ function WorkerClient(_api_sock) {
                 _emitParentMessage(3);
               }
               else {
-                _emitParentMessage(96,  Buffer.from(JSON.stringify({e: 'The service "'+_service_name+'" have no "close" function.'})));
+                _emitParentMessage(96,  Buf.from(JSON.stringify({e: 'The service "'+_service_name+'" have no "close" function.'})));
               }
             }
             catch(e) {
-              _emitParentMessage(96,  Buffer.from(JSON.stringify({e: e.stack})));
+              _emitParentMessage(96,  Buf.from(JSON.stringify({e: e.stack})));
               // Utils.TagLog('*ERR*', 'Service "'+_service_name+'" occured error while closing.');
               // console.log(e);
             }
@@ -340,12 +341,12 @@ function WorkerClient(_api_sock) {
     }
 
     this.established = ()=>{
-      _emitParentMessage(0, Buffer.from(JSON.stringify({s: process.argv[3]})));
+      _emitParentMessage(0, Buf.from(JSON.stringify({s: process.argv[3]})));
     }
   }
   catch(err) {
     console.log(err);
-    let t = Buffer.alloc(1, 97);
+    let t = Buf.alloc(1, 97);
     _api_sock.send(t);
   }
 }
@@ -372,7 +373,7 @@ client.on("connect", ()=> {
 
   client.on("data", (data)=> {
     if(resume_data) {
-      data = Buffer.concat([resume_data, data]);
+      data = Buf.concat([resume_data, data]);
       // console.log('resume');
     };
 
@@ -396,7 +397,7 @@ client.on("connect", ()=> {
       else if(data.length > chunks_size - message.length) {
         let left_size = chunks_size - message.length;
         // console.log('>', !message, data.length, chunks_size, message.length);
-        message = Buffer.concat([message, data.slice(0, left_size)]);
+        message = Buf.concat([message, data.slice(0, left_size)]);
         data = data.slice(left_size);
         // console.log('>', !message, data.length, chunks_size, message.length);
         if(message.length === chunks_size) {
@@ -411,7 +412,7 @@ client.on("connect", ()=> {
         }
       }
       else {
-        message = Buffer.concat([message, data]);
+        message = Buf.concat([message, data]);
         data = [];
         if(message.length === chunks_size) {
           _onMessege(message);

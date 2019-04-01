@@ -4,8 +4,9 @@
 // for multithreading.
 // Copyright 2018-2019 NOOXY. All Rights Reserved.
 // All api tree's top should be callable! For worker calling.
-
 'use strict';
+
+const Buf = require('../../../buffer');
 
 // for workers
 // generate fake Obj for remote calling back into local
@@ -188,27 +189,27 @@ module.exports.LocalCallbackTree = LocalCallbackTree;
 // type 3 binary:  [Binary]
 
 let encodeArgumentsToBinary = (args)=> {
-  let result = Buffer.alloc(0);
+  let result = Buf.alloc(0);
   for(let i in args) {
     // type 0
     if(args[i] instanceof Error) {
-      let blob = Buffer.from(args[i].toString());
-      result = Buffer.concat([result, Buffer.alloc(1, 0), Buffer.from(('000000000000000'+blob.length).slice(-15)), blob]);
+      let blob = Buf.from(args[i].toString());
+      result = Buf.concat([result, Buf.alloc(1, 0), Buf.from(('000000000000000'+blob.length).slice(-15)), blob]);
     }
     // type 2
     else if(args[i] instanceof LocalCallbackTree) {
-      let blob = Buffer.from(JSON.stringify(args[i].returnTree()));
-      result = Buffer.concat([result, Buffer.alloc(1, 2), Buffer.from(('000000000000000'+blob.length).slice(-15)), blob]);
+      let blob = Buf.from(JSON.stringify(args[i].returnTree()));
+      result = Buf.concat([result, Buf.alloc(1, 2), Buf.from(('000000000000000'+blob.length).slice(-15)), blob]);
     }
     // type 3
-    else if (Buffer.isBuffer(args[i])) {
+    else if (Buf.isBuffer(args[i])) {
       let blob = args[i];
-      result = Buffer.concat([result, Buffer.alloc(1, 3), Buffer.from(('000000000000000'+blob.length).slice(-15)), blob]);
+      result = Buf.concat([result, Buf.alloc(1, 3), Buf.from(('000000000000000'+blob.length).slice(-15)), blob]);
     }
     // type 1
     else {
-      let blob = Buffer.from(JSON.stringify(args[i]?args[i]:null));
-      result = Buffer.concat([result, Buffer.alloc(1, 1), Buffer.from(('000000000000000'+blob.length).slice(-15)), blob]);
+      let blob = Buf.from(JSON.stringify(args[i]?args[i]:null));
+      result = Buf.concat([result, Buf.alloc(1, 1), Buf.from(('000000000000000'+blob.length).slice(-15)), blob]);
     }
   }
   return result;

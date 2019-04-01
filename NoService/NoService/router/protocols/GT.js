@@ -3,7 +3,7 @@
 // "GT.js" nooxy service protocol implementation of "get token"
 // Copyright 2018-2019 NOOXY. All Rights Reserved.
 'use strict';
-
+const Buf = require('../../buffer');
 
 module.exports = function Protocol(coregateway, emitRequest, debug) {
   this.Protocol = "GT";
@@ -25,7 +25,7 @@ module.exports = function Protocol(coregateway, emitRequest, debug) {
       else {
         responsedata['s'] = 'OK';
       }
-      _senddata(connprofile, Buffer.from(JSON.stringify(responsedata)));
+      _senddata(connprofile, Buf.from(JSON.stringify(responsedata)));
     });
   };
 

@@ -28,6 +28,7 @@ const fs = require('fs');
 
 const Utils = require('../../../../library').Utilities;
 const API = require('./api');
+const Buf = require('../../../../buffer');
 
 
 function UnixSocketAPI() {
@@ -55,7 +56,7 @@ function UnixSocketAPI() {
     };
 
     this.send = (blob, callback)=> {
-      sock.write(Buffer.concat([Buffer.from(('0000000000000000'+blob.length).slice(-16)), blob]));
+      sock.write(Buf.concat([Buf.from(('0000000000000000'+blob.length).slice(-16)), blob]));
     }
 
     this.on = (eventname, callback)=> {
@@ -291,11 +292,11 @@ function UnixSocketAPI() {
 
     let _emitChildMessage = (type, blob)=> {
       if(blob) {
-        let t = Buffer.alloc(1, type);
-        _api_sock.send(Buffer.concat([t, blob]));
+        let t = Buf.alloc(1, type);
+        _api_sock.send(Buf.concat([t, blob]));
       }
       else {
-        let t = Buffer.alloc(1, type);
+        let t = Buf.alloc(1, type);
         _api_sock.send(t);
       }
     };
@@ -304,7 +305,7 @@ function UnixSocketAPI() {
       if(_child_alive&&_child) {
         let _rqid = Utils.generateUniqueId();
         _InfoRq[_rqid] = callback;
-        _emitChildMessage(4, Buffer.from(JSON.stringify({i: _rqid})));
+        _emitChildMessage(4, Buf.from(JSON.stringify({i: _rqid})));
       }
       else {
         callback(new Error("Child is not alive."));
@@ -315,7 +316,7 @@ function UnixSocketAPI() {
       if(_child_alive&&_child) {
         let _rqid = Utils.generateUniqueId();
         _InfoRq[_rqid] = callback;
-        _emitChildMessage(5, Buffer.from(JSON.stringify({i: _rqid})));
+        _emitChildMessage(5, Buf.from(JSON.stringify({i: _rqid})));
       }
       else {
         callback(new Error("Child is not alive."));
@@ -329,14 +330,14 @@ function UnixSocketAPI() {
 
     this.destroyChildCallback = (id)=> {
       if(_child_alive&&_child)
-        _emitChildMessage(3, Buffer.from(JSON.stringify({i: id})));
+        _emitChildMessage(3, Buf.from(JSON.stringify({i: id})));
     }
 
     this.emitChildCallback = ([obj_id, path], argsblob) => {
       let _data = JSON.stringify([obj_id, path]);
       try {
         if(_child_alive&&_api_sock)
-          _emitChildMessage(2, Buffer.concat([Buffer.alloc(1, _data.length), Buffer.from(_data), argsblob]));
+          _emitChildMessage(2, Buf.concat([Buf.alloc(1, _data.length), Buf.from(_data), argsblob]));
       }
       catch(err) {
         Utils.TagLog('*ERR*' , 'Occured error on "'+_service_name+'".');
@@ -346,7 +347,7 @@ function UnixSocketAPI() {
 
     this.onMessage = (type, blob)=> {
       if(type === 0) {
-        _emitChildMessage(0, Buffer.from(JSON.stringify({p: path, a: _serviceapi.returnAPITree(), c: _close_worker_timeout, g: _clear_obj_garbage_timeout, cpath: _const_path})));
+        _emitChildMessage(0, Buf.from(JSON.stringify({p: path, a: _serviceapi.returnAPITree(), c: _close_worker_timeout, g: _clear_obj_garbage_timeout, cpath: _const_path})));
       }
       else if(type === 1) {
         _init_callback(false);
@@ -377,7 +378,7 @@ function UnixSocketAPI() {
             },
             e: e.stack
           };
-          _emitChildMessage(98, Buffer.from(JSON.stringify(_data)));
+          _emitChildMessage(98, Buf.from(JSON.stringify(_data)));
         }
       }
       else if(type === 5) {
@@ -395,7 +396,7 @@ function UnixSocketAPI() {
             },
             e: e.stack
           };
-          _emitChildMessage(98, Buffer.from(JSON.stringify(_data)));
+          _emitChildMessage(98, Buf.from(JSON.stringify(_data)));
         }
       }
       else if(type === 6) {
@@ -528,7 +529,7 @@ function UnixSocketAPI() {
 
       socket.on('data', (data)=> {
         if(resume_data) {
-          data = Buffer.concat([resume_data, data]);
+          data = Buf.concat([resume_data, data]);
           // console.log('resume');
         };
 
@@ -552,7 +553,7 @@ function UnixSocketAPI() {
           else if(data.length > chunks_size - message.length) {
             let left_size = chunks_size - message.length;
             // console.log('>', !message, data.length, chunks_size, message.length);
-            message = Buffer.concat([message, data.slice(0, left_size)]);
+            message = Buf.concat([message, data.slice(0, left_size)]);
             data = data.slice(left_size);
             // console.log('>', !message, data.length, chunks_size, message.length);
             if(message.length === chunks_size) {
@@ -567,7 +568,7 @@ function UnixSocketAPI() {
             }
           }
           else {
-            message = Buffer.concat([message, data]);
+            message = Buf.concat([message, data]);
             data = [];
             if(message.length === chunks_size) {
               _onMessege(message);

@@ -8,12 +8,11 @@
 
 const Utils = require('../../../library').Utilities;
 const APIDaemon = require('./api_daemon');
+const Buf = require('../../../buffer');
 
 function WorkerDaemon() {
   let _worker_clients = {};
   // let _services_relaunch_cycle = 1000*60*60*24;
-
-  let _node_daemon = new (APIDaemon.Node)();
   let _unix_daemon = new (APIDaemon.UnixSocket)();
 
   this.getCBOCount = (callback)=> {
@@ -50,22 +49,18 @@ function WorkerDaemon() {
   }
 
   this.importAPI = (serviceapi_module) => {
-    _node_daemon.importAPI(serviceapi_module);
     _unix_daemon.importAPI(serviceapi_module);
   };
 
   this.setClearGarbageTimeout = (timeout)=> {
-    _node_daemon.setClearGarbageTimeout(timeout);
     _unix_daemon.setClearGarbageTimeout(timeout);
   }
 
   this.setCloseTimeout = (timeout)=> {
-    _node_daemon.setCloseTimeout(timeout);
     _unix_daemon.setCloseTimeout(timeout);
   }
 
   this.setConstantsPath = (path)=> {
-    _node_daemon.setConstantsPath(path);
     _unix_daemon.setConstantsPath(path);
   };
 
@@ -74,12 +69,10 @@ function WorkerDaemon() {
   };
 
   this.start = (callback)=> {
-    _node_daemon.start();
     _unix_daemon.start(callback);
   };
 
   this.close = ()=> {
-    _node_daemon.close();
     _unix_daemon.close();
   }
 }
