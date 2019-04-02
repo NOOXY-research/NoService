@@ -137,6 +137,14 @@ module.exports = function() {
           }
         });
       });
+      api.addAPI(['Client'], (createLocalCallbackTree)=> {
+        return({
+          clearUsername: (name, remote_callback_obj)=> {
+            delete tokens[name];
+            remote_callback_obj.apply([false]);
+          }
+        });
+      });
     });
 
     next(false);

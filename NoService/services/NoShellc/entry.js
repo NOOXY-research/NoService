@@ -60,10 +60,12 @@ function Service(Me, NoService) {
             commandread = () => {
               NoService.Commandline.question('>>> ', (cmd)=> {
                 if (cmd == 'exit') {
-                  _username = null;
-                  _token = null;
-                  _as = null;
-                  _new_session();
+                  NoService.Client.clearUsername(_username, (err)=> {
+                    _username = null;
+                    _token = null;
+                    _as = null;
+                    _new_session();
+                  });
                   return 0; //closing RL and returning from function.
                 }
                 as.call('sendC', {c: cmd}, (err, json)=>{
