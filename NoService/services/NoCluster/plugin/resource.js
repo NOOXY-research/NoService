@@ -10,14 +10,17 @@ function Resource() {
   let _on_handler = {
     'ProcessResourceRq': ()=> {},
     'ProcessResourceRq': ()=> {}
-
   };
 
   this.importModel = ()=> {
 
   };
 
-  this.processResource = (resource_id, callback)=> {
+  this.processSingle = (resource_id, callback)=> {
+
+  };
+
+  this.processSeries = (series_dict)=> {
 
   };
 

@@ -59,29 +59,29 @@ function Service(Me, NoService) {
           }
         })
 
-        ss.on('connect', (entityID, callback)=>{
-          NoService.Authorization.Authby.isSuperUser(entityID, (err, pass)=> {
+        ss.on('connect', (entityId, callback)=>{
+          NoService.Authorization.Authby.isSuperUser(entityId, (err, pass)=> {
             if(pass) {
-              NoService.Service.Entity.getEntityMetaData(entityID, (err, emeta)=>{
-                let msg = '\nHello. '+emeta.owner+'(as entity '+entityID+').\n  Welcome accessing NoShell service of Daemon "'+DaemonSettings.daemon_name+'".\n';
+              NoService.Service.Entity.getEntityMetaData(entityId, (err, emeta)=>{
+                let msg = '\nHello. '+emeta.owner+'(as entity '+entityId+').\n  Welcome accessing NoShell service of Daemon "'+DaemonSettings.daemon_name+'".\n';
                 msg = msg + '  Daemon description: \n  ' + DaemonSettings.description+'\n'+'NoService Daemon Version: '+DaemonVars.version+'\n';
-                NoService.Authorization.Authby.Token(entityID, (err, pass)=> {
+                NoService.Authorization.Authby.Token(entityId, (err, pass)=> {
                   if(pass) {
-                    ss.semit(entityID, 'welcome', msg);
+                    ss.semit(entityId, 'welcome', msg);
                   }
                   else {
-                    ss.emit(entityID, 'welcome', 'Hi you did not authorize.');
+                    ss.emit(entityId, 'welcome', 'Hi you did not authorize.');
                   }
                 });
-                // NoService.Authorization.emitSignin(entityID);
+                // NoService.Authorization.emitSignin(entityId);
                 callback(false);
               });
             }
             else {
-              NoService.Service.Entity.getEntityMetaData(entityID, (err, emeta)=>{
-                let msg = '\nHello. '+emeta.owner+'(as entity '+entityID+').\n  You have no NoShell access to "'+DaemonSettings.daemon_name+'".\n';
-                ss.semit(entityID, 'welcome', msg);
-                // NoService.Authorization.emitSignin(entityID);
+              NoService.Service.Entity.getEntityMetaData(entityId, (err, emeta)=>{
+                let msg = '\nHello. '+emeta.owner+'(as entity '+entityId+').\n  You have no NoShell access to "'+DaemonSettings.daemon_name+'".\n';
+                ss.semit(entityId, 'welcome', msg);
+                // NoService.Authorization.emitSignin(entityId);
 
                 callback(false);
               });
@@ -130,10 +130,10 @@ function Service(Me, NoService) {
           }
         };
         // send command
-        ss.sdef('sendC', (json, entityID, returnJSON)=>{
+        ss.sdef('sendC', (json, entityId, returnJSON)=>{
           let settings = DaemonSettings;
           let cmd = json.c.split(spliter);
-          NoService.Service.Entity.getEntityMetaData(entityID, (err, emeta)=>{
+          NoService.Service.Entity.getEntityMetaData(entityId, (err, emeta)=>{
             // commands dict
             let c_dict = {
               help: (t0, c0) =>{
@@ -147,7 +147,7 @@ function Service(Me, NoService) {
                   '  service create {service name} [blank|complete|normal|python]\n'+
                   '  service [funclist|funcdict|funcshow] {target service}\n'+
                   '  service func {target service} {target username} {target service function} {JSON} ---Call a Service function as target user.\n'+
-                  '  service entity [show {entityID}|list|count|showuser {username}]\n'+
+                  '  service entity [show {entityId}|list|count|showuser {username}]\n'+
                   '  service git install {repos/service} {gitsource} \n'+
                   '  service git [upgrade|bind|unbind] {service name}\n'+
                   '  service git [list|upgradeall|bindall|unbindall]\n'+
@@ -160,7 +160,7 @@ function Service(Me, NoService) {
                   '  serfunc {target service} {target service function} {JSON} ---Call a Service function as admin.\n'+
                   '\n'+
                   '[auth]\n'+
-                  '  auth emit [password|token] {entityID}  ---Emit authorization proccess to targeted entity.\n'+
+                  '  auth emit [password|token] {entityId}  ---Emit authorization proccess to targeted entity.\n'+
                   '  auth updatetoken {username}  ---Update a user\'s token.\n'+
                   '  auth updateprivilege {username} {value} ---Update a user\'s privilege.\n'+
                   '\n'+
@@ -187,7 +187,7 @@ function Service(Me, NoService) {
                   '  help ---This menu.\n'+
                   '\n'+
                   'Keywords: \n'+
-                  '  Me -> your entityID.'
+                  '  Me -> your entityId.'
                 });;
               },
               db: (t0, c0) => {
@@ -364,7 +364,7 @@ function Service(Me, NoService) {
                     }, c1)
                   },
                   entity: (t1, c1) => {
-                    NoService.Authorization.Authby.Token(entityID, (err, pass)=>{
+                    NoService.Authorization.Authby.Token(entityId, (err, pass)=>{
                       if(pass) {
                         _(t1, {
                           show: (t2, c2) => {
@@ -636,7 +636,7 @@ function Service(Me, NoService) {
               auth: (t0, c0) => {
                 _(t0, {
                   updateprivilege: (t1, c1) => {
-                    NoService.Authorization.Authby.Password(entityID, (err, pass)=>{
+                    NoService.Authorization.Authby.Password(entityId, (err, pass)=>{
                       if(pass) {
                         NoService.Authenticity.updatePrivilegeByUsername(t1[0], t1[1], (err)=>{
                           c1(false, {r:'Error->'+err});
@@ -671,33 +671,33 @@ function Service(Me, NoService) {
 
               me: (t0, c0) => {
                 if(t0.length == 0) {
-                  c0(false, {r: 'You are '+emeta.owner+'. Connected with ActivitySocket('+entityID+'). :D'});
+                  c0(false, {r: 'You are '+emeta.owner+'. Connected with ActivitySocket('+entityId+'). :D'});
                 }
                 else {
                   _(t0, {
                     chpasswd: (t1, c1) => {
-                      NoService.Service.Entity.getEntityOwner(entityID, (err, r)=>{
+                      NoService.Service.Entity.getEntityOwner(entityId, (err, r)=>{
                         NoService.Authenticity.updatePasswordByUsername(r, t1[0],(err)=>{
                           c1(false, {r:'Error->'+err});
                         })
                       });
                     },
                     entitymeta: (t1, c1) => {
-                      NoService.Service.Entity.getEntityMetaData(entityID, (err, r)=>{
+                      NoService.Service.Entity.getEntityMetaData(entityId, (err, r)=>{
                         c1(false, {r: JSON.stringify(r, null, 2)});
                       });
                     },
                     usermeta: (t1, c1) => {
-                      NoService.Service.Entity.getEntityOwner(entityID, (err, r)=>{
-                        NoService.Authenticity.updatePasswordByUsername(r, (err, meta)=>{
+                      NoService.Service.Entity.getEntityOwner(entityId, (err, r)=>{
+                        NoService.Authenticity.getUserMetaByUsername(r, (err, meta)=>{
                           c1(false, {r:JSON.stringify(meta, null, 2)});
                         });
                       });
 
                     },
                     updatetoken: (t1, c1) => {
-                      NoService.Service.Entity.getEntityOwner(entityID, (err, r)=>{
-                        NoService.Authenticity.updatePasswordByUsername(r, (err)=>{
+                      NoService.Service.Entity.getEntityOwner(entityId, (err, r)=>{
+                        NoService.Authenticity.updateTokenByUsername(r, (err)=>{
                           c1(false, {r:'Error->'+err});
                         })
                       });
@@ -737,7 +737,7 @@ function Service(Me, NoService) {
               sniffer: (t0, c0) => {
                 return _(t0, {
                   router: (t1, c1) => {
-                    NoService.Authorization.Authby.Token(entityID, (err, pass)=>{
+                    NoService.Authorization.Authby.Token(entityId, (err, pass)=>{
                       if(pass) {
                         r = _(t1, {
                           json: (t2, c2) => {
@@ -772,27 +772,27 @@ function Service(Me, NoService) {
               }
             };
 
-            replace(cmd, 'Me', entityID);
+            replace(cmd, 'Me', entityId);
             _(cmd, c_dict, returnJSON);
           });
         },
-          (json, entityID, returnJSON)=>{
+          (json, entityId, returnJSON)=>{
             returnJSON(false, {r:'Auth Failed.'});
           }
         );
 
 
         // welcome msg
-        ss.sdef('welcome', (json, entityID, returnJSON)=>{
-          NoService.Service.Entity.getEntityMetaData(entityID, (err, emeta)=>{
-            let msg = '\nHello. '+emeta.owner+'(as entity '+entityID+').\n  Welcome accessing NoShell service of Daemon "'+DaemonSettings.daemon_name+'".\n';
+        ss.sdef('welcome', (json, entityId, returnJSON)=>{
+          NoService.Service.Entity.getEntityMetaData(entityId, (err, emeta)=>{
+            let msg = '\nHello. '+emeta.owner+'(as entity '+entityId+').\n  Welcome accessing NoShell service of Daemon "'+DaemonSettings.daemon_name+'".\n';
             msg = msg + '  Daemon description: \n  ' + DaemonSettings.description+'\n'+'NoService Daemon Version: '+DaemonVars.version+'\n';
             returnJSON(false, msg);
           });
         },
-        (json, entityID, returnJSON)=>{
-          NoService.Service.Entity.getEntityMetaData(entityID, (err, emeta)=>{
-            let msg = '\nHello. '+emeta.owner+'(as entity '+entityID+').\n  You have no NoShell access to "'+DaemonSettings.daemon_name+'".\n';
+        (json, entityId, returnJSON)=>{
+          NoService.Service.Entity.getEntityMetaData(entityId, (err, emeta)=>{
+            let msg = '\nHello. '+emeta.owner+'(as entity '+entityId+').\n  You have no NoShell access to "'+DaemonSettings.daemon_name+'".\n';
             returnJSON(false, msg);
           });
         });
