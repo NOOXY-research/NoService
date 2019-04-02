@@ -161,7 +161,7 @@ function Authorization() {
       });
     },
 
-    isSuperUserwithToken: (entityId, callback) =>{
+    isSuperUserWithToken: (entityId, callback) =>{
       _checkhaveusername(entityId, callback, ()=>{
         this.Authby.isSuperUser(entityId, (err, pass) => {
           if(pass) {

@@ -101,9 +101,7 @@ module.exports = function() {
     });
 
     Implementation.setImplement('AuthbyTokenFailed', (connprofile, data, emitResponse) => {
-      // Implementation.getImplement('signin', (err, im)=> {
-      //   im(connprofile, data, emitResponse);
-      // });
+      log('Client', 'Entity "'+data.i+'" auth failed.');
       tokens = {};
     });
 

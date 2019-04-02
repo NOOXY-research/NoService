@@ -38,7 +38,11 @@ function Activity() {
       if(entityId) {
         let _as = new SocketPair.ActivitySocket(service, connprofile, _emmiter, _unbindActivitySocketList, _debug);
         _as.setEntityId(entityId);
-        connprofile.setBundle('entityId', entityId);
+        let prev = connprofile.returnBundle();
+        if(!prev) {
+          prev = [];
+        }
+        connprofile.setBundle('bundle_entities', prev.concat(entityId));
         _ASockets[entityId] = _as;
         callback(false, _ASockets[entityId]);
       }
@@ -62,7 +66,11 @@ function Activity() {
       if(entityId) {
         let _as = new SocketPair.ActivitySocket(service, connprofile, _emmiter, _unbindActivitySocketList, _debug);
         _as.setEntityId(entityId);
-        connprofile.setBundle('entityId', entityId);
+        let prev = connprofile.returnBundle();
+        if(!prev) {
+          prev = [];
+        }
+        connprofile.setBundle('bundle_entities', prev.concat(entityId));
         _ASockets[entityId] = _as;
         callback(false, _ASockets[entityId]);
       }

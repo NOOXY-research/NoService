@@ -772,6 +772,14 @@ function API(_coregateway) {
       Action: (entityId, action_meta_data, callback)=> {
 
       },
+      isSuperUserWithToken: (entityId, remote_callback) => {
+        _coregateway.Authorization.Authby.isSuperUserWithToken(entityId, (err, pass)=> {
+          if(remote_callback) {
+            remote_callback.apply([err, pass]);
+            remote_callback.destory();
+          }
+        });
+      },
       isSuperUser: (entityId, remote_callback) => {
         _coregateway.Authorization.Authby.isSuperUser(entityId, (err, pass)=> {
           if(remote_callback) {

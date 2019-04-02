@@ -54,7 +54,7 @@ function ServiceSocket(service_name, prototype, emitter, debug, entity_module, a
   // securly define
   this.sdef = (name, callback, fail) => {
     this.def(name, (json, entityId, returnJSON)=>{
-      authorization_module.Authby.isSuperUserwithToken(entityId, (err, pass)=>{
+      authorization_module.Authby.isSuperUserWithToken(entityId, (err, pass)=>{
         if(pass&&!err) {
           callback(json, entityId, returnJSON);
         }
@@ -74,7 +74,7 @@ function ServiceSocket(service_name, prototype, emitter, debug, entity_module, a
 
   // emit event to entityId securly
   this.semit = (entityId, event, data)=> {
-    authorization_module.Authby.isSuperUserwithToken(entityId, (err, pass)=>{
+    authorization_module.Authby.isSuperUserWithToken(entityId, (err, pass)=>{
       if(pass&&!err) {
         entity_module.getEntityConnProfile(entityId, (err, connprofile)=>{
           _emitasevent(connprofile, entityId, event, data);
