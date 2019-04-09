@@ -4,6 +4,10 @@
 // to keep retyping sql for table.
 // Copyright 2018-2019 NOOXY. All Rights Reserved.
 
+// TODO:
+// 1. plugin support for adding model module
+//
+
 'use strict';
 
 const ObjModel = require('./models/Object');

@@ -1,7 +1,10 @@
-// NoService/plugins/dummy.js
+// NoService/services/{{ servicename }}/plugin.js
 // Description:
-// "dummy.js" create an example of plugin.
+// "{{ servicename }}/plugin.js" description.
 // Copyright 2018-2019 NOOXY. All Rights Reserved.
+
+// Plugins are executed in the NoService Runtime Core. Which means if occured
+// failure will empact the whole system.
 
 module.exports = function() {
   this.name = 'Dummy Plugin';
