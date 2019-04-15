@@ -20,7 +20,7 @@ function Resource() {
 
   };
 
-  this.processSeries = (series_dict)=> {
+  this.processSeries = (series_dictww)=> {
 
   };
 

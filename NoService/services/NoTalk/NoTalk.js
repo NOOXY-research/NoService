@@ -154,7 +154,7 @@ function NoTalk(Me, NoService) {
 
   this.deleteChannel = (userId, channelId, callback)=> {
     _models.ChUserPair.getByPair([channelId, userId], (err, [pair])=> {
-      if(pair&&pair.Role==0) {
+      if(pair&&pair.Role === 0) {
         _models.ChMeta.update({ChId: channelId, Status: 2}, (err)=> {
           if(err) {
             callback(err);
@@ -338,10 +338,10 @@ function NoTalk(Me, NoService) {
             }
           });
         }
-        else if(pair.Role==0) {
+        else if(pair.Role === 0) {
           callback(false, 0);
         }
-        else if(pair.Role==1){
+        else if(pair.Role === 1){
           _models.ChMeta.get(channelId, (err, chmeta)=> {
             if(chmeta&&chmeta.AccessLevel>=1) {
               callback(false, 1);
@@ -411,13 +411,13 @@ function NoTalk(Me, NoService) {
   this.updateUserMeta = (userId, meta, callback)=> {
     let new_meta = {UserId: userId};
     for(let key in meta) {
-      if(key=='b') {
+      if(key === 'b') {
         new_meta.Bio = meta.b;
       }
-      else if(key=='a') {
+      else if(key === 'a') {
         new_meta.ShowActive = meta.a;
       }
-      else if(key=='l') {
+      else if(key === 'l') {
         new_meta.LatestOnline = meta.l;
       }
     }

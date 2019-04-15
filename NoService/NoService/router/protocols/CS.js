@@ -59,8 +59,8 @@ module.exports = function Protocol(coregateway, emitRequest, debug) {
         "d": {
           "i": entityId,
           "n": name,
-          "j": data,
-          "t": tempid
+          "t": tempid,
+          "d": data
         }
       };
       emitRequest(conn_profile, 'CS', Buf.from(JSON.stringify(_data)));
@@ -149,7 +149,7 @@ module.exports = function Protocol(coregateway, emitRequest, debug) {
         SF: (connprofile, data, emitResponse) => {
           let _data;
           if(typeof(theservice) != 'undefined') {
-            theservice.emitSSServiceFunctionCall(data.i, data.n, data.j, (err, returnvalue)=>{
+            theservice.emitSSServiceFunctionCall(data.i, data.n, data.d, (err, returnvalue)=>{
               if(err) {
                 _data = {
                   m: "SF",
