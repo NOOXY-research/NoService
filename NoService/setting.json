@@ -52,7 +52,8 @@
     "NoUser",
     "NoTalk",
     "NoMailer",
-    "NoCluster"
+    "NoCluster",
+    "NoTester"
   ],
 
   "debug": false,

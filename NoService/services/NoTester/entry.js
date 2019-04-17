@@ -83,6 +83,7 @@ function Service(Me, NoService) {
       log('Activty "'+entityId+'" connected.');
       // Send data to client.
       ss.sendData(entityId, 'A sent data from service.');
+      ss.sendData(entityId, Buffer.alloc(10));
       ss.sendDataToUsername('admin', 'An entity connected. Msg to admin.');
       ss.emit(entityId, 'event1', 'Event msg. SHOULD APPEAR(1/3)');
       ss.emit(entityId, 'event2', 'Event msg. SHOULD NOT APPEAR.');

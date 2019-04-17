@@ -96,7 +96,7 @@ function WorkerClient(_api_sock) {
     const emitParentAPI = ([id, APIpath], args) => {
       let _data = APIpath;
       for(let i in args) {
-        if(APIUtils.hasFunction(args[i])) {
+        if(!Buf.isBuffer(args[i])&&APIUtils.hasFunction(args[i])) {
           let id = Utils.generateUniqueId();
           _local_obj_callbacks_dict[id] = new LocalCallbackTree(id, args[i], ()=>{return args[i]},);
           args[i] = _local_obj_callbacks_dict[id];
@@ -108,7 +108,7 @@ function WorkerClient(_api_sock) {
     const emitParentCallback = ([obj_id, path], args) => {
       let _data = [obj_id, path];
       for(let i in args) {
-        if(APIUtils.hasFunction(args[i])) {
+        if(!Buf.isBuffer(args[i])&&APIUtils.hasFunction(args[i])) {
           let id = Utils.generateUniqueId();
           _local_obj_callbacks_dict[id] = new LocalCallbackTree(id, args[i], ()=>{return args[i]});
           args[i] = _local_obj_callbacks_dict[id];
