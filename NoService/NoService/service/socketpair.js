@@ -14,6 +14,8 @@ function ServiceSocket(service_name, prototype, emitter, debug, entity_module, a
 
   let _emitasevent = emitter.Event;
 
+  let _emitasblobevent = emitter.BlobEvent;
+
   let _emitasclose = emitter.Close;
   // JSON Function
 
@@ -72,12 +74,29 @@ function ServiceSocket(service_name, prototype, emitter, debug, entity_module, a
     });
   };
 
+  // emit event to entityId
+  this.emitBlob = (entityId, event, data, meta)=> {
+    entity_module.getEntityConnProfile(entityId, (err, connprofile)=>{
+      _emitasblobevent(connprofile, entityId, event, data, meta);
+    });
+  };
+
   // emit event to entityId securly
   this.semit = (entityId, event, data)=> {
     authorization_module.Authby.isSuperUserWithToken(entityId, (err, pass)=>{
       if(pass&&!err) {
         entity_module.getEntityConnProfile(entityId, (err, connprofile)=>{
           _emitasevent(connprofile, entityId, event, data);
+        });
+      };
+    });
+  };
+
+  this.semitBlob = (entityId, event, data, meta)=> {
+    authorization_module.Authby.isSuperUserWithToken(entityId, (err, pass)=>{
+      if(pass&&!err) {
+        entity_module.getEntityConnProfile(entityId, (err, connprofile)=>{
+          _emitasblobevent(connprofile, entityId, event, data, meta);
         });
       };
     });
@@ -316,6 +335,8 @@ function ActivitySocket(service_name, conn_profile, emitter, unbindActivitySocke
 
   let _emit_sfunc = emitter.ServiceFunction;
 
+  let _emit_blob_sfunc = emitter.BlobServiceFunction;
+
   let _emitclose = emitter.Close;
 
   let _entity_id;
@@ -323,7 +344,10 @@ function ActivitySocket(service_name, conn_profile, emitter, unbindActivitySocke
 
   let wait_ops = [];
   let wait_launch_ops = [];
-  let _jfqueue = {};
+
+  let _sfqueue = {};
+  let _bsfqueue = {};
+
   let _on_dict = {
     data: ()=> {
       if(debug) Utils.TagLog('*WARN*', 'ActivitySocket of service "'+service_name+'" on "data" not implemented')
@@ -334,6 +358,10 @@ function ActivitySocket(service_name, conn_profile, emitter, unbindActivitySocke
   };
 
   let _on_event = {
+
+  };
+
+  let _on_blob_event = {
 
   };
 
@@ -365,23 +393,26 @@ function ActivitySocket(service_name, conn_profile, emitter, unbindActivitySocke
     }
   };
 
-  this.emitSFReturn = (err, tempid, returnvalue) => {
-    if(err) {
-      _jfqueue[tempid](err);
-    }
-    else {
-      _jfqueue[tempid](err, returnvalue);
-    }
-  };
-
   // ServiceFunction call
-  this.call = (name, Json, callback) => {
+  this.call = (name, data, callback) => {
     let op = ()=> {
       let tempid = Utils.generateUniqueId();
-      _jfqueue[tempid] = (err, returnvalue) => {
+      _sfqueue[tempid] = (err, returnvalue) => {
         callback(err, returnvalue);
       };
-      _emit_sfunc(conn_profile, _entity_id, name, Json, tempid);
+      _emit_sfunc(conn_profile, _entity_id, name, data, tempid);
+    };
+    exec(op);
+  }
+
+  // BlobServiceFunction call
+  this.callBlob = (name, blob, meta, callback) => {
+    let op = ()=> {
+      let tempid = Utils.generateUniqueId();
+      _bsfqueue[tempid] = (err, returnblob, meta) => {
+        callback(err, returnblob, meta);
+      };
+      _emit_sfunc(conn_profile, _entity_id, name, blob, meta, tempid);
     };
     exec(op);
   }
@@ -405,8 +436,37 @@ function ActivitySocket(service_name, conn_profile, emitter, unbindActivitySocke
     _on_event[event] = callback;
   };
 
+  this.onBlobEvent = (event, callback)=> {
+    _on_blob_event[event] = callback;
+  };
+
   this._emitData = (data) => {
     _on_dict['data'](false, data);
+  };
+
+  this._emitBlobEvent = (event, data)=> {
+    if(_on_blob_event[event])
+      _on_blob_event[event](false, data);
+  };
+
+  this._emitSFReturn = (err, tempid, returnvalue) => {
+    if(err) {
+      _sfqueue[tempid](err);
+    }
+    else {
+      _sfqueue[tempid](err, returnvalue);
+    }
+    delete _sfqueue[tempid];
+  };
+
+  this._emitBSFReturn = (err, tempid, returnblob, meta) => {
+    if(err) {
+      _bsfqueue[tempid](err);
+    }
+    else {
+      _bsfqueue[tempid](err, returnblob, meta);
+    }
+    delete _bsfqueue[tempid];
   };
 
   this._emitEvent = (event, data)=> {

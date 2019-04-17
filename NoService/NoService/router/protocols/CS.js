@@ -291,7 +291,7 @@ module.exports = function Protocol(coregateway, emitRequest, debug) {
       SS: (connprofile, data) => {
 
       },
-      // nooxy service protocol implementation of "Call Service: Call with Blob"
+      // nooxy service protocol implementation of "Call Service: Blob ServiceFunction"
       BS: (connprofile, data) => {
 
       },

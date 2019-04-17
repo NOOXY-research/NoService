@@ -90,7 +90,7 @@ function Activity() {
   };
 
   this.emitSFReturn = (entityId, err, tempid, returnvalue)=> {
-    _ASockets[entityId].emitSFReturn(err, tempid, returnvalue);
+    _ASockets[entityId]._emitSFReturn(err, tempid, returnvalue);
   };
 
   this.emitASData = (entityId, data)=> {
