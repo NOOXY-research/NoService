@@ -66,6 +66,19 @@ module.exports = function Protocol(coregateway, emitRequest, debug) {
         };
         emitResponse(connprofile, Buf.from(JSON.stringify(_data)));
       },
+      // nooxy service protocol implementation of "Call Activity: Blob Event(with metadata)"
+      BE: () => {
+        Activity.emitASData(data.d.i, data.d.d);
+        let _data = {
+          "m": "AS",
+          "d": {
+            // status
+            "i": data.d.i,
+            "s": "OK"
+          }
+        };
+        emitResponse(connprofile, Buf.from(JSON.stringify(_data)));
+      },
       // nooxy service protocol implementation of "Call Activity: Event"
       EV: () => {
         Activity.emitASEvent(data.d.i, data.d.n, data.d.d);
@@ -100,7 +113,11 @@ module.exports = function Protocol(coregateway, emitRequest, debug) {
 
       EV: (connprofile, data) => {
         // no need to implement anything
-      }
+      },
+
+      BE: (connprofile, data) => {
+        // no need to implement anything
+      },
     }
 
     methods[data.m](connprofile, data.d);

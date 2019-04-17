@@ -41,6 +41,19 @@ module.exports = function Protocol(coregateway, emitRequest, debug) {
 
   });
 
+  Activity.on('EmitSSBlobServiceFunctionRq', (conn_profile, entityId, d, m) => {
+      let _data = {
+        "m": "BS",
+        "d": {
+          "i": entityId,
+          "m": m,
+          "d": d,
+        }
+      };
+      emitRequest(conn_profile, 'CS', Buf.from(JSON.stringify(_data)));
+
+  });
+
   Activity.on('EmitSSDataRq', (conn_profile, entityId, d) => {
       let _data = {
         "m": "SS",
@@ -145,6 +158,51 @@ module.exports = function Protocol(coregateway, emitRequest, debug) {
           }
           emitResponse(connprofile, Buf.from(JSON.stringify(_data)));
         },
+        // nooxy service protocol implementation of "Call Service: Call service function Blob(with metadata)"
+        BS: (connprofile, data, emitResponse) => {
+          let _data;
+          if(typeof(theservice) != 'undefined') {
+            theservice.emitSSBlobServiceFunctionCall(data.i, data.n, data.d, (err, returnvalue, meta)=>{
+              if(err) {
+                _data = {
+                  m: "SF",
+                  d: {
+                    // status
+                    "t": data.t,
+                    "i": data.i,
+                    "s": err.stack
+                  }
+                };
+              }
+              else {
+                _data = {
+                  m: "SF",
+                  d: {
+                    // status
+                    "t": data.t,
+                    "i": data.i,
+                    "s": "OK",
+                    "m": meta,
+                    "r": returnvalue
+                  }
+                };
+              }
+              emitResponse(connprofile, Buf.from(JSON.stringify(_data)));
+            });
+          }
+          else {
+            _data = {
+              m: "SF",
+              d: {
+                // status
+                "t": data.t,
+                "i": data.i,
+                "s": "Fail"
+              }
+            };
+            emitResponse(connprofile, Buf.from(JSON.stringify(_data)));
+          }
+        },
         // nooxy service protocol implementation of "Call Service: service function"
         SF: (connprofile, data, emitResponse) => {
           let _data;
@@ -214,6 +272,7 @@ module.exports = function Protocol(coregateway, emitRequest, debug) {
     });
   };
 
+  // client
   this.ResponseHandler = (connprofile, blob) => {
     let data = JSON.parse(blob.toString('utf8'));
     let methods = {
@@ -230,6 +289,10 @@ module.exports = function Protocol(coregateway, emitRequest, debug) {
       },
       // nooxy service protocol implementation of "Call Service: ServiceSocket"
       SS: (connprofile, data) => {
+
+      },
+      // nooxy service protocol implementation of "Call Service: Call with Blob"
+      BS: (connprofile, data) => {
 
       },
       // nooxy service protocol implementation of "Call Service: ServiceFunction"
