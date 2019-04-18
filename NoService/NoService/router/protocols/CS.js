@@ -41,13 +41,15 @@ module.exports = function Protocol(coregateway, emitRequest, debug) {
 
   });
 
-  Activity.on('EmitSSBlobServiceFunctionRq', (conn_profile, entityId, d, m) => {
+  Activity.on('EmitSSBlobServiceFunctionRq', (conn_profile, entityId, name, data, meta, tempid) => {
       let _data = {
         "m": "BS",
         "d": {
           "i": entityId,
-          "m": m,
-          "d": d,
+          "n": name,
+          "t": tempid,
+          "d": data,
+          "m": meta
         }
       };
       emitRequest(conn_profile, 'CS', Buf.from(JSON.stringify(_data)));
@@ -162,10 +164,10 @@ module.exports = function Protocol(coregateway, emitRequest, debug) {
         BS: (connprofile, data, emitResponse) => {
           let _data;
           if(typeof(theservice) != 'undefined') {
-            theservice.emitSSBlobServiceFunctionCall(data.i, data.n, data.d, (err, returnvalue, meta)=>{
+            theservice.emitSSBlobServiceFunctionCall(data.i, data.n, data.d, data.m, (err, returnvalue, meta)=>{
               if(err) {
                 _data = {
-                  m: "SF",
+                  m: "BS",
                   d: {
                     // status
                     "t": data.t,
@@ -176,7 +178,7 @@ module.exports = function Protocol(coregateway, emitRequest, debug) {
               }
               else {
                 _data = {
-                  m: "SF",
+                  m: "BS",
                   d: {
                     // status
                     "t": data.t,
@@ -192,7 +194,7 @@ module.exports = function Protocol(coregateway, emitRequest, debug) {
           }
           else {
             _data = {
-              m: "SF",
+              m: "BS",
               d: {
                 // status
                 "t": data.t,
@@ -293,7 +295,12 @@ module.exports = function Protocol(coregateway, emitRequest, debug) {
       },
       // nooxy service protocol implementation of "Call Service: Blob ServiceFunction"
       BS: (connprofile, data) => {
-
+        if(data.d.s === 'OK') {
+          Activity.emitBSFReturn(data.d.i, false, data.d.t, data.d.r, data.d.m);
+        }
+        else {
+          Activity.emitBSFReturn(data.d.i, true, data.d.t, data.d.r, data.d.m);
+        }
       },
       // nooxy service protocol implementation of "Call Service: ServiceFunction"
       SF: (connprofile, data) => {

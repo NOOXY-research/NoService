@@ -67,40 +67,7 @@ function Router() {
 
   // implementations of NOOXY Service Protocol methods
   let methods = {
-    // nooxy service protocol implementation of "secure protocol"
-    SP: {
-      emitRequest : (connprofile, data) => {
-        _senddata(connprofile, 'SP', 'rq', data);
-      },
 
-      RequestHandler : (connprofile, session, data) => {
-        let rq_rs_pos = {
-          rq: "Server",
-          rs: "Client"
-        }
-
-        let actions = {
-          rq : _coregateway.NSPS.RequestHandler,
-          rs : _coregateway.NSPS.ResponseHandler
-        }
-        connprofile.getRemotePosition((err, pos)=> {
-          if(rq_rs_pos[session] === pos || rq_rs_pos[session] === 'Both') {
-            if(session === 'rq') {
-              let _emitResponse = (connprofile, data)=> {
-                _senddata(connprofile,  'SP', 'rs', data);
-              };
-              actions[session](connprofile, data, _emitResponse);
-            }
-            else {
-              actions[session](connprofile, data);
-            }
-          }
-          else {
-            _sessionnotsupport();
-          }
-        });
-      }
-    }
   }
 
   this.addJSONSniffer = (callback) => {
@@ -128,51 +95,17 @@ function Router() {
       try {
         if(_coregateway.Settings.secure === true && connprofile.returnConnMethod() != 'Local' && connprofile.returnConnMethod() != 'local') {
           // upgrade protocol
-          let method = data.slice(0, 2).toString();
-          let session = data.slice(2, 4).toString();
-          let blob = data.slice(4);
-
-          if(connprofile.returnBundle('NSPS') === 'pending') {
-            _tellJSONSniffers({method: method, session: session, data: blob});
-            methods[method].RequestHandler(connprofile, session, blob);
-          }
-          else if(connprofile.returnBundle('NSPS') != true && connprofile.returnRemotePosition() === 'Client') {
-            _coregateway.NSPS.upgradeConnection(connprofile, (err, succeess)=>{
-              if(succeess) {
-                _tellJSONSniffers({method: method, session: session, data: blob});
-                methods[method].RequestHandler(connprofile, session, blob);
-              }
-              else {
-                connprofile.closeConnetion();
-              }
-              if(err) {
-                console.log(err);
-              }
-            });
-          }
-          else if(connprofile.returnBundle('NSPS') != true) {
-            let method = data.slice(0, 2).toString();
-            let session = data.slice(2, 4).toString();
-            let blob = data.slice(4);
+          _coregateway.NSPS.decrypt(connprofile, data, (err, decrypted)=> {
+            if(err&&_coregateway.Settings.debug) {
+              console.log(err);
+            }
+            let method = decrypted.slice(0, 2).toString();
+            let session = decrypted.slice(2, 4).toString();
+            let blob = decrypted.slice(4);
 
             _tellJSONSniffers({method: method, session: session, data: blob});
             methods[method].RequestHandler(connprofile, session, blob);
-          }
-          else if(connprofile.returnBundle('NSPS') === true) {
-            // true
-            _coregateway.NSPS.decrypt(connprofile, data, (err, decrypted)=> {
-              if(err&&_coregateway.Settings.debug) {
-                console.log(err);
-              }
-
-              let method = decrypted.slice(0, 2).toString();
-              let session = decrypted.slice(2, 4).toString();
-              let blob = decrypted.slice(4);
-
-              _tellJSONSniffers({method: method, session: session, data: blob});
-              methods[method].RequestHandler(connprofile, session, blob);
-            });
-          }
+          });
         }
         else {
           let method = data.slice(0, 2).toString();
@@ -245,7 +178,7 @@ function Router() {
     _coregateway.Implementation.getClientConnProfile = _coregateway.Connection.createClient;
     _coregateway.Implementation.emitRequest = (connprofile, method, json)=> {this.emitRequest(connprofile, method, Buf.from(JSON.stringify(json)))};
     _coregateway.Implementation.sendRouterData = _senddata;
-    _coregateway.NSPS.emitRequest = this.emitRequest;
+    _coregateway.NSPS.sendRouterData = _senddata;
   };
 
   // for plugins

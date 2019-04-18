@@ -19,73 +19,145 @@ function ServiceAPI() {
     api.addAPI(['Service', 'ServiceSocket'], (createLocalCallbackTree)=> {
       return ({
         def: (name, remote_callback)=> {
-          service_socket.def(name, (json, entityId, returnJSON)=> {
-            let returnJSON_LocalCallbackTree = createLocalCallbackTree(returnJSON, (returnJSON_syncRefer)=> {
+          service_socket.def(name, (json, entityId, returnResult)=> {
+            let returnResult_LocalCallbackTree = createLocalCallbackTree(returnResult, (returnResult_syncRefer)=> {
               return ((err, json_be_returned)=>{
-                returnJSON(err, json_be_returned);
+                returnResult(err, json_be_returned);
               });
             }, true);
             if(remote_callback) {
-              remote_callback.apply([json, entityId, returnJSON_LocalCallbackTree]);
+              remote_callback.apply([json, entityId, returnResult_LocalCallbackTree]);
             }
           });
         },
 
         define: (name, remote_callback)=> {
-          service_socket.def(name, (json, entityId, returnJSON)=> {
-            let returnJSON_LocalCallbackTree = createLocalCallbackTree(returnJSON, (returnJSON_syncRefer)=> {
+          service_socket.def(name, (json, entityId, returnResult)=> {
+            let returnResult_LocalCallbackTree = createLocalCallbackTree(returnResult, (returnResult_syncRefer)=> {
               return ((err, json_be_returned)=>{
-                returnJSON(err, json_be_returned);
+                returnResult(err, json_be_returned);
               });
             }, true);
             if(remote_callback) {
-              remote_callback.apply([json, entityId, returnJSON_LocalCallbackTree]);
+              remote_callback.apply([json, entityId, returnResult_LocalCallbackTree]);
             }
           });
         },
 
         sdef: (name, remote_callback, remote_callback_2)=> {
-          service_socket.sdef(name, (json, entityId, returnJSON)=> {
-            let returnJSON_LocalCallbackTree = createLocalCallbackTree(returnJSON, (returnJSON_syncRefer)=> {
+          service_socket.sdef(name, (json, entityId, returnResult)=> {
+            let returnResult_LocalCallbackTree = createLocalCallbackTree(returnResult, (returnResult_syncRefer)=> {
               return ((err, json_be_returned)=>{
-                returnJSON(err, json_be_returned);
+                returnResult(err, json_be_returned);
               });
             }, true);
             if(remote_callback) {
-              remote_callback.apply([json, entityId, returnJSON_LocalCallbackTree]);
+              remote_callback.apply([json, entityId, returnResult_LocalCallbackTree]);
             }
           },
-          (json, entityId, returnJSON)=> {
-            let returnJSON_LocalCallbackTree = createLocalCallbackTree(returnJSON, (returnJSON_syncRefer)=> {
+          (json, entityId, returnResult)=> {
+            let returnResult_LocalCallbackTree = createLocalCallbackTree(returnResult, (returnResult_syncRefer)=> {
               return ((err, json_be_returned)=>{
-                returnJSON(err, json_be_returned);
+                returnResult(err, json_be_returned);
               });
             }, true);
             if(remote_callback_2) {
-              remote_callback_2.apply([json, entityId, returnJSON_LocalCallbackTree]);
+              remote_callback_2.apply([json, entityId, returnResult_LocalCallbackTree]);
             }
           });
         },
 
         sdefine: (name, remote_callback, remote_callback_2)=> {
-          service_socket.sdef(name, (json, entityId, returnJSON)=> {
-            let returnJSON_LocalCallbackTree = createLocalCallbackTree(returnJSON, (returnJSON_syncRefer)=> {
+          service_socket.sdef(name, (json, entityId, returnResult)=> {
+            let returnResult_LocalCallbackTree = createLocalCallbackTree(returnResult, (returnResult_syncRefer)=> {
               return ((err, json_be_returned)=>{
-                returnJSON(err, json_be_returned);
+                returnResult(err, json_be_returned);
               });
             }, true);
             if(remote_callback) {
-              remote_callback.apply([json, entityId, returnJSON_LocalCallbackTree]);
+              remote_callback.apply([json, entityId, returnResult_LocalCallbackTree]);
             }
           },
-          (json, entityId, returnJSON)=> {
-            let returnJSON_LocalCallbackTree = createLocalCallbackTree(returnJSON, (returnJSON_syncRefer)=> {
+          (json, entityId, returnResult)=> {
+            let returnResult_LocalCallbackTree = createLocalCallbackTree(returnResult, (returnResult_syncRefer)=> {
               return ((err, json_be_returned)=>{
-                returnJSON(err, json_be_returned);
+                returnResult(err, json_be_returned);
               });
             }, true);
             if(remote_callback_2) {
-              remote_callback_2.apply([json, entityId, returnJSON_LocalCallbackTree]);
+              remote_callback_2.apply([json, entityId, returnResult_LocalCallbackTree]);
+            }
+          });
+        },
+
+        defBlob: (name, remote_callback)=> {
+          service_socket.defBlob(name, (data, meta, entityId, returnResult)=> {
+            let returnResult_LocalCallbackTree = createLocalCallbackTree(returnResult, (returnResult_syncRefer)=> {
+              return ((err, blob_be_returned, blob_meta_be_returned)=>{
+                returnResult(err, blob_be_returned, blob_meta_be_returned);
+              });
+            }, true);
+            if(remote_callback) {
+              remote_callback.apply([data, meta, entityId, returnResult_LocalCallbackTree]);
+            }
+          });
+        },
+
+        defineBlob: (name, remote_callback)=> {
+          service_socket.defineBlob(name, (data, meta, entityId, returnResult)=> {
+            let returnResult_LocalCallbackTree = createLocalCallbackTree(returnResult, (returnResult_syncRefer)=> {
+              return ((err, blob_be_returned, blob_meta_be_returned)=>{
+                returnResult(err, blob_be_returned, blob_meta_be_returned);
+              });
+            }, true);
+            if(remote_callback) {
+              remote_callback.apply([data, meta, entityId, returnResult_LocalCallbackTree]);
+            }
+          });
+        },
+
+        sdefBlob: (name, remote_callback, remote_callback_2)=> {
+          service_socket.sdefBlob(name, (data, meta, entityId, returnResult)=> {
+            let returnResult_LocalCallbackTree = createLocalCallbackTree(returnResult, (returnResult_syncRefer)=> {
+              return ((err, blob_be_returned, blob_meta_be_returned)=>{
+                returnResult(err, blob_be_returned, blob_meta_be_returned);
+              });
+            }, true);
+            if(remote_callback) {
+              remote_callback.apply([data, meta, entityId, returnResult_LocalCallbackTree]);
+            }
+          },
+          (data, meta, entityId, returnResult)=> {
+            let returnResult_LocalCallbackTree = createLocalCallbackTree(returnResult, (returnResult_syncRefer)=> {
+              return ((err, blob_be_returned, blob_meta_be_returned)=>{
+                returnResult(err, blob_be_returned, blob_meta_be_returned);
+              });
+            }, true);
+            if(remote_callback_2) {
+              remote_callback_2.apply([data, meta, entityId, returnResult_LocalCallbackTree]);
+            }
+          });
+        },
+
+        sdefineBlob: (name, remote_callback, remote_callback_2)=> {
+          service_socket.sdefineBlob(name, (data, meta, entityId, returnResult)=> {
+            let returnResult_LocalCallbackTree = createLocalCallbackTree(returnResult, (returnResult_syncRefer)=> {
+              return ((err, blob_be_returned, blob_meta_be_returned)=>{
+                returnResult(err, blob_be_returned, blob_meta_be_returned);
+              });
+            }, true);
+            if(remote_callback) {
+              remote_callback.apply([data, meta, entityId, returnResult_LocalCallbackTree]);
+            }
+          },
+          (data, meta, entityId, returnResult)=> {
+            let returnResult_LocalCallbackTree = createLocalCallbackTree(returnResult, (returnResult_syncRefer)=> {
+              return ((err, blob_be_returned, blob_meta_be_returned)=>{
+                returnResult(err, blob_be_returned, blob_meta_be_returned);
+              });
+            }, true);
+            if(remote_callback_2) {
+              remote_callback_2.apply([data, meta, entityId, returnResult_LocalCallbackTree]);
             }
           });
         },
@@ -116,7 +188,7 @@ function ServiceAPI() {
           service_socket.sendData(entityId, data);
         },
 
-        broadcastData: (data)=> {
+        sendDataAll: (data)=> {
           service_socket.broadcastData(data);
         },
 
@@ -128,7 +200,15 @@ function ServiceAPI() {
           service_socket.semit(entityId, event, data);
         },
 
-        broadcastEvent: (event, data)=> {
+        emitBlob: (entityId, event, data, meta)=> {
+          service_socket.emitBlob(entityId, event, data, meta);
+        },
+
+        semitBlob: (entityId, event, data, meta)=> {
+          service_socket.semitBlob(entityId, event, data, meta);
+        },
+
+        emitAll: (event, data)=> {
           service_socket.broadcastEvent(event, data);
         },
 

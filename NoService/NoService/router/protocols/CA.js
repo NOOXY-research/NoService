@@ -38,6 +38,19 @@ module.exports = function Protocol(coregateway, emitRequest, debug) {
     emitRequest(conn_profile, 'CA', Buf.from(JSON.stringify(_data)));
   });
 
+  coregateway.Service.on('EmitASBlobEventRq', (conn_profile, i, n, d, m) => {
+    let _data = {
+      "m": "BE",
+      "d": {
+        "i": i,
+        "n": n,
+        "d": d,
+        "m": m
+      }
+    };
+    emitRequest(conn_profile, 'CA', Buf.from(JSON.stringify(_data)));
+  });
+
   coregateway.Service.on('EmitASCloseRq', (conn_profile, i) => {
     let _data = {
       "m": "CS",
@@ -68,9 +81,9 @@ module.exports = function Protocol(coregateway, emitRequest, debug) {
       },
       // nooxy service protocol implementation of "Call Activity: Blob Event(with metadata)"
       BE: () => {
-        Activity.emitASData(data.d.i, data.d.d);
+        Activity.emitASBlobEvent(data.d.i, data.d.n, data.d.d, data.d.m);
         let _data = {
-          "m": "AS",
+          "m": "BE",
           "d": {
             // status
             "i": data.d.i,

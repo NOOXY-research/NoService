@@ -46,6 +46,15 @@ function Service(Me, NoService) {
       });
     });
 
+    ss.defBlob('blob1', (data, meta, entityId, returnJSON)=>{
+      NoService.Authorization.Authby.Token(entityId, (err, pass)=>{
+        log('Auth status: '+pass)
+        console.log(data, meta);
+        // First parameter for error, next is JSON to be returned.
+        returnJSON(false, data, meta);
+      });
+    });
+
     // Safe define a ServiceFunction.
     ss.sdef('SafeServiceFunction', (json, entityId, returnJSON)=>{
       // Code here for JSONfunciton
@@ -83,7 +92,7 @@ function Service(Me, NoService) {
       log('Activty "'+entityId+'" connected.');
       // Send data to client.
       ss.sendData(entityId, 'A sent data from service.');
-      ss.sendData(entityId, Buffer.alloc(10));
+      ss.emitBlob(entityId, 'blob1', Buffer.alloc(10), {type: 'image'});
       ss.sendDataToUsername('admin', 'An entity connected. Msg to admin.');
       ss.emit(entityId, 'event1', 'Event msg. SHOULD APPEAR(1/3)');
       ss.emit(entityId, 'event2', 'Event msg. SHOULD NOT APPEAR.');
@@ -145,6 +154,17 @@ function Service(Me, NoService) {
         i = (i + 1) % 4;
         process.stdout.write('  '+p[i]+'stressing  ');  // write text
       });
+
+      activitysocket.onBlobEvent('blob1', (err, blob, meta)=> {
+        log('Received blob from service.');
+        console.log(blob, meta);
+      });
+
+      activitysocket.callBlob('blob1', Buffer.alloc(10, 1), {type: 'image'}, (err, blob, meta)=> {
+        log('callBlob return');
+        console.log(blob, meta);
+      });
+
       activitysocket.onEvent('stressOK', (err, data)=> {
         console.log('');
         log('StressOK');
@@ -154,6 +174,7 @@ function Service(Me, NoService) {
       });
       activitysocket.sendData('A sent data from activity.');
       activitysocket.call('jfunc1', {d:'Hello! ServiceFunction call from client!'}, (err, json)=> {
+        log('call return');
         log(json);
       });
     });

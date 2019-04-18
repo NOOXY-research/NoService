@@ -6,8 +6,10 @@
 
 const Utils = require('../library').Utilities;
 
-function ServiceSocket(service_name, prototype, emitter, debug, entity_module, authorization_module) {
-  let _socketfunctions = prototype==null?{}:prototype;
+function ServiceSocket(service_name, prototype, blobprototype, emitter, debug, entity_module, authorization_module) {
+  let _servicefunctions = !prototype?{}:prototype;
+  let _blobservicefunctions = !blobprototype?{}:blobprototype;
+
   let _holding_entities = [];
   // as on data callback
   let _emitasdata = emitter.Data;
@@ -40,17 +42,96 @@ function ServiceSocket(service_name, prototype, emitter, debug, entity_module, a
     }
   }
 
+  let _to_group = (groups, callback)=> {
+    // console.log('f');
+    let query = 'service='+service_name+',type=Activity';
+    entity_module.getFilteredEntitiesList(query, (err, entitiesId)=>{
+      for(let i in entitiesId) {
+        let j = groups.length-1;
+        let op = ()=> {
+          let sent = false;
+          entity_module.isEntityInGroup(entitiesId[i], groups[j], (err, pass) => {
+            // console.log(pass, !sent, !err);
+            // console.log(err);
+            if(pass&&!sent&&!err) {
+              sent = true;
+              entity_module.getEntityConnProfile(entitiesId[i], (err, connprofile) => {
+                callback(connprofile, entitiesId[i]);
+              });
+            }
+            else {
+              if(j>0) {
+                j--;
+                op();
+              }
+            }
+          });
+        };
+        op();
+      };
+    });
+  };
+
+  let _to_including_group = (groups, callback)=> {
+    let query = 'service='+service_name+',type=Activity';
+    entity_module.getFilteredEntitiesList(query, (err, entitiesId)=>{
+      for(let i in entitiesId) {
+        entity_module.isEntityIncludingGroups(entitiesId[i], groups, (err, pass) => {
+          if(pass&&!err)
+            entity_module.getEntityConnProfile(entitiesId[i], (err, connprofile) => {
+              callback(connprofile, entitiesId[i]);
+            });
+        });
+      };
+    });
+  };
+
+  let _to_username = (username, callback)=> {
+    let query = 'owner='+username+',service='+service_name+',type=Activity';
+    entity_module.getFilteredEntitiesList(query, (err, entitiesId)=>{
+      for(let i in entitiesId) {
+        authorization_module.Authby.Token(entitiesId[i], (err, pass)=>{
+          if(pass&&!err) {
+            entity_module.getEntityConnProfile(entitiesId[i], (err, connprofile) => {
+              callback(connprofile, entitiesId[i]);
+            });
+          }
+        });
+      }
+    });
+  };
+
+  let _to_all = (callback)=> {
+    let query = 'service='+service_name+',type=Activity';
+    entity_module.getFilteredEntitiesList(query, (err, entitiesId)=>{
+      for(let i in entitiesId) {
+        entity_module.getEntityConnProfile(entitiesId[i], (err, connprofile) => {
+          callback(connprofile, entitiesId[i]);
+        });
+      }
+    });
+  };
+
+
   this.returnServiceFunctionList = () => {
-    return Object.keys(_socketfunctions);
+    return Object.keys(_servicefunctions);
   };
 
   this.returnServiceFunctionDict = () => {
-    return _socketfunctions;
+    return _servicefunctions;
+  };
+
+  this.returnBlobServiceFunctionList = () => {
+    return Object.keys(_blobservicefunctions);
+  };
+
+  this.returnBlobServiceFunctionDict = () => {
+    return _blobservicefunctions;
   };
 
   this.def = (name, callback) => {
-    _socketfunctions[name] = (!_socketfunctions[name])?{}:_socketfunctions[name];
-    _socketfunctions[name].obj = callback;
+    _servicefunctions[name] = (!_servicefunctions[name])?{}:_servicefunctions[name];
+    _servicefunctions[name].obj = callback;
   };
 
   // securly define
@@ -62,6 +143,25 @@ function ServiceSocket(service_name, prototype, emitter, debug, entity_module, a
         }
         else {
           fail(json, entityId, returnJSON);
+        }
+      });
+    });
+  };
+
+  this.defBlob = (name, callback) => {
+    _blobservicefunctions[name] = (!_blobservicefunctions[name])?{}:_blobservicefunctions[name];
+    _blobservicefunctions[name].obj = callback;
+  };
+
+  // securly define
+  this.sdefBlob = (name, callback, fail) => {
+    this.def(name, (data, meta, entityId, returnJSON)=>{
+      authorization_module.Authby.isSuperUserWithToken(entityId, (err, pass)=>{
+        if(pass&&!err) {
+          callback(data, meta, entityId, returnJSON);
+        }
+        else {
+          fail(data, meta, entityId, returnJSON);
         }
       });
     });
@@ -103,75 +203,27 @@ function ServiceSocket(service_name, prototype, emitter, debug, entity_module, a
   };
 
   this.emitToUsername = (username, event, data)=> {
-    let query = 'owner='+username+',service='+service_name+',type=Activity';
-    entity_module.getFilteredEntitiesList(query, (err, entitiesId)=>{
-      for(let i in entitiesId) {
-        authorization_module.Authby.Token(entitiesId[i], (err, pass)=>{
-          if(pass&&!err) {
-            entity_module.getEntityConnProfile(entitiesId[i], (err, connprofile) => {
-              _emitasevent(connprofile, entitiesId[i], event, data);
-            });
-          }
-        });
-      }
+    _to_username(username, (connprofile, entityId)=>{
+      _emitasevent(connprofile, entityId, event, data);
     });
   };
 
   this.emitToGroups = (groups, event, data)=> {
-    // console.log('f');
-    let query = 'service='+service_name+',type=Activity';
-    entity_module.getFilteredEntitiesList(query, (err, entitiesId)=>{
-      for(let i in entitiesId) {
-        let j = groups.length-1;
-        let op = ()=> {
-          let sent = false;
-          entity_module.isEntityInGroup(entitiesId[i], groups[j], (err, pass) => {
-            // console.log(pass, !sent, !err);
-            // console.log(err);
-            if(pass&&!sent&&!err) {
-              sent = true;
-              entity_module.getEntityConnProfile(entitiesId[i], (err, connprofile) => {
-                _emitasevent(connprofile, entitiesId[i], event, data);
-
-              });
-            }
-            else {
-              if(j>0) {
-                j--;
-                op();
-              }
-            }
-          });
-        };
-        op();
-      };
+    _to_group(groups, (connprofile, entityId)=> {
+      _emitasevent(connprofile, entityId, event, data);
     });
   };
 
   // broadcast to have all of this groups
   this.emitToIncludingGroups = (groups, event, data)=> {
-    // console.log('f');
-    let query = 'service='+service_name+',type=Activity';
-    entity_module.getFilteredEntitiesList(query, (err, entitiesId)=>{
-      for(let i in entitiesId) {
-        entity_module.isEntityIncludingGroups(entitiesId[i], groups, (err, pass) => {
-          if(pass&&!err)
-            entity_module.getEntityConnProfile(entitiesId[i], (err, connprofile) => {
-              _emitasevent(connprofile, entitiesId[i], event, data);
-            });
-        });
-      };
+    _to_including_group(groups, (connprofile, entityId)=> {
+      _emitasevent(connprofile, entityId, event, data);
     });
   };
 
-  this.broadcastEvent = (event, data)=> {
-    let query = 'service='+service_name+',type=Activity';
-    entity_module.getFilteredEntitiesList(query, (err, entitiesId)=>{
-      for(let i in entitiesId) {
-        entity_module.getEntityConnProfile(entitiesId[i], (err, connprofile) => {
-          _emitasevent(connprofile, entitiesId[i], event, data);
-        });
-      }
+  this.emitAll = (event, data)=> {
+    _to_all((connprofile, entityId)=> {
+      _emitasevent(connprofile, entityId, event, data);
     });
   };
 
@@ -182,76 +234,27 @@ function ServiceSocket(service_name, prototype, emitter, debug, entity_module, a
   };
 
   this.sendDataToUsername = (username, data) => {
-    // console.log('f');
-    let query = 'owner='+username+',service='+service_name+',type=Activity';
-    entity_module.getFilteredEntitiesList(query, (err, entitiesId)=>{
-      for(let i in entitiesId) {
-        authorization_module.Authby.Token(entitiesId[i], (err, pass)=>{
-          if(pass&&!err) {
-            entity_module.getEntityConnProfile(entitiesId[i], (err, connprofile) => {
-              _emitasdata(connprofile, entitiesId[i], data);
-            });
-          }
-        });
-      }
+    _to_username(username, (connprofile, entityId)=>{
+      _emitasdata(connprofile, entityId, data);
     });
   };
 
   this.sendDataToGroups = (groups, data)=> {
-    // console.log('f');
-    let query = 'service='+service_name+',type=Activity';
-    entity_module.getFilteredEntitiesList(query, (err, entitiesId)=>{
-      for(let i in entitiesId) {
-        let j = groups.length-1;
-        let op = ()=> {
-          let sent = false;
-          entity_module.isEntityInGroup(entitiesId[i], groups[j], (err, pass) => {
-            // console.log(pass, !sent, !err);
-            // console.log(err);
-            if(pass&&!sent&&!err) {
-              sent = true;
-              entity_module.getEntityConnProfile(entitiesId[i], (err, connprofile) => {
-                _emitasdata(connprofile, entitiesId[i], data);
-              });
-            }
-            else {
-              if(j>0) {
-                j--;
-                op();
-              }
-            }
-          });
-        };
-        op();
-      };
+    _to_group(groups, (connprofile, entityId)=> {
+      _emitasdata(connprofile, entityId, data);
     });
   };
 
   // broadcast to have all of this groups
   this.sendDataToIncludingGroups = (groups, data)=> {
-    // console.log('f');
-    let query = 'service='+service_name+',type=Activity';
-    entity_module.getFilteredEntitiesList(query, (err, entitiesId)=>{
-      for(let i in entitiesId) {
-        entity_module.isEntityIncludingGroups(entitiesId[i], groups, (err, pass) => {
-          if(pass&&!err)
-            entity_module.getEntityConnProfile(entitiesId[i], (err, connprofile) => {
-              _emitasdata(connprofile, entitiesId[i], data);
-            });
-        });
-      };
+    _to_including_group(groups, (connprofile, entityId)=> {
+      _emitasdata(connprofile, entityId, data);
     });
   };
 
-  this.broadcastData = (data) => {
-    // console.log('f');
-    let query = 'service='+service_name+',type=Activity';
-    entity_module.getFilteredEntitiesList(query, (err, entitiesId)=>{
-      for(let i in entitiesId) {
-        entity_module.getEntityConnProfile(entitiesId[i], (err, connprofile) => {
-          _emitasdata(connprofile, entitiesId[i], data);
-        });
-      }
+  this.sendDataAll = (data) => {
+    _to_all((connprofile, entityId)=> {
+      _emitasdata(connprofile, entityId, data);
     });
   };
 
@@ -274,10 +277,10 @@ function ServiceSocket(service_name, prototype, emitter, debug, entity_module, a
     _on_dict[type] = callback;
   };
 
-  this._emitFunctionCall = (entityId, SFname, jsons, callback) => {
+  this._emitServiceFunctionCall = (entityId, SFname, data, callback) => {
     try {
-      if(_socketfunctions[SFname]) {
-        _socketfunctions[SFname].obj(jsons, entityId, (err, returnVal)=> {
+      if(_servicefunctions[SFname]) {
+        _servicefunctions[SFname].obj(data, entityId, (err, returnVal)=> {
           callback(err, returnVal);
         });
       }
@@ -287,7 +290,27 @@ function ServiceSocket(service_name, prototype, emitter, debug, entity_module, a
     }
     catch (err) {
       if(debug) {
-        Utils.TagLog('*ERR*', 'An error occured on JSON function call. Jfunc might not be exist.');
+        Utils.TagLog('*ERR*', 'An error occured on ServiceFunction call. ServiceFunction might not be exist.');
+        console.log(err);
+      }
+      callback(err);
+    }
+  };
+
+  this._emitBlobServiceFunctionCall = (entityId, BSFname, blob, meta, callback) => {
+    try {
+      if(_blobservicefunctions[BSFname]) {
+        _blobservicefunctions[BSFname].obj(blob, meta, entityId, (err, returnVal, meta)=> {
+          callback(err, returnVal, meta);
+        });
+      }
+      else {
+        throw new Error('BlobServiceFunction '+BSFname+' not exist');
+      }
+    }
+    catch (err) {
+      if(debug) {
+        Utils.TagLog('*ERR*', 'An error occured on Blob ServiceFunction call. Blob ServiceFunction might not be exist.');
         console.log(err);
       }
       callback(err);
@@ -412,7 +435,7 @@ function ActivitySocket(service_name, conn_profile, emitter, unbindActivitySocke
       _bsfqueue[tempid] = (err, returnblob, meta) => {
         callback(err, returnblob, meta);
       };
-      _emit_sfunc(conn_profile, _entity_id, name, blob, meta, tempid);
+      _emit_blob_sfunc(conn_profile, _entity_id, name, blob, meta, tempid);
     };
     exec(op);
   }
@@ -444,9 +467,9 @@ function ActivitySocket(service_name, conn_profile, emitter, unbindActivitySocke
     _on_dict['data'](false, data);
   };
 
-  this._emitBlobEvent = (event, data)=> {
+  this._emitBlobEvent = (event, blob, meta)=> {
     if(_on_blob_event[event])
-      _on_blob_event[event](false, data);
+      _on_blob_event[event](false, blob, meta);
   };
 
   this._emitSFReturn = (err, tempid, returnvalue) => {

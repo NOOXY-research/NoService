@@ -60,6 +60,7 @@ function Activity() {
     _emmiter = {
       Data: _on_handler['EmitSSDataRq'],
       ServiceFunction: _on_handler['EmitSSServiceFunctionRq'],
+      BlobServiceFunction: _on_handler['EmitSSBlobServiceFunctionRq'],
       Close: _on_handler['EmitASCloseRq'],
     }
     _on_handler['createActivitySocketRq'](method, targetport, owner, 'daemon', service, targetip, _daemon_auth_key, (err, connprofile, entityId)=> {
@@ -89,6 +90,10 @@ function Activity() {
     _ASockets[entityId]._emitData(data);
   };
 
+  this.emitBSFReturn = (entityId, err, tempid, returnvalue, meta)=> {
+    _ASockets[entityId]._emitBSFReturn(err, tempid, returnvalue, meta);
+  };
+
   this.emitSFReturn = (entityId, err, tempid, returnvalue)=> {
     _ASockets[entityId]._emitSFReturn(err, tempid, returnvalue);
   };
@@ -99,6 +104,10 @@ function Activity() {
 
   this.emitASEvent = (entityId, event, data)=> {
     _ASockets[entityId]._emitEvent(event, data);
+  };
+
+  this.emitASBlobEvent = (entityId, event, blob, meta)=> {
+    _ASockets[entityId]._emitBlobEvent(event, blob, meta);
   };
 
   this.launchActivitySocketByEntityId = (entityId)=> {

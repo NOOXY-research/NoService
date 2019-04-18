@@ -118,295 +118,101 @@ function API(_coregateway) {
     callback(false, _coregateway.Variables);
   };
 
+  let _generateASHandler = (remote_callback)=> {
+    return((err, as)=> {
+      let local_callback_tree = createLocalCallbackTree(as, (syncRefer)=> {
+        return ({
+            call: (name, data, remote_callback_2)=> {
+              if(remote_callback_2&&as) {
+                syncRefer(remote_callback_2);
+                as.call(name, data, (err, rdata)=> {
+                  remote_callback_2.apply([err, rdata]);
+                  remote_callback_2.destory();
+                });
+              }
+            },
+
+            callBlob: (name, blob, meta, remote_callback_2)=> {
+              if(remote_callback_2&&as) {
+                syncRefer(remote_callback_2);
+                as.callBlob(name, blob, meta, (err, rblob, rmeta)=> {
+                  remote_callback_2.apply([err, rblob, rmeta]);
+                  remote_callback_2.destory();
+                });
+              }
+            },
+
+            getEntityId: (remote_callback_2)=> {
+              if(remote_callback_2&&as) {
+                syncRefer(remote_callback_2);
+                as.getEntityId((err, entityId)=>{
+                  remote_callback_2.apply([err, entityId]);
+                  remote_callback_2.destory();
+                });
+              }
+            },
+
+            on: (type, remote_callback_2)=> {
+              if(remote_callback_2&&as) {
+                syncRefer(remote_callback_2);
+                as.on(type, (err, data)=>{
+                  remote_callback_2.apply([err, data]);
+                });
+              }
+            },
+
+            onEvent: (event, remote_callback_2)=> {
+              if(remote_callback_2&&as) {
+                syncRefer(remote_callback_2);
+                as.onEvent(event, (err, data)=>{
+                  remote_callback_2.apply([err, data]);
+                });
+              }
+            },
+
+            onBlobEvent: (event, remote_callback_2)=> {
+              if(remote_callback_2&&as) {
+                syncRefer(remote_callback_2);
+                as.onBlobEvent(event, (err, data, meta)=>{
+                  remote_callback_2.apply([err, data, meta]);
+                });
+              }
+            },
+
+            sendData: (data)=> {
+              as.sendData(data);
+            },
+
+            close: ()=> {
+              as.close();
+            }
+        })
+      });
+      if(remote_callback) {
+        remote_callback.apply([err, local_callback_tree]);
+        remote_callback.destory();
+      }
+    })
+  };
+
   _api.Service = {
     ActivitySocket: {
       createSocket: (method, targetip, targetport, service, owner, remote_callback) => {
-        _coregateway.Activity.createActivitySocket(method, targetip, targetport, service, owner, (err, as)=> {
-          let local_callback_tree = createLocalCallbackTree(as, (syncRefer)=> {
-            return ({
-                call: (name, Json, remote_callback_2)=> {
-                  if(remote_callback_2&&as) {
-                    syncRefer(remote_callback_2);
-                    as.call(name, Json, (err, json)=> {
-                      remote_callback_2.apply([err, json]);
-                      remote_callback_2.destory();
-                    });
-                  }
-                },
-
-                getEntityId: (remote_callback_2)=> {
-                  if(remote_callback_2&&as) {
-                    syncRefer(remote_callback_2);
-                    as.getEntityId((err, entityId)=>{
-                      remote_callback_2.apply([err, entityId]);
-                      remote_callback_2.destory();
-                    });
-                  }
-                },
-
-                on: (type, remote_callback_2)=> {
-                  if(remote_callback_2&&as) {
-                    syncRefer(remote_callback_2);
-                    as.on(type, (err, data)=>{
-                      remote_callback_2.apply([err, data]);
-                    });
-                  }
-                },
-
-                onEvent: (event, remote_callback_2)=> {
-                  if(remote_callback_2&&as) {
-                    syncRefer(remote_callback_2);
-                    as.onEvent(event, (err, data)=>{
-                      remote_callback_2.apply([err, data]);
-                    });
-                  }
-                },
-
-                sendData: (data)=> {
-                  as.sendData(data);
-                },
-
-                close: ()=> {
-                  as.close();
-                }
-            })
-          });
-          if(remote_callback) {
-            remote_callback.apply([err, local_callback_tree]);
-            remote_callback.destory();
-          }
-        });
+        _coregateway.Activity.createActivitySocket(method, targetip, targetport, service, owner, _generateASHandler(remote_callback));
       },
       createDefaultDeamonSocket: (service, owner, remote_callback) => {
-        _coregateway.Activity.createDaemonActivitySocket(DAEMONTYPE, DAEMONIP, DAEMONPORT, service, owner, (err, as)=> {
-          let local_callback_tree = createLocalCallbackTree(as, (syncRefer)=> {
-            return ({
-                call: (name, Json, remote_callback_2)=> {
-                  if(remote_callback_2&&as) {
-                    syncRefer(remote_callback_2);
-                    as.call(name, Json, (err, json)=> {
-                      remote_callback_2.apply([err, json]);
-                      remote_callback_2.destory();
-                    });
-                  }
-                },
-
-                getEntityId: (remote_callback_2)=> {
-                  if(remote_callback_2&&as) {
-                    syncRefer(remote_callback_2);
-                    as.getEntityId((err, entityId)=>{
-                      remote_callback_2.apply([err, entityId]);
-                      remote_callback_2.destory();
-                    });
-                  }
-                },
-
-                on: (type, remote_callback_2)=> {
-                  if(remote_callback_2&&as) {
-                    syncRefer(remote_callback_2);
-                    as.on(type, (err, data)=>{
-                      remote_callback_2.apply([err, data]);
-                    });
-                  }
-                },
-
-                onEvent: (event, remote_callback_2)=> {
-                  if(remote_callback_2&&as) {
-                    syncRefer(remote_callback_2);
-                    as.onEvent(event, (err, data)=>{
-                      remote_callback_2.apply([err, data]);
-                    });
-                  }
-                },
-
-                sendData: (data)=> {
-                  as.sendData(data);
-                },
-
-                close: ()=> {
-                  as.close();
-                }
-            })
-          });
-          if(remote_callback) {
-            remote_callback.apply([err, local_callback_tree]);
-            remote_callback.destory();
-          }
-        });
+        _coregateway.Activity.createDaemonActivitySocket(DAEMONTYPE, DAEMONIP, DAEMONPORT, service, owner, _generateASHandler(remote_callback));
       },
       createDeamonSocket: (method, targetip, targetport, service, owner, remote_callback) => {
-        _coregateway.Activity.createDaemonActivitySocket(method, targetip, targetport, service, owner, (err, as)=> {
-          let local_callback_tree = createLocalCallbackTree(as, (syncRefer)=> {
-            return ({
-                call: (name, Json, remote_callback_2)=> {
-                  if(remote_callback_2&&as) {
-                    syncRefer(remote_callback_2);
-                    as.call(name, Json, (err, json)=> {
-                      remote_callback_2.apply([err, json]);
-                      remote_callback_2.destory();
-                    });
-                  }
-
-                },
-
-                getEntityId: (remote_callback_2)=> {
-                  if(remote_callback_2&&as) {
-                    syncRefer(remote_callback_2);
-                    as.getEntityId((err, entityId)=>{
-                      remote_callback_2.apply([err, entityId]);
-                      remote_callback_2.destory();
-                    });
-                  }
-
-                },
-
-                on: (type, remote_callback_2)=> {
-                  if(remote_callback_2&&as) {
-                    syncRefer(remote_callback_2);
-                    as.on(type, (err, data)=>{
-                      remote_callback_2.apply([err, data]);
-                    });
-                  }
-                },
-
-                onEvent: (event, remote_callback_2)=> {
-                  if(remote_callback_2&&as) {
-                    syncRefer(remote_callback_2);
-                    as.onEvent(event, (err, data)=>{
-                      remote_callback_2.apply([err, data]);
-                    });
-                  }
-                },
-
-                sendData: (data)=> {
-                  as.sendData(data);
-                },
-
-                close: ()=> {
-                  as.close();
-                }
-            })
-          });
-          if(remote_callback) {
-            remote_callback.apply([err, local_callback_tree]);
-            remote_callback.destory();
-          }
-        });
+        _coregateway.Activity.createDaemonActivitySocket(method, targetip, targetport, service, owner, _generateASHandler(remote_callback));
       },
+
       createAdminDeamonSocket: (method, targetip, targetport, service, remote_callback) => {
-        _coregateway.Activity.createAdminDaemonActivitySocket(method, targetip, targetport, service, (err, as)=> {
-          let local_callback_tree = createLocalCallbackTree(as, (syncRefer)=> {
-            return ({
-                call: (name, Json, remote_callback_2)=> {
-                  if(remote_callback_2&&as) {
-                    syncRefer(remote_callback_2);
-                    as.call(name, Json, (err, json)=> {
-                      remote_callback_2.apply([err, json]);
-                      remote_callback_2.destory();
-                    });
-                  }
-                },
-
-                getEntityId: (remote_callback_2)=> {
-                  if(remote_callback_2&&as) {
-                    syncRefer(remote_callback_2);
-                    as.getEntityId((err, entityId)=>{
-                      remote_callback_2.apply([err, entityId]);
-                      remote_callback_2.destory();
-                    });
-                  }
-                },
-
-                on: (type, remote_callback_2)=> {
-                  if(remote_callback_2&&as) {
-                    syncRefer(remote_callback_2);
-                    as.on(type, (err, data)=>{
-                      remote_callback_2.apply([err, data]);
-                    });
-                  }
-                },
-
-                onEvent: (event, remote_callback_2)=> {
-                  if(remote_callback_2&&as) {
-                    syncRefer(remote_callback_2);
-                    as.onEvent(event, (err, data)=>{
-                      remote_callback_2.apply([err, data]);
-                    });
-                  }
-                },
-
-                sendData: (data)=> {
-                  as.sendData(data);
-                },
-
-                close: ()=> {
-                  as.close();
-                }
-            })
-          });
-          if(remote_callback) {
-            remote_callback.apply([err, local_callback_tree]);
-            remote_callback.destory();
-          }
-        });
+        _coregateway.Activity.createAdminDaemonActivitySocket(method, targetip, targetport, service, _generateASHandler(remote_callback));
       },
 
       createDefaultAdminDeamonSocket: (service, remote_callback) => {
-        _coregateway.Activity.createAdminDaemonActivitySocket(DAEMONTYPE, DAEMONIP, DAEMONPORT, service, (err, as)=> {
-          let local_callback_tree = createLocalCallbackTree(as, (syncRefer)=> {
-            return ({
-                call: (name, Json, remote_callback_2)=> {
-                  if(remote_callback_2&&as) {
-                    syncRefer(remote_callback_2);
-                    as.call(name, Json, (err, json)=> {
-                      remote_callback_2.apply([err, json]);
-                      remote_callback_2.destory();
-                    });
-                  }
-                },
-
-                getEntityId: (remote_callback_2)=> {
-                  if(remote_callback_2&&as) {
-                    syncRefer(remote_callback_2);
-                    as.getEntityId((err, entityId)=>{
-                      remote_callback_2.apply([err, entityId]);
-                      remote_callback_2.destory();
-                    });
-                  }
-                },
-
-                on: (type, remote_callback_2)=> {
-                  if(remote_callback_2&&as) {
-                    syncRefer(remote_callback_2);
-                    as.on(type, (err, data)=>{
-                      remote_callback_2.apply([err, data]);
-                    });
-                  }
-                },
-
-                onEvent: (event, remote_callback_2)=> {
-                  if(remote_callback_2&&as) {
-                    syncRefer(remote_callback_2);
-                    as.onEvent(event, (err, data)=>{
-                      remote_callback_2.apply([err, data]);
-                    });
-                  }
-                },
-
-                sendData: (data)=> {
-                  as.sendData(data);
-                },
-
-                close: ()=> {
-                  as.close();
-                }
-            })
-          });
-          if(remote_callback) {
-            remote_callback.apply([err, local_callback_tree]);
-            remote_callback.destory();
-          }
-        });
+        _coregateway.Activity.createAdminDaemonActivitySocket(DAEMONTYPE, DAEMONIP, DAEMONPORT, service, _generateASHandler(remote_callback));
       },
     },
 

@@ -127,9 +127,10 @@ function Service() {
           Data: _on_handler['EmitASDataRq'],
           Event: _on_handler['EmitASEventRq'],
           Close: _on_handler['EmitASCloseRq'],
+          BlobEvent: _on_handler['EmitASBlobEventRq'],
         }
 
-        _service_socket = new SocketPair.ServiceSocket(_service_name, _service_manifest.servicefunctions, _emmiter, _debug, _entity_module, _authorization_module); // _onServiceFunctionCAll = on ServiceFunction call
+        _service_socket = new SocketPair.ServiceSocket(_service_name, _service_manifest.servicefunctions,  _service_manifest.blobservicefunctions, _emmiter, _debug, _entity_module, _authorization_module); // _onServiceFunctionCAll = on ServiceFunction call
 
         // create the service for module.
         try {
@@ -215,8 +216,12 @@ function Service() {
       _service_socket._emitData(entityId, data);
     };
 
-    this.emitSSServiceFunctionCall = (entityId, SFname, jsons, callback) => {
-      _service_socket._emitFunctionCall(entityId, SFname, jsons, callback);
+    this.emitSSServiceFunctionCall = (entityId, SFname, data, callback) => {
+      _service_socket._emitServiceFunctionCall(entityId, SFname, data, callback);
+    };
+
+    this.emitSSBlobServiceFunctionCall = (entityId, BSFname, blob, meta, callback) => {
+      _service_socket._emitBlobServiceFunctionCall(entityId, BSFname, blob, meta, callback);
     };
 
     this.returnManifest = () => {

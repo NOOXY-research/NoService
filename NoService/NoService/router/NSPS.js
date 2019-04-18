@@ -18,12 +18,12 @@ function NSPS() {
   // daemon side
   this.ResponseHandler = (connprofile, blob) => {
     let data = JSON.parse(blob.toString('utf8'));
-    let resume = _resumes[connprofile.returnGUID()];
-    if(resume) {
+    let resumes = _resumes[connprofile.returnGUID()];
+    if(resumes) {
       try{
         _crypto_module.decryptString('RSA2048', _rsa_priv, data, (err, decrypted) => {
           if(err) {
-            resume(err);
+            connprofile.closeConnetion();
           }
           else {
             let json;
@@ -36,23 +36,23 @@ function NSPS() {
                   connprofile.setBundle('aes_256_cbc_key', aes_key);
                   connprofile.setBundle('NSPS', true);
                   connprofile.setBundle('NSPSremote', true);
-                  resume(err, true);
+                  for(let i in resumes) {
+                    resumes[i](err, true);
+                  }
                 }
                 else {
-                  resume(err, false);
+                  connprofile.closeConnetion();
                 }
-
               });
             }
             catch (err) {
-              resume(err, false);
+              connprofile.closeConnetion();
             }
           }
         });
       }
       catch(er) {
         console.log(er);
-        connprofile.closeConnetion();
         resume(true, false);
       }
     };
@@ -60,7 +60,7 @@ function NSPS() {
 
   // Nooxy service protocol secure request ClientSide
   // in client need to be in implementation module
-  this.RequestHandler = (connprofile, blob, emitResponse) => {
+  this.RequestHandler = (connprofile, blob) => {
     let data = JSON.parse(blob.toString('utf8'));
     let host_rsa_pub = data.p;
     let client_random_num = _crypto_module.returnRandomInt(99999);
@@ -72,8 +72,14 @@ function NSPS() {
         a: aes_key// aes key to vertify
       };
       _crypto_module.encryptString('RSA2048', host_rsa_pub, JSON.stringify(_data), (err, encrypted)=> {
-        connprofile.setBundle('NSPS', 'finalize');
-        emitResponse(connprofile,  Buf.from(JSON.stringify(encrypted)));
+        if(err) {
+          console.log(err);
+        }
+        else {
+          this.sendRouterData(connprofile, 'SP', 'rs', Buf.from(JSON.stringify(encrypted)));
+          connprofile.setBundle('NSPS', true);
+        }
+
       });
     });
   };
@@ -87,25 +93,67 @@ function NSPS() {
   };
 
   this.decrypt = (connprofile, blob, callback)=> {
-    _crypto_module.decrypt('AESCBC256', connprofile.returnBundle('aes_256_cbc_key'), blob, (err, decrypted)=> {
-      callback(err, decrypted);
-    });
+    if(connprofile.returnBundle('NSPS') === 'pending') {
+      let method = blob.slice(0, 2).toString();
+      if(method === 'SP') {
+        let session = blob.slice(2, 4).toString();
+        if(session === 'rs') {
+          let data = blob.slice(4);
+          this.ResponseHandler(connprofile, data);
+        }
+      }
+      else {
+        _resumes[connprofile.returnGUID()].push(()=> {callback(false, blob)});
+      }
+    }
+    else if(connprofile.returnBundle('NSPS') != true && connprofile.returnRemotePosition() === 'Client') {
+      this.upgradeConnection(connprofile, (err, succeess)=>{
+        if(succeess) {
+          callback(false, blob);
+        }
+        else {
+          connprofile.closeConnetion();
+        }
+        if(err) {
+          console.log(err);
+        }
+      });
+    }
+    else if(connprofile.returnBundle('NSPS') != true  && connprofile.returnRemotePosition() === 'Server') {
+      let method = blob.slice(0, 2).toString();
+      if(method === 'SP') {
+        let session = blob.slice(2, 4).toString();
+        if(session === 'rq') {
+          let data = blob.slice(4);
+          this.RequestHandler(connprofile, data);
+        }
+      }
+      else {
+        callback(false, blob);
+      }
+
+    }
+    else if(connprofile.returnBundle('NSPS') === true) {
+      _crypto_module.decrypt('AESCBC256', connprofile.returnBundle('aes_256_cbc_key'), blob, (err, decrypted)=> {
+        callback(err, decrypted);
+      });
+    }
   };
 
   this.isConnectionSecured = (connprofile, callback)=> {
     connprofile.getBundle('NSPS', (err, NSPS)=>{
-      if(NSPS === 'finalize') {
-        connprofile.setBundle('NSPS', true);
-        callback(false);
-      }
-      else {
+      // if(NSPS === 'finalize') {
+      //   connprofile.setBundle('NSPS', true);
+      //   callback(false);
+      // }
+      // else {
         callback(NSPS);
-      }
+      // }
     });
   };
 
   this.upgradeConnection = (connprofile, callback) => {
-    _resumes[connprofile.returnGUID()] = callback;
+    _resumes[connprofile.returnGUID()] = [callback];
     // operation timeout
     setTimeout(()=>{
       delete _resumes[connprofile.returnGUID()];
@@ -115,7 +163,7 @@ function NSPS() {
       p: _rsa_pub// RSA publicKey
     };
     connprofile.setBundle('NSPS', 'pending');
-    this.emitRequest(connprofile, 'SP',  Buf.from(JSON.stringify(_data)));
+    this.sendRouterData(connprofile, 'SP', 'rq', Buf.from(JSON.stringify(_data)));
   }
 
   this.importOperationTimeout = (timeout) => {
