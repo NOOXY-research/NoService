@@ -19,6 +19,36 @@ module.exports = function Protocol(coregateway, emitRequest, debug) {
 
   let _ActivityRsCEcallbacks = {};
 
+  let _to_blob = (data)=> {
+    if(Buf.isBuffer(data.d.d)) {
+      let blob_back = Buf.from(JSON.stringify(data.d.d));
+      data.d.d = null;
+      let blob_front = Buf.from(JSON.stringify(data));
+      return Buf.concat([Buf.from(('0000000000000000'+blob_front.length).slice(-16)), blob_front, Buf.from(('000000000000000'+blob_back.length).slice(-15)), blob_back]);
+    }
+    else {
+      let blob = Buf.from(JSON.stringify(data));
+      return Buf.concat([Buf.from(('0000000000000000'+blob.length).slice(-16)), blob]);
+    }
+  };
+
+  let _parse_blob = (blob)=> {
+    let length = parseInt(blob.slice(0, 16));
+    let json_data = JSON.parse(blob.slice(16, 16+length).toString());
+    blob = blob.slice(16+length);
+    if(blob.length) {
+      let blob_data;
+      length = parseInt(blob.slice(0, 16));
+      blob_data = blob.slice(16, 16+length);
+      json_data.d.d = blob_data;
+      return json_data;
+    }
+    else {
+      return json_data;
+    }
+  };
+
+
   Activity.on('createActivitySocketRq', (method, targetport, owner, mode, service, targetip, daemon_authkey, callback)=> {
     let err = false;
     let _data = {
@@ -36,7 +66,7 @@ module.exports = function Protocol(coregateway, emitRequest, debug) {
       _ActivityRsCEcallbacks[_data.d.t] = (connprofile, data) => {
         callback(false, connprofile, data.d.i);
       }
-      emitRequest(connprofile, 'CS', Buf.from(JSON.stringify(_data)));
+      emitRequest(connprofile, 'CS', _to_blob(_data));
     });
 
   });
@@ -52,7 +82,7 @@ module.exports = function Protocol(coregateway, emitRequest, debug) {
           "m": meta
         }
       };
-      emitRequest(conn_profile, 'CS', Buf.from(JSON.stringify(_data)));
+      emitRequest(conn_profile, 'CS', _to_blob(_data));
 
   });
 
@@ -64,7 +94,7 @@ module.exports = function Protocol(coregateway, emitRequest, debug) {
           "d": d,
         }
       };
-      emitRequest(conn_profile, 'CS', Buf.from(JSON.stringify(_data)));
+      emitRequest(conn_profile, 'CS', _to_blob(_data));
 
   });
 
@@ -78,7 +108,7 @@ module.exports = function Protocol(coregateway, emitRequest, debug) {
           "d": data
         }
       };
-      emitRequest(conn_profile, 'CS', Buf.from(JSON.stringify(_data)));
+      emitRequest(conn_profile, 'CS', _to_blob(_data));
 
   });
 
@@ -89,12 +119,12 @@ module.exports = function Protocol(coregateway, emitRequest, debug) {
           "i": entityId
         }
       };
-      emitRequest(conn_profile, 'CS', Buf.from(JSON.stringify(_data)));
+      emitRequest(conn_profile, 'CS', _to_blob(_data));
   });
 
   // Serverside
   this.RequestHandler = (connprofile, blob, emitResponse) => {
-    let data = JSON.parse(blob.toString('utf8'));
+    let data = _parse_blob(blob);
     Service.getServiceInstanceByEntityId(data.d.i, (err, theservice)=> {
       let methods = {
         // nooxy service protocol implementation of "Call Service: Close ServiceSocket"
@@ -130,7 +160,7 @@ module.exports = function Protocol(coregateway, emitRequest, debug) {
                 }
               }
             }
-            emitResponse(connprofile, Buf.from(JSON.stringify(_data)));
+            emitResponse(connprofile, _to_blob(_data));
           });
 
         },
@@ -158,7 +188,7 @@ module.exports = function Protocol(coregateway, emitRequest, debug) {
               }
             };
           }
-          emitResponse(connprofile, Buf.from(JSON.stringify(_data)));
+          emitResponse(connprofile, _to_blob(_data));
         },
         // nooxy service protocol implementation of "Call Service: Call service function Blob(with metadata)"
         BS: (connprofile, data, emitResponse) => {
@@ -185,11 +215,11 @@ module.exports = function Protocol(coregateway, emitRequest, debug) {
                     "i": data.i,
                     "s": "OK",
                     "m": meta,
-                    "r": returnvalue
+                    "d": returnvalue
                   }
                 };
               }
-              emitResponse(connprofile, Buf.from(JSON.stringify(_data)));
+              emitResponse(connprofile, _to_blob(_data));
             });
           }
           else {
@@ -202,7 +232,7 @@ module.exports = function Protocol(coregateway, emitRequest, debug) {
                 "s": "Fail"
               }
             };
-            emitResponse(connprofile, Buf.from(JSON.stringify(_data)));
+            emitResponse(connprofile, _to_blob(_data));
           }
         },
         // nooxy service protocol implementation of "Call Service: service function"
@@ -229,11 +259,11 @@ module.exports = function Protocol(coregateway, emitRequest, debug) {
                     "t": data.t,
                     "i": data.i,
                     "s": "OK",
-                    "r": returnvalue
+                    "d": returnvalue
                   }
                 };
               }
-              emitResponse(connprofile, Buf.from(JSON.stringify(_data)));
+              emitResponse(connprofile, _to_blob(_data));
             });
           }
           else {
@@ -246,7 +276,7 @@ module.exports = function Protocol(coregateway, emitRequest, debug) {
                 "s": "Fail"
               }
             };
-            emitResponse(connprofile, Buf.from(JSON.stringify(_data)));
+            emitResponse(connprofile, _to_blob(_data));
           }
         },
 
@@ -254,7 +284,7 @@ module.exports = function Protocol(coregateway, emitRequest, debug) {
         CE: (connprofile, data, emitResponse) => {
           Service.createEntity(connprofile, data.s, data.m, data.k, connprofile.returnClientIP(),
            data.o, data.od, connprofile.returnServerId(), connprofile.returnConnMethod(), data.d, (err, Id)=> {
-            emitResponse(connprofile, Buf.from(JSON.stringify({
+            emitResponse(connprofile, _to_blob({
               "m": "CE",
               "d": {
                 // temp id
@@ -262,7 +292,7 @@ module.exports = function Protocol(coregateway, emitRequest, debug) {
                 "i": Id,
                 "e": err
               }
-            })));
+            }));
           });
         }
       }
@@ -276,7 +306,7 @@ module.exports = function Protocol(coregateway, emitRequest, debug) {
 
   // client
   this.ResponseHandler = (connprofile, blob) => {
-    let data = JSON.parse(blob.toString('utf8'));
+    let data = _parse_blob(blob);
     let methods = {
       // nooxy service protocol implementation of "Call Service: Vertify Connection"
       VE: (connprofile, data) => {
@@ -296,19 +326,19 @@ module.exports = function Protocol(coregateway, emitRequest, debug) {
       // nooxy service protocol implementation of "Call Service: Blob ServiceFunction"
       BS: (connprofile, data) => {
         if(data.d.s === 'OK') {
-          Activity.emitBSFReturn(data.d.i, false, data.d.t, data.d.r, data.d.m);
+          Activity.emitBSFReturn(data.d.i, false, data.d.t, data.d.d, data.d.m);
         }
         else {
-          Activity.emitBSFReturn(data.d.i, true, data.d.t, data.d.r, data.d.m);
+          Activity.emitBSFReturn(data.d.i, true, data.d.t, data.d.d, data.d.m);
         }
       },
       // nooxy service protocol implementation of "Call Service: ServiceFunction"
       SF: (connprofile, data) => {
         if(data.d.s === 'OK') {
-          Activity.emitSFReturn(data.d.i, false, data.d.t, data.d.r);
+          Activity.emitSFReturn(data.d.i, false, data.d.t, data.d.d);
         }
         else {
-          Activity.emitSFReturn(data.d.i, true, data.d.t, data.d.r);
+          Activity.emitSFReturn(data.d.i, true, data.d.t, data.d.d);
         }
       },
       // nooxy service protocol implementation of "Call Service: createEntity"
@@ -324,7 +354,7 @@ module.exports = function Protocol(coregateway, emitRequest, debug) {
             }
           };
 
-          emitRequest(connprofile, 'CS', Buf.from(JSON.stringify(_data)));
+          emitRequest(connprofile, 'CS', _to_blob(_data));
         }
         else {
           _ActivityRsCEcallbacks[data.d.t](connprofile, data);
