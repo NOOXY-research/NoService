@@ -296,7 +296,6 @@ function WorkerClient(_api_sock) {
       }
       else if(type === 3) {
         let message = JSON.parse(blob.toString());
-
         delete _local_obj_callbacks_dict[message.i];
         // console.log(Object.keys(_local_obj_callbacks_dict).length);
       }

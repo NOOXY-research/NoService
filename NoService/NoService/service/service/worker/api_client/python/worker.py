@@ -48,12 +48,10 @@ class WorkerClient:
 
     def emitParentMessage(self, type, blob):
         b = str(len(blob)+1).zfill(16).encode()+bytearray([type])+blob
-        print(b)
         self.writer.write(b)
 
     # send message to nodejs parent
     def send(self, message):
-        print(message)
         encoded = None
         if(isinstance(message, str)):
             encoded = message.encode()
@@ -64,34 +62,31 @@ class WorkerClient:
     # parent API caller wrapper
     def callParentAPI(self, id_APIpath, args):
         id, APIpath = id_APIpath
-        _data = {"p": APIpath, "a": args, "o": {}}
+        _data = APIpath
         for i in range(len(args)):
             arg = args[i]
             if callable(arg):
-                args[i] = None
                 _Id = random.randint(0, 999999)
-                self._local_obj_callbacks_dict[_Id] = arg
-                _data["o"][i] = [_Id, generateObjCallbacksTree(arg)]
-        self.emitParentMessage(4, json.dumps(_data).encode())
+                self._local_obj_callbacks_dict[_Id] = LocalCallback(_Id, arg)
+                args[i] = self._local_obj_callbacks_dict[_Id]
+        self.emitParentMessage(4, bytearray([len(json.dumps(_data).encode())])+json.dumps(_data).encode()+encodeArgumentsToBinary(args))
 
     # parent API caller wrapper
     def emitParentCallback(self, id_APIpath, args):
-        obj_id, path = id_APIpath
-        _data = {"t":5, "p": [obj_id, path], "a": args, "o": {}}
+        id, APIpath = id_APIpath
+        _data = id_APIpath
         for i in range(len(args)):
             arg = args[i]
             if callable(arg):
-                args[i] = None
                 _Id = random.randint(0, 999999)
-                self._local_obj_callbacks_dict[_Id] = arg
-                _data["o"][i] = [_Id, generateObjCallbacksTree(arg)]
-        self.send(_data)
+                self._local_obj_callbacks_dict[_Id] = LocalCallback(_Id, arg)
+                args[i] = self._local_obj_callbacks_dict[_Id]
+        self.emitParentMessage(5, bytearray([len(json.dumps(_data).encode())])+json.dumps(_data).encode()+encodeArgumentsToBinary(args))
 
     # onMessage event callback
-    async def onMessage(self, type, message):
-        print(type)
+    async def onMessage(self, type, blob):
         if type == 0:
-            message = json.loads(message)
+            message = json.loads(blob)
             p = re.compile('.*\/([^\/]*)\/entry')
             self._service_name = p.match(message['p']).group(1)
             self._close_timeout = message['c'];
@@ -108,26 +103,34 @@ class WorkerClient:
                     sys.path.append(message['p'].split('/entry')[0])
                     from entry import Service
                     self._service_module = Service(Me, self._api)
-                    self.emitParentMessage(1)
+                    self.emitParentMessage(1, bytes(0))
                 self._api.Daemon.getSettings(getSettingsCallback)
             self._api.getMe(getMeCallback)
             # not completed
         elif type == 1:
             try:
                 self._service_module.start(self._Me, self._api)
-                self.emitParentMessage(2)
+                self.emitParentMessage(2, bytes(0))
             except Exception as e:
-                self.send({'t': 98, 'e': str(traceback.format_exc())});
+                self.emitParentMessage(98, json.dumps({'e': str(traceback.format_exc())}).encode())
         elif type == 2:
-            callObjCallback(self._local_obj_callbacks_dict[message['p'][0]], message['p'][1], message['a'], message['o'], self.emitParentCallback, generateObjCallbacks)
+            id_path = json.loads(blob[1:1+blob[0]].decode())
+            args = decodeArgumentsFromBinary(blob[1+blob[0]:])
+            for i in range(len(args)):
+                if(isinstance(args[i], RemoteCallbackTree)):
+                    args[i].emitRemoteCallback = self.emitParentCallback
+                    args[i] = args[i].returnCallbacks()
+            self._local_obj_callbacks_dict[id_path[0]].callCallback(args);
         elif type == 3:
+            message = json.loads(blob.decode())
             del  self._local_obj_callbacks_dict[message['i']]
         elif type == 4:
-            self.send({'t':6, 'i':message['i'], 'c': len(_local_obj_callbacks_dict)})
+            self.emitParentMessage(6, json.dumps({'i':message['i'], 'c': len(_local_obj_callbacks_dict)}).encode())
         elif type == 5:
             # not implemented
-            self.send({'t':7, 'i':message['i'], 'c': {"rss":0}})
+            self.emitParentMessage(7, json.dumps({'i':message['i'], 'c': {"rss":0}}).encode())
         elif type == 98:
+            message = json.loads(blob.decode())
             print(message['e'])
         elif type == 99:
             if self._closed == False:
@@ -136,11 +139,11 @@ class WorkerClient:
                     try:
                         if self._service_module.close:
                             self._service_module.close(self._Me, self._api)
-                            self.send({'t':3})
+                            self.emitParentMessage(3, bytes(0))
                         else:
-                            self.send({'t':96, 'e': 'The service "'+self._service_name+'" have no "close" function.'})
+                            self.emitParentMessage(96, json.dumps({'e': 'The service "'+self._service_name+'" have no "close" function.'}).encode())
                     except Exception as e:
-                        self.send({'t': 96, 'e': str(traceback.format_exc())});
+                        self.emitParentMessage(96, json.dumps({'e': str(traceback.format_exc())}).encode())
             self.alive = False
 
     def established(self):

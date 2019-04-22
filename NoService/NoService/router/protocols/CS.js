@@ -21,10 +21,10 @@ module.exports = function Protocol(coregateway, emitRequest, debug) {
 
   let _to_blob = (data)=> {
     if(Buf.isBuffer(data.d.d)) {
-      let blob_back = Buf.from(JSON.stringify(data.d.d));
+      let blob_back = Buf.concat([data.d.d]);
       data.d.d = null;
       let blob_front = Buf.from(JSON.stringify(data));
-      return Buf.concat([Buf.from(('0000000000000000'+blob_front.length).slice(-16)), blob_front, Buf.from(('000000000000000'+blob_back.length).slice(-15)), blob_back]);
+      return Buf.concat([Buf.from(('0000000000000000'+blob_front.length).slice(-16)), blob_front, Buf.from(('0000000000000000'+blob_back.length).slice(-16)), blob_back]);
     }
     else {
       let blob = Buf.from(JSON.stringify(data));

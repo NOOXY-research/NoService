@@ -31,6 +31,16 @@ class Service:
 
         ss.define('jfunc1', jfunc1)
 
+        def blobfunc1(blob, meta, entityId, returnJSON):
+            log('blobfunc1 called')
+            log('blob')
+            print(blob)
+            log('meta')
+            print(meta)
+            returnJSON(False, blob, meta);
+
+        ss.defineBlob('blobfunc1', blobfunc1)
+
         def onDataCallback(entityId, data):
             def getEntityOwnerCallback(err, username):
                 log('Recieved a data from activity. owner: '+username)
@@ -56,6 +66,13 @@ class Service:
             def jfunc1Callback(err, json):
                 log(json)
             activitysocket.call('jfunc1', {'d':'Hello! ServiceFunction call from client!'}, jfunc1Callback)
+            def blobfunc1Callback(err, blob, meta):
+                log('blobfunc1 returned')
+                log('blob')
+                print(blob)
+                log('meta')
+                print(meta)
+            activitysocket.callBlob('blobfunc1', bytearray([0, 1, 2]), {"type": "blob"}, blobfunc1Callback)
 
         NoService.Service.ActivitySocket.createDefaultAdminDeamonSocket('PyTester', createDefaultAdminDeamonSocketCallback)
         log('Get RawModel Test.')

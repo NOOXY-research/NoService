@@ -104,7 +104,7 @@ function ServiceAPI() {
         },
 
         defineBlob: (name, remote_callback)=> {
-          service_socket.defineBlob(name, (data, meta, entityId, returnResult)=> {
+          service_socket.defBlob(name, (data, meta, entityId, returnResult)=> {
             let returnResult_LocalCallbackTree = createLocalCallbackTree(returnResult, (returnResult_syncRefer)=> {
               return ((err, blob_be_returned, blob_meta_be_returned)=>{
                 returnResult(err, blob_be_returned, blob_meta_be_returned);
@@ -140,7 +140,7 @@ function ServiceAPI() {
         },
 
         sdefineBlob: (name, remote_callback, remote_callback_2)=> {
-          service_socket.sdefineBlob(name, (data, meta, entityId, returnResult)=> {
+          service_socket.sdefBlob(name, (data, meta, entityId, returnResult)=> {
             let returnResult_LocalCallbackTree = createLocalCallbackTree(returnResult, (returnResult_syncRefer)=> {
               return ((err, blob_be_returned, blob_meta_be_returned)=>{
                 returnResult(err, blob_be_returned, blob_meta_be_returned);
@@ -237,7 +237,7 @@ function ServiceAPI() {
         },
       })
     });
-    api.addAPI(['getMe'], (LocalCallbackTree)=> {
+    api.addAPI(['getMe'], (createLocalCallbackTree)=> {
       return((remote_callback)=> {
         if(remote_callback) {
           remote_callback.apply([false, {
@@ -250,7 +250,7 @@ function ServiceAPI() {
       });
     });
 
-    let _turn_model_to_local_callback_obj = (model, LocalCallbackTree)=> {
+    let _turn_model_to_local_callback_obj = (model, createLocalCallbackTree)=> {
       if(!model){
         return null;
       }
@@ -904,7 +904,7 @@ function ServiceAPI() {
       }
 
     };
-    api.addAPI(['Database', 'Database'], (LocalCallbackTree)=> {
+    api.addAPI(['Database', 'Database'], (createLocalCallbackTree)=> {
       return({
         query: (query, remote_callback)=> {
           _coregateway.Database.Database.query(query, (...args)=> {
@@ -916,7 +916,7 @@ function ServiceAPI() {
         }
       })
     });
-    api.addAPI(['Database', 'Model'], (LocalCallbackTree)=> {
+    api.addAPI(['Database', 'Model'], (createLocalCallbackTree)=> {
       return({
         remove: (model_name, remote_callback)=> {
           _coregateway.Model.remove(_service_name+'_'+model_name, (err)=> {
@@ -939,7 +939,7 @@ function ServiceAPI() {
         get: (model_name, remote_callback)=> {
           _coregateway.Model.get(_service_name+'_'+model_name, (err, the_model)=> {
             if(remote_callback) {
-              remote_callback.apply([err, _turn_model_to_local_callback_obj(the_model, LocalCallbackTree)]);
+              remote_callback.apply([err, _turn_model_to_local_callback_obj(the_model, createLocalCallbackTree)]);
               remote_callback.destory();
             }
           });
@@ -948,7 +948,7 @@ function ServiceAPI() {
         define: (model_name, model_structure, remote_callback)=> {
           _coregateway.Model.define(_service_name+'_'+model_name, model_structure, (err, the_model)=> {
             if(remote_callback) {
-              remote_callback.apply([err, _turn_model_to_local_callback_obj(the_model, LocalCallbackTree)]);
+              remote_callback.apply([err, _turn_model_to_local_callback_obj(the_model, createLocalCallbackTree)]);
               remote_callback.destory();
             }
           });
@@ -963,7 +963,7 @@ function ServiceAPI() {
             let local_callback_obj = createLocalCallbackTree(models, (models_syncRefer)=> {
               let dict = {};
               for(let key in models) {
-                dict[key] = _turn_model_to_local_callback_obj(models[key], LocalCallbackTree);
+                dict[key] = _turn_model_to_local_callback_obj(models[key], createLocalCallbackTree);
               };
               return dict;
             });
@@ -976,7 +976,7 @@ function ServiceAPI() {
       });
       // close cannot be implemented this time compare to worker.js
     });
-    api.addAPI(['Database', 'RAWModel'], (LocalCallbackTree)=> {
+    api.addAPI(['Database', 'RAWModel'], (createLocalCallbackTree)=> {
       return({
         get: (model_name, remote_callback)=> {
           _coregateway.Model.get(model_name, (err, the_model)=> {

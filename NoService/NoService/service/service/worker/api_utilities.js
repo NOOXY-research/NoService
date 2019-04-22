@@ -191,24 +191,25 @@ module.exports.LocalCallbackTree = LocalCallbackTree;
 let encodeArgumentsToBinary = (args)=> {
   let result = Buf.alloc(0);
   for(let i in args) {
+    let arg = args[i];
     // type 0
-    if(args[i] instanceof Error) {
-      let blob = Buf.from(args[i].toString());
+    if(arg instanceof Error) {
+      let blob = Buf.from(arg.toString());
       result = Buf.concat([result, Buf.alloc(1, 0), Buf.from(('000000000000000'+blob.length).slice(-15)), blob]);
     }
     // type 2
-    else if(args[i] instanceof LocalCallbackTree) {
-      let blob = Buf.from(JSON.stringify(args[i].returnTree()));
+    else if(arg instanceof LocalCallbackTree) {
+      let blob = Buf.from(JSON.stringify(arg.returnTree()));
       result = Buf.concat([result, Buf.alloc(1, 2), Buf.from(('000000000000000'+blob.length).slice(-15)), blob]);
     }
     // type 3
-    else if (Buf.isBuffer(args[i])) {
-      let blob = args[i];
+    else if (Buf.isBuffer(arg)) {
+      let blob = arg;
       result = Buf.concat([result, Buf.alloc(1, 3), Buf.from(('000000000000000'+blob.length).slice(-15)), blob]);
     }
     // type 1
     else {
-      let blob = Buf.from(JSON.stringify(args[i]?args[i]:null));
+      let blob = Buf.from(JSON.stringify(arg?arg:null));
       result = Buf.concat([result, Buf.alloc(1, 1), Buf.from(('000000000000000'+blob.length).slice(-15)), blob]);
     }
   }

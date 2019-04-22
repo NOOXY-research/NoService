@@ -86,7 +86,6 @@ function UnixSocketAPI() {
     let _service_name = _manifest.name;
 
     let _emitChildMessage = (type, blob)=> {
-      console.log(type);
       if(blob) {
         let t = Buf.alloc(1, type);
         _api_sock.send(Buf.concat([t, blob]));
@@ -129,9 +128,8 @@ function UnixSocketAPI() {
          _emitChildMessage(3, Buf.from(JSON.stringify({i: id})));
     }
 
-    this.emitChildCallback = ([obj_id, path], args, argsobj) => {
+    this.emitChildCallback = ([obj_id, path], argsblob) => {
       let _data = JSON.stringify([obj_id, path]);
-
       try {
         if(_child_alive&&_child&&_api_sock)
            _emitChildMessage(2, Buf.concat([Buf.alloc(1, _data.length), Buf.from(_data), argsblob]));
@@ -143,7 +141,6 @@ function UnixSocketAPI() {
     }
 
     this.onMessage = (type, blob)=>{
-      console.log(type);
       if(type === 0) {
         _emitChildMessage(0, Buf.from(JSON.stringify({p: path, a: _serviceapi.returnAPITree(), c: _close_worker_timeout, g: _clear_obj_garbage_timeout, cpath: _const_path})));
       }
@@ -234,7 +231,6 @@ function UnixSocketAPI() {
       _api_sock = APIsock;
       APIsock.on('message', (message)=> {
         let type = message[0];
-        console.log(message.slice(1).toString());
         this.onMessage(type, message.slice(1));
       });
       APIsock.on('error', ()=> {
@@ -250,7 +246,7 @@ function UnixSocketAPI() {
 
     this.launch = (launch_callback)=> {
       _launch_callback = launch_callback;
-      _api_sock.send(1);
+      _emitChildMessage(1);
     };
 
     this.init = (init_callback)=> {
