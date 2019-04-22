@@ -12,6 +12,14 @@ class NestedCallable:
     def __init__(self):
         pass
 
+class RemoteCallbackTree:
+    def __init__(self, cbtree):
+        pass
+
+class LocalCallbackTree:
+    def __init__(self, cbtree):
+        pass
+
 def generateObjCallbacksTree(obj_raw):
     if callable(obj_raw):
         return {}
@@ -58,5 +66,15 @@ def callObjCallback(Obj, Objpath, args):
         print(str(traceback.format_exc()))
         print(f)
 
-def decodeArgumentsFromBinary(blob):
+def encodeArgumentsToBinary(args):
+    result = bytes(0)
+    for i in range(len(args)):
+        arg = args[i]
+        if isinstance(arg, (bytes, bytearray)):
+            pass
+        elif callable(arg):
+            _Id = random.randint(0, 999999)
+
+
+def decodeArgumentsFromBinary(blob, callparent):
     result = []

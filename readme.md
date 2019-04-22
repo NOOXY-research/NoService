@@ -770,20 +770,21 @@ NoService.Database.Model.define('IndexedListTest', {'model_type': "IndexedList",
 
   ### ServiceSocket
   NoService.Serivce.ServiceSocket.def(name, callback)\
+  NoService.Serivce.ServiceSocket.defBlob(name, callback)\
   NoService.Serivce.ServiceSocket.sdef(name, callback, failopearation)\
-  NoService.Serivce.ServiceSocket.sendData(entityId, data)\
   NoService.Serivce.ServiceSocket.broadcastData(data)\
   NoService.Serivce.ServiceSocket.sendDataToUsername(username, data)\
   NoService.Serivce.ServiceSocket.emit(entityId, event, data)\
   NoService.Serivce.ServiceSocket.semit(entityId, event, data)\
+  NoService.Serivce.ServiceSocket.emitBlob(username, event, data)\
   NoService.Serivce.ServiceSocket.emitToUsername(username, event, data)\
   NoService.Serivce.ServiceSocket.emitToGroups(groups, event, data)\
   NoService.Serivce.ServiceSocket.emitToIncludingGroups(groups, event, data)\
-  NoService.Serivce.ServiceSocket.broadcastEvent(event, data)\
+  NoService.Serivce.ServiceSocket.emitAll(event, data)\
   NoService.Serivce.ServiceSocket.sendDataToUsername(username, data)\
   NoService.Serivce.ServiceSocket.sendDataToGroups(groups, data)\
   NoService.Serivce.ServiceSocket.sendDataToIncludingGroups(groups, data)\
-  NoService.Serivce.ServiceSocket.broadcastData(data)\
+  NoService.Serivce.ServiceSocket.sendDataAll(data)\
   NoService.Serivce.ServiceSocket.on(type, callback)\
   NoService.Serivce.ServiceSocket.close(entityId)
 
@@ -794,11 +795,13 @@ NoService.Database.Model.define('IndexedListTest', {'model_type': "IndexedList",
 
   ### ActivitySocket Object
   ActivitySocket.call(name, Json, callback)\
+  ActivitySocket.callBlob(name, blob, meta, callback)\
   ActivitySocket.sendData(data)\
   ActivitySocket.returnEntityId()\
   ActivitySocket.on(type, callback)\
   ActivitySocket.close()\
-  ActivitySocket.onEvent(event, callback);
+  ActivitySocket.onBlobEvent(event, callback)\
+  ActivitySocket.onEvent(event, callback)
 
 ## Plugin APIs(Note)
 1.  note that NoService do not resolve plugins' dependencies.
