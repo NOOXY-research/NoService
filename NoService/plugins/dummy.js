@@ -7,6 +7,7 @@ module.exports = function() {
   this.name = 'Dummy Plugin';
   this.version = '0.0.0';
   this.noservice = "0.5.6";
+  this.level = 0; // 0-5 the lower the first to be loaded
   this.allow_older_noservice = false;
   this.dependencies = ['ws'];
 

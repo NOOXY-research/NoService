@@ -340,6 +340,22 @@ let substrUTF8Bytes = (str, startInBytes, lengthInBytes) => {
     return resultStr;
 }
 
+let sortOnKeys = (dict)=> {
+
+    var sorted = [];
+    for(let key in dict) {
+        sorted[sorted.length] = key;
+    }
+    sorted.sort();
+
+    var tempDict = {};
+    for(let i = 0; i < sorted.length; i++) {
+        tempDict[sorted[i]] = dict[sorted[i]];
+    }
+
+    return tempDict;
+}
+
 module.exports = {
   UnixCmd: {
     uninitGitDir: uninitGitDir,
@@ -361,5 +377,6 @@ module.exports = {
   addDays: addDays,
   DatetoSQL: DatetoSQL,
   SQLtoDate: SQLtoDate,
-  substrUTF8Bytes: substrUTF8Bytes
+  substrUTF8Bytes: substrUTF8Bytes,
+  sortOnKeys: sortOnKeys
 }

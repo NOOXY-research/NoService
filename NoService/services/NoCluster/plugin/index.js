@@ -19,6 +19,7 @@ module.exports = function() {
   this.noservice = "0.5.6";
   this.allow_older_noservice = false;
   this.dependencies = ['sntp'];
+  this.level = 0;
 
   this.plugin = (noservice_coregateway, noservice_isInitialized, deploy_settings, noservice_constants, verbose, next)=> {
     verbose('Cluster', 'Loading cluster plugin...');
@@ -26,7 +27,7 @@ module.exports = function() {
       next(false);
       return 0;
     }
-    
+
     const Sntp = require('sntp');
 
     let exec = async ()=> {

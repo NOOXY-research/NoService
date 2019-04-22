@@ -22,12 +22,34 @@ function startPlugins(plugins, coregateway, isInitialized, settings, callback) {
 
   let Plugins = require("fs").readdirSync(require("path").join(__dirname, "./plugins")).map((file)=> {
     return require('./plugins/'+ file);});
-    
+
+  let PluginsWithLevel = {};
+  let PluginInstances = [];
   Plugins = Plugins.concat(plugins);
+
+  // sort by level
+  for(let i in Plugins) {
+    let p = new Plugins[i]();
+    if(!PluginsWithLevel[p.level]) {
+      if(!p.level && p.level != 0) {
+        p.level = 0;
+      }
+      PluginsWithLevel[p.level] = [p]
+    }
+    else {
+      PluginsWithLevel[p.level].push(p)
+    }
+  }
+
+  PluginsWithLevel = Utils.sortOnKeys(PluginsWithLevel);
+
+  for(let i in PluginsWithLevel) {
+    PluginInstances = PluginInstances.concat(PluginsWithLevel[i]);
+  }
 
   let index = 0;
   let load_next = ()=> {
-    let p = new Plugins[index]();
+    let p = PluginInstances[index];
     verbose('Plugin', 'Loading plugin "'+p.name+'"...');
     if(p.noservice) {
       let biggerthanruntime = Utils.compareVersion(p.noservice, Constants.version);
