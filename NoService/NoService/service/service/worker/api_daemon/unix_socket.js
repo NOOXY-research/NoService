@@ -85,11 +85,23 @@ function UnixSocketAPI() {
     let _init = false;
     let _service_name = _manifest.name;
 
+    let _emitChildMessage = (type, blob)=> {
+      console.log(type);
+      if(blob) {
+        let t = Buf.alloc(1, type);
+        _api_sock.send(Buf.concat([t, blob]));
+      }
+      else {
+        let t = Buf.alloc(1, type);
+        _api_sock.send(t);
+      }
+    };
+
     this.getCBOCount = (callback)=> {
       if(_child_alive&&_child) {
         let _rqid = Utils.generateUniqueId();
         _InfoRq[_rqid] = callback;
-        _api_sock.send({t: 4, i: _rqid});
+        _emitChildMessage(4, Buf.from(JSON.stringify({i: _rqid})));
       }
       else {
         callback(new Error("Child is not alive."));
@@ -100,7 +112,7 @@ function UnixSocketAPI() {
       if(_child_alive&&_child) {
         let _rqid = Utils.generateUniqueId();
         _InfoRq[_rqid] = callback;
-        _api_sock.send({t: 5, i: _rqid});
+        _emitChildMessage(5, Buf.from(JSON.stringify({i: _rqid})));
       }
       else {
         callback(new Error("Child is not alive."));
@@ -109,35 +121,20 @@ function UnixSocketAPI() {
 
     this.emitChildClose = ()=> {
       if(_child_alive&&_child&&_api_sock)
-        _api_sock.send({t:99});
+        _emitChildMessage(99);
     }
 
     this.destroyChildCallback = (id)=> {
        if(_child_alive&&_child&&_api_sock)
-         _api_sock.send({t:3, i: id}, (err)=> {
-           if (err) {
-             Utils.TagLog('*ERR*' , 'Occured error on sending data to child "'+_service_name+'".');
-             console.log(err);
-           }
-        });
+         _emitChildMessage(3, Buf.from(JSON.stringify({i: id})));
     }
 
     this.emitChildCallback = ([obj_id, path], args, argsobj) => {
-      let _data = {
-        t: 2,
-        p: [obj_id, path],
-        a: args,
-        o: argsobj
-      }
+      let _data = JSON.stringify([obj_id, path]);
 
       try {
         if(_child_alive&&_child&&_api_sock)
-           _api_sock.send(_data, (err)=> {
-             if (err) {
-               Utils.TagLog('*ERR*' , 'Occured error on sending data to child "'+_service_name+'".');
-               console.log(err);
-             }
-          });
+           _emitChildMessage(2, Buf.concat([Buf.alloc(1, _data.length), Buf.from(_data), argsblob]));
       }
       catch(err) {
         Utils.TagLog('*ERR*' , 'Occured error on "'+_service_name+'".');
@@ -145,17 +142,18 @@ function UnixSocketAPI() {
       }
     }
 
-    this.onMessage = (message)=>{
-      if(message.t === 0) {
-        _api_sock.send({t:0, p: path, a: _serviceapi.returnAPITree(), c: _close_worker_timeout, g: _clear_obj_garbage_timeout, cpath: _const_path});
+    this.onMessage = (type, blob)=>{
+      console.log(type);
+      if(type === 0) {
+        _emitChildMessage(0, Buf.from(JSON.stringify({p: path, a: _serviceapi.returnAPITree(), c: _close_worker_timeout, g: _clear_obj_garbage_timeout, cpath: _const_path})));
       }
-      else if(message.t === 1) {
+      else if(type === 1) {
         _init_callback(false);
       }
-      else if(message.t === 2) {
+      else if(type === 2) {
         _launch_callback(false);
       }
-      else if(message.t === 3) {
+      else if(type === 3) {
         _close_callback(false);
         _child.kill();
         _child = null;
@@ -163,48 +161,55 @@ function UnixSocketAPI() {
         _api_sock = null;
         _child_alive = false;
       }
-      else if(message.t === 4) {
+      else if(type === 4) {
         // python version needs to check is it a database api!
         try {
-          _serviceapi.emitAPIRq(message.p, message.a, message.o);
+          let APIpath = JSON.parse(blob.slice(1, 1+blob[0]).toString());
+          _serviceapi.emitAPIRq(APIpath, blob.slice(1+blob[0]));
         }
         catch (e) {
-           _api_sock.send({
-             t:98,
-             d:{
-               api_path: message.p,
-               call_args: message.a,
-               args_obj_tree: message.o
-             },
-             e: e.stack
-          });
+          console.log(blob[0]);
+          console.log(blob.slice(1, 1+blob[0]).toString());
+          let APIpath = JSON.parse(blob.slice(1, 1+blob[0]).toString());
+          let _data = {
+            d:{
+              api_path: APIpath,
+              args_string: blob.slice(1+blob[0]).toString()
+            },
+            e: e.stack
+          };
+          _emitChildMessage(98, Buf.from(JSON.stringify(_data)));
         }
       }
-      else if(message.t === 5) {
+      else if(type === 5) {
         try {
-          _serviceapi.emitCallbackRq(message.p, message.a, message.o);
+          let cbtree = JSON.parse(blob.slice(1, 1+blob[0]).toString());
+          _serviceapi.emitCallbackRq(cbtree, blob.slice(1+blob[0]));
         }
         catch (e) {
-           _api_sock.send({
-             t:98,
-             d:{
-               obj_path: message.p,
-               call_args: message.a,
-               args_obj_tree: message.o
-             },
-             e: e.stack
-          });
+          let message = JSON.parse(blob.toString());
+          let _data = {
+            d:{
+              obj_path: message.p,
+              call_args: message.a,
+              args_obj_tree: message.o
+            },
+            e: e.stack
+          };
+          _emitChildMessage(98, Buf.from(JSON.stringify(_data)));
         }
       }
-      else if(message.t === 6) {
+      else if(type === 6) {
         _InfoRq[message.i](false, {daemon: _serviceapi.returnLCBOCount(), client: message.c})
         delete _InfoRq[message.i];
       }
-      else if(message.t === 7) {
+      else if(type === 7) {
+        let message = JSON.parse(blob.toString());
         _InfoRq[message.i](false, message.c)
         delete _InfoRq[message.i];
       }
-      else if(message.t === 96){
+      else if(type === 96){
+        let message = JSON.parse(blob.toString());
         _close_callback(new Error('Worker closing error:\n'+message.e));
         _child.kill();
         _child = null;
@@ -212,13 +217,15 @@ function UnixSocketAPI() {
         _api_sock = null;
         _child_alive = false;
       }
-      else if(message.t === 97){
+      else if(type === 97){
         // _launch_callback(new Error('Worker runtime error:\n'+message.e));
       }
-      else if(message.t === 98){
+      else if(type === 98){
+        let message = JSON.parse(blob.toString());
         _launch_callback(new Error('"'+_service_name+'" worker launching error:\n'+message.e));
       }
-      else if(message.t === 99){
+      else if(type === 99){
+        let message = JSON.parse(blob.toString());
         _init_callback(new Error('"'+_service_name+'" worker initializing error:\n'+message.e));
       }
     };
@@ -226,20 +233,24 @@ function UnixSocketAPI() {
     this.pairSocket = (APIsock)=> {
       _api_sock = APIsock;
       APIsock.on('message', (message)=> {
-        this.onMessage(message);
+        let type = message[0];
+        console.log(message.slice(1).toString());
+        this.onMessage(type, message.slice(1));
       });
       APIsock.on('error', ()=> {
-        console.log('err');
         _child.kill();
         _child = null;
         _child_alive = false;
+        if(_close_callback) {
+          _close_callback();
+        }
       });
-      this.onMessage({t: 0});
+      this.onMessage(0);
     };
 
     this.launch = (launch_callback)=> {
       _launch_callback = launch_callback;
-      _api_sock.send({t:1});
+      _api_sock.send(1);
     };
 
     this.init = (init_callback)=> {
@@ -354,6 +365,8 @@ function UnixSocketAPI() {
         _close_callback(false);
         _child.kill();
         _child = null;
+        _api_sock.close();
+        _api_sock = null;
         _child_alive = false;
       }
       else if(type === 4) {
@@ -363,7 +376,6 @@ function UnixSocketAPI() {
         }
         catch (e) {
           console.log(blob[0]);
-
           console.log(blob.slice(1, 1+blob[0]).toString());
           let APIpath = JSON.parse(blob.slice(1, 1+blob[0]).toString());
           let _data = {
@@ -418,11 +430,11 @@ function UnixSocketAPI() {
 
       else if(type === 98){
         let message = JSON.parse(blob.toString());
-        _launch_callback(new Error('Worker launching error:\n'+message.e));
+        _launch_callback(new Error('"'+_service_name+'" worker launching error:\n'+message.e));
       }
       else if(type === 99){
         let message = JSON.parse(blob.toString());
-        _init_callback(new Error('Worker initializing error:\n'+message.e));
+        _init_callback(new Error('"'+_service_name+'" worker initializing error:\n'+message.e));
       }
     };
 
@@ -439,27 +451,6 @@ function UnixSocketAPI() {
           _init_callback(new Error('NodeWorkerClient of "'+_service_name+'" occured error.'));
       });
       _child_alive = true;
-    };
-
-    this.relaunch = (relaunch_callback)=> {
-      Utils.TagLog('Workerd', 'Relaunching service "'+_service_name+'"');
-      this.close((err)=> {
-        if(err) {
-          relaunch_callback(err);
-        }
-        else {
-          setTimeout(()=>{
-            this.init((err)=> {
-              if(err) {
-                relaunch_callback(err);
-              }
-              else {
-                this.launch(relaunch_callback);
-              }
-            });
-          }, _close_worker_timeout+10);
-        }
-      });
     };
 
     this.pairSocket = (APIsock)=> {
@@ -591,6 +582,7 @@ function UnixSocketAPI() {
       });
 
       socket.on('error', (error) => {
+        console.log(error);
         socket.destroy();
         _api_sock._onError();
       });

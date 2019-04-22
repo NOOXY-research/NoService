@@ -4,7 +4,7 @@
 # Copyright 2018-2019 NOOXY. All Rights Reserved.
 
 # NOOXY Service WorkerDaemon protocol
-# message['t']
+# type
 # 0 worker established {t, a: api tree, p: service module path, c: closetimeout}
 # 1 launch
 # 2 callback {t, p: [obj_id, callback_path], a: arguments, o:{arg_index, [obj_id, callback_tree]}}
@@ -46,8 +46,14 @@ class WorkerClient:
         self._service_module = None
         self._closed = False
 
+    def emitParentMessage(self, type, blob):
+        b = str(len(blob)+1).zfill(16).encode()+bytearray([type])+blob
+        print(b)
+        self.writer.write(b)
+
     # send message to nodejs parent
     def send(self, message):
+        print(message)
         encoded = None
         if(isinstance(message, str)):
             encoded = message.encode()
@@ -58,7 +64,7 @@ class WorkerClient:
     # parent API caller wrapper
     def callParentAPI(self, id_APIpath, args):
         id, APIpath = id_APIpath
-        _data = {"t":4, "p": APIpath, "a": args, "o": {}}
+        _data = {"p": APIpath, "a": args, "o": {}}
         for i in range(len(args)):
             arg = args[i]
             if callable(arg):
@@ -66,7 +72,7 @@ class WorkerClient:
                 _Id = random.randint(0, 999999)
                 self._local_obj_callbacks_dict[_Id] = arg
                 _data["o"][i] = [_Id, generateObjCallbacksTree(arg)]
-        self.send(_data)
+        self.emitParentMessage(4, json.dumps(_data).encode())
 
     # parent API caller wrapper
     def emitParentCallback(self, id_APIpath, args):
@@ -82,9 +88,10 @@ class WorkerClient:
         self.send(_data)
 
     # onMessage event callback
-    async def onMessage(self, message):
-        message = json.loads(message)
-        if message['t'] == 0:
+    async def onMessage(self, type, message):
+        print(type)
+        if type == 0:
+            message = json.loads(message)
             p = re.compile('.*\/([^\/]*)\/entry')
             self._service_name = p.match(message['p']).group(1)
             self._close_timeout = message['c'];
@@ -101,28 +108,28 @@ class WorkerClient:
                     sys.path.append(message['p'].split('/entry')[0])
                     from entry import Service
                     self._service_module = Service(Me, self._api)
-                    self.send({'t':1})
+                    self.emitParentMessage(1)
                 self._api.Daemon.getSettings(getSettingsCallback)
             self._api.getMe(getMeCallback)
             # not completed
-        elif message['t'] == 1:
+        elif type == 1:
             try:
                 self._service_module.start(self._Me, self._api)
-                self.send({'t': 2});
+                self.emitParentMessage(2)
             except Exception as e:
                 self.send({'t': 98, 'e': str(traceback.format_exc())});
-        elif message['t'] == 2:
+        elif type == 2:
             callObjCallback(self._local_obj_callbacks_dict[message['p'][0]], message['p'][1], message['a'], message['o'], self.emitParentCallback, generateObjCallbacks)
-        elif message['t'] == 3:
+        elif type == 3:
             del  self._local_obj_callbacks_dict[message['i']]
-        elif message['t'] == 4:
+        elif type == 4:
             self.send({'t':6, 'i':message['i'], 'c': len(_local_obj_callbacks_dict)})
-        elif message['t'] == 5:
+        elif type == 5:
             # not implemented
             self.send({'t':7, 'i':message['i'], 'c': {"rss":0}})
-        elif message['t'] == 98:
+        elif type == 98:
             print(message['e'])
-        elif message['t'] == 99:
+        elif type == 99:
             if self._closed == False:
                 self._closed = True
                 if self._service_module:
@@ -137,11 +144,11 @@ class WorkerClient:
             self.alive = False
 
     def established(self):
-        self.send({'t':0, 's': Service_Name})
+        self.emitParentMessage(0, json.dumps({'s': Service_Name}).encode())
 
 # readOneMessege from reader and follows the NoService TCP protocol
 async def readOneMessege(reader):
-    msg_string = ""
+    blob = bytearray(0)
     msg_size = (await reader.read(IPC_MSG_SIZE_PREFIX_SIZE)).decode()
     if msg_size == '':
         return None
@@ -150,12 +157,12 @@ async def readOneMessege(reader):
         left = msg_size
         while left>0:
             if left>MSG_READ_SIZE:
-                msg_string += (await reader.read(MSG_READ_SIZE)).decode()
+                blob += await reader.read(MSG_READ_SIZE)
                 left = left - MSG_READ_SIZE
             else:
-                msg_string += (await reader.read(left)).decode()
+                blob += await reader.read(left)
                 left = 0
-        return msg_string
+        return blob
 
 # first layer of eventloop
 async def unix_sock_client(loop):
@@ -164,9 +171,9 @@ async def unix_sock_client(loop):
     w = WorkerClient(loop, reader, writer)
     w.established()
     while w.alive:
-        msg_string = await readOneMessege(reader)
-        if(msg_string != None):
-            loop.create_task(w.onMessage(msg_string))
+        blob = await readOneMessege(reader)
+        if(blob != None):
+            loop.create_task(w.onMessage(blob[0], blob[1:]))
         elif(w.alive):
             print('Disconnect from NoService Core. "'+Service_Name+'" forced to exit. Your state may not be saved!')
             exit(0)

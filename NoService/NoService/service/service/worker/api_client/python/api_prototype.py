@@ -45,17 +45,18 @@ def generateObjCallbacks(callback_id, obj_tree, callparent):
             callparent([callback_id, []], list(args))
         return callablefunc
 
-def callObjCallback(Obj, Objpath, args, arg_objs_trees, obj_callback_policy, generate_obj_policy):
+def callObjCallback(Obj, Objpath, args):
     def getTargetObj(path, subobj):
         if(len(path)):
             return getTargetObj(path[1:], getattr(subobj, path[0]))
         else:
             return subobj
-    for i in arg_objs_trees:
-        args[int(i)] = generate_obj_policy(arg_objs_trees[i][0], arg_objs_trees[i][1], obj_callback_policy)
     f = getTargetObj(Objpath, Obj)
     try:
         f(*args)
     except Exception as e:
         print(str(traceback.format_exc()))
         print(f)
+
+def decodeArgumentsFromBinary(blob):
+    result = []
