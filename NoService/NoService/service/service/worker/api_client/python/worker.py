@@ -125,9 +125,11 @@ class WorkerClient:
             message = json.loads(blob.decode())
             del  self._local_obj_callbacks_dict[message['i']]
         elif type == 4:
+            message = json.loads(blob.decode())
             self.emitParentMessage(6, json.dumps({'i':message['i'], 'c': len(_local_obj_callbacks_dict)}).encode())
         elif type == 5:
             # not implemented
+            message = json.loads(blob.decode())
             self.emitParentMessage(7, json.dumps({'i':message['i'], 'c': {"rss":0}}).encode())
         elif type == 98:
             message = json.loads(blob.decode())
