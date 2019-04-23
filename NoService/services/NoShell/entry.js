@@ -227,7 +227,7 @@ function Service(Me, NoService) {
                                 c2(false, {r: "ModelType \"GroupIndexedList\" not support yet."});
                               }
                               else if(model.modeltype == 'Pair'){
-                                model.getbyBoth(t2[1], (err, result)=> {
+                                model.getByBoth(t2[1], (err, result)=> {
                                   c2(false, {r:JSON.stringify(result, null, 2)});
                                 });
                               }
