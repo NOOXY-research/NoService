@@ -99,8 +99,8 @@ function Router() {
             if(err&&_coregateway.Settings.debug) {
               console.log(err);
             }
-            let method = decrypted.slice(0, 2).toString();
-            let session = decrypted.slice(2, 4).toString();
+            let method = Buf.decode(decrypted.slice(0, 2));
+            let session = Buf.decode(decrypted.slice(2, 4));
             let blob = decrypted.slice(4);
 
             _tellJSONSniffers({method: method, session: session, data: blob});
@@ -108,8 +108,8 @@ function Router() {
           });
         }
         else {
-          let method = data.slice(0, 2).toString();
-          let session = data.slice(2, 4).toString();;
+          let method = Buf.decode(data.slice(0, 2));
+          let session = Buf.decode(data.slice(2, 4));
           let blob = data.slice(4);
 
           _tellJSONSniffers({method: method, session: session, data: blob});

@@ -46,7 +46,7 @@ function Implementation() {
 
 
   this.onToken = (connprofile, status, username, token)=> {
-    _implts['onToken'](status, username, token);
+    _implts['onToken'](status, token, username);
   };
 
   this.setImplement = (name, callback) => {

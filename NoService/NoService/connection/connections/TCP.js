@@ -171,7 +171,7 @@ function Client(ConnectionProfile) {
       while(data.length) {
         // console.log('>', !message, data.length, chunks_size);
         if(!message) {
-          chunks_size = parseInt(data.slice(0, 16).toString());
+          chunks_size = parseInt(Buf.decode(data.slice(0, 16)));
           message = data.slice(16, 16+chunks_size);
           data = data.slice(16+chunks_size);
           if(message.length === chunks_size) {

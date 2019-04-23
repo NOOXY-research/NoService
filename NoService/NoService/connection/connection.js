@@ -47,6 +47,9 @@ function Connection(options) {
     }
 
     this.closeConnetion = () => {
+      if(Rpos === 'Server') {
+        delete _clients[connMethod+hostip+hostport];
+      }
       // Utils.TagLog('*ERR*', 'closeConnetion not implemented. Of '+this.type);
       _conn.closeConnetion(_GUID);
     };

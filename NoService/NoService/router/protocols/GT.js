@@ -14,7 +14,7 @@ module.exports = function Protocol(coregateway, emitRequest, debug) {
   };
 
   this.RequestHandler = (connprofile, blob, _senddata) => {
-    let data = JSON.parse(blob.toString('utf8'));
+    let data = JSON.parse(Buf.decode(blob));
     let responsedata = {};
     coregateway.Authenticity.getUserTokenByUsername(data.u, data.p, (err, token)=>{
       responsedata['t'] = token;
@@ -30,7 +30,7 @@ module.exports = function Protocol(coregateway, emitRequest, debug) {
   };
 
   this.ResponseHandler = (connprofile, blob) => {
-    let data = JSON.parse(blob.toString('utf8'));
+    let data = JSON.parse(Buf.decode(blob));
     if(data.s === 'OK') {
       coregateway.Implementation.onToken(connprofile, false, data.u, data.t);
     }

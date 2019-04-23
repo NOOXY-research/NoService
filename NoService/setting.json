@@ -52,11 +52,10 @@
     "NoUser",
     "NoTalk",
     "NoMailer",
-    "NoCluster",
-    "PyTester"
+    "NoCluster"
   ],
 
-  "debug": false,
+  "debug": true,
   "verbose": true,
 
   "master_service": "NoServiceManager",

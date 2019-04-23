@@ -116,7 +116,7 @@ module.exports = function Protocol(coregateway, emitRequest, debug) {
 
 
   this.RequestHandler = (connprofile, blob, emitResponse) => {
-    let data = JSON.parse(blob);
+    let data = JSON.parse(Buf.decode(blob));
     let _emitResponse = (connprofile, data)=> {
       emitResponse(connprofile, Buf.encode(JSON.stringify(data)));
     };
@@ -124,7 +124,7 @@ module.exports = function Protocol(coregateway, emitRequest, debug) {
   };
 
   this.ResponseHandler = (connprofile, blob) => {
-    let data = JSON.parse(blob);
+    let data = JSON.parse(Buf.decode(blob));
     try {
       let op = _queue_operation[data.d.t];
       if(op) {

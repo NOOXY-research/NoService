@@ -95,7 +95,7 @@ module.exports = function() {
 
     });
 
-    Implementation.setImplement('onToken', (err, username, token)=>{
+    Implementation.setImplement('onToken', (err, token, username)=>{
       token_resumes[username](false, token);
       if(!err) tokens[username] = token;
     });

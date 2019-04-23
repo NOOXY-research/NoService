@@ -161,13 +161,13 @@ function UnixSocketAPI() {
       else if(type === 4) {
         // python version needs to check is it a database api!
         try {
-          let APIpath = JSON.parse(blob.slice(1, 1+blob[0]).toString());
+          let APIpath = JSON.parse(Buf.decode(blob.slice(1, 1+blob[0])));
           _serviceapi.emitAPIRq(APIpath, blob.slice(1+blob[0]));
         }
         catch (e) {
           console.log(blob[0]);
-          console.log(blob.slice(1, 1+blob[0]).toString());
-          let APIpath = JSON.parse(blob.slice(1, 1+blob[0]).toString());
+          console.log(Buf.decode(blob.slice(1, 1+blob[0])));
+          let APIpath = JSON.parse(Buf.decode(blob.slice(1, 1+blob[0])));
           let _data = {
             d:{
               api_path: APIpath,
@@ -180,11 +180,11 @@ function UnixSocketAPI() {
       }
       else if(type === 5) {
         try {
-          let cbtree = JSON.parse(blob.slice(1, 1+blob[0]).toString());
+          let cbtree = JSON.parse(Buf.decode(blob.slice(1, 1+blob[0])));
           _serviceapi.emitCallbackRq(cbtree, blob.slice(1+blob[0]));
         }
         catch (e) {
-          let message = JSON.parse(blob.toString());
+          let message = JSON.parse(Buf.decode(blob));
           let _data = {
             d:{
               obj_path: message.p,
@@ -201,12 +201,12 @@ function UnixSocketAPI() {
         delete _InfoRq[message.i];
       }
       else if(type === 7) {
-        let message = JSON.parse(blob.toString());
+        let message = JSON.parse(Buf.decode(blob));
         _InfoRq[message.i](false, message.c)
         delete _InfoRq[message.i];
       }
       else if(type === 96){
-        let message = JSON.parse(blob.toString());
+        let message = JSON.parse(Buf.decode(blob));
         _close_callback(new Error('Worker closing error:\n'+message.e));
         _child.kill();
         _child = null;
@@ -218,11 +218,11 @@ function UnixSocketAPI() {
         // _launch_callback(new Error('Worker runtime error:\n'+message.e));
       }
       else if(type === 98){
-        let message = JSON.parse(blob.toString());
+        let message = JSON.parse(Buf.decode(blob));
         _launch_callback(new Error('"'+_service_name+'" worker launching error:\n'+message.e));
       }
       else if(type === 99){
-        let message = JSON.parse(blob.toString());
+        let message = JSON.parse(Buf.decode(blob));
         _init_callback(new Error('"'+_service_name+'" worker initializing error:\n'+message.e));
       }
     };
@@ -367,13 +367,13 @@ function UnixSocketAPI() {
       }
       else if(type === 4) {
         try {
-          let APIpath = JSON.parse(blob.slice(1, 1+blob[0]).toString());
+          let APIpath = JSON.parse(Buf.decode(blob.slice(1, 1+blob[0])));
           _serviceapi.emitAPIRq(APIpath, blob.slice(1+blob[0]));
         }
         catch (e) {
           console.log(blob[0]);
-          console.log(blob.slice(1, 1+blob[0]).toString());
-          let APIpath = JSON.parse(blob.slice(1, 1+blob[0]).toString());
+          console.log(Buf.decode(blob.slice(1, 1+blob[0])));
+          let APIpath = JSON.parse(Buf.decode(blob.slice(1, 1+blob[0])));
           let _data = {
             d:{
               api_path: APIpath,
@@ -386,11 +386,11 @@ function UnixSocketAPI() {
       }
       else if(type === 5) {
         try {
-          let cbtree = JSON.parse(blob.slice(1, 1+blob[0]).toString());
+          let cbtree = JSON.parse(Buf.decode(blob.slice(1, 1+blob[0])));
           _serviceapi.emitCallbackRq(cbtree, blob.slice(1+blob[0]));
         }
         catch (e) {
-          let message = JSON.parse(blob.toString());
+          let message = JSON.parse(Buf.decode(blob));
           let _data = {
             d:{
               obj_path: message.p,
@@ -403,17 +403,17 @@ function UnixSocketAPI() {
         }
       }
       else if(type === 6) {
-        let message = JSON.parse(blob.toString());
+        let message = JSON.parse(Buf.decode(blob));
         _InfoRq[message.i](false, {daemon: _serviceapi.returnLCBOCount(), client: message.c})
         delete _InfoRq[message.i];
       }
       else if(type === 7) {
-        let message = JSON.parse(blob.toString());
+        let message = JSON.parse(Buf.decode(blob));
         _InfoRq[message.i](false, message.c)
         delete _InfoRq[message.i];
       }
       else if(type === 96){
-        let message = JSON.parse(blob.toString());
+        let message = JSON.parse(Buf.decode(blob));
         _close_callback(new Error('Worker closing error:\n'+message.e));
         _child.kill();
         _child = null;
@@ -425,11 +425,11 @@ function UnixSocketAPI() {
       }
 
       else if(type === 98){
-        let message = JSON.parse(blob.toString());
+        let message = JSON.parse(Buf.decode(blob));
         _launch_callback(new Error('"'+_service_name+'" worker launching error:\n'+message.e));
       }
       else if(type === 99){
-        let message = JSON.parse(blob.toString());
+        let message = JSON.parse(Buf.decode(blob));
         _init_callback(new Error('"'+_service_name+'" worker initializing error:\n'+message.e));
       }
     };

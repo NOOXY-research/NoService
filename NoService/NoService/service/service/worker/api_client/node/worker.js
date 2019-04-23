@@ -125,7 +125,7 @@ function WorkerClient(_api_sock) {
     this.onMessage = (type, blob)=>{
       // init worker
       if(type === 0) {
-        let message = JSON.parse(blob.toString());
+        let message = JSON.parse(Buf.decode(blob));
         _service_name = /.*\/([^\/]*)\/entry/g.exec(message.p)[1];
         process.title = 'NoService_worker: '+_service_name;
         _close_timeout = message.c;
@@ -276,7 +276,7 @@ function WorkerClient(_api_sock) {
       // function return
       else if(type === 2) {
         try {
-          let id_path = JSON.parse(blob.slice(1, 1+blob[0]).toString());
+          let id_path = JSON.parse(Buf.decode(blob.slice(1, 1+blob[0])));
           let args = decodeArgumentsFromBinary(blob.slice(1+blob[0]));
           for(let i in args) {
             if(args[i] instanceof RemoteCallbackTree) {
@@ -287,7 +287,7 @@ function WorkerClient(_api_sock) {
           _local_obj_callbacks_dict[id_path[0]].callCallback([], args);
         }
         catch (e) {
-          let message = blob.toString();
+          let message = Buf.decode(blob);
           Utils.TagLog('*ERR*', 'Callback error occured on service "'+_service_name+'".');
           console.log('Details: ');
           console.log(message);
@@ -295,22 +295,22 @@ function WorkerClient(_api_sock) {
         }
       }
       else if(type === 3) {
-        let message = JSON.parse(blob.toString());
+        let message = JSON.parse(Buf.decode(blob));
         delete _local_obj_callbacks_dict[message.i];
         // console.log(Object.keys(_local_obj_callbacks_dict).length);
       }
       else if(type === 4) {
-        let message = JSON.parse(blob.toString());
+        let message = JSON.parse(Buf.decode(blob));
         _emitParentMessage(6,  Buf.encode(JSON.stringify({i:message.i, c:Object.keys(_local_obj_callbacks_dict).length})));
       }
       // memory
       else if(type === 5) {
-        let message = JSON.parse(blob.toString());
+        let message = JSON.parse(Buf.decode(blob));
         _emitParentMessage(7,  Buf.encode(JSON.stringify({i:message.i, c: process.memoryUsage()})));
       }
 
       else if(type === 98) {
-        let message = JSON.parse(blob.toString());
+        let message = JSON.parse(Buf.decode(blob));
         Utils.TagLog('*ERR*', 'Service "'+_service_name+'" occured error on API call.');
         console.log('Details: ');
         console.log(message.d);

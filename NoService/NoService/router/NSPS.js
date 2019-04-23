@@ -17,7 +17,7 @@ function NSPS() {
 
   // daemon side
   this.ResponseHandler = (connprofile, blob) => {
-    let data = JSON.parse(blob.toString('utf8'));
+    let data = JSON.parse(Buf.decode(blob));
     let resumes = _resumes[connprofile.returnGUID()];
     if(resumes) {
       try{
@@ -61,7 +61,7 @@ function NSPS() {
   // Nooxy service protocol secure request ClientSide
   // in client need to be in implementation module
   this.RequestHandler = (connprofile, blob) => {
-    let data = JSON.parse(blob.toString('utf8'));
+    let data = JSON.parse(Buf.decode(blob));
     let host_rsa_pub = data.p;
     let client_random_num = _crypto_module.returnRandomInt(99999);
     connprofile.setBundle('host_rsa_pub_key', host_rsa_pub);
@@ -94,9 +94,9 @@ function NSPS() {
 
   this.decrypt = (connprofile, blob, callback)=> {
     if(connprofile.returnBundle('NSPS') === 'pending') {
-      let method = blob.slice(0, 2).toString();
+      let method = Buf.decode(blob.slice(0, 2));
       if(method === 'SP') {
-        let session = blob.slice(2, 4).toString();
+        let session = Buf.decode(blob.slice(2, 4));
         if(session === 'rs') {
           let data = blob.slice(4);
           this.ResponseHandler(connprofile, data);
@@ -120,9 +120,9 @@ function NSPS() {
       });
     }
     else if(connprofile.returnBundle('NSPS') != true  && connprofile.returnRemotePosition() === 'Server') {
-      let method = blob.slice(0, 2).toString();
+      let method = Buf.decode(blob.slice(0, 2));
       if(method === 'SP') {
-        let session = blob.slice(2, 4).toString();
+        let session = Buf.decode(blob.slice(2, 4));
         if(session === 'rq') {
           let data = blob.slice(4);
           this.RequestHandler(connprofile, data);

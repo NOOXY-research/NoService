@@ -29,12 +29,12 @@ module.exports = function Protocol(coregateway, emitRequest, debug) {
   };
 
   let _parse_blob = (blob)=> {
-    let length = parseInt(blob.slice(0, 16));
-    let json_data = JSON.parse(blob.slice(16, 16+length).toString());
+    let length = parseInt(Buf.decode(blob.slice(0, 16)));
+    let json_data = JSON.parse(Buf.decode(blob.slice(16, 16+length)));
     blob = blob.slice(16+length);
     if(blob.length) {
       let blob_data;
-      length = parseInt(blob.slice(0, 16));
+      length = parseInt(Buf.decode(blob.slice(0, 16)));
       blob_data = blob.slice(16, 16+length);
       json_data.d.d = blob_data;
       return json_data;
@@ -145,7 +145,7 @@ module.exports = function Protocol(coregateway, emitRequest, debug) {
 
   // Serverside
   this.ResponseHandler = (connprofile, blob) => {
-    let data = JSON.parse(blob.toString('utf8'));
+    let data = JSON.parse(Buf.decode(blob));
 
     let methods = {
       // nooxy service protocol implementation of "Call Activity: ActivitySocket"

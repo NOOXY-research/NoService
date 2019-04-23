@@ -10,7 +10,7 @@ const VirtualNet = new (require('../library/virtualnet'))();
 
 function Server(ServerId, ConnectionProfile) {
   let _vnets;
-  let _myclients= {};
+  let _myclients = {};
   let _debug;
 
   this.setDebug = (d)=> {
