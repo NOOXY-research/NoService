@@ -27,6 +27,7 @@ module.exports = function Protocol(coregateway, emitRequest, debug) {
 
   // ServerSide
   Authorization.on('AuthPasswordRq', (entityId, callback)=> {
+<<<<<<< HEAD
     Entity.getEntityOwner(entityId, (err, owner)=> {
       Entity.getEntityConnProfile(entityId, (err, connprofile) => {
         let data = {
@@ -41,12 +42,30 @@ module.exports = function Protocol(coregateway, emitRequest, debug) {
         setTimeout(() => {if(_queue_operation[data.d.t]) {delete _queue_operation[data.d.t]}}, _auth_timeout*1000);
         emitRequest(connprofile, 'AU', Buf.from(JSON.stringify(data)));
       });
+=======
+    Entity.getEntityConnProfile(entityId, (err, connprofile) => {
+      let data = {
+        m: "PW",
+        d: {t: Utils.generateGUID()}
+      }
+      let op = (connprofile, data) => {
+        callback(err, data.d.v);
+      }
+      _queue_operation[data.d.t] = op;
+      // set the timeout of this operation
+      setTimeout(() => {if(_queue_operation[data.d.t]) {delete _queue_operation[data.d.t]}}, _auth_timeout*1000);
+      emitRequest(connprofile, 'AU', data);
+>>>>>>> 2b7f7b4e7477b266a2d1c10cda2cd22e4fc44238
     });
   });
 
   Authorization.on('AuthbyPasswordFailed', (entityId, callback)=> {
     Entity.getEntityConnProfile(entityId, (err, connprofile) => {
+<<<<<<< HEAD
       emitRequest(connprofile, 'AU', Buf.from(JSON.stringify({m: 'PF', i: entityId})));
+=======
+      emitRequest(connprofile, 'AU', {m: 'PF'});
+>>>>>>> 2b7f7b4e7477b266a2d1c10cda2cd22e4fc44238
     });
   });
 
