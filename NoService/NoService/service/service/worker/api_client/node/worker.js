@@ -50,7 +50,7 @@ function APISocket(sock) {
   };
 
   this.send = (blob, callback)=> {
-    sock.write(Buf.concat([Buf.from(('0000000000000000'+blob.length).slice(-16)), blob]));
+    sock.write(Buf.concat([Buf.encode(('0000000000000000'+blob.length).slice(-16)), blob]));
   }
 
   this.on = (eventname, callback)=> {
@@ -102,7 +102,7 @@ function WorkerClient(_api_sock) {
           args[i] = _local_obj_callbacks_dict[id];
         }
       }
-      _emitParentMessage(4,  Buf.concat([Buf.alloc(1, JSON.stringify(_data).length), Buf.from(JSON.stringify(_data)), encodeArgumentsToBinary(args)]));
+      _emitParentMessage(4,  Buf.concat([Buf.alloc(1, JSON.stringify(_data).length), Buf.encode(JSON.stringify(_data)), encodeArgumentsToBinary(args)]));
     }
 
     const emitParentCallback = ([obj_id, path], args) => {
@@ -114,7 +114,7 @@ function WorkerClient(_api_sock) {
           args[i] = _local_obj_callbacks_dict[id];
         }
       }
-      _emitParentMessage(5,  Buf.concat([Buf.alloc(1, JSON.stringify(_data).length), Buf.from(JSON.stringify(_data)), encodeArgumentsToBinary(args)]));
+      _emitParentMessage(5,  Buf.concat([Buf.alloc(1, JSON.stringify(_data).length), Buf.encode(JSON.stringify(_data)), encodeArgumentsToBinary(args)]));
     }
 
     _api_sock.on('message', message => {
@@ -245,7 +245,7 @@ function WorkerClient(_api_sock) {
                   }
                   catch(e) {
                     console.log(e);
-                    _emitParentMessage(99,  Buf.from(JSON.stringify({e:e.toString()})));
+                    _emitParentMessage(99,  Buf.encode(JSON.stringify({e:e.toString()})));
                   }
                 });
               });
@@ -258,7 +258,7 @@ function WorkerClient(_api_sock) {
               }
               catch(e) {
                 console.log(e);
-                _emitParentMessage(99,  Buf.from(JSON.stringify({e:e.toString()})));
+                _emitParentMessage(99,  Buf.encode(JSON.stringify({e:e.toString()})));
               }
             }
           });
@@ -270,7 +270,7 @@ function WorkerClient(_api_sock) {
           _emitParentMessage(2);
         }
         catch(err) {
-          _emitParentMessage(98,  Buf.from(JSON.stringify({e: err.stack})));
+          _emitParentMessage(98,  Buf.encode(JSON.stringify({e: err.stack})));
         }
       }
       // function return
@@ -301,12 +301,12 @@ function WorkerClient(_api_sock) {
       }
       else if(type === 4) {
         let message = JSON.parse(blob.toString());
-        _emitParentMessage(6,  Buf.from(JSON.stringify({i:message.i, c:Object.keys(_local_obj_callbacks_dict).length})));
+        _emitParentMessage(6,  Buf.encode(JSON.stringify({i:message.i, c:Object.keys(_local_obj_callbacks_dict).length})));
       }
       // memory
       else if(type === 5) {
         let message = JSON.parse(blob.toString());
-        _emitParentMessage(7,  Buf.from(JSON.stringify({i:message.i, c: process.memoryUsage()})));
+        _emitParentMessage(7,  Buf.encode(JSON.stringify({i:message.i, c: process.memoryUsage()})));
       }
 
       else if(type === 98) {
@@ -326,11 +326,11 @@ function WorkerClient(_api_sock) {
                 _emitParentMessage(3);
               }
               else {
-                _emitParentMessage(96,  Buf.from(JSON.stringify({e: 'The service "'+_service_name+'" have no "close" function.'})));
+                _emitParentMessage(96,  Buf.encode(JSON.stringify({e: 'The service "'+_service_name+'" have no "close" function.'})));
               }
             }
             catch(e) {
-              _emitParentMessage(96,  Buf.from(JSON.stringify({e: e.stack})));
+              _emitParentMessage(96,  Buf.encode(JSON.stringify({e: e.stack})));
               // Utils.TagLog('*ERR*', 'Service "'+_service_name+'" occured error while closing.');
               // console.log(e);
             }
@@ -340,7 +340,7 @@ function WorkerClient(_api_sock) {
     }
 
     this.established = ()=>{
-      _emitParentMessage(0, Buf.from(JSON.stringify({s: process.argv[3]})));
+      _emitParentMessage(0, Buf.encode(JSON.stringify({s: process.argv[3]})));
     }
   }
   catch(err) {

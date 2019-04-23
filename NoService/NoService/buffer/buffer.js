@@ -9,9 +9,12 @@ module.exports = {
     return Buffer.alloc.apply(null, args);
   },
 
-  from : (...args)=> {
+  encode : (...args)=> {
     return Buffer.from.apply(null, args);
+  },
 
+  decode : (...args)=> {
+    return args[0].toString();
   },
 
   concat : (...args)=> {

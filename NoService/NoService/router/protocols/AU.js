@@ -39,14 +39,14 @@ module.exports = function Protocol(coregateway, emitRequest, debug) {
         _queue_operation[data.d.t] = op;
         // set the timeout of this operation
         setTimeout(() => {if(_queue_operation[data.d.t]) {delete _queue_operation[data.d.t]}}, _auth_timeout*1000);
-        emitRequest(connprofile, 'AU', Buf.from(JSON.stringify(data)));
+        emitRequest(connprofile, 'AU', Buf.encode(JSON.stringify(data)));
       });
     });
   });
 
   Authorization.on('AuthbyPasswordFailed', (entityId, callback)=> {
     Entity.getEntityConnProfile(entityId, (err, connprofile) => {
-      emitRequest(connprofile, 'AU', Buf.from(JSON.stringify({m: 'PF', i: entityId})));
+      emitRequest(connprofile, 'AU', Buf.encode(JSON.stringify({m: 'PF', i: entityId})));
     });
   });
 
@@ -63,20 +63,20 @@ module.exports = function Protocol(coregateway, emitRequest, debug) {
         _queue_operation[data.d.t] = op;
         // set the timeout of this operation
         setTimeout(() => {if(_queue_operation[data.d.t]) {delete _queue_operation[data.d.t]}}, _auth_timeout*1000);
-        emitRequest(connprofile, 'AU', Buf.from(JSON.stringify(data)));
+        emitRequest(connprofile, 'AU', Buf.encode(JSON.stringify(data)));
       });
     });
   });
 
   Authorization.on('AuthbyTokenFailed', (entityId, callback)=> {
     Entity.getEntityConnProfile(entityId, (err, connprofile) => {
-      emitRequest(connprofile, 'AU', Buf.from(JSON.stringify({m: 'TF', i: entityId})));
+      emitRequest(connprofile, 'AU', Buf.encode(JSON.stringify({m: 'TF', i: entityId})));
     });
   });
 
   Authorization.on('SigninRq', (entityId)=> {
     Entity.getEntityConnProfile(entityId, (err, connprofile) => {
-      emitRequest(connprofile, 'AU', Buf.from(JSON.stringify({m: 'SI', i: entityId})));
+      emitRequest(connprofile, 'AU', Buf.encode(JSON.stringify({m: 'SI', i: entityId})));
     });
   });
   // ServerSide end
@@ -118,7 +118,7 @@ module.exports = function Protocol(coregateway, emitRequest, debug) {
   this.RequestHandler = (connprofile, blob, emitResponse) => {
     let data = JSON.parse(blob);
     let _emitResponse = (connprofile, data)=> {
-      emitResponse(connprofile, Buf.from(JSON.stringify(data)));
+      emitResponse(connprofile, Buf.encode(JSON.stringify(data)));
     };
     _handler[data.m](connprofile, data, _emitResponse);
   };

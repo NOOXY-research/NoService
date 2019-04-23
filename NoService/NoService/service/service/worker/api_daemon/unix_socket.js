@@ -61,7 +61,7 @@ function UnixSocketAPI() {
     };
 
     this.send = (blob, callback)=> {
-      sock.write(Buf.concat([Buf.from(('0000000000000000'+blob.length).slice(-16)), blob]));
+      sock.write(Buf.concat([Buf.encode(('0000000000000000'+blob.length).slice(-16)), blob]));
     }
 
     this.on = (eventname, callback)=> {
@@ -100,7 +100,7 @@ function UnixSocketAPI() {
       if(_child_alive&&_child) {
         let _rqid = Utils.generateUniqueId();
         _InfoRq[_rqid] = callback;
-        _emitChildMessage(4, Buf.from(JSON.stringify({i: _rqid})));
+        _emitChildMessage(4, Buf.encode(JSON.stringify({i: _rqid})));
       }
       else {
         callback(new Error("Child is not alive."));
@@ -111,7 +111,7 @@ function UnixSocketAPI() {
       if(_child_alive&&_child) {
         let _rqid = Utils.generateUniqueId();
         _InfoRq[_rqid] = callback;
-        _emitChildMessage(5, Buf.from(JSON.stringify({i: _rqid})));
+        _emitChildMessage(5, Buf.encode(JSON.stringify({i: _rqid})));
       }
       else {
         callback(new Error("Child is not alive."));
@@ -125,14 +125,14 @@ function UnixSocketAPI() {
 
     this.destroyChildCallback = (id)=> {
        if(_child_alive&&_child&&_api_sock)
-         _emitChildMessage(3, Buf.from(JSON.stringify({i: id})));
+         _emitChildMessage(3, Buf.encode(JSON.stringify({i: id})));
     }
 
     this.emitChildCallback = ([obj_id, path], argsblob) => {
       let _data = JSON.stringify([obj_id, path]);
       try {
         if(_child_alive&&_child&&_api_sock)
-           _emitChildMessage(2, Buf.concat([Buf.alloc(1, _data.length), Buf.from(_data), argsblob]));
+           _emitChildMessage(2, Buf.concat([Buf.alloc(1, _data.length), Buf.encode(_data), argsblob]));
       }
       catch(err) {
         Utils.TagLog('*ERR*' , 'Occured error on "'+_service_name+'".');
@@ -142,7 +142,7 @@ function UnixSocketAPI() {
 
     this.onMessage = (type, blob)=>{
       if(type === 0) {
-        _emitChildMessage(0, Buf.from(JSON.stringify({p: path, a: _serviceapi.returnAPITree(), c: _close_worker_timeout, g: _clear_obj_garbage_timeout, cpath: _const_path})));
+        _emitChildMessage(0, Buf.encode(JSON.stringify({p: path, a: _serviceapi.returnAPITree(), c: _close_worker_timeout, g: _clear_obj_garbage_timeout, cpath: _const_path})));
       }
       else if(type === 1) {
         _init_callback(false);
@@ -175,7 +175,7 @@ function UnixSocketAPI() {
             },
             e: e.stack
           };
-          _emitChildMessage(98, Buf.from(JSON.stringify(_data)));
+          _emitChildMessage(98, Buf.encode(JSON.stringify(_data)));
         }
       }
       else if(type === 5) {
@@ -193,7 +193,7 @@ function UnixSocketAPI() {
             },
             e: e.stack
           };
-          _emitChildMessage(98, Buf.from(JSON.stringify(_data)));
+          _emitChildMessage(98, Buf.encode(JSON.stringify(_data)));
         }
       }
       else if(type === 6) {
@@ -307,7 +307,7 @@ function UnixSocketAPI() {
       if(_child_alive&&_child) {
         let _rqid = Utils.generateUniqueId();
         _InfoRq[_rqid] = callback;
-        _emitChildMessage(4, Buf.from(JSON.stringify({i: _rqid})));
+        _emitChildMessage(4, Buf.encode(JSON.stringify({i: _rqid})));
       }
       else {
         callback(new Error("Child is not alive."));
@@ -318,7 +318,7 @@ function UnixSocketAPI() {
       if(_child_alive&&_child) {
         let _rqid = Utils.generateUniqueId();
         _InfoRq[_rqid] = callback;
-        _emitChildMessage(5, Buf.from(JSON.stringify({i: _rqid})));
+        _emitChildMessage(5, Buf.encode(JSON.stringify({i: _rqid})));
       }
       else {
         callback(new Error("Child is not alive."));
@@ -332,14 +332,14 @@ function UnixSocketAPI() {
 
     this.destroyChildCallback = (id)=> {
       if(_child_alive&&_child)
-        _emitChildMessage(3, Buf.from(JSON.stringify({i: id})));
+        _emitChildMessage(3, Buf.encode(JSON.stringify({i: id})));
     }
 
     this.emitChildCallback = ([obj_id, path], argsblob) => {
       let _data = JSON.stringify([obj_id, path]);
       try {
         if(_child_alive&&_api_sock)
-          _emitChildMessage(2, Buf.concat([Buf.alloc(1, _data.length), Buf.from(_data), argsblob]));
+          _emitChildMessage(2, Buf.concat([Buf.alloc(1, _data.length), Buf.encode(_data), argsblob]));
       }
       catch(err) {
         Utils.TagLog('*ERR*' , 'Occured error on "'+_service_name+'".');
@@ -349,7 +349,7 @@ function UnixSocketAPI() {
 
     this.onMessage = (type, blob)=> {
       if(type === 0) {
-        _emitChildMessage(0, Buf.from(JSON.stringify({p: path, a: _serviceapi.returnAPITree(), c: _close_worker_timeout, g: _clear_obj_garbage_timeout, cpath: _const_path})));
+        _emitChildMessage(0, Buf.encode(JSON.stringify({p: path, a: _serviceapi.returnAPITree(), c: _close_worker_timeout, g: _clear_obj_garbage_timeout, cpath: _const_path})));
       }
       else if(type === 1) {
         _init_callback(false);
@@ -381,7 +381,7 @@ function UnixSocketAPI() {
             },
             e: e.stack
           };
-          _emitChildMessage(98, Buf.from(JSON.stringify(_data)));
+          _emitChildMessage(98, Buf.encode(JSON.stringify(_data)));
         }
       }
       else if(type === 5) {
@@ -399,7 +399,7 @@ function UnixSocketAPI() {
             },
             e: e.stack
           };
-          _emitChildMessage(98, Buf.from(JSON.stringify(_data)));
+          _emitChildMessage(98, Buf.encode(JSON.stringify(_data)));
         }
       }
       else if(type === 6) {

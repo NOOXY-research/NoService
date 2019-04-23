@@ -23,12 +23,12 @@ module.exports = function Protocol(coregateway, emitRequest, debug) {
     if(Buf.isBuffer(data.d.d)) {
       let blob_back = Buf.concat([data.d.d]);
       data.d.d = null;
-      let blob_front = Buf.from(JSON.stringify(data));
-      return Buf.concat([Buf.from(('0000000000000000'+blob_front.length).slice(-16)), blob_front, Buf.from(('0000000000000000'+blob_back.length).slice(-16)), blob_back]);
+      let blob_front = Buf.encode(JSON.stringify(data));
+      return Buf.concat([Buf.encode(('0000000000000000'+blob_front.length).slice(-16)), blob_front, Buf.encode(('0000000000000000'+blob_back.length).slice(-16)), blob_back]);
     }
     else {
-      let blob = Buf.from(JSON.stringify(data));
-      return Buf.concat([Buf.from(('0000000000000000'+blob.length).slice(-16)), blob]);
+      let blob = Buf.encode(JSON.stringify(data));
+      return Buf.concat([Buf.encode(('0000000000000000'+blob.length).slice(-16)), blob]);
     }
   };
 

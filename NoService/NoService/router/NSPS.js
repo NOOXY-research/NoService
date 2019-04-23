@@ -76,7 +76,7 @@ function NSPS() {
           console.log(err);
         }
         else {
-          this.sendRouterData(connprofile, 'SP', 'rs', Buf.from(JSON.stringify(encrypted)));
+          this.sendRouterData(connprofile, 'SP', 'rs', Buf.encode(JSON.stringify(encrypted)));
           connprofile.setBundle('NSPS', true);
         }
 
@@ -163,7 +163,7 @@ function NSPS() {
       p: _rsa_pub// RSA publicKey
     };
     connprofile.setBundle('NSPS', 'pending');
-    this.sendRouterData(connprofile, 'SP', 'rq', Buf.from(JSON.stringify(_data)));
+    this.sendRouterData(connprofile, 'SP', 'rq', Buf.encode(JSON.stringify(_data)));
   }
 
   this.importOperationTimeout = (timeout) => {

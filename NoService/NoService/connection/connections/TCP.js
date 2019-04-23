@@ -28,12 +28,12 @@ function Server(ServerId, ConnectionProfile) {
   this.onClose = (connprofile) => {Utils.TagLog('*ERR*', 'onClose not implemented');};
 
   this.send = (connprofile, blob)=> {
-    _myclients[connprofile.returnGUID()].write(Buf.concat([Buf.from(('0000000000000000'+blob.length).slice(-16)), blob]));
+    _myclients[connprofile.returnGUID()].write(Buf.concat([Buf.encode(('0000000000000000'+blob.length).slice(-16)), blob]));
   };
 
   this.broadcast = (blob) => {
     for(let i in _myclients) {
-      _myclients[i].write(Buf.concat([Buf.from(('0000000000000000'+blob.length).slice(-16)), blob]));
+      _myclients[i].write(Buf.concat([Buf.encode(('0000000000000000'+blob.length).slice(-16)), blob]));
     }
   };
 
@@ -61,7 +61,7 @@ function Server(ServerId, ConnectionProfile) {
         while(data.length) {
           // console.log('>', !message, data.length, chunks_size);
           if(!message) {
-            chunks_size = parseInt(data.slice(0, 16).toString());
+            chunks_size = parseInt(Buf.decode(data.slice(0, 16)));
             message = data.slice(16, 16+chunks_size);
             data = data.slice(16+chunks_size);
             if(message.length === chunks_size) {
@@ -143,7 +143,7 @@ function Client(ConnectionProfile) {
   this.onClose = () => {Utils.TagLog('*ERR*', 'onClose not implemented');};
 
   this.send = (connprofile, blob) => {
-    _netc.write(Buf.concat([Buf.from(('0000000000000000'+blob.length).slice(-16)), blob]));
+    _netc.write(Buf.concat([Buf.encode(('0000000000000000'+blob.length).slice(-16)), blob]));
   };
 
   this.connect = (ip, port, callback) => {

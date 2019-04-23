@@ -25,7 +25,7 @@ module.exports = function Protocol(coregateway, emitRequest, debug) {
       else {
         responsedata['s'] = 'OK';
       }
-      _senddata(connprofile, Buf.from(JSON.stringify(responsedata)));
+      _senddata(connprofile, Buf.encode(JSON.stringify(responsedata)));
     });
   };
 

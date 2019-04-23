@@ -21,7 +21,7 @@ function NoCrypto() {
         callback(false, crypted);
       },
       decryptString: (key, toDecrypt, callback) => {
-        let iv = new Buf.from(toDecrypt.substring(0, 24), "base64");
+        let iv = new Buf.encode(toDecrypt.substring(0, 24), "base64");
         let decipher = crypto.createDecipheriv('aes-256-cbc', key, iv);
         toDecrypt = toDecrypt.substring(24);
         let dec = decipher.update(toDecrypt, 'base64', 'utf8');
@@ -49,22 +49,22 @@ function NoCrypto() {
     // Keys is in pem format
     RSA2048: {
       encryptString: (publicKey, toEncrypt, callback) => {
-        let buffer = Buf.from(toEncrypt);
+        let buffer = Buf.encode(toEncrypt);
         let encrypted = crypto.publicEncrypt(publicKey, buffer);
         callback(false, encrypted.toString("base64"));
       },
       decryptString: (privateKey, toDecrypt, callback) => {
-        let buffer = Buf.from(toDecrypt, "base64");
+        let buffer = Buf.encode(toDecrypt, "base64");
         let decrypted = crypto.privateDecrypt(privateKey, buffer);
         callback(false, decrypted.toString("utf8"));
       },
       encrypt: (publicKey, toEncrypt, callback) => {
-        let buffer = Buf.from(toEncrypt);
+        let buffer = Buf.encode(toEncrypt);
         let encrypted = crypto.publicEncrypt(publicKey, buffer);
         callback(false, encrypted);
       },
       decrypt: (privateKey, toDecrypt, callback) => {
-        let buffer = Buf.from(toDecrypt);
+        let buffer = Buf.encode(toDecrypt);
         let decrypted = crypto.privateDecrypt(privateKey, buffer);
         callback(false, decrypted);
       }
