@@ -57,7 +57,6 @@ function Server(ServerId, ConnectionProfile) {
           Utils.TagLog('*WARN*', message);
         }
         ws.close();
-        this.onClose(connprofile);
       });
 
       ws.on('close', (message) => {
@@ -119,11 +118,10 @@ function Client(ConnectionProfile) {
         Utils.TagLog('*WARN*', error);
       }
       _ws.close();
-      this.onClose(connprofile);
     });
 
     _ws.on('close', (error) => {
-        this.onClose(connprofile);
+      this.onClose(connprofile);
     });
 
   }

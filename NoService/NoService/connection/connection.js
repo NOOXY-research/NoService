@@ -7,6 +7,7 @@
 const Utils = require('../library').Utilities;
 const ConnectionsPath = require("path").join(__dirname, "./connections");
 let Connections = {};
+const Buf = require('../buffer');
 
 require("fs").readdirSync(ConnectionsPath).forEach((file)=> {
   let conn = require(ConnectionsPath+"/" + file);
@@ -24,7 +25,7 @@ function Connection(options) {
   let _blocked_ip = [];
   let ssl_priv_key;
   let ssl_cert;
-  let heartbeat_phrase = '{m:"HB"}';
+  let uint16_heartbeat_phrase = Buf.encode('HB');
   let heartbeat_cycle = 60000;
   let _debug = false;
   let _conn_meth_name_map;
@@ -121,7 +122,7 @@ function Connection(options) {
       setInterval(()=>{
         for(let i in _servers) {
           try{
-            _servers[i].broadcast(heartbeat_phrase);
+            _servers[i].broadcast(uint16_heartbeat_phrase);
           }
           catch(e) {
             if(_debug) {
@@ -136,7 +137,7 @@ function Connection(options) {
   this.createClient = (conn_method, remoteip, port, callback) => {
     // Heartbeat
     let onData_wrapped = (connprofile, data)=> {
-      if(data!=heartbeat_phrase) {
+      if(data.length!=uint16_heartbeat_phrase.length||data[0]!=uint16_heartbeat_phrase[0]||data[1]!=uint16_heartbeat_phrase[1]) {
         this.onData(connprofile, data);
       }
       else {
