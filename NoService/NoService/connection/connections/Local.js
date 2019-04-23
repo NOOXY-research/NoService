@@ -5,7 +5,7 @@
 'use strict';
 
 const Utils = require('../../library').Utilities;
-const VirtualNet = new (require('../virtualnet'))();
+const VirtualNet = new (require('../library/virtualnet'))();
 
 
 function Server(ServerId, ConnectionProfile) {
