@@ -181,7 +181,7 @@ function Core(NoServiceLibrary, settings) {
             });
           }
         },
-        Variables: Constants
+        Constants: Constants
       }
 
       this.close = _daemon.close;
@@ -207,7 +207,7 @@ function Core(NoServiceLibrary, settings) {
           NoCrypto: _nocrypto,
           NSPS: _nsps,
           Daemon: _daemon,
-          Variables: Constants
+          Constants: Constants
         };
       verbose('Daemon', 'Creating coregateway done.')
 

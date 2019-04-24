@@ -595,7 +595,7 @@ NoService.Database.Model.define('IndexedListTest', {'model_type': "IndexedList",
   NoService.Daemon.getSettings(callback)\
   NoService.Daemon.close()\
   NoService.Daemon.relaunch()\
-  NoService.Daemon.getVariables(callback)
+  NoService.Daemon.getConstants(callback)
 
   ### Authenticity
 

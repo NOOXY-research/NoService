@@ -55,7 +55,7 @@
     "NoCluster"
   ],
 
-  "debug": true,
+  "debug": false,
   "verbose": true,
 
   "master_service": "NoServiceManager",

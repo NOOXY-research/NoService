@@ -20,7 +20,7 @@ function Service(Me, NoService) {
     let sniffonJSON = false;
     let sniffonRAW = false;
     NoService.Daemon.getSettings((err, DaemonSettings)=>{
-      NoService.Daemon.getVariables((err, DaemonVars)=>{
+      NoService.Daemon.getConstants((err, DaemonConsts)=>{
 
         NoService.Sniffer.onRouterJSON((err, json)=> {
           let j = JSON.stringify(json, null, 2);
@@ -64,7 +64,7 @@ function Service(Me, NoService) {
             if(pass) {
               NoService.Service.Entity.getEntityMetaData(entityId, (err, emeta)=>{
                 let msg = '\nHello. '+emeta.owner+'(as entity '+entityId+').\n  Welcome accessing NoShell service of Daemon "'+DaemonSettings.daemon_name+'".\n';
-                msg = msg + '  Daemon description: \n  ' + DaemonSettings.description+'\n'+'NoService Daemon Version: '+DaemonVars.version+'\n';
+                msg = msg + '  Daemon description: \n  ' + DaemonSettings.description+'\n'+'NoService Daemon Version: '+DaemonConsts.version+'\n';
                 ss.emit(entityId, 'welcome', msg);
                 // NoService.Authorization.emitSignin(entityId);
                 callback(false);
@@ -132,7 +132,7 @@ function Service(Me, NoService) {
               help: (t0, c0) =>{
                 c0(false, {r:
                   '[daemon]\n'+
-                  '  daemon [settings|stop|memuse|upgrade|relaunch]\n'+
+                  '  daemon [settings|stop|memuse|upgrade|relaunch|version]\n'+
                   '\n'+
                   '[service]\n'+
                   '  service [list|cbo|memuse|dependstack]\n'+
@@ -755,10 +755,13 @@ function Service(Me, NoService) {
                 NoService.Authorization.Authby.isSuperUserWithToken(entityId, (err, pass)=> {
                   if(pass) {
                     if(t0.length == 0) {
-                      c0(false, {r: settings.daemon_display_name+'('+settings.daemon_name+')\n'+settings.description+'\n'+'Version: '+DaemonVars.version});
+                      c0(false, {r: settings.daemon_display_name+'('+settings.daemon_name+')\n'+settings.description+'\n'+'Version: '+DaemonConsts.version});
                     }
                     else {
                       _(t0, {
+                        version: (t1, c1) => {
+                          c1(false, {r:JSON.stringify({NoService: DaemonConsts.version, NSP: DaemonConsts.NSP_version}, null, 2)});
+                        },
                         settings: (t1, c1) => {
                           c1(false, {r:JSON.stringify(settings, null, 2)});
                         },
@@ -839,7 +842,7 @@ function Service(Me, NoService) {
         ss.sdef('welcome', (json, entityId, returnJSON)=>{
           NoService.Service.Entity.getEntityMetaData(entityId, (err, emeta)=>{
             let msg = '\nHello. '+emeta.owner+'(as entity '+entityId+').\n  Welcome accessing NoShell service of Daemon "'+DaemonSettings.daemon_name+'".\n';
-            msg = msg + '  Daemon description: \n  ' + DaemonSettings.description+'\n'+'NoService Daemon Version: '+DaemonVars.version+'\n';
+            msg = msg + '  Daemon description: \n  ' + DaemonSettings.description+'\n'+'NoService Daemon Version: '+DaemonConsts.version+'\n';
             returnJSON(false, msg);
           });
         },

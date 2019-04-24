@@ -6,4 +6,4 @@
 const Launcher = require('./NoService').Runtime.Launcher;
 const Path = require("path");
 
-Launcher.launch(Path.resolve("./"), Path.resolve("./")+'/setting.json');
+Launcher.launch(Path.resolve("./"), Path.resolve("./")+'/settings.json');

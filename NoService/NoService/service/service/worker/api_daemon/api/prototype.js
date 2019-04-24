@@ -114,8 +114,8 @@ function API(_coregateway) {
     _api_tree = APIUtils.generateObjCallbacksTree(_api);
   }
 
-  _api.getVariables = (callback)=> {
-    callback(false, _coregateway.Variables);
+  _api.getConstants = (callback)=> {
+    callback(false, _coregateway.Constants);
   };
 
   let _generateASHandler = (remote_callback)=> {
@@ -629,9 +629,9 @@ function API(_coregateway) {
       }
     },
 
-    getVariables: (remote_callback)=>{
+    getConstants: (remote_callback)=>{
       if(remote_callback) {
-        remote_callback.apply([false, _coregateway.Daemon.Variables]);
+        remote_callback.apply([false, _coregateway.Daemon.Constants]);
         remote_callback.destory();
       }
     },
