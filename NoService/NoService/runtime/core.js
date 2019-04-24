@@ -155,8 +155,8 @@ function Core(NoServiceLibrary, settings) {
               _nocrypto.close();
               _nsps.close();
               _worker.close();
-              verbose('Daemon', 'Stopping daemon in '+settings.kill_daemon_timeout+'ms.');
-              setTimeout(this.onTerminated, settings.kill_daemon_timeout);
+              verbose('Daemon', 'Stopping daemon in '+settings.kill_daemon_timeout_millisecond+'ms.');
+              setTimeout(this.onTerminated, settings.kill_daemon_timeout_millisecond);
             });
           }
         },
@@ -176,8 +176,8 @@ function Core(NoServiceLibrary, settings) {
               _nocrypto.close();
               _nsps.close();
               _worker.close();
-              verbose('Daemon', 'Relaunching daemon in '+settings.kill_daemon_timeout+'ms.');
-              setTimeout(this.onTerminated, settings.kill_daemon_timeout);
+              verbose('Daemon', 'Relaunching daemon in '+settings.kill_daemon_timeout_millisecond+'ms.');
+              setTimeout(this.onTerminated, settings.kill_daemon_timeout_millisecond);
             });
           }
         },
@@ -247,7 +247,7 @@ function Core(NoServiceLibrary, settings) {
           try {
             _nsps.importRSA2048KeyPair(fs.readFileSync(settings.rsa_2048_priv_key, 'utf8'), fs.readFileSync(settings.rsa_2048_pub_key, 'utf8'));
             _nsps.importCryptoModule(_nocrypto);
-            _nsps.importOperationTimeout(settings.operations_timeout);
+            _nsps.importOperationTimeout(settings.operations_timeout_second);
             // setup router
             _router.importCore(coregateway);
           }
@@ -272,7 +272,7 @@ function Core(NoServiceLibrary, settings) {
                settings.connection_servers[server].ip, settings.connection_servers[server].port);
           }
 
-          _connection.importHeartBeatCycle(settings.heartbeat_cycle);
+          _connection.importHeartBeatCycle(settings.heartbeat_cycle_millisecond);
 
 
           //
@@ -301,7 +301,7 @@ function Core(NoServiceLibrary, settings) {
               verbose('Daemon', 'Importing Model to Authenticity...')
 
               // setup authenticity
-              _authenticity.TokenExpirePeriod = settings.token_expire_period;
+              _authenticity.TokenExpirePeriod = settings.token_expire_period_day;
               _authenticity.setDefaultUsername(Constants.default_user.username);
               _authenticity.setUserModelName(Constants.AUTHE_USER_MODEL_NAME);
 
@@ -364,7 +364,7 @@ function Core(NoServiceLibrary, settings) {
                 _service.importAPI(_serviceAPI);
                 _service.importOwner(settings.local_services_owner);
                 // setup Worker
-                _worker.setCloseTimeout(settings.kill_daemon_timeout);
+                _worker.setCloseTimeout(settings.kill_daemon_timeout_millisecond);
                 _worker.setClearGarbageTimeout(settings.clear_garbage_timeout);
                 _worker.setConstantsPath(require("path").join(__dirname, './constants.json'));
                 _worker.setUnixSocketPath(Constants.WORKER_UNIX_SOCK_PATH);
@@ -472,7 +472,7 @@ function Core(NoServiceLibrary, settings) {
             }
             verbose('Daemon', 'Importing Model...')
             // setup authenticity
-            _init_auth.TokenExpirePeriod = settings.token_expire_period;
+            _init_auth.TokenExpirePeriod = settings.token_expire_period_day;
             _init_auth.setDefaultUsername(Constants.default_user.username);
             _init_auth.setUserModelName(Constants.AUTHE_USER_MODEL_NAME);
             // Import set Model Module to authenticity.

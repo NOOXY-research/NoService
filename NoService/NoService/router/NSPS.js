@@ -11,7 +11,7 @@ function NSPS() {
   let _rsa_priv;
   let _resumes = {};
   let _crypto_module;
-  let _operation_timeout = 60; // seconds
+  let _operation_timeout_second = 60; // seconds
 
   this.emitRequest = () => {console.log('[*ERR*] emitRequest not implemented');};
 
@@ -157,7 +157,7 @@ function NSPS() {
     // operation timeout
     setTimeout(()=>{
       delete _resumes[connprofile.returnGUID()];
-    }, _operation_timeout*1000);
+    }, _operation_timeout_second*1000);
 
     let _data = {
       p: _rsa_pub// RSA publicKey
@@ -167,7 +167,7 @@ function NSPS() {
   }
 
   this.importOperationTimeout = (timeout) => {
-    _operation_timeout = timeout;
+    _operation_timeout_second = timeout;
   };
 
   this.importCryptoModule = (crypto_module) => {

@@ -76,9 +76,9 @@
 
   "only_trust_origin_domain": false,
 
-  "operations_timeout": 320,
+  "operations_timeout_second": 320,
 
-  "token_expire_period": 7,
+  "token_expire_period_day": 7,
 
   "daemon_authorization_key": "WHATAKEY",
 
@@ -92,9 +92,9 @@
 
   "ssl_cert": null,
 
-  "kill_daemon_timeout": 1500,
+  "kill_daemon_timeout_millisecond": 500,
 
-  "heartbeat_cycle": 60000,
+  "heartbeat_cycle_millisecond": 60000,
 
   "database": {
     "dialect": "sqlite3",

@@ -26,7 +26,7 @@ function Connection(options) {
   let ssl_priv_key;
   let ssl_cert;
   let uint16_heartbeat_phrase = Buf.encode('HB');
-  let heartbeat_cycle = 60000;
+  let heartbeat_cycle_millisecond = 60000;
   let _debug = false;
   let _conn_meth_name_map;
 
@@ -130,7 +130,7 @@ function Connection(options) {
             }
           }
         };
-      }, heartbeat_cycle);
+      }, heartbeat_cycle_millisecond);
     };
   }
 
@@ -239,7 +239,7 @@ function Connection(options) {
   }
 
   this.importHeartBeatCycle = (cycle) => {
-    heartbeat_cycle = cycle;
+    heartbeat_cycle_millisecond = cycle;
   };
 
   this.importConnectionMethodNameMap = (dict)=> {
