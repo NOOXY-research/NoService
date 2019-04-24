@@ -23,8 +23,8 @@ function Connection(options) {
   let _clients = {};
   let _have_local_server = false;
   let _blocked_ip = [];
-  let ssl_priv_key;
-  let ssl_cert;
+  let ssl_private_key;
+  let ssl_certificate;
   let uint16_heartbeat_phrase = Buf.encode('HB');
   let heartbeat_cycle_millisecond = 60000;
   let _debug = false;
@@ -106,7 +106,7 @@ function Connection(options) {
     }
     else if(_conn_meth_name_map[conn_method]) {
       let _serverId = Utils.generateUniqueId();
-      let server = new Connections[_conn_meth_name_map[conn_method]].Server(_serverId, ConnectionProfile, ssl_priv_key, ssl_cert);
+      let server = new Connections[_conn_meth_name_map[conn_method]].Server(_serverId, ConnectionProfile, ssl_private_key, ssl_certificate);
       _servers[_serverId] = server;
       server.setDebug(_debug);
       server.start(ip, port);
@@ -230,12 +230,12 @@ function Connection(options) {
     _debug = bool;
   };
 
-  this.importSSLCert = (ssl_cert_in) => {
-    ssl_cert = ssl_cert_in;
+  this.importSSLCert = (ssl_certificate_in) => {
+    ssl_certificate = ssl_certificate_in;
   };
 
-  this.importSSLPrivateKey = (ssl_priv_key_in) => {
-    ssl_priv_key = ssl_priv_key_in;
+  this.importSSLPrivateKey = (ssl_private_key_in) => {
+    ssl_private_key = ssl_private_key_in;
   }
 
   this.importHeartBeatCycle = (cycle) => {

@@ -14,10 +14,10 @@ const RemoteCallbackTree = APIUtils.RemoteCallbackTree;
 function API(_coregateway) {
   let _clear_obj_garbage_timeout = 30000;
   // setup up remote shell service by daemon default connection
-  let DEFAULT_SERVER = _coregateway.Daemon.Settings.default_server;
-  let DAEMONTYPE = _coregateway.Daemon.Settings.connection_servers[DEFAULT_SERVER].type;
-  let DAEMONIP = _coregateway.Daemon.Settings.connection_servers[DEFAULT_SERVER].ip;
-  let DAEMONPORT = _coregateway.Daemon.Settings.connection_servers[DEFAULT_SERVER].port;
+  let DEFAULT_SERVER = _coregateway.Daemon.Settings.connection.default_server;
+  let DAEMONTYPE = _coregateway.Daemon.Settings.connection.servers[DEFAULT_SERVER].type;
+  let DAEMONIP = _coregateway.Daemon.Settings.connection.servers[DEFAULT_SERVER].ip;
+  let DAEMONPORT = _coregateway.Daemon.Settings.connection.servers[DEFAULT_SERVER].port;
 
   let _api = {};
   let _LocalCallbackTrees = {};

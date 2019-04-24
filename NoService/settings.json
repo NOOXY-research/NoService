@@ -12,68 +12,75 @@
 
   "kill_daemon_timeout_millisecond": 500,
 
-  "operations_timeout_second": 320,
-
-  "default_server": null,
-  "heartbeat_cycle_millisecond": 60000,
-  "only_trust_origin_domain": false,
-  "connection_servers": [
-    {
-      "type": "WebSocketSecure",
-      "ip": "0.0.0.0",
-      "port": 43581
-    },
-    {
-      "type": "WebSocket",
-      "ip": "0.0.0.0",
-      "port": 43582
-    },
-    {
-      "type": "TCP/IP",
-      "ip": "0.0.0.0",
-      "port": 43583
-    }
-  ],
-
-
-  "services_path": "./services",
-  "services_files_path": "./service_files",
-  "local_services_owner" : "admin",
-  "master_service": "NoServiceManager",
-  "master_config": {
-    "auto_updagrade_service": true,
-    "check_service_version": true
+  "connection": {
+    "heartbeat_cycle_millisecond": 60000,
+    "only_trust_origin_domain": false,
+    "default_server": null,
+    "servers": [
+      {
+        "type": "WebSocketSecure",
+        "ip": "0.0.0.0",
+        "port": 43581
+      },
+      {
+        "type": "WebSocket",
+        "ip": "0.0.0.0",
+        "port": 43582
+      },
+      {
+        "type": "TCP/IP",
+        "ip": "0.0.0.0",
+        "port": 43583
+      }
+    ]
   },
-  "debug_service": "NoActivity",
-  "debug_config": {
-  	"show_json": true,
-	  "show_conn_data": false
-  },
-  "shell_service": "NoShell",
-  "shell_client_service": "NoShellc",
-  "services": [
-    "NoActivity",
-    "NoServiceManager",
-    "NoUser",
-    "NoTalk",
-    "NoMailer",
-    "NoCluster"
-  ],
 
-  "secure": true,
-  "token_expire_period_day": 7,
-  "daemon_authorization_key": "WHATAKEY",
-  "SHA256_key": "FATFROG",
-  "rsa_2048_pub_key": "public.pem",
-  "rsa_2048_priv_key": "private.pem",
-  "ssl_priv_key": null,
-  "ssl_cert": null,
-  "trusted_domains": [
-    "www.nooxy.org",
-    "127.0.0.1",
-    "0.0.0.0",
-    "localhost"
-  ],
+  "service": {
+    "services_path": "./services",
+    "services_files_path": "./service_files",
+    "local_services_owner" : "admin",
+    "master_service": "NoServiceManager",
+    "master_service_conf": {
+      "auto_updagrade_service": true,
+      "check_service_version": true
+    },
+    "debug_service": "NoActivity",
+    "debug_service_conf": {
+    	"show_json": true,
+  	  "show_conn_data": false
+    },
+    "shell_service": "NoShell",
+    "shell_service_conf": {
+    },
+    "shell_client_service": "NoShellc",
+    "shell_client_service_conf": {
+    },
+    "services": [
+      "NoActivity",
+      "NoServiceManager",
+      "NoUser",
+      "NoTalk",
+      "NoMailer",
+      "NoCluster"
+    ]
+  },
+
+  "security": {
+    "secure": true,
+    "operations_timeout_second": 320,
+    "token_expire_period_day": 7,
+    "daemon_authorization_key": "WHATAKEY",
+    "RSA2048_public_key": "public.pem",
+    "RSA2048_private_key": "private.pem",
+    "ssl_private_key": null,
+    "ssl_certificate": null,
+    "trusted_domains": [
+      "www.nooxy.org",
+      "127.0.0.1",
+      "0.0.0.0",
+      "localhost"
+    ]
+  },
 
   "database": {
     "dialect": "sqlite3",

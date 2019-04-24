@@ -47,16 +47,16 @@ function Core(NoServiceLibrary, settings) {
   let _runtime_id = Utils.generateGUID();
   let _path = settings['path'];
   verbose('Daemon', 'Path setted as '+ _path);
-  if(settings.services_path[0] != '/')
-    settings.services_path = _path+settings.services_path;
+  if(settings.service.services_path[0] != '/')
+    settings.service.services_path = _path+settings.service.services_path;
+  if(settings.service.services_files_path[0] != '/')
+    settings.service.services_files_path = _path+settings.service.services_files_path;
   if(settings.plugins_path[0] != '/')
     settings.plugins_path = _path+settings.plugins_path;
-  if(settings.services_files_path[0] != '/')
-    settings.services_files_path = _path+settings.services_files_path;
-  if(settings.rsa_2048_priv_key[0] != '/')
-    settings.rsa_2048_priv_key = settings.rsa_2048_priv_key;
-  if(settings.rsa_2048_pub_key[0] != '/')
-    settings.rsa_2048_pub_key = settings.rsa_2048_pub_key;
+  if(settings.security.RSA2048_private_key[0] != '/')
+    settings.security.RSA2048_private_key = settings.security.RSA2048_private_key;
+  if(settings.security.RSA2048_public_key[0] != '/')
+    settings.security.RSA2048_public_key = settings.security.RSA2048_public_key;
   // initialize variables
   let _connection;
   let _authorization;
@@ -213,18 +213,18 @@ function Core(NoServiceLibrary, settings) {
 
       // initialize settings
       // trust myself
-      settings.connection_servers.push({
+      settings.connection.servers.push({
             "type": "Local",
             "ip": "LOCALIP",
             "port": "LOCALPORT"
       });
 
-      if(settings.default_server === 'Local' || !settings.default_server ) {
-        settings.default_server = settings.connection_servers.length-1;
+      if(settings.connection.default_server === 'Local' || !settings.connection.default_server ) {
+        settings.connection.default_server = settings.connection.servers.length-1;
       }
 
-      for(let i in settings.connection_servers) {
-        settings.trusted_domains.push(settings.connection_servers[i].ip);
+      for(let i in settings.connection.servers) {
+        settings.security.trusted_domains.push(settings.connection.servers[i].ip);
       }
 
       // start setting up
@@ -232,9 +232,9 @@ function Core(NoServiceLibrary, settings) {
 
       let plugins = require("fs").readdirSync(settings.plugins_path).map((file)=> { return require(settings.plugins_path+"/" + file);});
       let plugins_from_services = [];
-      settings.services.forEach((file)=> {
-        if(require("fs").existsSync(settings.services_path+"/" + file+'/plugin')) {
-          plugins_from_services.push( require(settings.services_path+"/" + file+'/plugin'));
+      settings.service.services.forEach((file)=> {
+        if(require("fs").existsSync(settings.service.services_path+"/" + file+'/plugin')) {
+          plugins_from_services.push(require(settings.service.services_path+"/" + file+'/plugin'));
         }
       })
 
@@ -245,9 +245,9 @@ function Core(NoServiceLibrary, settings) {
         else {
           // setup NOOXY Service protocol secure
           try {
-            _nsps.importRSA2048KeyPair(fs.readFileSync(settings.rsa_2048_priv_key, 'utf8'), fs.readFileSync(settings.rsa_2048_pub_key, 'utf8'));
+            _nsps.importRSA2048KeyPair(fs.readFileSync(settings.security.RSA2048_private_key, 'utf8'), fs.readFileSync(settings.security.RSA2048_public_key, 'utf8'));
             _nsps.importCryptoModule(_nocrypto);
-            _nsps.importOperationTimeout(settings.operations_timeout_second);
+            _nsps.importOperationTimeout(settings.security.operations_timeout_second);
             // setup router
             _router.importCore(coregateway);
           }
@@ -257,19 +257,19 @@ function Core(NoServiceLibrary, settings) {
 
           // setup connection
           _connection.setDebug(settings.debug);
-          if(settings.ssl_priv_key!=null && settings.ssl_cert!=null) {
+          if(settings.security.ssl_private_key!=null && settings.security.ssl_certificate!=null) {
             // read ssl certificate
-            let privateKey = fs.readFileSync(settings.ssl_priv_key, 'utf8');
-            let certificate = fs.readFileSync(settings.ssl_cert, 'utf8');
+            let privateKey = fs.readFileSync(settings.security.ssl_private_key, 'utf8');
+            let certificate = fs.readFileSync(settings.security.ssl_certificate, 'utf8');
             _connection.importSSLPrivateKey(privateKey);
             _connection.importSSLCert(certificate);
           }
 
           _connection.importConnectionMethodNameMap(Constants.CONNECTION_METHOD_NAME_MAP);
 
-          for(let server in settings.connection_servers) {
-            _connection.addServer(settings.connection_servers[server].type,
-               settings.connection_servers[server].ip, settings.connection_servers[server].port);
+          for(let server in settings.connection.servers) {
+            _connection.addServer(settings.connection.servers[server].type,
+               settings.connection.servers[server].ip, settings.connection.servers[server].port);
           }
 
           _connection.importHeartBeatCycle(settings.heartbeat_cycle_millisecond);
@@ -301,7 +301,7 @@ function Core(NoServiceLibrary, settings) {
               verbose('Daemon', 'Importing Model to Authenticity...')
 
               // setup authenticity
-              _authenticity.TokenExpirePeriod = settings.token_expire_period_day;
+              _authenticity.TokenExpirePeriod = settings.security.token_expire_period_day;
               _authenticity.setDefaultUsername(Constants.default_user.username);
               _authenticity.setUserModelName(Constants.AUTHE_USER_MODEL_NAME);
 
@@ -316,53 +316,53 @@ function Core(NoServiceLibrary, settings) {
                 // setup authorization
                 _authorization.importAuthenticityModule(_authenticity);
                 _authorization.importEntityModule(_entity);
-                _authorization.importTrustedDomains(settings.trusted_domains);
-                _authorization.importDaemonAuthKey(settings.daemon_authorization_key);
+                _authorization.importTrustedDomains(settings.security.trusted_domains);
+                _authorization.importDaemonAuthKey(settings.security.daemon_authorization_key);
 
                 _authorizationhandler.importImplementation(_implementation);
 
                 // setup service: Activity
                 _activity.spawnClient = _connection.createClient;
                 _activity.setDefaultUsername(Constants.default_user.username);
-                _activity.importDaemonAuthKey(settings.daemon_authorization_key);
+                _activity.importDaemonAuthKey(settings.security.daemon_authorization_key);
                 _activity.setDebug(settings.debug);
 
                 // setup service: Service
                 _service.setDebug(settings.debug);
                 _service.importWorkerModule(_worker);
-                _service.setDebugService(settings.debug_service);
-                _service.setMasterService(settings.master_service);
-                _service.setupServicesPath(settings.services_path);
-                _service.setupServicesFilesPath(settings.services_files_path);
+                _service.setDebugService(settings.service.debug_service);
+                _service.setMasterService(settings.service.master_service);
+                _service.setupServicesPath(settings.service.services_path);
+                _service.setupServicesFilesPath(settings.service.services_files_path);
                 _service.importAuthorization(_authorization);
                 _service.importAuthenticity(_authenticity);
                 // add shell related service to List.
-                if(settings.shell_service != null) {
-                  let index = settings.services.indexOf(settings.shell_service);
+                if(settings.service.shell_service != null) {
+                  let index = settings.service.services.indexOf(settings.service.shell_service);
                   if(index>=0)
-                    settings.services.splice(index, 1);
-                  settings.services.push(settings.shell_service);
+                    settings.service.services.splice(index, 1);
+                  settings.service.services.push(settings.service.shell_service);
                 }
-                if(settings.shell_client_service != null) {
-                  let index = settings.services.indexOf(settings.shell_client_service);
+                if(settings.service.shell_client_service != null) {
+                  let index = settings.service.services.indexOf(settings.service.shell_client_service);
                   if(index>=0)
-                    settings.services.splice(index, 1);
-                  settings.services.push(settings.shell_client_service);
+                    settings.service.services.splice(index, 1);
+                  settings.service.services.push(settings.service.shell_client_service);
 
                 }
                 // add debug
-                if(settings.debug_service != null ) {
-                  let index = settings.services.indexOf(settings.debug_service);
+                if(settings.service.debug_service != null ) {
+                  let index = settings.service.services.indexOf(settings.service.debug_service);
                   if(index>=0)
-                    settings.services.splice(index, 1);
-                  settings.services.unshift(settings.debug_service);
+                    settings.service.services.splice(index, 1);
+                  settings.service.services.unshift(settings.service.debug_service);
                 }
                 verbose('Daemon', 'Debug service enabled.');
 
-                _service.importServicesList(settings.services);
+                _service.importServicesList(settings.service.services);
                 _service.importEntity(_entity);
                 _service.importAPI(_serviceAPI);
-                _service.importOwner(settings.local_services_owner);
+                _service.importOwner(settings.service.local_services_owner);
                 // setup Worker
                 _worker.setCloseTimeout(settings.kill_daemon_timeout_millisecond);
                 _worker.setClearGarbageTimeout(settings.clear_garbage_timeout);
@@ -386,11 +386,11 @@ function Core(NoServiceLibrary, settings) {
                   verbose('Daemon', 'NOOXY Service Framework successfully started.');
                   if(callback)
                     callback(false);
-                  if(!settings.shell_service) {
+                  if(!settings.service.shell_service) {
                     verbose('Shell', 'Shell Service not implemented.');
                   }
 
-                  if(!settings.shell_client_service) {
+                  if(!settings.service.shell_client_service) {
                     verbose('Shellc', 'Local Shell not implemented.');
                   }
                 });
@@ -408,14 +408,14 @@ function Core(NoServiceLibrary, settings) {
       if(settings.sercure === false) {
         return true;
       }
-      else if(fs.existsSync(settings.rsa_2048_priv_key) && fs.existsSync(settings.rsa_2048_pub_key)) {
+      else if(fs.existsSync(settings.security.RSA2048_private_key) && fs.existsSync(settings.security.RSA2048_public_key)) {
         return true;
       }
       else {
         Utils.TagLog('*ERR*', 'Secure is on. But RSA2048 Key Pair is not set. Please geneate it by openssl.');
         Utils.TagLog('*ERR*', 'Your settings:');
-        Utils.TagLog('*ERR*', 'PrivateKey: '+settings.rsa_2048_priv_key);
-        Utils.TagLog('*ERR*', 'PublicKey: '+settings.rsa_2048_pub_key);
+        Utils.TagLog('*ERR*', 'PrivateKey: '+settings.security.RSA2048_private_key);
+        Utils.TagLog('*ERR*', 'PublicKey: '+settings.security.RSA2048_public_key);
         Utils.TagLog('*ERR*', '-');
         Utils.TagLog('*ERR*', 'You can generate it in UNIX system by openssl.');
         Utils.TagLog('*ERR*', '$ openssl genrsa -des3 -out private.pem 2048');
@@ -442,9 +442,9 @@ function Core(NoServiceLibrary, settings) {
 
     let plugins = require("fs").readdirSync(settings.plugins_path).map((file)=> { return require(settings.plugins_path+"/" + file);});
     let plugins_from_services = [];
-    settings.services.forEach((file)=> {
-      if(require("fs").existsSync(settings.services_path+"/" + file+'/plugin')) {
-        plugins_from_services.push( require(settings.services_path+"/" + file+'/plugin'));
+    settings.service.services.forEach((file)=> {
+      if(require("fs").existsSync(settings.service.services_path+"/" + file+'/plugin')) {
+        plugins_from_services.push( require(settings.service.services_path+"/" + file+'/plugin'));
       }
     })
     Plugin.startPlugins(plugins, null, false, settings, (err)=> {
@@ -472,7 +472,7 @@ function Core(NoServiceLibrary, settings) {
             }
             verbose('Daemon', 'Importing Model...')
             // setup authenticity
-            _init_auth.TokenExpirePeriod = settings.token_expire_period_day;
+            _init_auth.TokenExpirePeriod = settings.security.token_expire_period_day;
             _init_auth.setDefaultUsername(Constants.default_user.username);
             _init_auth.setUserModelName(Constants.AUTHE_USER_MODEL_NAME);
             // Import set Model Module to authenticity.

@@ -243,7 +243,7 @@ function ServiceAPI() {
           remote_callback.apply([false, {
             Settings: manifest.settings,
             Manifest: manifest,
-            FilesPath: _coregateway.Daemon.Settings.services_files_path+'/'+manifest.name
+            FilesPath: _coregateway.Daemon.Settings.service.services_files_path+'/'+manifest.name
           }])
           remote_callback.destory();
         }

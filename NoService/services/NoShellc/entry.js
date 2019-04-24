@@ -28,11 +28,11 @@ function Service(Me, NoService) {
     let _password;
 
     NoService.Daemon.getSettings((err, daemon_setting)=>{
-      // setup up remote shell service by daemon default connciton
-      let DEFAULT_SERVER = daemon_setting.default_server;
-      let DAEMONTYPE = daemon_setting.connection_servers[DEFAULT_SERVER].type;
-      let DAEMONIP = daemon_setting.connection_servers[DEFAULT_SERVER].ip;
-      let DAEMONPORT =daemon_setting.connection_servers[DEFAULT_SERVER].port;
+      // setup up remote shell service by daemon default conneciton
+      let DEFAULT_SERVER = daemon_setting.connection.default_server;
+      let DAEMONTYPE = daemon_setting.connection.servers[DEFAULT_SERVER].type;
+      let DAEMONIP = daemon_setting.connection.servers[DEFAULT_SERVER].ip;
+      let DAEMONPORT =daemon_setting.connection.servers[DEFAULT_SERVER].port;
 
       // overwrite settings
       if(settings.remote_daemon) {
