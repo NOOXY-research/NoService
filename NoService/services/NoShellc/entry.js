@@ -4,6 +4,7 @@
 // Copyright 2018 NOOXY. All Rights Reserved.
 //
 // beware that this client's crypto uses daemon's implementation so it can only be used as local client instead of remote one.
+'use strict';
 
 function Service(Me, NoService) {
   // Your service entry point
