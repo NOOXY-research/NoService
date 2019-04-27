@@ -6,7 +6,7 @@ INSTALL_DIR="$(pwd)"
 if [[ $1 = *[!\ ]* ]]; then
   INSTALL_DIR=$1
 fi
-echo "Fetch newest update from github?(y)"
+echo "Fetch newest update from github?(y/n)"
 read update
 if [ "$update" = "y" ]; then
   rm -rf ${DIR}
@@ -18,7 +18,7 @@ echo "Deploying NoService..."
 echo "Install directory: $INSTALL_DIR"
 echo "NoService root: $DIR"
 echo "Copying NoService..."
-cp -R "${DIR}NoService/*" "$INSTALL_DIR"
+cp -R "${DIR}NoService/" "$INSTALL_DIR"
 echo "Cleaning up unessasary files..."
 rm -rf "${INSTALL_DIR}/NoService/npm_scripts"
 rm -rf "${INSTALL_DIR}/node_modules/"
