@@ -62,7 +62,6 @@ function Server(ServerId, ConnectionProfile, ssl_private_key=null, ssl_certifica
           Utils.TagLog('*WARN*', error);
         }
         ws.close();
-        this.onClose(connprofile);
       });
 
       ws.on('close', (message) => {
@@ -124,7 +123,6 @@ function Client(ConnectionProfile) {
         Utils.TagLog('*WARN*', error);
       }
       _ws.close();
-      this.onClose(connprofile);
     });
 
     _ws.on('close', (error) => {

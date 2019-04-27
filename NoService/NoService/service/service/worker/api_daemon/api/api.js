@@ -189,7 +189,7 @@ function ServiceAPI() {
         },
 
         sendDataAll: (data)=> {
-          service_socket.broadcastData(data);
+          service_socket.sendDataAll(data);
         },
 
         emit: (entityId, event, data)=> {
@@ -209,7 +209,7 @@ function ServiceAPI() {
         },
 
         emitAll: (event, data)=> {
-          service_socket.broadcastEvent(event, data);
+          service_socket.emitAll(event, data);
         },
 
         emitToUsername: (username, event, data)=> {

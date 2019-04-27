@@ -396,7 +396,7 @@ function NoServiceManager() {
   this.installService = (giturl, callback)=> {
     Daemon.getSettings((err, DaemonSettings)=> {
       let workingdir = Utils.generateUniqueId();
-      services_path = DaemonSettings.services_path;
+      services_path = DaemonSettings.service.services_path;
       fs.mkdirSync(workingdir);
       try {
         fs.mkdirSync(workingdir);
