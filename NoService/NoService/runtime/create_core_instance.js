@@ -8,11 +8,24 @@ const Constants = require('./constants');
 const Core = require('./core');
 const NoServiceLibaray = require('../../NoService');
 let _core;
+let _settings;
 
 let terminateNoService = ()=> {
   process.send({t:0});
   process.exit();
 };
+
+let launchNoService = (msg)=> {
+  _core = new Core(NoServiceLibaray, _settings);
+  _core.onTerminated = terminateNoService;
+  _core.onRelaunch = launchNoService;
+  _core.checkandlaunch((err)=> {
+    if(err) {
+      process.exit(1);
+    }
+  });
+};
+
 
 // Checking dependencies
 for(let pkg in Constants.dependencies) {
@@ -32,14 +45,8 @@ process.on('message', (msg)=> {
     process.title = msg.settings.daemon_name;
     if(msg.settings.path)
       process.chdir(msg.settings.path)
-
-    _core = new Core(NoServiceLibaray, msg.settings);
-    _core.onTerminated = terminateNoService;
-    _core.checkandlaunch((err)=> {
-      if(err) {
-        process.exit(1);
-      }
-    });
+    _settings = msg.settings;
+    launchNoService(msg);
   }
   else if(msg.t === 99) {
     _core.close();

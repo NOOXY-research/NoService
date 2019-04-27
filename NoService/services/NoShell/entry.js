@@ -73,9 +73,8 @@ function Service(Me, NoService) {
             else {
               NoService.Service.Entity.getEntityMetaData(entityId, (err, emeta)=>{
                 let msg = '\nHello. '+emeta.owner+'(as entity '+entityId+').\n  You have no full NoShell access to "'+DaemonSettings.daemon_name+'".\n';
-                ss.semit(entityId, 'welcome', msg);
+                ss.emit(entityId, 'welcome', msg);
                 // NoService.Authorization.emitSignin(entityId);
-
                 callback(false);
               });
             }

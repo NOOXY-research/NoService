@@ -177,7 +177,7 @@ function Core(NoServiceLibrary, settings) {
               _nsps.close();
               _worker.close();
               verbose('Daemon', 'Relaunching daemon in '+settings.kill_daemon_timeout_millisecond+'ms.');
-              setTimeout(this.onTerminated, settings.kill_daemon_timeout_millisecond);
+              setTimeout(this.onRelaunch, settings.kill_daemon_timeout_millisecond);
             });
           }
         },

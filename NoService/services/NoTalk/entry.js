@@ -59,16 +59,21 @@ function Service(Me, NoService) {
         }
         else {
           ss.on('connect', (entityId, callback)=> {
-            NoService.Authorization.Authby.Token(entityId, (err, valid)=> {
-              if(valid) {
-                NoService.Service.Entity.getEntityOwnerId(entityId, (err, id)=>{
-                  NoService.Service.Entity.addEntityToGroups(entityId, [USERID_PREFIX+id], (err)=> {
-                    callback(err);
-                  });
+            NoService.Service.Entity.getEntityOwnerId(entityId, (err, id)=>{
+              if(id) {
+                NoService.Authorization.Authby.Token(entityId, (err, valid)=> {
+                  if(valid) {
+                    NoService.Service.Entity.addEntityToGroups(entityId, [USERID_PREFIX+id], (err)=> {
+                      callback(err);
+                    });
+                  }
+                  else {
+                    callback(false);
+                  }
                 });
-              }
-              else {
-                callback(false);
+                NoService.Service.Entity.addEntityToGroups(entityId, [USERID_PREFIX+id], (err)=> {
+                  callback(err);
+                });
               }
             });
           });
