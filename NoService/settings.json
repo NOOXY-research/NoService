@@ -60,8 +60,7 @@
       "NoServiceManager",
       "NoUser",
       "NoTalk",
-      "NoMailer",
-      "NoCluster"
+      "NoMailer"
     ]
   },
 
