@@ -226,13 +226,13 @@ let decodeArgumentsFromBinary = (blob)=> {
     let token = blob.slice(16, 16+length);
     blob = blob.slice(16+length);
     if(type === 0) {
-      result.push(new Error(token.toString()));
+      result.push(new Error(Buf.decode(token)));
     }
     else if(type === 1) {
-      result.push(JSON.parse(token.toString()));
+      result.push(JSON.parse(Buf.decode(token)));
     }
     else if(type === 2) {
-      result.push(new RemoteCallbackTree(JSON.parse(token.toString())));
+      result.push(new RemoteCallbackTree(JSON.parse(Buf.decode(token))));
     }
     else if(type === 3) {
       result.push(token);
