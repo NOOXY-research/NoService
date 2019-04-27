@@ -75,6 +75,9 @@ function Service(Me, NoService) {
                   callback(err);
                 });
               }
+              else {
+                callback(false);
+              }
             });
           });
 
