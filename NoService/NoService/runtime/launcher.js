@@ -12,7 +12,7 @@ process.title = 'NoServiceLauncher';
 module.exports.launch = (path, settingspath)=> {
   let _child;
   let relaunch = true;
-  let retry = 0;
+  let retried = 0;
   let settings = JSON.parse(fs.readFileSync(settingspath, 'utf8'));
   settings["path"] = path+'/';
 
@@ -28,14 +28,14 @@ module.exports.launch = (path, settingspath)=> {
          console.log('Launcher has recieve close signal from core.');
          process.exit();
         }
-        if(retry===3) {
-          console.log('Launcher has retried launching '+retry+' times. Aborted.');
+        if(retried===3) {
+          console.log('Launcher has retried launching '+retried+' times. Aborted.');
           process.exit();
         }
-        retry +=1;
+        retried +=1;
       }
       else {
-        retry = 0;
+        retried = 0;
       }
 
       if(relaunch) {

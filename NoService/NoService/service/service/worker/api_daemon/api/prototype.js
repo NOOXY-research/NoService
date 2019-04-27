@@ -252,7 +252,7 @@ function API(_coregateway) {
         }
       },
       getEntitiesMetaData: (remote_callback) => {
-        _coregateway.Entity.getEntitiesMeta((err, metatdata)=> {
+        _coregateway.Entity.getEntitiesMetaData((err, metatdata)=> {
           if(remote_callback) {
             remote_callback.apply([err, metatdata])
             remote_callback.destory();
