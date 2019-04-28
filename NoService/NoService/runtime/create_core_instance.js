@@ -23,6 +23,9 @@ let launchNoService = (msg)=> {
     if(err) {
       process.exit(1);
     }
+    else {
+      process.send({t:1});
+    }
   });
 };
 

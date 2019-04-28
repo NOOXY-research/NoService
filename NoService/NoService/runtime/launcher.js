@@ -49,8 +49,11 @@ module.exports.launch = (path, settingspath)=> {
 
     _child.on('message', (msg)=> {
       // do not relaunch code
-      if(msg.t==0) {
+      if(msg.t===0) {
         relaunch = false;
+      }
+      if(msg.t===1) {
+        retried = 0;
       }
     });
 
