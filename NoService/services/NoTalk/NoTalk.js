@@ -51,6 +51,26 @@ function NoTalk(Me, NoService) {
     });
   };
 
+  this.getChannelMeta = (channelId, callback)=> {
+    _models.ChMeta.get(channelId, (err, meta)=> {
+      if(err) {
+        callback(err);
+      }
+      else if(!meta) {
+        callback(new Error('Meta of '+channelId+' does not exists.'));
+      }
+      else {
+        callback(false, {
+          "o": meta.CreatorId,
+          "n": meta.Displayname,
+          "d": meta.Description,
+          "u": null,
+          "s": meta.Status
+        });
+      }
+    });
+  };
+
   this.addContacts = (meta, callback)=> {
     let index = 0;
     let result = [];

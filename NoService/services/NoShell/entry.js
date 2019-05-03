@@ -139,7 +139,7 @@ function Service(Me, NoService) {
                   '  service create {service name} [blank|complete|normal|python]\n'+
                   '  service [funclist|funcdict|funcshow] {target service}\n'+
                   '  service func {target service} {target username} {target service function} {JSON} ---Call a Service function as target user.\n'+
-                  '  service entity [show {entityId}|list|count|showuser {username}]\n'+
+                  '  service entity [query {query}|show {entityId}|list|count|listmeta|showuser {username}]\n'+
                   '  service git install {repos/service} {gitsource} \n'+
                   '  service git [upgrade|bind|unbind] {service name}\n'+
                   '  service git [list|upgradeall|bindall|unbindall]\n'+
@@ -370,8 +370,24 @@ function Service(Me, NoService) {
                           if(pass) {
                             _(t1, {
                               show: (t2, c2) => {
-                                NoService.Service.Entity.getEntityMetaData(t2[0], (err, r)=>{
+                                NoService.Service.Entity.getFilteredEntitiesMetaData(t2[0], (err, r)=>{
                                   c2(false, {r:JSON.stringify(r, null, 2)});
+                                });
+                              },
+
+                              query: (t2, c2) => {
+                                let query = "";
+                                for(let i=0; i<t1.length; i++) {
+                                  query += ' '+t1[i];
+                                }
+                                NoService.Service.Entity.getFilteredEntitiesList(query, (err, r)=>{
+                                  c2(false, {r: JSON.stringify(r, null, 2)});
+                                });
+                              },
+
+                              listmeta: (t2, c2) => {
+                                NoService.Service.Entity.getEntitiesMetaData((err, r)=>{
+                                  c2(false, {r: JSON.stringify(r, null, 2)});
                                 });
                               },
 

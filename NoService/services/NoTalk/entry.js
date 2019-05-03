@@ -262,16 +262,46 @@ function Service(Me, NoService) {
           });
 
           ss.def('bindChs', (json, entityId, returnJSON)=> {
-            NoService.Authorization.Authby.Token(entityId, (err, valid)=> {
-              if(valid) {
-                NoService.Service.Entity.addEntityToGroups(entityId, json.i.map(id=>{return(CHID_PREFIX+id)}), (err)=> {
-                    returnJSON(false, {s: "OK"});
-                });
-              }
-              else {
-                returnJSON(false, {e:true, s: "Auth failed"});
-              }
+            NoService.Service.Entity.getEntityOwnerId(entityId, (err, user_id)=>{
+              let channel_list = [];
+              let index = 0;
+              let check_next = ()=> {
+                if(index<json.i.length) {
+                  NoTalk.canViewCh(user_id, json.i[index], (err, role, latestreadline)=> {
+                    if(err) {
+                      index++;
+                      check_next();
+                    }
+                    else {
+                      channel_list.push(json.i[index]);
+                      index++;
+                      check_next();
+                    }
+                  });
+                }
+                else {
+                  if(user_id) {
+                    NoService.Authorization.Authby.Token(entityId, (err, valid)=> {
+                      if(valid) {
+                        NoService.Service.Entity.addEntityToGroups(entityId, channel_list.map(id=>{return(CHID_PREFIX+id)}), (err)=> {
+                            returnJSON(false, {s: "OK"});
+                        });
+                      }
+                      else {
+                        returnJSON(false, {e:true, s: "Auth failed"});
+                      }
+                    });
+                  }
+                  else {
+                    NoService.Service.Entity.addEntityToGroups(entityId, channel_list.map(id=>{return(CHID_PREFIX+id)}), (err)=> {
+                        returnJSON(false, {s: "OK"});
+                    });
+                  }
+                }
+              };
+              check_next();
             });
+
           });
 
           ss.def('getMyChs', (json, entityId, returnJSON)=> {
@@ -399,7 +429,14 @@ function Service(Me, NoService) {
           });
 
           ss.def('getChMeta', (json, entityId, returnJSON)=> {
-
+            NoTalk.getChannelMeta(json.c, (err, meta)=> {
+              if(err) {
+                returnJSON(false, {e: err.stack, s:err.toString()});
+              }
+              else {
+                returnJSON(false, meta);
+              }
+            });
           });
 
           ss.def('delCh', (json, entityId, returnJSON)=> {

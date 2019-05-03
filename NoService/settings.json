@@ -5,7 +5,7 @@
   "company_name": "NOOXY",
   "copyright": "copyright©2017-2019 NOOXY inc.",
 
-  "debug": true,
+  "debug": false,
   "verbose": true,
 
   "plugins_path": "./plugins",
