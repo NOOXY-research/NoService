@@ -43,7 +43,8 @@ NoService is a high level framework for services that provide you "nodejs" and "
 1. Game that combine our neuralnet lib and NoService. ([noversi](https://nooxy.org/noversi))
 2. Chat service. ([Talksy](https://talk.nooxy.org))
 3. Notification([NOOXY](https://nooxy.org))
-4. Shell that access NoService. ([NoShell](https://www.nooxy.org/static/nsf/shell.html))
+4. Shell that access NoService. ([NoShell](https://www.nooxy.org/static/NoService/shell.html))
+5. A internet radio that uses out technology. ([goto&Play](https://gotoandplay.nctu.edu.tw/))
 
 ## Why we build NoService? And why you should give it a try?
 
