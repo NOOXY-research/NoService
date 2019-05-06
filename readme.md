@@ -100,19 +100,19 @@ NoService has good software structure which means you can modify the native libr
 NoService provide bundled services such as NoShell which give you access of NoService. NoUser for user system. And so on.
 
 ## Roadmap
-[alpha version]
-[0.1] First version of NoService
-[0.2] mthread_alpha
-[0.3] ORM_alpha
-[0.4] Service_alpha
-[0.5] python_worker_alpha (python+structural refresh+plugin support)
-->[0.6] noservice_0_6_x (binaryize protocol NSP 0.5+streaming)
-[0.7] noservice_0_7_x (resource network+more plugin support)
-[0.8] noservice_0_8_x (refresh codes)
+### [alpha version]
+- [0.1] First version of NoService
+- [0.2] mthread_alpha
+- [0.3] ORM_alpha
+- [0.4] Service_alpha
+- [0.5] python_worker_alpha (python+structural refresh+plugin support)
+- ->[0.6] noservice_0_6_x (binaryize protocol NSP 0.5+streaming)
+- [0.7] noservice_0_7_x (resource network+more plugin support)
+- [0.8] noservice_0_8_x (refresh codes)
 
-[beta version]
+### [beta version]
 
-[official version]
+### [official version]
 
 ## Final goal
 not yet
