@@ -60,13 +60,7 @@ function NoTalk(Me, NoService) {
         callback(new Error('Meta of '+channelId+' does not exists.'));
       }
       else {
-        callback(false, {
-          "o": meta.CreatorId,
-          "n": meta.Displayname,
-          "d": meta.Description,
-          "u": null,
-          "s": meta.Status
-        });
+        callback(false, meta);
       }
     });
   };
@@ -128,7 +122,10 @@ function NoTalk(Me, NoService) {
   // create a channel
   this.createChannel = (meta, callback)=> {
     let uuid = NoService.Library.Utilities.generateGUID();
-    if(meta.n!=null&&meta.t!=null&&meta.a!=null&&meta.c!=null) {
+    if(meta.p&&meta.p.length>Me.Settings.max_image_size_bytes) {
+      callback(new Error('You have reach the max image size. '+Me.Settings.max_image_size_bytes*0.77+' bytes.'));
+    }
+    else if(meta.n!=null&&meta.t!=null&&meta.a!=null&&meta.c!=null) {
       let new_meta = {
         ChId: uuid,
         Type: meta.t,
@@ -195,7 +192,10 @@ function NoTalk(Me, NoService) {
   this.updateChannel = (modifyerId, meta, callback)=> {
     if(meta.i!=null) {
       _models.ChUserPair.getByPair([meta.i, modifyerId], (err, [pair])=> {
-        if(pair&&pair.Role==0) {
+        if(meta.p&&meta.p.length>Me.Settings.max_image_size_bytes) {
+          callback(new Error('You have reach the max image size. '+Me.Settings.max_image_size_bytes*0.77+' bytes.'));
+        }
+        else if(pair&&pair.Role==0) {
           let new_meta = {
             ChId: meta.i,
             Type: meta.t,

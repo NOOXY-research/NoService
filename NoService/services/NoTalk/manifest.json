@@ -249,5 +249,9 @@
         }
       }
     }
+  },
+
+  "settings": {
+    "max_image_size_bytes": 10000000
   }
 }
