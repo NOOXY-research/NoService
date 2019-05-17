@@ -106,7 +106,7 @@ function NSPS() {
         _resumes[connprofile.returnGUID()].push(()=> {callback(false, blob)});
       }
     }
-    else if(connprofile.returnBundle('NSPS') != true && connprofile.returnRemotePosition() === 'Client') {
+    else if(connprofile.returnBundle('NSPS') !== true && connprofile.returnRemotePosition() === 'Client') {
       this.upgradeConnection(connprofile, (err, succeess)=>{
         if(succeess) {
           callback(false, blob);

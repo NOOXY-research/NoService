@@ -15,7 +15,7 @@
   "connection": {
     "heartbeat_cycle_millisecond": 60000,
     "only_trust_origin_domain": false,
-    "default_server": null,
+    "default_server": 1,
     "servers": [
       {
         "type": "WebSocketSecure",

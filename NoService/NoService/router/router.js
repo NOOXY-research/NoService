@@ -87,13 +87,12 @@ function Router() {
   this.importCore = (coregateway) => {
     _coregateway = coregateway;
     _debug = _coregateway.Settings.debug;
-
     // while recieve a data from connection
     _coregateway.Connection.onData = (connprofile, data) => {
       _tellRAWSniffers(data);
 
       try {
-        if(_coregateway.Settings.secure === true && connprofile.returnConnMethod() != 'Local' && connprofile.returnConnMethod() != 'local') {
+        if(_coregateway.Settings.security.secure === true && connprofile.returnConnMethod() != 'Local' && connprofile.returnConnMethod() != 'local') {
           // upgrade protocol
           _coregateway.NSPS.decrypt(connprofile, data, (err, decrypted)=> {
             if(err&&_coregateway.Settings.debug) {
