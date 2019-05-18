@@ -115,7 +115,7 @@ NoService provide bundled services such as NoShell which give you access of NoSe
 ### [official version]
 
 ## Final goal
-not yet
+We wish to develop an universal decentralized infrastructural framework for any kind of internet services.
 
 ## Target version
 * daemon: alpha 0.5.5
