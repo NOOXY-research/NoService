@@ -49,7 +49,7 @@ NoService is a high level framework for services that provide you "nodejs" and "
 ## Why we build NoService? And why you should give it a try?
 
 ### Seperating backend applications from physical differences
-NoService provide a API layer that handle backend designer for connection, database and authenticity. Thus you other designer's project can basically deploy on any NoService framework.
+NoService provide a API layer that handle backend designer for connection, database and authenticity. Thus yours and other designer's project can basically deploy on any NoService framework.
 
 ### Resource network(distributable) (not yet)
 Still working on it. With resource network you are supposed to put any kind of resource such as "database", "gpu" etc anywhere(hosts) that deploy noservice framework.
