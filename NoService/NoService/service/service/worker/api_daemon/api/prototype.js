@@ -217,8 +217,8 @@ function API(_coregateway) {
     },
 
     Entity: {
-      getFilteredEntitiesMetaData: (key, value, remote_callback) => {
-        _coregateway.Entity.getFilteredEntitiesMetaData(key, value, (err, metatdata)=> {
+      getFilteredEntitiesMetaData: (query, remote_callback) => {
+        _coregateway.Entity.getFilteredEntitiesMetaData(query, (err, metatdata)=> {
           if(remote_callback) {
             remote_callback.apply([err, metatdata])
             remote_callback.destory();
