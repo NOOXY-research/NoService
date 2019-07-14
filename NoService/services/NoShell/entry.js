@@ -370,17 +370,13 @@ function Service(Me, NoService) {
                           if(pass) {
                             _(t1, {
                               show: (t2, c2) => {
-                                NoService.Service.Entity.getFilteredEntitiesMetaData(t2[0], (err, r)=>{
+                                NoService.Service.Entity.getEntityMetaData(t2[0], (err, r)=>{
                                   c2(false, {r:JSON.stringify(r, null, 2)});
                                 });
                               },
 
                               query: (t2, c2) => {
-                                let query = "";
-                                for(let i=0; i<t1.length; i++) {
-                                  query += ' '+t1[i];
-                                }
-                                NoService.Service.Entity.getFilteredEntitiesList(query, (err, r)=>{
+                                NoService.Service.Entity.getEntitiesId(query, (err, r)=>{
                                   c2(false, {r: JSON.stringify(r, null, 2)});
                                 });
                               },
