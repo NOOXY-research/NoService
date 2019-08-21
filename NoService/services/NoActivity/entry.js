@@ -212,9 +212,9 @@ function Service(Me, NoService) {
       let now = new Date();
       now = now.toISOString().replace(/T/, ' ').replace(/\..+/, '') ;
       if(settings.entity_log)
-        fs.appendFileSync('entity.log', '['+now+'] '+Me.Manifest.name+' started. Stop recording.\n');
+        fs.appendFileSync('entity.log', '['+now+'] '+Me.Manifest.name+' closed. Stop recording.\n');
       if(settings.protocol_log)
-        fs.appendFileSync('protocol.log', '['+now+'] '+Me.Manifest.name+' started. Stop recording.\n');
+        fs.appendFileSync('protocol.log', '['+now+'] '+Me.Manifest.name+' closed. Stop recording.\n');
     // Saving state of you service.
     // Please save and manipulate your files in this directory
   }
