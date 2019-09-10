@@ -38,6 +38,7 @@ core.checkandlaunch();
 ```
 ## What is NoService?
 NoService is a high level framework for services that provide you "nodejs" and "python3" environment and eliminate service designer to care about low level part of your project.Such as authorization, user system, database, protocol and so on. It also run multiple services integrated and we also provide a manager and shell to manipulate all of them.
+NoService is a high level framework for services that provides you "nodejs" and "python3" environment and eliminates service designer from caring about low level part of your project. Such as authorization, user system, database, protocol and so on. It also run multiple services integrated and we also provide a manager and shell to manipulate all of them.
 
 ## Examples
 1. Game that combine our neuralnet lib and NoService. ([noversi](https://nooxy.org/noversi))
@@ -50,6 +51,7 @@ NoService is a high level framework for services that provide you "nodejs" and "
 
 ### Seperating backend applications from physical differences
 NoService provide a API layer that handle backend designer for connection, database and authenticity. Thus you other designer's project can basically deploy on any NoService framework.
+NoService provide a API layer that handle backend designer for connection, database and authenticity. Thus yours and other designer's project can basically deploy on any NoService framework.
 
 ### Resource network(distributable) (not yet)
 Still working on it. With resource network you are supposed to put any kind of resource such as "database", "gpu" etc anywhere(hosts) that deploy noservice framework.
@@ -107,7 +109,8 @@ NoService provide bundled services such as NoShell which give you access of NoSe
 - [0.4] Service_alpha
 - [0.5] python_worker_alpha (python+structural refresh+plugin support)
 - ->[0.6] noservice_0_6_x (binaryize protocol NSP 0.5+streaming)
-- [0.7] noservice_0_7_x (resource network+more plugin support)
+- [0.7] noservice_0_7_x (resource(decentralized) network+more plugin support)
+>>>>>>> fed6a788a7ad6a2d42cb7f3fe94183ddc6d38384
 - [0.8] noservice_0_8_x (refresh codes)
 
 ### [beta version]
@@ -116,6 +119,7 @@ NoService provide bundled services such as NoShell which give you access of NoSe
 
 ## Final goal
 not yet
+We wish to develop an universal decentralized infrastructural framework for any kind of internet services.
 
 ## Target version
 * daemon: alpha 0.5.5
