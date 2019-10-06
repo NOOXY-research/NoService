@@ -37,8 +37,7 @@ core.checkandlaunch();
 
 ```
 ## What is NoService?
-NoService is a high level framework for services that provide you "nodejs" and "python3" environment and eliminate service designer to care about low level part of your project.Such as authorization, user system, database, protocol and so on. It also run multiple services integrated and we also provide a manager and shell to manipulate all of them.
-NoService is a high level framework for services that provides you "nodejs" and "python3" environment and eliminates service designer from caring about low level part of your project. Such as authorization, user system, database, protocol and so on. It also run multiple services integrated and we also provide a manager and shell to manipulate all of them.
+NoService is a high level framework for services that provide you "nodejs" and "python3" environment and eliminate service designer to care about low level part of your project. Such as authorization, user system, database, protocol and so on. It also run multiple services integrated and we also provide a manager and shell to manipulate all of them.
 
 ## Examples
 1. Game that combine our neuralnet lib and NoService. ([noversi](https://nooxy.org/noversi))
@@ -51,7 +50,6 @@ NoService is a high level framework for services that provides you "nodejs" and 
 
 ### Seperating backend applications from physical differences
 NoService provide a API layer that handle backend designer for connection, database and authenticity. Thus you other designer's project can basically deploy on any NoService framework.
-NoService provide a API layer that handle backend designer for connection, database and authenticity. Thus yours and other designer's project can basically deploy on any NoService framework.
 
 ### Resource network(distributable) (not yet)
 Still working on it. With resource network you are supposed to put any kind of resource such as "database", "gpu" etc anywhere(hosts) that deploy noservice framework.
