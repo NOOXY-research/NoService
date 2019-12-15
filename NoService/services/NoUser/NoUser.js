@@ -33,6 +33,10 @@ function NoUser() {
             phonenumber: 'VARCHAR(50)',
             birthday: 'DATE',
             country: 'VARCHAR(160)',
+            darkmode: 'BOOLEAN',
+            //Is this really boolean? Does it has pre-defined value set? Please check with nooxy.
+            //It's odd to have a "dark mode" option in profile setting. It should be in preference section.
+            //But we don't have a user preference section now. Please dicuss with nooxy.
             aboutme: 'TEXT'
           }
         }, (err, user_model)=> {
@@ -138,7 +142,7 @@ function NoUser() {
   };
 
   this.sendMail = ()=> {
-    
+
   };
 
   this.deleteUser = (userid, callback) => {
