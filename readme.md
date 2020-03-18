@@ -1,4 +1,6 @@
 ![](https://raw.githubusercontent.com/NOOXY-inc/Art-Collection/master/NoService/NoService.png)
+
+We have moved our service project to [NoXerve](https://github.com/NoXerve/NoXerve).
 # NoService
 Deploy services just like apps
 The project is still in alpha!
