@@ -46,7 +46,7 @@ NoService is a high level framework for services that provide you "nodejs" and "
 2. Chat service. ([Talksy](https://talk.nooxy.org))
 3. Notification([NOOXY](https://nooxy.org))
 4. Shell that access NoService. ([NoShell](https://www.nooxy.org/static/NoService/shell.html))
-5. A internet radio that uses out technology. ([goto&Play](https://gotoandplay.nctu.edu.tw/))
+5. A internet radio that uses our technology. ([goto&Play](https://gotoandplay.nctu.edu.tw/))
 
 ## Why we build NoService? And why you should give it a try?
 
